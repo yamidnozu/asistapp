@@ -1,15 +1,11 @@
 import 'package:hive/hive.dart';
-import '../models/module.dart';
 import '../models/event.dart';
 import '../models/project.dart';
-import '../models/relationship.dart';
-import '../models/investment.dart';
 import 'money_module.dart';
 import 'health_module.dart';
 import 'relationship_module.dart';
 import 'reputation_module.dart';
 import 'event_engine.dart';
-import '../services/audio_service.dart';
 
 class LifeController {
   int currentDay = 1;
@@ -19,7 +15,6 @@ class LifeController {
   late RelationshipModule relationshipModule;
   late ReputationModule reputationModule;
   late EventEngine eventEngine;
-  late AudioService audioService;
   List<Project> projects = [];
   List<Event> activeEvents = [];
 
@@ -30,7 +25,6 @@ class LifeController {
     relationshipModule = RelationshipModule();
     reputationModule = ReputationModule();
     eventEngine = EventEngine();
-    audioService = AudioService();
     loadState();
   }
 
@@ -39,7 +33,6 @@ class LifeController {
     applyDailyChanges();
     generateEvents();
     saveState();
-    updateAudio();
   }
 
   void rewindDay() {
@@ -80,13 +73,5 @@ class LifeController {
     healthModule.physical = lifeStateBox.get('health_physical', defaultValue: 100.0);
     healthModule.mental = lifeStateBox.get('health_mental', defaultValue: 100.0);
     // Load other states...
-  }
-
-  void updateAudio() {
-    if (healthModule.mental < 50) {
-      audioService.playAmbientMusic('stressed');
-    } else {
-      audioService.playAmbientMusic('calm');
-    }
   }
 }
