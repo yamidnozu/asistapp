@@ -1,0 +1,4353 @@
+
+/* Directorio:  */
+├── 📂 .dart_tool
+│   ├── 📂 dartpad
+│   │   └── web_plugin_registrant.dart [11]
+│   ├── 📂 extension_discovery
+│   │   └── vs_code.json [1]
+│   ├── 📂 flutter_build
+│   │   ├── dart_plugin_registrant.dart [68]
+│   │   ├── 📂 de44e66e6e82bcfb29ce7a9114729d48
+│   │   │   ├── native_assets.yaml [5]
+│   │   │   ├── outputs.json [1]
+│   │   └── 📂 e3b3b484b62816e30898e75f50db5340
+│   │       ├── native_assets.yaml [5]
+│   │       ├── outputs.json [1]
+│   ├── package_config.json [540]
+├── analysis_options.yaml [9]
+├── 📂 android
+│   ├── 📂 .gradle
+│   │   ├── 📂 8.3
+│   │   │   ├── 📂 dependencies-accessors
+│   │   │   │   └── gc.properties [1]
+│   │   │   ├── gc.properties [1]
+│   │   ├── 📂 buildOutputCleanup
+│   │   │   ├── cache.properties [3]
+│   │   └── 📂 vcs-1
+│   │       └── gc.properties [1]
+│   ├── 📂 gradle
+│   │   └── 📂 wrapper
+│   │       └── gradle-wrapper.properties [6]
+│   ├── gradle.properties [4]
+│   ├── local.properties [3]
+├── 📂 ios
+│   ├── 📂 Runner
+│   │   ├── 📂 Assets.xcassets
+│   │   │   ├── 📂 AppIcon.appiconset
+│   │   │   │   ├── Contents.json [123]
+│   │   │   └── 📂 LaunchImage.imageset
+│   │   │       ├── Contents.json [24]
+├── 📂 lib
+│   ├── app.dart [41]
+│   ├── 📂 core
+│   │   ├── calendar_system.dart [14]
+│   │   ├── event_engine.dart [69]
+│   │   ├── life_controller.dart [146]
+│   │   └── time_keeper.dart [49]
+│   ├── 📂 data
+│   │   ├── goal.dart [35]
+│   │   └── models.dart [98]
+│   ├── main.dart [10]
+│   ├── 📂 modules
+│   │   ├── health_module.dart [23]
+│   │   ├── money_module.dart [17]
+│   │   ├── project_module.dart [21]
+│   │   └── relationship_module.dart [10]
+│   ├── 📂 services
+│   │   └── gemini_service.dart [91]
+│   ├── 📂 ui
+│   │   ├── 📂 primitives
+│   │   │   └── glass_container.dart [17]
+│   │   ├── 📂 screens
+│   │   │   ├── dashboard_screen.dart [366]
+│   │   │   ├── planner_screen.dart [99]
+│   │   │   ├── summary_screen.dart [41]
+│   │   │   └── weekly_summary_screen.dart [90]
+│   │   ├── theme.dart [29]
+│   │   └── 📂 widgets
+│   │       ├── goal_panel.dart [155]
+│   │       ├── indicators_row.dart [51]
+│   │       └── time_block.dart [55]
+│   └── 📂 utils
+│       └── tilt_controller.dart [28]
+├── 📂 linux
+│   ├── 📂 flutter
+│   │   ├── 📂 ephemeral
+│   │   │   └── 📂 .plugin_symlinks
+│   │   │       └── 📂 path_provider_linux
+│   │   │           ├── 📂 example
+│   │   │           │   ├── 📂 integration_test
+│   │   │           │   │   └── path_provider_test.dart [63]
+│   │   │           │   ├── 📂 lib
+│   │   │           │   │   └── main.dart [104]
+│   │   │           │   ├── pubspec.yaml [25]
+│   │   │           │   └── 📂 test_driver
+│   │   │           │       └── integration_test.dart [6]
+│   │   │           ├── 📂 lib
+│   │   │           │   ├── path_provider_linux.dart [4]
+│   │   │           │   └── 📂 src
+│   │   │           │       ├── get_application_id.dart [5]
+│   │   │           │       ├── get_application_id_real.dart [69]
+│   │   │           │       ├── get_application_id_stub.dart [4]
+│   │   │           │       └── path_provider_linux.dart [91]
+│   │   │           ├── pubspec.yaml [34]
+│   │   │           └── 📂 test
+│   │   │               ├── get_application_id_test.dart [62]
+│   │   │               └── path_provider_linux_test.dart [71]
+├── 📂 macos
+│   ├── 📂 Runner
+│   │   ├── 📂 Assets.xcassets
+│   │   │   └── 📂 AppIcon.appiconset
+│   │   │       └── Contents.json [69]
+├── pubspec.yaml [26]
+├── 📂 web
+│   └── manifest.json [36]
+└── 📂 windows
+    ├── 📂 flutter
+    │   ├── 📂 ephemeral
+    │   │   └── 📂 .plugin_symlinks
+    │   │       └── 📂 path_provider_windows
+    │   │           ├── 📂 example
+    │   │           │   ├── 📂 integration_test
+    │   │           │   │   └── path_provider_test.dart [60]
+    │   │           │   ├── 📂 lib
+    │   │           │   │   └── main.dart [98]
+    │   │           │   ├── pubspec.yaml [24]
+    │   │           │   ├── 📂 test_driver
+    │   │           │   │   └── integration_test.dart [6]
+    │   │           ├── 📂 lib
+    │   │           │   ├── path_provider_windows.dart [6]
+    │   │           │   └── 📂 src
+    │   │           │       ├── folders.dart [116]
+    │   │           │       ├── folders_stub.dart [4]
+    │   │           │       ├── guid.dart [38]
+    │   │           │       ├── path_provider_windows_real.dart [230]
+    │   │           │       ├── path_provider_windows_stub.dart [19]
+    │   │           │       └── win32_wrappers.dart [93]
+    │   │           ├── pubspec.yaml [33]
+    │   │           └── 📂 test
+    │   │               ├── guid_test.dart [62]
+    │   │               └── path_provider_windows_test.dart [186]
+
+
+Total de líneas resumidas: 4006
+Total de archivos: 70
+Promedio de líneas por archivo: 57
+Archivo más grande: package_config.json (540 líneas)
+
+
+/* Inicio .dart_tool\dartpad\web_plugin_registrant.dart */
+
+
+import 'package:sensors_plus/src/sensors_plus_web.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+void registerPlugins([final Registrar? pluginRegistrar]) {
+  final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
+  WebSensorsPlugin.registerWith(registrar);
+  registrar.registerMessageHandler();
+}
+
+/* Fin .dart_tool\dartpad\web_plugin_registrant.dart */
+
+/* Inicio .dart_tool\extension_discovery\vs_code.json */
+{"version":2,"entries":[{"package":"chronolife","rootUri":"../","packageUri":"lib/"}]}
+/* Fin .dart_tool\extension_discovery\vs_code.json */
+
+/* Inicio .dart_tool\flutter_build\dart_plugin_registrant.dart */
+
+
+import 'dart:io'
+import 'package:path_provider_android/path_provider_android.dart';
+import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:path_provider_linux/path_provider_linux.dart';
+import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:path_provider_windows/path_provider_windows.dart';
+
+@pragma('vm:entry-point')
+class _PluginRegistrant {
+
+  @pragma('vm:entry-point')
+  static void register() {
+    if (Platform.isAndroid) {
+      try {
+        PathProviderAndroid.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+    } else if (Platform.isIOS) {
+      try {
+        PathProviderFoundation.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_foundation` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+    } else if (Platform.isLinux) {
+      try {
+        PathProviderLinux.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_linux` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+    } else if (Platform.isMacOS) {
+      try {
+        PathProviderFoundation.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_foundation` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+    } else if (Platform.isWindows) {
+      try {
+        PathProviderWindows.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_windows` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+    }
+  }
+}
+
+/* Fin .dart_tool\flutter_build\dart_plugin_registrant.dart */
+
+/* Inicio .dart_tool\flutter_build\de44e66e6e82bcfb29ce7a9114729d48\native_assets.yaml */
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+/* Fin .dart_tool\flutter_build\de44e66e6e82bcfb29ce7a9114729d48\native_assets.yaml */
+
+/* Inicio .dart_tool\flutter_build\de44e66e6e82bcfb29ce7a9114729d48\outputs.json */
+["C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\flutter_assets\\shaders/ink_sparkle.frag","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\flutter_assets\\AssetManifest.json","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\flutter_assets\\AssetManifest.bin","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\flutter_assets\\FontManifest.json","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\flutter_assets\\NOTICES.Z","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\release\\arm64-v8a\\app.so"]
+/* Fin .dart_tool\flutter_build\de44e66e6e82bcfb29ce7a9114729d48\outputs.json */
+
+/* Inicio .dart_tool\flutter_build\e3b3b484b62816e30898e75f50db5340\native_assets.yaml */
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+/* Fin .dart_tool\flutter_build\e3b3b484b62816e30898e75f50db5340\native_assets.yaml */
+
+/* Inicio .dart_tool\flutter_build\e3b3b484b62816e30898e75f50db5340\outputs.json */
+["C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\vm_snapshot_data","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\isolate_snapshot_data","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\kernel_blob.bin","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\shaders/ink_sparkle.frag","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\AssetManifest.json","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\AssetManifest.bin","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\FontManifest.json","C:\\Proyectos\\DemoLife\\build\\app\\intermediates\\flutter\\debug\\flutter_assets\\NOTICES.Z"]
+/* Fin .dart_tool\flutter_build\e3b3b484b62816e30898e75f50db5340\outputs.json */
+
+/* Inicio .dart_tool\package_config.json */
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "_fe_analyzer_shared",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/_fe_analyzer_shared-76.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "_macros",
+      "rootUri": "file:///C:/flutter/bin/cache/dart-sdk/pkg/_macros",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "analyzer",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-6.11.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "args",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "async",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "boolean_selector",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "build",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build-2.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "build_config",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build_config-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "build_daemon",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build_daemon-4.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "build_resolvers",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build_resolvers-2.4.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "build_runner",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.15",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "build_runner_core",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-8.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "built_collection",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/built_collection-5.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "built_value",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/built_value-8.12.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "characters",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "checked_yaml",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/checked_yaml-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "code_builder",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/code_builder-4.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "collection",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.19.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "convert",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/convert-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "crypto",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "dart_style",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/dart_style-2.3.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "ffi",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "fixnum",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flame",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/flame-1.30.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "flutter",
+      "rootUri": "file:///C:/flutter/packages/flutter",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "flutter_animate",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_animate-4.5.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_lints",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flutter_shaders",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_shaders-0.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "flutter_web_plugins",
+      "rootUri": "file:///C:/flutter/packages/flutter_web_plugins",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "frontend_server_client",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/frontend_server_client-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "glob",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/glob-2.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "google_generative_ai",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/google_generative_ai-0.4.7",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "graphs",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/graphs-2.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "hive",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/hive-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "hive_flutter",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/hive_flutter-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "hive_generator",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/hive_generator-2.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "http",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "http_multi_server",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/http_multi_server-3.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "http_parser",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "io",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/io-1.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "js",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/js-0.6.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "json_annotation",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/json_annotation-4.9.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "lints",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/lints-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "logging",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/logging-1.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "macros",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/macros-0.1.3-main.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "matcher",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.16+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "material_color_utilities",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.11.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "meta",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.15.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "mime",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/mime-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "ordered_set",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/ordered_set-8.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "package_config",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/package_config-2.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "path",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "path_provider",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider-2.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "path_provider_android",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.17",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "path_provider_foundation",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "path_provider_linux",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_linux-2.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "path_provider_windows",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "platform",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "plugin_platform_interface",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "pool",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/pool-1.5.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "pub_semver",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "pubspec_parse",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/pubspec_parse-1.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "sensors_plus",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/sensors_plus-6.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "sensors_plus_platform_interface",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/sensors_plus_platform_interface-2.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "shelf",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/shelf-1.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shelf_web_socket",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/shelf_web_socket-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "sky_engine",
+      "rootUri": "file:///C:/flutter/bin/cache/pkg/sky_engine",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "source_gen",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/source_gen-1.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "source_helper",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/source_helper-1.3.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "source_span",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "stack_trace",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.12.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "stream_channel",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/stream_channel-2.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "stream_transform",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/stream_transform-2.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "string_scanner",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "term_glyph",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/term_glyph-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "test_api",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "timing",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/timing-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "typed_data",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "vector_math",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
+      "name": "watcher",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "web",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "web_socket",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "web_socket_channel",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "xdg_directories",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "yaml",
+      "rootUri": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache/hosted/pub.dev/yaml-3.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "chronolife",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    }
+  ],
+  "generated": "2025-10-16T15:52:33.202107Z",
+  "generator": "pub",
+  "generatorVersion": "3.6.0",
+  "flutterRoot": "file:///C:/flutter",
+  "flutterVersion": "3.27.1",
+  "pubCache": "file:///C:/Users/eynz1/AppData/Local/Pub/Cache"
+}
+
+/* Fin .dart_tool\package_config.json */
+
+/* Inicio analysis_options.yaml */
+
+
+include: package:flutter_lints/flutter.yaml
+
+linter:
+
+  rules:
+
+
+/* Fin analysis_options.yaml */
+
+/* Inicio android\.gradle\8.3\dependencies-accessors\gc.properties */
+
+/* Fin android\.gradle\8.3\dependencies-accessors\gc.properties */
+
+/* Inicio android\.gradle\8.3\gc.properties */
+
+/* Fin android\.gradle\8.3\gc.properties */
+
+/* Inicio android\.gradle\buildOutputCleanup\cache.properties */
+#Thu Oct 16 10:11:01 COT 2025
+gradle.version=8.3
+
+/* Fin android\.gradle\buildOutputCleanup\cache.properties */
+
+/* Inicio android\.gradle\vcs-1\gc.properties */
+
+/* Fin android\.gradle\vcs-1\gc.properties */
+
+/* Inicio android\gradle\wrapper\gradle-wrapper.properties */
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-all.zip
+
+/* Fin android\gradle\wrapper\gradle-wrapper.properties */
+
+/* Inicio android\gradle.properties */
+org.gradle.jvmargs=-Xmx1G -XX:MaxMetaspaceSize=512M -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+android.enableJetifier=true
+
+/* Fin android\gradle.properties */
+
+/* Inicio android\local.properties */
+sdk.dir=C:\\Users\\eynz1\\AppData\\Local\\Android\\Sdk
+flutter.sdk=C:\\flutter
+flutter.buildMode=release
+/* Fin android\local.properties */
+
+/* Inicio ios\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json */
+{
+  "images" : [
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "83.5x83.5",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-83.5x83.5@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "1024x1024",
+      "idiom" : "ios-marketing",
+      "filename" : "Icon-App-1024x1024@1x.png",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+/* Fin ios\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json */
+
+/* Inicio ios\Runner\Assets.xcassets\LaunchImage.imageset\Contents.json */
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@3x.png",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+/* Fin ios\Runner\Assets.xcassets\LaunchImage.imageset\Contents.json */
+
+/* Inicio lib\app.dart */
+import 'package:flutter/widgets.dart';
+import 'ui/theme.dart';
+import 'ui/screens/dashboard_screen.dart';
+import 'ui/screens/planner_screen.dart';
+import 'ui/screens/summary_screen.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
+
+class ChronoApp extends StatelessWidget {
+  const ChronoApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return WidgetsApp(
+      navigatorKey: navigatorKey,
+      color: ChronoTheme.background,
+      textStyle: ChronoTheme.baseText,
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const DashboardScreen(),
+            );
+          case '/planner':
+            return PageRouteBuilder(
+              pageBuilder: (_, __, ___) => PlannerScreen(initialPlan: const [], onSave: (_) {}),
+            );
+          case '/summary':
+            return PageRouteBuilder(
+              pageBuilder: (_, __, ___) => SummaryScreen(lines: const [], onContinue: () {}),
+            );
+          default:
+            return PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const DashboardScreen(),
+            );
+        }
+      },
+      initialRoute: '/',
+    );
+  }
+}
+/* Fin lib\app.dart */
+
+/* Inicio lib\core\calendar_system.dart */
+class CalendarSystem {
+  static const weekdays = [
+    'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'
+  ];
+
+  static String weekdayName(int day) => weekdays[(day - 1) % 7];
+
+  static int weekNumber(int day) => ((day - 1) ~/ 7) + 1;
+
+  static bool isWeekend(int day) {
+    int wd = (day - 1) % 7;
+    return wd == 5 || wd == 6
+  }
+}
+/* Fin lib\core\calendar_system.dart */
+
+/* Inicio lib\core\event_engine.dart */
+import '../data/models.dart';
+import '../services/gemini_service.dart';
+
+class EventResult {
+  final String title;
+  final String desc;
+  final List<EventOption> options;
+  EventResult(this.title, this.desc, this.options);
+}
+
+class EventOption {
+  final String label;
+  final void Function(PlayerState s) apply;
+  EventOption(this.label, this.apply);
+}
+
+class EventEngine {
+  final GeminiService? ai
+
+  EventEngine({this.ai});
+
+  Future<EventResult?> maybeSpawn(PlayerState s) async {
+    if (s.physical.value < 40) {
+      return EventResult(
+        'Dolor estomacal',
+        'Últimos días comiste mal y dormiste poco.',
+        [
+          EventOption('Ir al médico (-\$80, +salud)', (ps) {
+            ps.money -= 80;
+            ps.physical.value = (ps.physical.value + 18).clamp(0, 100);
+          }),
+          EventOption('Ignorar (riesgo)', (ps) {
+            ps.physical.value -= 6;
+            ps.mental.value   -= 2;
+          }),
+        ],
+      );
+    }
+    if (ai != null && s.money < 250 && s.mental.value < 55) {
+      final suggestion = await ai!.suggestContextualEvent(
+        money: s.money,
+        physical: s.physical.value,
+        mental: s.mental.value,
+        reputation: s.reputation.toDouble(),
+        day: s.day,
+      );
+      if (suggestion != null) {
+        return EventResult(
+          suggestion.title,
+          suggestion.description,
+          [
+            EventOption(suggestion.optionYesLabel, (ps) {
+              ps.money += suggestion.deltaMoneyYes;
+              ps.physical.value = (ps.physical.value + suggestion.deltaPhysYes).clamp(0,100);
+              ps.mental.value   = (ps.mental.value   + suggestion.deltaMentYes).clamp(0,100);
+            }),
+            EventOption(suggestion.optionNoLabel, (ps) {
+              ps.money += suggestion.deltaMoneyNo;
+              ps.physical.value = (ps.physical.value + suggestion.deltaPhysNo).clamp(0,100);
+              ps.mental.value   = (ps.mental.value   + suggestion.deltaMentNo).clamp(0,100);
+            }),
+          ],
+        );
+      }
+    }
+
+    return null;
+  }
+}
+/* Fin lib\core\event_engine.dart */
+
+/* Inicio lib\core\life_controller.dart */
+import '../data/models.dart';
+import '../modules/money_module.dart';
+import '../modules/health_module.dart';
+import '../modules/relationship_module.dart';
+import '../modules/project_module.dart';
+import '../core/event_engine.dart';
+import '../core/time_keeper.dart';
+import '../core/calendar_system.dart';
+import '../data/goal.dart';
+import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
+
+class LifeController {
+  final MoneyModule _money = MoneyModule();
+  final HealthModule _health = HealthModule();
+  final RelationshipModule _rel = RelationshipModule();
+  final ProjectModule _proj = ProjectModule();
+  final EventEngine? eventEngine;
+
+  late TimeKeeper timeKeeper;
+  late ValueNotifier<GameTime> timeNotifier;
+  late Box lifeBox;
+  late List<String> narrativeHistory;
+
+  PlayerState state = PlayerState();
+  DayState currentPlan = DayState(1, []);
+
+  LifeController({this.eventEngine}) {
+    timeKeeper = TimeKeeper();
+    timeNotifier = timeKeeper.timeNotifier;
+    timeKeeper.start();
+    lifeBox = Hive.box('life');
+    narrativeHistory = [];
+    loadState();
+  }
+
+  Future<EventResult?> simulateDay() async {
+    final plan = currentPlan.plan;
+    final worked = plan.any((p) => p.action == 'work');
+    if (worked) {
+      state.projects.removeWhere((p) => p.name == '_WORK_FLAG_');
+      state.projects.add(Project(id: '_work', name: '_WORK_FLAG_'));
+    } else {
+      state.projects.removeWhere((p) => p.name == '_WORK_FLAG_');
+    }
+
+    _money.applyDaily(state);
+    _health.applyDaily(state, plan);
+    _rel.applyDaily(state, plan);
+    _proj.applyDaily(state, plan);
+    state.reputation = (state.reputation + (worked ? 2 : -1)).clamp(0, 100);
+
+    final event = await eventEngine?.maybeSpawn(state);
+
+    state.day += 1;
+    currentPlan = DayState(state.day, [])
+    for (var goal in state.goals) {
+      if (!goal.completed && goal.deadlineDay < state.day) {
+        state.mental.value = (state.mental.value - 5).clamp(0, 100);
+        state.reputation = (state.reputation - 2).clamp(0, 100);
+      }
+    }
+    if (CalendarSystem.weekdayName(state.day) == 'Domingo') {
+      processWeeklyEconomy();
+    }
+
+    saveState();
+
+    return event;
+  }
+
+  void processWeeklyEconomy() {
+    double salary = 400.0;
+    if (state.reputation > 70) salary += 50;
+    if (state.physical.value > 80 && state.mental.value > 80) salary += 40;
+    state.money += salary;
+    double rent = 300.0;
+    double food = 100.0;
+    double transport = 50.0;
+    double totalDeductions = rent + food + transport;
+    state.money -= totalDeductions;
+  }
+
+  void rewindOneDay() {
+    state.day = (state.day - 1).clamp(1, 99999);
+    state.mental.value = (state.mental.value - 4).clamp(0, 100);
+    state.physical.value = (state.physical.value - 2).clamp(0, 100);
+  }
+
+  void addGoal(Goal goal) {
+    state.goals.add(goal);
+  }
+
+  void updateGoalProgress(String id, double newProgress) {
+    final goal = state.goals.firstWhere((g) => g.id == id);
+    final wasCompleted = goal.completed;
+    goal.progress = newProgress.clamp(0.0, 1.0);
+    if (goal.progress >= 1.0 && !wasCompleted) {
+      goal.completed = true;
+      state.mental.value = (state.mental.value + 10).clamp(0, 100);
+      state.reputation = (state.reputation + 5).clamp(0, 100);
+    }
+  }
+
+  void saveState() {
+    lifeBox.put('day', state.day);
+    lifeBox.put('money', state.money);
+    lifeBox.put('physical', state.physical.value);
+    lifeBox.put('mental', state.mental.value);
+    lifeBox.put('reputation', state.reputation);
+    lifeBox.put('goals', state.goals.map((g) => g.toJson()).toList());
+    lifeBox.put('relationships', state.relations);
+    lifeBox.put('currentDay', timeKeeper.currentDay);
+    lifeBox.put('hour', timeKeeper.hour);
+    lifeBox.put('minutes', timeKeeper.minutes);
+    lifeBox.put('narrativeHistory', narrativeHistory);
+  }
+
+  void loadState() {
+    state.day = lifeBox.get('day', defaultValue: 1);
+    state.money = lifeBox.get('money', defaultValue: 1000.0);
+    state.physical.value = lifeBox.get('physical', defaultValue: 100.0);
+    state.mental.value = lifeBox.get('mental', defaultValue: 100.0);
+    state.reputation = lifeBox.get('reputation', defaultValue: 50);
+    state.goals = (lifeBox.get('goals', defaultValue: []) as List).map((g) => Goal.fromJson(g)).toList();
+    state.relations = Map<String, double>.from(lifeBox.get('relationships', defaultValue: {}));
+    timeKeeper.currentDay = lifeBox.get('currentDay', defaultValue: 1);
+    timeKeeper.hour = lifeBox.get('hour', defaultValue: 6);
+    timeKeeper.minutes = lifeBox.get('minutes', defaultValue: 0);
+    narrativeHistory = List<String>.from(lifeBox.get('narrativeHistory', defaultValue: []));
+  }
+
+  String exportToJSON() {
+    return '''
+{
+  "day": ${state.day},
+  "money": ${state.money},
+  "physical": ${state.physical.value},
+  "mental": ${state.mental.value},
+  "reputation": ${state.reputation},
+  "goals": ${state.goals.map((g) => g.toJson()).toList()},
+  "relationships": ${state.relations}
+}
+''';
+  }
+}
+/* Fin lib\core\life_controller.dart */
+
+/* Inicio lib\core\time_keeper.dart */
+import 'dart:async';
+import 'calendar_system.dart';
+import 'package:flutter/foundation.dart';
+import '../data/models.dart';
+
+class TimeKeeper {
+  int currentDay = 1;
+  int hour = 6
+  int minutes = 0;
+  Duration tickRate = const Duration(milliseconds: 200)
+
+  int get week => CalendarSystem.weekNumber(currentDay);
+  bool get isWeekend => CalendarSystem.isWeekend(currentDay);
+
+  late ValueNotifier<GameTime> timeNotifier;
+
+  TimeKeeper() {
+    timeNotifier = ValueNotifier(GameTime(hour: hour, minute: minutes));
+  }
+
+  void start() {
+    Timer.periodic(tickRate, (timer) {
+      minutes += 5;
+      if (minutes >= 60) {
+        minutes = 0;
+        hour += 1;
+        if (hour >= 24) {
+          hour = 0;
+          currentDay += 1;
+        }
+      }
+      timeNotifier.value = GameTime(hour: hour, minute: minutes);
+    });
+  }
+}
+
+class TimeOfDay {
+  final int hour;
+  final int minute;
+
+  TimeOfDay({required this.hour, required this.minute});
+
+  String format() => '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+}
+
+String getWeekday(int day) {
+  const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  return weekdays[(day - 1) % 7];
+}
+/* Fin lib\core\time_keeper.dart */
+
+/* Inicio lib\data\goal.dart */
+class Goal {
+  String id;
+  String title;
+  String description;
+  int deadlineDay;
+  double progress;
+  bool completed;
+
+  Goal({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.deadlineDay,
+    this.progress = 0.0,
+    this.completed = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'deadlineDay': deadlineDay,
+    'progress': progress,
+    'completed': completed,
+  };
+
+  factory Goal.fromJson(Map<String, dynamic> json) => Goal(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    deadlineDay: json['deadlineDay'],
+    progress: json['progress'],
+    completed: json['completed'],
+  );
+}
+/* Fin lib\data\goal.dart */
+
+/* Inicio lib\data\models.dart */
+import 'goal.dart';
+
+class Stat {
+  double value
+  double trend
+  List<double> history
+  Stat({this.value = 50, this.trend = 0, List<double>? history})
+      : history = history ?? <double>[];
+}
+
+enum TimeBlock { morning, afternoon, night }
+
+class PlanEntry {
+  final TimeBlock block;
+  final String action
+  PlanEntry(this.block, this.action);
+}
+
+class Investment {
+  String id;
+  String name;
+  double principal;
+  double dailyReturn
+  double risk
+  bool active;
+  Investment({
+    required this.id,
+    required this.name,
+    required this.principal,
+    required this.dailyReturn,
+    required this.risk,
+    this.active = true,
+  });
+}
+
+class Project {
+  String id;
+  String name;
+  double progress
+  int stage
+  double requiredFunds;
+  Project({
+    required this.id,
+    required this.name,
+    this.progress = 0,
+    this.stage = 0,
+    this.requiredFunds = 0,
+  });
+}
+
+class Relationship {
+  String name;
+  double level
+  Relationship(this.name, this.level);
+}
+
+class DayState {
+  int day;
+  List<PlanEntry> plan;
+  DayState(this.day, this.plan);
+}
+
+class GameTime {
+  final int hour;
+  final int minute;
+
+  GameTime({required this.hour, required this.minute});
+
+  String format() => '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+}
+
+class PlayerState {
+  int day;
+  double money;
+  Stat physical;
+  Stat mental;
+  int reputation;
+  Map<String, double> relations;
+  List<Investment> investments;
+  List<Project> projects;
+  List<Goal> goals;
+  PlayerState({
+    this.day = 1,
+    this.money = 500,
+    Stat? physical,
+    Stat? mental,
+    this.reputation = 50,
+    Map<String, double>? relations,
+    List<Investment>? investments,
+    List<Project>? projects,
+    List<Goal>? goals,
+  })  : physical = physical ?? Stat(value: 70),
+        mental = mental ?? Stat(value: 70),
+        relations = relations ?? {},
+        investments = investments ?? [],
+        projects = projects ?? [],
+        goals = goals ?? [];
+}
+/* Fin lib\data\models.dart */
+
+/* Inicio lib\main.dart */
+import 'package:flutter/widgets.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'app.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('life');
+  runApp(const ChronoApp());
+}
+/* Fin lib\main.dart */
+
+/* Inicio lib\modules\health_module.dart */
+import '../data/models.dart';
+import 'dart:math';
+
+class HealthModule {
+  void applyDaily(PlayerState s, List<PlanEntry> plan) {
+    final didRest = plan.any((p) => p.action == 'rest');
+    final didGym  = plan.any((p) => p.action == 'exercise');
+    final lateSocial = plan.any((p) => p.block == TimeBlock.night && p.action == 'social');
+
+    s.physical.value += didRest ? 4 : -2;
+    if (didGym) s.physical.value += 3;
+    if (lateSocial) s.physical.value -= 2;
+    final didProject = plan.any((p) => p.action.startsWith('project:'));
+    final overwork = plan.where((p) => p.action == 'work').length >= 2;
+    s.mental.value += (didProject ? 2 : 0) + (didRest ? 3 : -3) + (overwork ? -4 : 0);
+    if (Random().nextDouble() < 0.08 && !didRest) {
+      s.mental.value -= 3;
+      s.physical.value -= 1;
+    }
+    s.physical.value = s.physical.value.clamp(0, 100);
+    s.mental.value   = s.mental.value.clamp(0, 100);
+  }
+}
+/* Fin lib\modules\health_module.dart */
+
+/* Inicio lib\modules\money_module.dart */
+import '../data/models.dart';
+import 'dart:math';
+
+class MoneyModule {
+  void applyDaily(PlayerState s) {
+    s.money -= 15
+    final worked = s.projects.any((p) => p.name == '_WORK_FLAG_')
+    if (worked) s.money += 60;
+    for (final inv in s.investments.where((i) => i.active)) {
+      final vol = (Random().nextDouble() - 0.5) * inv.risk * 0.02
+      final daily = inv.principal * (inv.dailyReturn + vol);
+      s.money += daily;
+      inv.principal += daily;
+      if (inv.principal <= 50) inv.active = false;
+    }
+  }
+}
+/* Fin lib\modules\money_module.dart */
+
+/* Inicio lib\modules\project_module.dart */
+import '../data/models.dart';
+
+class ProjectModule {
+  void applyDaily(PlayerState s, List<PlanEntry> plan) {
+    for (final p in s.projects) {
+      final worked = plan.any((e) => e.action == 'project:${p.id}');
+      if (worked) {
+        p.progress += 0.06
+        if (p.progress >= 1.0) {
+          p.stage = (p.stage + 1).clamp(0, 3);
+          p.progress = 0.0;
+          if (p.stage == 2) {
+            s.money += 50;
+          }
+        }
+      } else {
+        p.progress = (p.progress - 0.01).clamp(0.0, 1.0);
+      }
+    }
+  }
+}
+/* Fin lib\modules\project_module.dart */
+
+/* Inicio lib\modules\relationship_module.dart */
+import '../data/models.dart';
+
+class RelationshipModule {
+  void applyDaily(PlayerState s, List<PlanEntry> plan) {
+    final social = plan.any((p) => p.action == 'social');
+    for (final key in s.relations.keys) {
+      s.relations[key] = (s.relations[key]! + (social ? 3 : -1)).clamp(0, 100);
+    }
+  }
+}
+/* Fin lib\modules\relationship_module.dart */
+
+/* Inicio lib\services\gemini_service.dart */
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'dart:convert';
+
+const String? kGeminiKey = String.fromEnvironment('GEMINI_API_KEY');
+
+class GeminiSuggestion {
+  final String title;
+  final String description;
+  final String optionYesLabel;
+  final String optionNoLabel;
+  final double deltaMoneyYes, deltaPhysYes, deltaMentYes;
+  final double deltaMoneyNo,  deltaPhysNo,  deltaMentNo;
+
+  GeminiSuggestion({
+    required this.title,
+    required this.description,
+    required this.optionYesLabel,
+    required this.optionNoLabel,
+    required this.deltaMoneyYes,
+    required this.deltaPhysYes,
+    required this.deltaMentYes,
+    required this.deltaMoneyNo,
+    required this.deltaPhysNo,
+    required this.deltaMentNo,
+  });
+}
+
+class GeminiService {
+  final GenerativeModel _model;
+  GeminiService._(this._model);
+
+  static GeminiService fromApiKey(String apiKey, {String model='gemini-2.5-flash-lite'}) {
+    return GeminiService._(GenerativeModel(model: model, apiKey: apiKey));
+  }
+
+  Future<GeminiSuggestion?> suggestContextualEvent({
+    required double money,
+    required double physical,
+    required double mental,
+    required double reputation,
+    required int day,
+  }) async {
+    final prompt = '''
+Eres un motor de eventos de vida realista. Genera SOLO un evento breve con:
+- title
+- description (1 línea)
+- option_yes_label
+- option_no_label
+- delta_money_yes, delta_phys_yes, delta_ment_yes (números enteros o decimales)
+- delta_money_no,  delta_phys_no,  delta_ment_no
+
+Contexto numérico:
+money=$money, physical=$physical, mental=$mental, reputation=$reputation, day=$day.
+
+El evento debe ser coherente (salud/estrés/dinero/reputación). Devuelve en JSON puro.
+''';
+
+    final res = await _model.generateContent([Content.text(prompt)]);
+    final text = res.text;
+    if (text == null) return null;
+    try {
+      final json = _extractJson(text);
+      return GeminiSuggestion(
+        title: json['title'],
+        description: json['description'],
+        optionYesLabel: json['option_yes_label'],
+        optionNoLabel: json['option_no_label'],
+        deltaMoneyYes: (json['delta_money_yes'] as num).toDouble(),
+        deltaPhysYes:  (json['delta_phys_yes']  as num).toDouble(),
+        deltaMentYes:  (json['delta_ment_yes']  as num).toDouble(),
+        deltaMoneyNo:  (json['delta_money_no']  as num).toDouble(),
+        deltaPhysNo:   (json['delta_phys_no']   as num).toDouble(),
+        deltaMentNo:   (json['delta_ment_no']   as num).toDouble(),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> generateNarrative(String prompt) async {
+    final res = await _model.generateContent([Content.text(prompt)]);
+    return res.text;
+  }
+
+  Map<String, dynamic> _extractJson(String raw) {
+    final start = raw.indexOf('{');
+    final end = raw.lastIndexOf('}');
+    final jsonStr = raw.substring(start, end + 1);
+    return Map<String, dynamic>.from(jsonDecode(jsonStr));
+  }
+}
+/* Fin lib\services\gemini_service.dart */
+
+/* Inicio lib\ui\primitives\glass_container.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+
+class GlassContainer extends StatelessWidget {
+  const GlassContainer({super.key, required this.child, this.padding = const EdgeInsets.all(12)});
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: ChronoTheme.glass(),
+      padding: padding,
+      child: child,
+    );
+  }
+}
+/* Fin lib\ui\primitives\glass_container.dart */
+
+/* Inicio lib\ui\screens\dashboard_screen.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+import '../widgets/indicators_row.dart';
+import '../primitives/glass_container.dart';
+import '../../core/life_controller.dart';
+import '../../utils/tilt_controller.dart';
+import 'planner_screen.dart';
+import 'summary_screen.dart';
+import '../../core/event_engine.dart';
+import '../../services/gemini_service.dart';
+import '../../data/models.dart';
+import '../../core/calendar_system.dart';
+import 'weekly_summary_screen.dart';
+import '../../ui/widgets/goal_panel.dart';
+
+class MicroEvent {
+  final String title;
+  final String desc;
+  final List<String> options;
+  final List<VoidCallback> actions;
+
+  MicroEvent(this.title, this.desc, this.options, this.actions);
+}
+
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  late final LifeController life;
+  late final TiltController tilt;
+  EventResult? pendingEvent;
+  MicroEvent? pendingMicroEvent;
+  Color backgroundColor = const Color(0xFF14213D);
+
+  @override
+  void initState() {
+    super.initState();
+    const apiKey = kGeminiKey;
+    final gemini = (apiKey != null && apiKey.isNotEmpty) ? GeminiService.fromApiKey(apiKey, model: 'gemini-2.5-flash-lite') : null;
+    life = LifeController(eventEngine: EventEngine(ai: gemini));
+    tilt = TiltController((dir) async {
+      if (dir == TiltDirection.forward) {
+        await _simulate();
+      } else if (dir == TiltDirection.backward) {
+        setState(() => life.rewindOneDay());
+      }
+    })..start();
+
+    life.timeNotifier.addListener(() => _checkMicroEvents(life.timeNotifier.value));
+  }
+
+  @override
+  void dispose() {
+    tilt.dispose();
+    super.dispose();
+  }
+
+  Future<void> _simulate() async {
+    final event = await life.simulateDay();
+    if (!mounted) return;
+    if (event != null) {
+      setState(() => pendingEvent = event);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showSummary());
+    }
+  }
+
+  Future<void> _showSummary() async {
+    final s = life.state;
+    final isSunday = CalendarSystem.weekdayName(s.day) == 'Domingo';
+    if (isSunday) {
+      final week = CalendarSystem.weekNumber(s.day);
+      final balance = s.money
+      final healthAvg = s.physical.value;
+      final stressAvg = 100 - s.mental.value
+      final reputation = s.reputation;
+      final goals = s.goals;
+      final narrative = await _generateWeeklyNarrative(s, week);
+
+      await Navigator.of(context).push(PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => WeeklySummaryScreen(
+          week: week,
+          balance: balance,
+          healthAvg: healthAvg,
+          stressAvg: stressAvg,
+          reputation: reputation,
+          goals: goals,
+          narrative: narrative,
+        ),
+      ));
+    } else {
+      await Navigator.of(context).push(PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => SummaryScreen(
+          lines: [
+            'Día ${s.day - 1} completado',
+            'Dinero: \$${s.money.toStringAsFixed(2)}',
+            'Salud física: ${s.physical.value.toStringAsFixed(0)}%',
+            'Salud mental: ${s.mental.value.toStringAsFixed(0)}%',
+          ],
+          onContinue: () => Navigator.of(_).pop(),
+        ),
+      ));
+    }
+    setState(() {});
+  }
+
+  Future<String> _generateWeeklyNarrative(PlayerState s, int week) async {
+    final ai = life.eventEngine?.ai;
+    if (ai == null) return 'Sin narrativa disponible.';
+
+    final prompt = '''
+Genera una narrativa breve (3-4 frases) para el resumen semanal de ChronoLife.
+Semana: $week
+Dinero: ${s.money}
+Salud física: ${s.physical.value}%
+Salud mental: ${s.mental.value}%
+Reputación: ${s.reputation}
+Metas: ${s.goals.map((g) => '${g.title}: ${(g.progress * 100).toInt()}%').join(', ')}
+Historia previa: ${life.narrativeHistory.join(' ')}
+Incluye una decisión moral con 2 opciones.
+''';
+
+    try {
+      final response = await ai.generateNarrative(prompt);
+      final narrative = response ?? 'Narrativa generada.';
+      life.narrativeHistory.add(narrative);
+      life.saveState();
+      return narrative;
+    } catch (e) {
+      return 'Error generando narrativa: $e';
+    }
+  }
+
+  void _showGoalPanel() {
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      pageBuilder: (_, __, ___) => GoalPanel(
+        goals: life.state.goals,
+        onAddGoal: (goal) => setState(() => life.addGoal(goal)),
+        onUpdateProgress: (id, progress) => setState(() => life.updateGoalProgress(id, progress)),
+      ),
+    ));
+  }
+
+  void _checkMicroEvents(GameTime time) {
+    if (time.hour == 10 && life.state.physical.value < 40 && pendingMicroEvent == null) {
+      setState(() => pendingMicroEvent = MicroEvent(
+        'Fatiga Matutina',
+        'Te sientes agotado esta mañana.',
+        ['Descansar 10 min', 'Ignorar', 'Tomar café'],
+        [
+          () => setState(() {
+            life.state.physical.value = (life.state.physical.value + 5).clamp(0,100);
+            pendingMicroEvent = null;
+          }),
+          () => setState(() {
+            life.state.mental.value = (life.state.mental.value - 2).clamp(0,100);
+            pendingMicroEvent = null;
+          }),
+          () => setState(() {
+            life.state.money -= 5;
+            life.state.physical.value = (life.state.physical.value + 3).clamp(0,100);
+            pendingMicroEvent = null;
+          }),
+        ],
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<GameTime>(
+      valueListenable: life.timeNotifier,
+      builder: (context, time, child) {
+        final weekday = CalendarSystem.weekdayName(life.timeKeeper.currentDay);
+        final week = life.timeKeeper.week;
+        final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} hrs';
+        final progress = (time.hour * 60 + time.minute) / (24 * 60.0);
+        backgroundColor = _calculateColor(time.hour);
+
+        return AnimatedContainer(
+          duration: const Duration(seconds: 1),
+          color: backgroundColor,
+          padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      Flexible(child: Text('Semana $week — $weekday — $timeStr', style: ChronoTheme.baseText.copyWith(fontSize: 22))),
+                      const Spacer(),
+                      _pill('Avanza: inclina adelante'),
+                      const SizedBox(width: 8),
+                      _pill('Rebobina: inclina atrás'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 4,
+                    width: double.infinity,
+                    decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(2)),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: progress,
+                      child: Container(
+                        decoration: BoxDecoration(color: ChronoTheme.text, borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  GlassContainer(
+                    child: IndicatorsRow(money: life.state.money, physical: life.state.physical.value, mental: life.state.mental.value, reputation: life.state.reputation.toDouble()),
+                  ),
+                  const SizedBox(height: 14),
+                  GlassContainer(
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        _actionButton('Planear día', () {
+                          Navigator.of(context).push(PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => PlannerScreen(
+                              initialPlan: life.currentPlan.plan,
+                              onSave: (plan) {
+                                setState(() => life.currentPlan = DayState(life.state.day, plan));
+                              },
+                            ),
+                          ));
+                        }),
+                        _actionButton('Simular (tap)', () async => await _simulate()),
+                        _actionButton('Retroceder (tap)', () { setState(() => life.rewindOneDay()); }),
+                        _actionButton('Metas', () => _showGoalPanel()),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: GlassContainer(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Agenda del día: ${life.currentPlan.plan.map((e) => '${e.block.name}:${e.action}').join(', ')}',
+                          style: ChronoTheme.baseText,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              if (pendingEvent != null) _eventOverlay(pendingEvent!),
+              if (pendingMicroEvent != null) _microEventOverlay(pendingMicroEvent!),
+              if (pendingEvent != null) _eventOverlay(pendingEvent!)
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _pill(String text) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(20)),
+    child: Text(text, style: ChronoTheme.baseText.copyWith(fontSize: 12, color: ChronoTheme.textDim)),
+  );
+
+  Widget _actionButton(String label, VoidCallback onTap) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(12)),
+      child: Text(label, style: ChronoTheme.baseText),
+    ),
+  );
+
+  Widget _eventOverlay(EventResult e) {
+    return Positioned.fill(
+      child: Container(
+        color: const Color(0x99000000),
+        child: Center(
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.all(16),
+            decoration: ChronoTheme.glass(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(e.title, style: ChronoTheme.baseText.copyWith(fontSize: 20)),
+                const SizedBox(height: 8),
+                Text(e.desc, style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(child: _actionButton(e.options[0].label, () {
+                      setState(() {
+                        e.options[0].apply(life.state);
+                        pendingEvent = null;
+                      });
+                    })),
+                    const SizedBox(width: 12),
+                    if (e.options.length > 1)
+                      Expanded(child: _actionButton(e.options[1].label, () {
+                        setState(() {
+                          e.options[1].apply(life.state);
+                          pendingEvent = null;
+                        });
+                      })),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _calculateColor(int hour) {
+    if (hour >= 6 && hour < 12) {
+      double t = (hour - 6) / 6.0;
+      return Color.lerp(const Color(0xFF14213D), const Color(0xFFFFDFA3), t)!;
+    } else if (hour >= 12 && hour < 18) {
+      double t = (hour - 12) / 6.0;
+      return Color.lerp(const Color(0xFFFFDFA3), const Color(0xFFFCA311), t)!;
+    } else {
+      double t = hour < 6 ? (hour / 6.0) : ((hour - 18) / 6.0);
+      return Color.lerp(const Color(0xFFFCA311), const Color(0xFF14213D), t)!;
+    }
+  }
+
+  Widget _microEventOverlay(MicroEvent e) {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: GlassContainer(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(e.title, style: ChronoTheme.baseText.copyWith(fontSize: 18)),
+              const SizedBox(height: 8),
+              Text(e.desc, style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim)),
+              const SizedBox(height: 12),
+              Row(
+                children: e.options.asMap().entries.map((entry) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: _actionButton(entry.value, e.actions[entry.key]),
+                  ),
+                )).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+/* Fin lib\ui\screens\dashboard_screen.dart */
+
+/* Inicio lib\ui\screens\planner_screen.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+import '../primitives/glass_container.dart';
+import '../widgets/time_block.dart';
+import '../../data/models.dart';
+
+class PlannerScreen extends StatefulWidget {
+  const PlannerScreen({
+    super.key,
+    required this.initialPlan,
+    required this.onSave,
+  });
+  final List<PlanEntry> initialPlan;
+  final void Function(List<PlanEntry>) onSave;
+
+  @override
+  State<PlannerScreen> createState() => _PlannerScreenState();
+}
+
+class _PlannerScreenState extends State<PlannerScreen> {
+  final Map<TimeBlock, String?> plan = { for (var b in TimeBlock.values) b: null };
+  final activities = const ['work', 'rest', 'social', 'exercise', 'invest', 'project:new_idea'];
+
+  @override
+  void initState() {
+    super.initState();
+    for (final p in widget.initialPlan) {
+      plan[p.block] = p.action;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: ChronoTheme.background,
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
+      child: Column(
+        children: [
+          Text('Planear día', style: ChronoTheme.baseText.copyWith(fontSize: 22)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: TimeBlockWidget(block: TimeBlock.morning, currentAction: plan[TimeBlock.morning], onDrop: (a){ setState(()=> plan[TimeBlock.morning]=a); })),
+              const SizedBox(width: 12),
+              Expanded(child: TimeBlockWidget(block: TimeBlock.afternoon, currentAction: plan[TimeBlock.afternoon], onDrop: (a){ setState(()=> plan[TimeBlock.afternoon]=a); })),
+              const SizedBox(width: 12),
+              Expanded(child: TimeBlockWidget(block: TimeBlock.night, currentAction: plan[TimeBlock.night], onDrop: (a){ setState(()=> plan[TimeBlock.night]=a); })),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GlassContainer(
+            child: Wrap(
+              spacing: 8, runSpacing: 8,
+              children: activities.map((a) => Draggable<String>(
+                data: a,
+                feedback: _chip(a, opacity: 0.7),
+                child: _chip(a),
+              )).toList(),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              final result = <PlanEntry>[];
+              plan.forEach((b, a) { if (a != null) result.add(PlanEntry(b, a!)); });
+              widget.onSave(result);
+              Navigator.of(context).pop();
+            },
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: BoxDecoration(
+                  color: ChronoTheme.accent, borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text('Guardar plan', style: ChronoTheme.baseText.copyWith(color: const Color(0xFF071018))),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(String a, {double opacity = 1}) {
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0x22FFFFFF),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0x33FFFFFF)),
+        ),
+        child: Text(a, style: ChronoTheme.baseText),
+      ),
+    );
+  }
+}
+/* Fin lib\ui\screens\planner_screen.dart */
+
+/* Inicio lib\ui\screens\summary_screen.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+
+class SummaryScreen extends StatelessWidget {
+  const SummaryScreen({super.key, required this.lines, required this.onContinue});
+  final List<String> lines;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: ChronoTheme.background,
+      padding: const EdgeInsets.fromLTRB(16, 64, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Resumen del día', style: ChronoTheme.baseText.copyWith(fontSize: 22)),
+          const SizedBox(height: 14),
+          ...lines.map((l) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text('• $l', style: ChronoTheme.baseText),
+          )),
+          const Spacer(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: onContinue,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: BoxDecoration(
+                  color: ChronoTheme.ok, borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text('Continuar', style: ChronoTheme.baseText.copyWith(color: const Color(0xFF071018))),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+/* Fin lib\ui\screens\summary_screen.dart */
+
+/* Inicio lib\ui\screens\weekly_summary_screen.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+import '../primitives/glass_container.dart';
+import '../../core/life_controller.dart';
+import '../../data/goal.dart';
+
+class WeeklySummaryScreen extends StatelessWidget {
+  final int week;
+  final double balance;
+  final double healthAvg;
+  final double stressAvg;
+  final int reputation;
+  final List<Goal> goals;
+  final String narrative;
+
+  const WeeklySummaryScreen({
+    super.key,
+    required this.week,
+    required this.balance,
+    required this.healthAvg,
+    required this.stressAvg,
+    required this.reputation,
+    required this.goals,
+    required this.narrative,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: ChronoTheme.background,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text('Resumen Semana $week', style: ChronoTheme.baseText.copyWith(fontSize: 24)),
+          const SizedBox(height: 16),
+          GlassContainer(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(narrative, style: ChronoTheme.baseText.copyWith(fontSize: 16)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _summaryItem('Financiero', 'Balance: \$${balance.toStringAsFixed(2)}'),
+          _summaryItem('Salud Física', '${healthAvg.toStringAsFixed(0)}% promedio'),
+          _summaryItem('Estrés Mental', '${stressAvg.toStringAsFixed(0)}% promedio'),
+          _summaryItem('Reputación', '$reputation/100'),
+          const SizedBox(height: 16),
+          Text('Metas:', style: ChronoTheme.baseText.copyWith(fontSize: 18)),
+          ...goals.map((g) => _goalItem(g)),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: ChronoTheme.glass(),
+              child: Text('Continuar', style: ChronoTheme.baseText),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: ChronoTheme.baseText),
+          Text(value, style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim)),
+        ],
+      ),
+    );
+  }
+
+  Widget _goalItem(Goal g) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(g.title, style: ChronoTheme.baseText),
+          const Spacer(),
+          Text('${(g.progress * 100).toInt()}%', style: ChronoTheme.baseText),
+          if (g.completed) Text(' ✓', style: ChronoTheme.baseText.copyWith(color: ChronoTheme.ok)),
+        ],
+      ),
+    );
+  }
+}
+/* Fin lib\ui\screens\weekly_summary_screen.dart */
+
+/* Inicio lib\ui\theme.dart */
+import 'package:flutter/widgets.dart';
+
+class ChronoTheme {
+  static const Color background = Color(0xFF0F1115);
+  static const Color card = Color(0x1AF5F7FA)
+  static const Color accent = Color(0xFF7DD3FC);
+  static const Color ok = Color(0xFF34D399);
+  static const Color warn = Color(0xFFF59E0B);
+  static const Color danger = Color(0xFFEF4444);
+  static const Color purple = Color(0xFF8B5CF6);
+  static const Color text = Color(0xFFE5E7EB);
+  static const Color textDim = Color(0xFF9CA3AF);
+
+  static const TextStyle baseText = TextStyle(
+    color: text,
+    fontSize: 16,
+    height: 1.25,
+    fontFamilyFallback: ['SF Pro Text', 'Roboto', 'Helvetica', 'Arial'],
+  );
+
+  static BoxDecoration glass() => BoxDecoration(
+    color: card,
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: const [
+      BoxShadow(color: Color(0x66000000), blurRadius: 12, offset: Offset(0, 8)),
+    ],
+    border: Border.all(color: Color(0x22FFFFFF), width: 1),
+  );
+}
+/* Fin lib\ui\theme.dart */
+
+/* Inicio lib\ui\widgets\goal_panel.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+import '../primitives/glass_container.dart';
+import '../../data/goal.dart';
+
+class GoalPanel extends StatefulWidget {
+  final List<Goal> goals;
+  final Function(Goal) onAddGoal;
+  final Function(String, double) onUpdateProgress;
+
+  const GoalPanel({
+    super.key,
+    required this.goals,
+    required this.onAddGoal,
+    required this.onUpdateProgress,
+  });
+
+  @override
+  State<GoalPanel> createState() => _GoalPanelState();
+}
+
+class _GoalPanelState extends State<GoalPanel> {
+  bool _adding = false;
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  final _deadlineController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    _deadlineController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        color: const Color(0x99000000),
+        child: Center(
+          child: Container(
+            width: 400,
+            height: 600,
+            padding: const EdgeInsets.all(16),
+            decoration: ChronoTheme.glass(),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text('Metas Personales', style: ChronoTheme.baseText.copyWith(fontSize: 20)),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Text('Cerrar', style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView(
+                    children: widget.goals.map((g) => _goalItem(g)).toList(),
+                  ),
+                ),
+                if (!_adding)
+                  GestureDetector(
+                    onTap: () => setState(() => _adding = true),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(8)),
+                      child: Text('Agregar Meta', style: ChronoTheme.baseText),
+                    ),
+                  )
+                else
+                  _addGoalForm(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _goalItem(Goal g) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GlassContainer(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(g.title, style: ChronoTheme.baseText.copyWith(fontSize: 16)),
+              const SizedBox(height: 4),
+              Text(g.description, style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim, fontSize: 12)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 8,
+                      decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(4)),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: g.progress,
+                        child: Container(
+                          decoration: BoxDecoration(color: g.completed ? ChronoTheme.ok : ChronoTheme.accent, borderRadius: BorderRadius.circular(4)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${(g.progress * 100).toInt()}%', style: ChronoTheme.baseText.copyWith(fontSize: 12)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text('Deadline: Día ${g.deadlineDay}', style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim, fontSize: 12)),
+              if (g.completed) Text('Completada ✓', style: ChronoTheme.baseText.copyWith(color: ChronoTheme.ok)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _addGoalForm() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(8)),
+          child: const Text('Funcionalidad de agregar meta próximamente (sin Material)', style: TextStyle(color: Color(0xFF9CA3AF))),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _adding = false),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(8)),
+                  child: const Text('Cerrar', style: TextStyle(color: Color(0xFFE5E7EB))),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _saveGoal() {
+  }
+}
+/* Fin lib\ui\widgets\goal_panel.dart */
+
+/* Inicio lib\ui\widgets\indicators_row.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+
+class Indicator extends StatelessWidget {
+  const Indicator({super.key, required this.label, required this.value, this.color});
+  final String label;
+  final double value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? ChronoTheme.accent;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: ChronoTheme.baseText.copyWith(color: ChronoTheme.textDim)),
+        const SizedBox(height: 6),
+        Container(
+          height: 6,
+          decoration: BoxDecoration(color: const Color(0x22FFFFFF), borderRadius: BorderRadius.circular(6)),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: (value / 100).clamp(0, 1),
+            child: Container(decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(6))),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text('${value.toStringAsFixed(0)}%', style: ChronoTheme.baseText),
+      ],
+    );
+  }
+}
+
+class IndicatorsRow extends StatelessWidget {
+  const IndicatorsRow({super.key, required this.money, required this.physical, required this.mental, required this.reputation});
+  final double money, physical, mental, reputation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        Indicator(label: 'Salud física', value: physical, color: ChronoTheme.ok),
+        Indicator(label: 'Salud mental', value: mental, color: ChronoTheme.warn),
+        Indicator(label: 'Reputación', value: reputation, color: ChronoTheme.purple),
+        Indicator(label: 'Dinero', value: (money / 20).clamp(0, 100).toDouble()),
+      ],
+    );
+  }
+}
+/* Fin lib\ui\widgets\indicators_row.dart */
+
+/* Inicio lib\ui\widgets\time_block.dart */
+import 'package:flutter/widgets.dart';
+import '../theme.dart';
+import '../primitives/glass_container.dart';
+import '../../data/models.dart';
+
+class TimeBlockWidget extends StatelessWidget {
+  const TimeBlockWidget({
+    super.key,
+    required this.block,
+    required this.currentAction,
+    required this.onDrop,
+  });
+
+  final TimeBlock block;
+  final String? currentAction;
+  final void Function(String action) onDrop;
+
+  String get label => switch (block) {
+    TimeBlock.morning => 'Mañana',
+    TimeBlock.afternoon => 'Tarde',
+    TimeBlock.night => 'Noche',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<String>(
+      onWillAccept: (_) => true,
+      onAccept: onDrop,
+      builder: (context, _, __) {
+        return GlassContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: ChronoTheme.baseText.copyWith(fontSize: 18)),
+              const SizedBox(height: 10),
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0x11000000),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    currentAction == null ? 'Arrastra una actividad aquí' : currentAction!,
+                    style: ChronoTheme.baseText,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+/* Fin lib\ui\widgets\time_block.dart */
+
+/* Inicio lib\utils\tilt_controller.dart */
+import 'dart:async';
+import 'package:sensors_plus/sensors_plus.dart';
+
+typedef TiltCallback = void Function(TiltDirection dir);
+
+enum TiltDirection { forward, backward, neutral }
+
+class TiltController {
+  TiltController(this.onTilt);
+  final TiltCallback onTilt;
+
+  StreamSubscription? _sub;
+  static const double _threshold = 0.7
+
+  void start() {
+    _sub = gyroscopeEventStream().listen((e) {
+      if (e.y > _threshold) {
+        onTilt(TiltDirection.forward);
+      } else if (e.y < -_threshold) {
+        onTilt(TiltDirection.backward);
+      } else {
+        onTilt(TiltDirection.neutral);
+      }
+    });
+  }
+
+  void dispose() => _sub?.cancel();
+}
+/* Fin lib\utils\tilt_controller.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\integration_test\path_provider_test.dart */
+
+
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:path_provider_linux/path_provider_linux.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('getTemporaryDirectory', (WidgetTester tester) async {
+    final PathProviderLinux provider = PathProviderLinux();
+    final String? result = await provider.getTemporaryPath();
+    _verifySampleFile(result, 'temporaryDirectory');
+  });
+
+  testWidgets('getDownloadDirectory', (WidgetTester tester) async {
+    if (!Platform.isLinux) {
+      return;
+    }
+    final PathProviderLinux provider = PathProviderLinux();
+    final String? result = await provider.getDownloadsPath();
+    _verifySampleFile(result, 'downloadDirectory');
+  });
+
+  testWidgets('getApplicationDocumentsDirectory', (WidgetTester tester) async {
+    final PathProviderLinux provider = PathProviderLinux();
+    final String? result = await provider.getApplicationDocumentsPath();
+    _verifySampleFile(result, 'applicationDocuments');
+  });
+
+  testWidgets('getApplicationSupportDirectory', (WidgetTester tester) async {
+    final PathProviderLinux provider = PathProviderLinux();
+    final String? result = await provider.getApplicationSupportPath();
+    _verifySampleFile(result, 'applicationSupport');
+  });
+
+  testWidgets('getApplicationCacheDirectory', (WidgetTester tester) async {
+    final PathProviderLinux provider = PathProviderLinux();
+    final String? result = await provider.getApplicationCachePath();
+    _verifySampleFile(result, 'applicationCache');
+  });
+}
+
+void _verifySampleFile(String? directoryPath, String name) {
+  expect(directoryPath, isNotNull);
+  if (directoryPath == null) {
+    return;
+  }
+  final Directory directory = Directory(directoryPath);
+  final File file = File('${directory.path}${Platform.pathSeparator}$name');
+
+  if (file.existsSync()) {
+    file.deleteSync();
+    expect(file.existsSync(), isFalse);
+  }
+
+  file.writeAsStringSync('Hello world!');
+  expect(file.readAsStringSync(), 'Hello world!');
+  expect(directory.listSync(), isNotEmpty);
+  file.deleteSync();
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\integration_test\path_provider_test.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\lib\main.dart */
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider_linux/path_provider_linux.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String? _tempDirectory = 'Unknown';
+  String? _downloadsDirectory = 'Unknown';
+  String? _appSupportDirectory = 'Unknown';
+  String? _appCacheDirectory = 'Unknown';
+  String? _documentsDirectory = 'Unknown';
+  final PathProviderLinux _provider = PathProviderLinux();
+
+  @override
+  void initState() {
+    super.initState();
+    initDirectories();
+  }
+
+  Future<void> initDirectories() async {
+    String? tempDirectory;
+    String? downloadsDirectory;
+    String? appSupportDirectory;
+    String? appCacheDirectory;
+    String? documentsDirectory;
+
+    try {
+      tempDirectory = await _provider.getTemporaryPath();
+    } on PlatformException {
+      tempDirectory = 'Failed to get temp directory.';
+    }
+    try {
+      downloadsDirectory = await _provider.getDownloadsPath();
+    } on PlatformException {
+      downloadsDirectory = 'Failed to get downloads directory.';
+    }
+
+    try {
+      documentsDirectory = await _provider.getApplicationDocumentsPath();
+    } on PlatformException {
+      documentsDirectory = 'Failed to get documents directory.';
+    }
+
+    try {
+      appSupportDirectory = await _provider.getApplicationSupportPath();
+    } on PlatformException {
+      appSupportDirectory = 'Failed to get documents directory.';
+    }
+
+    try {
+      appCacheDirectory = await _provider.getApplicationCachePath();
+    } on PlatformException {
+      appCacheDirectory = 'Failed to get cache directory.';
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _tempDirectory = tempDirectory;
+      _downloadsDirectory = downloadsDirectory;
+      _appSupportDirectory = appSupportDirectory;
+      _appCacheDirectory = appCacheDirectory;
+      _documentsDirectory = documentsDirectory;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Path Provider Linux example app'),
+        ),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              Text('Temp Directory: $_tempDirectory\n'),
+              Text('Documents Directory: $_documentsDirectory\n'),
+              Text('Downloads Directory: $_downloadsDirectory\n'),
+              Text('Application Support Directory: $_appSupportDirectory\n'),
+              Text('Application Cache Directory: $_appCacheDirectory\n'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\lib\main.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\pubspec.yaml */
+name: pathproviderexample
+description: Demonstrates how to use the path_provider_linux plugin.
+publish_to: "none"
+
+environment:
+  sdk: ">=2.19.0 <4.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  path_provider_linux:
+
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\pubspec.yaml */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\test_driver\integration_test.dart */
+
+
+import 'package:integration_test/integration_test_driver.dart';
+
+Future<void> main() => integrationDriver();
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\example\test_driver\integration_test.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\path_provider_linux.dart */
+
+
+export 'src/path_provider_linux.dart';
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\path_provider_linux.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id.dart */
+
+
+export 'get_application_id_stub.dart'
+    if (dart.library.ffi) 'get_application_id_real.dart';
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id_real.dart */
+
+
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
+typedef _GApplicationGetDefaultC = IntPtr Function();
+typedef _GApplicationGetDefaultDart = int Function();
+
+typedef _GApplicationGetApplicationIdC = Pointer<Utf8> Function(IntPtr);
+typedef _GApplicationGetApplicationIdDart = Pointer<Utf8> Function(int);
+
+@visibleForTesting
+class GioUtils {
+
+  GioUtils() {
+    try {
+      _gio = DynamicLibrary.open('libgio-2.0.so');
+    } on ArgumentError {
+      _gio = null;
+    }
+  }
+
+  DynamicLibrary? _gio;
+
+  bool get libraryIsPresent => _gio != null;
+
+  int gApplicationGetDefault() {
+    if (_gio == null) {
+      return 0;
+    }
+    final _GApplicationGetDefaultDart getDefault = _gio!
+        .lookupFunction<_GApplicationGetDefaultC, _GApplicationGetDefaultDart>(
+            'g_application_get_default');
+    return getDefault();
+  }
+
+  Pointer<Utf8> gApplicationGetApplicationId(int app) {
+    if (_gio == null) {
+      return nullptr;
+    }
+    final _GApplicationGetApplicationIdDart gApplicationGetApplicationId = _gio!
+        .lookupFunction<_GApplicationGetApplicationIdC,
+                _GApplicationGetApplicationIdDart>(
+            'g_application_get_application_id');
+    return gApplicationGetApplicationId(app);
+  }
+}
+
+@visibleForTesting
+GioUtils? gioUtilsOverride;
+
+String? getApplicationId() {
+  final GioUtils gio = gioUtilsOverride ?? GioUtils();
+  if (!gio.libraryIsPresent) {
+    return null;
+  }
+
+  final int app = gio.gApplicationGetDefault();
+  if (app == 0) {
+    return null;
+  }
+  final Pointer<Utf8> appId = gio.gApplicationGetApplicationId(app);
+  if (appId == nullptr) {
+    return null;
+  }
+  return appId.toDartString();
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id_real.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id_stub.dart */
+
+
+String? getApplicationId() => null;
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\get_application_id_stub.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\path_provider_linux.dart */
+
+
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:xdg_directories/xdg_directories.dart' as xdg;
+
+import 'get_application_id.dart';
+
+class PathProviderLinux extends PathProviderPlatform {
+
+  PathProviderLinux() : _environment = Platform.environment;
+
+  @visibleForTesting
+  PathProviderLinux.private(
+      {Map<String, String> environment = const <String, String>{},
+      String? executableName,
+      String? applicationId})
+      : _environment = environment,
+        _executableName = executableName,
+        _applicationId = applicationId;
+
+  final Map<String, String> _environment;
+  String? _executableName;
+  String? _applicationId;
+
+  static void registerWith() {
+    PathProviderPlatform.instance = PathProviderLinux();
+  }
+
+  @override
+  Future<String?> getTemporaryPath() {
+    final String environmentTmpDir = _environment['TMPDIR'] ?? '';
+    return Future<String?>.value(
+      environmentTmpDir.isEmpty ? '/tmp' : environmentTmpDir,
+    );
+  }
+
+  @override
+  Future<String?> getApplicationSupportPath() async {
+    final Directory directory =
+        Directory(path.join(xdg.dataHome.path, await _getId()));
+    if (directory.existsSync()) {
+      return directory.path;
+    }
+
+    final Directory legacyDirectory =
+        Directory(path.join(xdg.dataHome.path, await _getExecutableName()));
+    if (legacyDirectory.existsSync()) {
+      return legacyDirectory.path;
+    }
+
+    await directory.create(recursive: true);
+    return directory.path;
+  }
+
+  @override
+  Future<String?> getApplicationDocumentsPath() {
+    return Future<String?>.value(xdg.getUserDirectory('DOCUMENTS')?.path);
+  }
+
+  @override
+  Future<String?> getApplicationCachePath() async {
+    final Directory directory =
+        Directory(path.join(xdg.cacheHome.path, await _getId()));
+    if (!directory.existsSync()) {
+      await directory.create(recursive: true);
+    }
+    return directory.path;
+  }
+
+  @override
+  Future<String?> getDownloadsPath() {
+    return Future<String?>.value(xdg.getUserDirectory('DOWNLOAD')?.path);
+  }
+
+  Future<String> _getExecutableName() async {
+    _executableName ??= path.basenameWithoutExtension(
+        await File('/proc/self/exe').resolveSymbolicLinks());
+    return _executableName!;
+  }
+
+  Future<String> _getId() async {
+    _applicationId ??= getApplicationId();
+
+    return _applicationId ?? await _getExecutableName();
+  }
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\lib\src\path_provider_linux.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\pubspec.yaml */
+name: path_provider_linux
+description: Linux implementation of the path_provider plugin
+repository: https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_linux
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+path_provider%22
+version: 2.2.1
+
+environment:
+  sdk: ">=2.19.0 <4.0.0"
+  flutter: ">=3.7.0"
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      linux:
+        dartPluginClass: PathProviderLinux
+
+dependencies:
+  ffi: ">=1.1.2 <3.0.0"
+  flutter:
+    sdk: flutter
+  path: ^1.8.0
+  path_provider_platform_interface: ^2.1.0
+  xdg_directories: ">=0.2.0 <2.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+topics:
+  - files
+  - path-provider
+  - paths
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\pubspec.yaml */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\test\get_application_id_test.dart */
+
+
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_linux/src/get_application_id_real.dart';
+
+class _FakeGioUtils implements GioUtils {
+  int? application;
+  Pointer<Utf8>? applicationId;
+
+  @override
+  bool libraryIsPresent = false;
+
+  @override
+  int gApplicationGetDefault() => application!;
+
+  @override
+  Pointer<Utf8> gApplicationGetApplicationId(int app) => applicationId!;
+}
+
+void main() {
+  late _FakeGioUtils fakeGio;
+
+  setUp(() {
+    fakeGio = _FakeGioUtils();
+    gioUtilsOverride = fakeGio;
+  });
+
+  tearDown(() {
+    gioUtilsOverride = null;
+  });
+
+  test('returns null if libgio is not available', () {
+    expect(getApplicationId(), null);
+  });
+
+  test('returns null if g_paplication_get_default returns 0', () {
+    fakeGio.libraryIsPresent = true;
+    fakeGio.application = 0;
+    expect(getApplicationId(), null);
+  });
+
+  test('returns null if g_application_get_application_id returns nullptr', () {
+    fakeGio.libraryIsPresent = true;
+    fakeGio.application = 1;
+    fakeGio.applicationId = nullptr;
+    expect(getApplicationId(), null);
+  });
+
+  test('returns value if g_application_get_application_id returns a value', () {
+    fakeGio.libraryIsPresent = true;
+    fakeGio.application = 1;
+    const String id = 'foo';
+    final Pointer<Utf8> idPtr = id.toNativeUtf8();
+    fakeGio.applicationId = idPtr;
+    expect(getApplicationId(), id);
+    calloc.free(idPtr);
+  });
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\test\get_application_id_test.dart */
+
+/* Inicio linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\test\path_provider_linux_test.dart */
+
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_linux/path_provider_linux.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:xdg_directories/xdg_directories.dart' as xdg;
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  PathProviderLinux.registerWith();
+
+  test('registered instance', () {
+    expect(PathProviderPlatform.instance, isA<PathProviderLinux>());
+  });
+
+  test('getTemporaryPath defaults to TMPDIR', () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+      environment: <String, String>{'TMPDIR': '/run/user/0/tmp'},
+    );
+    expect(await plugin.getTemporaryPath(), '/run/user/0/tmp');
+  });
+
+  test('getTemporaryPath uses fallback if TMPDIR is empty', () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+      environment: <String, String>{'TMPDIR': ''},
+    );
+    expect(await plugin.getTemporaryPath(), '/tmp');
+  });
+
+  test('getTemporaryPath uses fallback if TMPDIR is unset', () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+      environment: <String, String>{},
+    );
+    expect(await plugin.getTemporaryPath(), '/tmp');
+  });
+
+  test('getApplicationSupportPath', () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+        executableName: 'path_provider_linux_test_binary',
+        applicationId: 'com.example.Test');
+
+    expect(await plugin.getApplicationSupportPath(),
+        '${xdg.dataHome.path}/com.example.Test');
+  });
+
+  test('getApplicationSupportPath uses executable name if no application Id',
+      () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+        executableName: 'path_provider_linux_test_binary');
+    expect(await plugin.getApplicationSupportPath(),
+        '${xdg.dataHome.path}/path_provider_linux_test_binary');
+  });
+
+  test('getApplicationDocumentsPath', () async {
+    final PathProviderPlatform plugin = PathProviderPlatform.instance;
+    expect(await plugin.getApplicationDocumentsPath(), startsWith('/'));
+  });
+
+  test('getApplicationCachePath', () async {
+    final PathProviderPlatform plugin = PathProviderLinux.private(
+        executableName: 'path_provider_linux_test_binary');
+    expect(await plugin.getApplicationCachePath(),
+        '${xdg.cacheHome.path}/path_provider_linux_test_binary');
+  });
+
+  test('getDownloadsPath', () async {
+    final PathProviderPlatform plugin = PathProviderPlatform.instance;
+    expect(await plugin.getDownloadsPath(), startsWith('/'));
+  });
+}
+
+/* Fin linux\flutter\ephemeral\.plugin_symlinks\path_provider_linux\test\path_provider_linux_test.dart */
+
+/* Inicio macos\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json */
+{
+  "images" : [
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_16.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_64.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_128.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_1024.png",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+/* Fin macos\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json */
+
+/* Inicio pubspec.yaml */
+name: chronolife
+description: "ChronoLife: Emergent Reality – Flutter life sim without Material"
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.16.0
+  sensors_plus: ^6.0.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.4
+  flutter_animate: ^4.5.0
+  google_generative_ai: ^0.4.6
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: false
+  assets:
+    - assets/audio/
+/* Fin pubspec.yaml */
+
+/* Inicio web\manifest.json */
+{
+    "name": "chronolife",
+    "short_name": "chronolife",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
+
+/* Fin web\manifest.json */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\integration_test\path_provider_test.dart */
+
+
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:path_provider_windows/path_provider_windows.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('getTemporaryDirectory', (WidgetTester tester) async {
+    final PathProviderWindows provider = PathProviderWindows();
+    final String? result = await provider.getTemporaryPath();
+    _verifySampleFile(result, 'temporaryDirectory');
+  });
+
+  testWidgets('getApplicationDocumentsDirectory', (WidgetTester tester) async {
+    final PathProviderWindows provider = PathProviderWindows();
+    final String? result = await provider.getApplicationDocumentsPath();
+    _verifySampleFile(result, 'applicationDocuments');
+  });
+
+  testWidgets('getApplicationSupportDirectory', (WidgetTester tester) async {
+    final PathProviderWindows provider = PathProviderWindows();
+    final String? result = await provider.getApplicationSupportPath();
+    _verifySampleFile(result, 'applicationSupport');
+  });
+
+  testWidgets('getApplicationCacheDirectory', (WidgetTester tester) async {
+    final PathProviderWindows provider = PathProviderWindows();
+    final String? result = await provider.getApplicationCachePath();
+    _verifySampleFile(result, 'applicationCache');
+  });
+
+  testWidgets('getDownloadsDirectory', (WidgetTester tester) async {
+    final PathProviderWindows provider = PathProviderWindows();
+    final String? result = await provider.getDownloadsPath();
+    _verifySampleFile(result, 'downloads');
+  });
+}
+
+void _verifySampleFile(String? directoryPath, String name) {
+  expect(directoryPath, isNotNull);
+  if (directoryPath == null) {
+    return;
+  }
+  final Directory directory = Directory(directoryPath);
+  final File file = File('${directory.path}${Platform.pathSeparator}$name');
+
+  if (file.existsSync()) {
+    file.deleteSync();
+    expect(file.existsSync(), isFalse);
+  }
+
+  file.writeAsStringSync('Hello world!');
+  expect(file.readAsStringSync(), 'Hello world!');
+  expect(directory.listSync(), isNotEmpty);
+  file.deleteSync();
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\integration_test\path_provider_test.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\lib\main.dart */
+
+
+import 'package:flutter/material.dart';
+import 'package:path_provider_windows/path_provider_windows.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String? _tempDirectory = 'Unknown';
+  String? _downloadsDirectory = 'Unknown';
+  String? _appSupportDirectory = 'Unknown';
+  String? _documentsDirectory = 'Unknown';
+  String? _cacheDirectory = 'Unknown';
+
+  @override
+  void initState() {
+    super.initState();
+    initDirectories();
+  }
+
+  Future<void> initDirectories() async {
+    String? tempDirectory;
+    String? downloadsDirectory;
+    String? appSupportDirectory;
+    String? documentsDirectory;
+    String? cacheDirectory;
+    final PathProviderWindows provider = PathProviderWindows();
+
+    try {
+      tempDirectory = await provider.getTemporaryPath();
+    } catch (exception) {
+      tempDirectory = 'Failed to get temp directory: $exception';
+    }
+    try {
+      downloadsDirectory = await provider.getDownloadsPath();
+    } catch (exception) {
+      downloadsDirectory = 'Failed to get downloads directory: $exception';
+    }
+
+    try {
+      documentsDirectory = await provider.getApplicationDocumentsPath();
+    } catch (exception) {
+      documentsDirectory = 'Failed to get documents directory: $exception';
+    }
+
+    try {
+      appSupportDirectory = await provider.getApplicationSupportPath();
+    } catch (exception) {
+      appSupportDirectory = 'Failed to get app support directory: $exception';
+    }
+
+    try {
+      cacheDirectory = await provider.getApplicationCachePath();
+    } catch (exception) {
+      cacheDirectory = 'Failed to get cache directory: $exception';
+    }
+
+    setState(() {
+      _tempDirectory = tempDirectory;
+      _downloadsDirectory = downloadsDirectory;
+      _appSupportDirectory = appSupportDirectory;
+      _documentsDirectory = documentsDirectory;
+      _cacheDirectory = cacheDirectory;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Path Provider example app'),
+        ),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              Text('Temp Directory: $_tempDirectory\n'),
+              Text('Documents Directory: $_documentsDirectory\n'),
+              Text('Downloads Directory: $_downloadsDirectory\n'),
+              Text('Application Support Directory: $_appSupportDirectory\n'),
+              Text('Cache Directory: $_cacheDirectory\n'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\lib\main.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\pubspec.yaml */
+name: path_provider_example
+description: Demonstrates how to use the path_provider plugin.
+publish_to: none
+
+environment:
+  sdk: ^3.2.0
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_windows:
+
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\pubspec.yaml */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\test_driver\integration_test.dart */
+
+
+import 'package:integration_test/integration_test_driver.dart';
+
+Future<void> main() => integrationDriver();
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\example\test_driver\integration_test.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\path_provider_windows.dart */
+
+
+export 'src/folders_stub.dart' if (dart.library.ffi) 'src/folders.dart';
+export 'src/path_provider_windows_stub.dart'
+    if (dart.library.ffi) 'src/path_provider_windows_real.dart';
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\path_provider_windows.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\folders.dart */
+
+
+class WindowsKnownFolder {
+
+  static String get AdminTools => '{724EF170-A42D-4FEF-9F26-B60E846FBA4F}';
+
+  static String get CDBurning => '{9E52AB10-F80D-49DF-ACB8-4330F5687855}';
+
+  static String get CommonAdminTools =>
+      '{D0384E7D-BAC3-4797-8F14-CBA229B392B5}';
+
+  static String get CommonPrograms => '{0139D44E-6AFE-49F2-8690-3DAFCAE6FFB8}';
+
+  static String get CommonStartMenu => '{A4115719-D62E-491D-AA7C-E74B8BE3B067}';
+
+  static String get CommonStartup => '{82A5EA35-D9CD-47C5-9629-E15D2F714E6E}';
+
+  static String get CommonTemplates => '{B94237E7-57AC-4347-9151-B08C6C32D1F7}';
+
+  static String get ComputerFolder => '{0AC0837C-BBF8-452A-850D-79D08E667CA7}';
+
+  static String get ConnectionsFolder =>
+      '{6F0CD92B-2E97-45D1-88FF-B0D186B8DEDD}';
+
+  static String get ControlPanelFolder =>
+      '{82A74AEB-AEB4-465C-A014-D097EE346D63}';
+
+  static String get Cookies => '{2B0F765D-C0E9-4171-908E-08A611B84FF6}';
+
+  static String get Desktop => '{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}';
+
+  static String get Documents => '{FDD39AD0-238F-46AF-ADB4-6C85480369C7}';
+
+  static String get Downloads => '{374DE290-123F-4565-9164-39C4925E467B}';
+
+  static String get Favorites => '{1777F761-68AD-4D8A-87BD-30B759FA33DD}';
+
+  static String get Fonts => '{FD228CB7-AE11-4AE3-864C-16F3910AB8FE}';
+
+  static String get History => '{D9DC8A3B-B784-432E-A781-5A1130A75963}';
+
+  static String get InternetCache => '{352481E8-33BE-4251-BA85-6007CAEDCF9D}';
+
+  static String get InternetFolder => '{4D9F7874-4E0C-4904-967B-40B0D20C3E4B}';
+
+  static String get LocalAppData => '{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}';
+
+  static String get Music => '{4BD8D571-6D19-48D3-BE97-422220080E43}';
+
+  static String get NetHood => '{C5ABBF53-E17F-4121-8900-86626FC2C973}';
+
+  static String get NetworkFolder => '{D20BEEC4-5CA8-4905-AE3B-BF251EA09B53}';
+
+  static String get Pictures => '{33E28130-4E1E-4676-835A-98395C3BC3BB}';
+
+  static String get PrintHood => '{9274BD8D-CFD1-41C3-B35E-B13F55A758F4}';
+
+  static String get PrintersFolder => '{76FC4E2D-D6AD-4519-A663-37BD56068185}';
+
+  static String get Profile => '{5E6C858F-0E22-4760-9AFE-EA3317B67173}';
+
+  static String get ProgramData => '{62AB5D82-FDC1-4DC3-A9DD-070D1D495D97}';
+
+  static String get ProgramFiles => '{905e63b6-c1bf-494e-b29c-65b732d3d21a}';
+
+  static String get ProgramFilesCommon =>
+      '{F7F1ED05-9F6D-47A2-AAAE-29D317C6F066}';
+
+  static String get ProgramFilesCommonX64 =>
+      '{6365D5A7-0F0D-45e5-87F6-0DA56B6A4F7D}';
+
+  static String get ProgramFilesCommonX86 =>
+      '{DE974D24-D9C6-4D3E-BF91-F4455120B917}';
+
+  static String get ProgramFilesX64 => '{6D809377-6AF0-444b-8957-A3773F02200E}';
+
+  static String get ProgramFilesX86 => '{7C5A40EF-A0FB-4BFC-874A-C0F2E0B9FA8E}';
+
+  static String get Programs => '{A77F5D77-2E2B-44C3-A6A2-ABA601054A51}';
+
+  static String get PublicDesktop => '{C4AA340D-F20F-4863-AFEF-F87EF2E6BA25}';
+
+  static String get PublicDocuments => '{ED4824AF-DCE4-45A8-81E2-FC7965083634}';
+
+  static String get PublicMusic => '{3214FAB5-9757-4298-BB61-92A9DEAA44FF}';
+
+  static String get PublicPictures => '{B6EBFB86-6907-413C-9AF7-4FC2ABF07CC5}';
+
+  static String get PublicVideos => '{2400183A-6185-49FB-A2D8-4A392A602BA3}';
+
+  static String get Recent => '{AE50C081-EBD2-438A-8655-8A092E34987A}';
+
+  static String get RecycleBinFolder =>
+      '{B7534046-3ECB-4C18-BE4E-64CD4CB7D6AC}';
+
+  static String get ResourceDir => '{8AD10C31-2ADB-4296-A8F7-E4701232C972}';
+
+  static String get RoamingAppData => '{3EB685DB-65F9-4CF6-A03A-E3EF65729F3D}';
+
+  static String get SendTo => '{8983036C-27C0-404B-8F08-102D10DCFD74}';
+
+  static String get StartMenu => '{625B53C3-AB48-4EC1-BA1F-A1EF4146FC19}';
+
+  static String get Startup => '{B97D20BB-F46A-4C97-BA10-5E3608430854}';
+
+  static String get System => '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}';
+
+  static String get SystemX86 => '{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}';
+
+  static String get Templates => '{A63293E8-664E-48DB-A079-DF759E0509F7}';
+
+  static String get Videos => '{18989B1D-99B5-455B-841C-AB7C74E4DDFC}';
+
+  static String get Windows => '{F38BF404-1D43-42F2-9305-67DE0B28FC23}';
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\folders.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\folders_stub.dart */
+
+
+class WindowsKnownFolder {}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\folders_stub.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\guid.dart */
+
+
+import 'dart:ffi';
+import 'dart:typed_data';
+
+@Packed(4)
+base class GUID extends Struct {
+
+  @Uint32()
+  external int data1;
+
+  @Uint16()
+  external int data2;
+
+  @Uint16()
+  external int data3;
+
+  @Uint64()
+  external int data4;
+
+  void parse(String guid) {
+    final String hexOnly = guid.replaceAll(RegExp(r'[{}-]'), '');
+    if (hexOnly.length != 32) {
+      throw ArgumentError.value(guid, 'guid', 'Invalid GUID string');
+    }
+    final ByteData bytes = ByteData(16);
+    for (int i = 0; i < 16; ++i) {
+      bytes.setUint8(
+          i, int.parse(hexOnly.substring(i * 2, i * 2 + 2), radix: 16));
+    }
+    data1 = bytes.getInt32(0);
+    data2 = bytes.getInt16(4);
+    data3 = bytes.getInt16(6);
+
+    data4 = bytes.getInt64(8, Endian.little);
+  }
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\guid.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\path_provider_windows_real.dart */
+
+
+import 'dart:ffi';
+import 'dart:io';
+
+import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+import 'folders.dart';
+import 'guid.dart';
+import 'win32_wrappers.dart';
+
+@visibleForTesting
+const String languageEn = '0409';
+
+@visibleForTesting
+const String encodingCP1252 = '04e4';
+
+@visibleForTesting
+const String encodingUnicode = '04b0';
+
+@visibleForTesting
+class VersionInfoQuerier {
+
+  String? getStringValue(
+    Pointer<Uint8>? versionInfo,
+    String key, {
+    required String language,
+    required String encoding,
+  }) {
+    assert(language.isNotEmpty);
+    assert(encoding.isNotEmpty);
+    if (versionInfo == null) {
+      return null;
+    }
+    final Pointer<Utf16> keyPath =
+        '\\StringFileInfo\\$language$encoding\\$key'.toNativeUtf16();
+    final Pointer<UINT> length = calloc<UINT>();
+    final Pointer<Pointer<Utf16>> valueAddress = calloc<Pointer<Utf16>>();
+    try {
+      if (VerQueryValue(versionInfo, keyPath, valueAddress, length) == 0) {
+        return null;
+      }
+      return valueAddress.value.toDartString();
+    } finally {
+      calloc.free(keyPath);
+      calloc.free(length);
+      calloc.free(valueAddress);
+    }
+  }
+}
+
+class PathProviderWindows extends PathProviderPlatform {
+
+  static void registerWith() {
+    PathProviderPlatform.instance = PathProviderWindows();
+  }
+
+  @visibleForTesting
+  VersionInfoQuerier versionInfoQuerier = VersionInfoQuerier();
+
+  @override
+  Future<String?> getTemporaryPath() async {
+    final Pointer<Utf16> buffer = calloc<Uint16>(MAX_PATH + 1).cast<Utf16>();
+    String path;
+
+    try {
+      final int length = GetTempPath(MAX_PATH, buffer);
+
+      if (length == 0) {
+        final int error = GetLastError();
+        throw _createWin32Exception(error);
+      } else {
+        path = buffer.toDartString();
+
+        if (path.endsWith(r'\')) {
+          path = path.substring(0, path.length - 1);
+        }
+      }
+
+      final Directory directory = Directory(path);
+      if (!directory.existsSync()) {
+        await directory.create(recursive: true);
+      }
+
+      return path;
+    } finally {
+      calloc.free(buffer);
+    }
+  }
+
+  @override
+  Future<String?> getApplicationSupportPath() =>
+      _createApplicationSubdirectory(WindowsKnownFolder.RoamingAppData);
+
+  @override
+  Future<String?> getApplicationDocumentsPath() =>
+      getPath(WindowsKnownFolder.Documents);
+
+  @override
+  Future<String?> getApplicationCachePath() =>
+      _createApplicationSubdirectory(WindowsKnownFolder.LocalAppData);
+
+  @override
+  Future<String?> getDownloadsPath() => getPath(WindowsKnownFolder.Downloads);
+
+  Future<String?> getPath(String folderID) {
+    final Pointer<Pointer<Utf16>> pathPtrPtr = calloc<Pointer<Utf16>>();
+    final Pointer<GUID> knownFolderID = calloc<GUID>()..ref.parse(folderID);
+
+    try {
+      final int hr = SHGetKnownFolderPath(
+        knownFolderID,
+        KF_FLAG_DEFAULT,
+        NULL,
+        pathPtrPtr,
+      );
+
+      if (FAILED(hr)) {
+        if (hr == E_INVALIDARG || hr == E_FAIL) {
+          throw _createWin32Exception(hr);
+        }
+        return Future<String?>.value();
+      }
+
+      final String path = pathPtrPtr.value.toDartString();
+      return Future<String>.value(path);
+    } finally {
+      calloc.free(pathPtrPtr);
+      calloc.free(knownFolderID);
+    }
+  }
+
+  String? _getStringValue(Pointer<Uint8>? infoBuffer, String key) =>
+      versionInfoQuerier.getStringValue(infoBuffer, key,
+          language: languageEn, encoding: encodingCP1252) ??
+      versionInfoQuerier.getStringValue(infoBuffer, key,
+          language: languageEn, encoding: encodingUnicode);
+
+  String _getApplicationSpecificSubdirectory() {
+    String? companyName;
+    String? productName;
+
+    final Pointer<Utf16> moduleNameBuffer =
+        calloc<WCHAR>(MAX_PATH + 1).cast<Utf16>();
+    final Pointer<DWORD> unused = calloc<DWORD>();
+    Pointer<BYTE>? infoBuffer;
+    try {
+
+      final int moduleNameLength =
+          GetModuleFileName(0, moduleNameBuffer, MAX_PATH);
+      if (moduleNameLength == 0) {
+        final int error = GetLastError();
+        throw _createWin32Exception(error);
+      }
+
+      final int infoSize = GetFileVersionInfoSize(moduleNameBuffer, unused);
+      if (infoSize != 0) {
+        infoBuffer = calloc<BYTE>(infoSize);
+        if (GetFileVersionInfo(moduleNameBuffer, 0, infoSize, infoBuffer) ==
+            0) {
+          calloc.free(infoBuffer);
+          infoBuffer = null;
+        }
+      }
+      companyName =
+          _sanitizedDirectoryName(_getStringValue(infoBuffer, 'CompanyName'));
+      productName =
+          _sanitizedDirectoryName(_getStringValue(infoBuffer, 'ProductName'));
+
+      productName ??=
+          path.basenameWithoutExtension(moduleNameBuffer.toDartString());
+
+      return companyName != null
+          ? path.join(companyName, productName)
+          : productName;
+    } finally {
+      calloc.free(moduleNameBuffer);
+      calloc.free(unused);
+      if (infoBuffer != null) {
+        calloc.free(infoBuffer);
+      }
+    }
+  }
+
+  String? _sanitizedDirectoryName(String? rawString) {
+    if (rawString == null) {
+      return null;
+    }
+    String sanitized = rawString
+
+        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+
+        .trimRight()
+
+        .replaceAll(RegExp(r'[.]+$'), '');
+    const int kMaxComponentLength = 255;
+    if (sanitized.length > kMaxComponentLength) {
+      sanitized = sanitized.substring(0, kMaxComponentLength);
+    }
+    return sanitized.isEmpty ? null : sanitized;
+  }
+
+  Future<String?> _createApplicationSubdirectory(String folderId) async {
+    final String? baseDir = await getPath(folderId);
+    if (baseDir == null) {
+      return null;
+    }
+    final Directory directory =
+        Directory(path.join(baseDir, _getApplicationSpecificSubdirectory()));
+
+    if (directory.path.length <= MAX_PATH) {
+      if (!directory.existsSync()) {
+        await directory.create(recursive: true);
+      }
+    }
+    return directory.path;
+  }
+}
+
+Exception _createWin32Exception(int errorCode) {
+  return PlatformException(
+      code: 'Win32 Error',
+
+      message: 'Error code 0x${errorCode.toRadixString(16)}');
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\path_provider_windows_real.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\path_provider_windows_stub.dart */
+
+
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+class PathProviderWindows extends PathProviderPlatform {
+
+  PathProviderWindows() : assert(false);
+
+  static void registerWith() {
+    PathProviderPlatform.instance = PathProviderWindows();
+  }
+
+  VersionInfoQuerier versionInfoQuerier = VersionInfoQuerier();
+
+  Future<String> getPath(String folderID) async => '';
+}
+
+class VersionInfoQuerier {}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\path_provider_windows_stub.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\win32_wrappers.dart */
+
+
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
+
+import 'guid.dart';
+
+typedef BOOL = Int32;
+typedef BYTE = Uint8;
+typedef DWORD = Uint32;
+typedef UINT = Uint32;
+typedef HANDLE = IntPtr;
+typedef HMODULE = HANDLE;
+typedef HRESULT = Int32;
+typedef LPCVOID = Pointer<NativeType>;
+typedef LPCWSTR = Pointer<Utf16>;
+typedef LPDWORD = Pointer<DWORD>;
+typedef LPWSTR = Pointer<Utf16>;
+typedef LPVOID = Pointer<NativeType>;
+typedef PUINT = Pointer<UINT>;
+typedef PWSTR = Pointer<Pointer<Utf16>>;
+typedef WCHAR = Uint16;
+
+const int NULL = 0;
+
+const int MAX_PATH = 260;
+
+final int E_FAIL = 0x80004005.toSigned(32);
+
+final int E_INVALIDARG = 0x80070057.toSigned(32);
+
+bool FAILED(int hr) => hr < 0;
+
+const int KF_FLAG_DEFAULT = 0x00000000;
+
+final DynamicLibrary _dllKernel32 = DynamicLibrary.open('kernel32.dll');
+final DynamicLibrary _dllVersion = DynamicLibrary.open('version.dll');
+final DynamicLibrary _dllShell32 = DynamicLibrary.open('shell32.dll');
+
+typedef _FFITypeSHGetKnownFolderPath = HRESULT Function(
+    Pointer<GUID>, DWORD, HANDLE, PWSTR);
+typedef FFITypeSHGetKnownFolderPathDart = int Function(
+    Pointer<GUID>, int, int, Pointer<Pointer<Utf16>>);
+
+final FFITypeSHGetKnownFolderPathDart SHGetKnownFolderPath =
+    _dllShell32.lookupFunction<_FFITypeSHGetKnownFolderPath,
+        FFITypeSHGetKnownFolderPathDart>('SHGetKnownFolderPath');
+
+typedef _FFITypeGetFileVersionInfoW = BOOL Function(
+    LPCWSTR, DWORD, DWORD, LPVOID);
+typedef FFITypeGetFileVersionInfoW = int Function(
+    Pointer<Utf16>, int, int, Pointer<NativeType>);
+
+final FFITypeGetFileVersionInfoW GetFileVersionInfo = _dllVersion
+    .lookupFunction<_FFITypeGetFileVersionInfoW, FFITypeGetFileVersionInfoW>(
+        'GetFileVersionInfoW');
+
+typedef _FFITypeGetFileVersionInfoSizeW = DWORD Function(LPCWSTR, LPDWORD);
+typedef FFITypeGetFileVersionInfoSizeW = int Function(
+    Pointer<Utf16>, Pointer<Uint32>);
+
+final FFITypeGetFileVersionInfoSizeW GetFileVersionInfoSize =
+    _dllVersion.lookupFunction<_FFITypeGetFileVersionInfoSizeW,
+        FFITypeGetFileVersionInfoSizeW>('GetFileVersionInfoSizeW');
+
+typedef _FFITypeGetLastError = DWORD Function();
+typedef FFITypeGetLastError = int Function();
+
+final FFITypeGetLastError GetLastError = _dllKernel32
+    .lookupFunction<_FFITypeGetLastError, FFITypeGetLastError>('GetLastError');
+
+typedef _FFITypeGetModuleFileNameW = DWORD Function(HMODULE, LPWSTR, DWORD);
+typedef FFITypeGetModuleFileNameW = int Function(int, Pointer<Utf16>, int);
+
+final FFITypeGetModuleFileNameW GetModuleFileName = _dllKernel32.lookupFunction<
+    _FFITypeGetModuleFileNameW,
+    FFITypeGetModuleFileNameW>('GetModuleFileNameW');
+
+typedef _FFITypeVerQueryValueW = BOOL Function(LPCVOID, LPCWSTR, LPVOID, PUINT);
+typedef FFITypeVerQueryValueW = int Function(
+    Pointer<NativeType>, Pointer<Utf16>, Pointer<NativeType>, Pointer<Uint32>);
+
+final FFITypeVerQueryValueW VerQueryValue =
+    _dllVersion.lookupFunction<_FFITypeVerQueryValueW, FFITypeVerQueryValueW>(
+        'VerQueryValueW');
+
+typedef _FFITypeGetTempPathW = DWORD Function(DWORD, LPWSTR);
+typedef FFITypeGetTempPathW = int Function(int, Pointer<Utf16>);
+
+final FFITypeGetTempPathW GetTempPath = _dllKernel32
+    .lookupFunction<_FFITypeGetTempPathW, FFITypeGetTempPathW>('GetTempPathW');
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\lib\src\win32_wrappers.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\pubspec.yaml */
+name: path_provider_windows
+description: Windows implementation of the path_provider plugin
+repository: https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_windows
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+path_provider%22
+version: 2.3.0
+
+environment:
+  sdk: ^3.2.0
+  flutter: ">=3.16.0"
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      windows:
+        dartPluginClass: PathProviderWindows
+
+dependencies:
+  ffi: ^2.0.0
+  flutter:
+    sdk: flutter
+  path: ^1.8.0
+  path_provider_platform_interface: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+topics:
+  - files
+  - path-provider
+  - paths
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\pubspec.yaml */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\test\guid_test.dart */
+
+
+import 'dart:ffi';
+import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_windows/src/guid.dart';
+
+void main() {
+  test('has correct byte representation', () async {
+    final Pointer<GUID> guid = calloc<GUID>()
+      ..ref.parse('{00112233-4455-6677-8899-aabbccddeeff}');
+    final ByteData data = ByteData(16)
+      ..setInt32(0, guid.ref.data1, Endian.little)
+      ..setInt16(4, guid.ref.data2, Endian.little)
+      ..setInt16(6, guid.ref.data3, Endian.little)
+      ..setInt64(8, guid.ref.data4, Endian.little);
+    expect(data.getUint8(0), 0x33);
+    expect(data.getUint8(1), 0x22);
+    expect(data.getUint8(2), 0x11);
+    expect(data.getUint8(3), 0x00);
+    expect(data.getUint8(4), 0x55);
+    expect(data.getUint8(5), 0x44);
+    expect(data.getUint8(6), 0x77);
+    expect(data.getUint8(7), 0x66);
+    expect(data.getUint8(8), 0x88);
+    expect(data.getUint8(9), 0x99);
+    expect(data.getUint8(10), 0xAA);
+    expect(data.getUint8(11), 0xBB);
+    expect(data.getUint8(12), 0xCC);
+    expect(data.getUint8(13), 0xDD);
+    expect(data.getUint8(14), 0xEE);
+    expect(data.getUint8(15), 0xFF);
+
+    calloc.free(guid);
+  });
+
+  test('handles alternate forms', () async {
+    final Pointer<GUID> guid1 = calloc<GUID>()
+      ..ref.parse('{00112233-4455-6677-8899-aabbccddeeff}');
+    final Pointer<GUID> guid2 = calloc<GUID>()
+      ..ref.parse('00112233445566778899AABBCCDDEEFF');
+
+    expect(guid1.ref.data1, guid2.ref.data1);
+    expect(guid1.ref.data2, guid2.ref.data2);
+    expect(guid1.ref.data3, guid2.ref.data3);
+    expect(guid1.ref.data4, guid2.ref.data4);
+
+    calloc.free(guid1);
+    calloc.free(guid2);
+  });
+
+  test('throws for bad data', () async {
+    final Pointer<GUID> guid = calloc<GUID>();
+
+    expect(() => guid.ref.parse('{00112233-4455-6677-88'), throwsArgumentError);
+
+    calloc.free(guid);
+  });
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\test\guid_test.dart */
+
+/* Inicio windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\test\path_provider_windows_test.dart */
+
+
+import 'dart:ffi';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:path_provider_windows/path_provider_windows.dart';
+import 'package:path_provider_windows/src/path_provider_windows_real.dart'
+    show encodingCP1252, encodingUnicode, languageEn;
+
+class FakeVersionInfoQuerier implements VersionInfoQuerier {
+  FakeVersionInfoQuerier(
+    this.responses, {
+    this.language = languageEn,
+    this.encoding = encodingUnicode,
+  });
+
+  final String language;
+  final String encoding;
+  final Map<String, String> responses;
+
+  String? getStringValue(
+    Pointer<Uint8>? versionInfo,
+    String key, {
+    required String language,
+    required String encoding,
+  }) {
+    if (language == this.language && encoding == this.encoding) {
+      return responses[key];
+    } else {
+      return null;
+    }
+  }
+}
+
+void main() {
+  test('registered instance', () {
+    PathProviderWindows.registerWith();
+    expect(PathProviderPlatform.instance, isA<PathProviderWindows>());
+  });
+
+  test('getTemporaryPath', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    expect(await pathProvider.getTemporaryPath(), contains(r'C:\'));
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with no version info', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier =
+        FakeVersionInfoQuerier(<String, String>{});
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, contains(r'C:\'));
+    expect(path, contains(r'AppData'));
+
+    expect(path, endsWith(r'flutter_tester'));
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with full version info in CP1252', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': 'A Company',
+      'ProductName': 'Amazing App',
+    }, encoding: encodingCP1252);
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(path, endsWith(r'AppData\Roaming\A Company\Amazing App'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with full version info in Unicode', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': 'A Company',
+      'ProductName': 'Amazing App',
+    });
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(path, endsWith(r'AppData\Roaming\A Company\Amazing App'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test(
+      'getApplicationSupportPath with full version info in Unsupported Encoding',
+      () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': 'A Company',
+      'ProductName': 'Amazing App',
+    }, language: '0000', encoding: '0000');
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, contains(r'C:\'));
+    expect(path, contains(r'AppData'));
+
+    expect(path, endsWith(r'flutter_tester'));
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with missing company', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'ProductName': 'Amazing App',
+    });
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(path, endsWith(r'AppData\Roaming\Amazing App'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with problematic values', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': r'A <Bad> Company: Name.',
+      'ProductName': r'A"/Terrible\|App?*Name',
+    });
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(
+          path,
+          endsWith(
+              r'AppData\Roaming\A _Bad_ Company_ Name\A__Terrible__App__Name'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with a completely invalid company', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': r'..',
+      'ProductName': r'Amazing App',
+    });
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(path, endsWith(r'AppData\Roaming\Amazing App'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationSupportPath with very long app name', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    final String truncatedName = 'A' * 255;
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': 'A Company',
+      'ProductName': truncatedName * 2,
+    });
+    final String? path = await pathProvider.getApplicationSupportPath();
+    expect(path, endsWith('\\$truncatedName'));
+
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationDocumentsPath', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    final String? path = await pathProvider.getApplicationDocumentsPath();
+    expect(path, contains(r'C:\'));
+    expect(path, contains(r'Documents'));
+  }, skip: !Platform.isWindows);
+
+  test('getApplicationCachePath', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    pathProvider.versionInfoQuerier = FakeVersionInfoQuerier(<String, String>{
+      'CompanyName': 'A Company',
+      'ProductName': 'Amazing App',
+    }, encoding: encodingCP1252);
+    final String? path = await pathProvider.getApplicationCachePath();
+    expect(path, isNotNull);
+    if (path != null) {
+      expect(path, endsWith(r'AppData\Local\A Company\Amazing App'));
+      expect(Directory(path).existsSync(), isTrue);
+    }
+  }, skip: !Platform.isWindows);
+
+  test('getDownloadsPath', () async {
+    final PathProviderWindows pathProvider = PathProviderWindows();
+    final String? path = await pathProvider.getDownloadsPath();
+    expect(path, contains(r'C:\'));
+    expect(path, contains(r'Downloads'));
+  }, skip: !Platform.isWindows);
+}
+
+/* Fin windows\flutter\ephemeral\.plugin_symlinks\path_provider_windows\test\path_provider_windows_test.dart */

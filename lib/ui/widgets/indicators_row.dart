@@ -32,18 +32,19 @@ class Indicator extends StatelessWidget {
 }
 
 class IndicatorsRow extends StatelessWidget {
-  const IndicatorsRow({super.key, required this.money, required this.physical, required this.mental});
-  final double money, physical, mental;
+  const IndicatorsRow({super.key, required this.money, required this.physical, required this.mental, required this.reputation});
+  final double money, physical, mental, reputation;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
       children: [
-        Expanded(child: Indicator(label: 'Salud física', value: physical, color: ChronoTheme.ok)),
-        const SizedBox(width: 12),
-        Expanded(child: Indicator(label: 'Salud mental', value: mental, color: ChronoTheme.warn)),
-        const SizedBox(width: 12),
-        Expanded(child: Indicator(label: 'Dinero', value: (money / 20).clamp(0, 100).toDouble())),
+        Indicator(label: 'Salud física', value: physical, color: ChronoTheme.ok),
+        Indicator(label: 'Salud mental', value: mental, color: ChronoTheme.warn),
+        Indicator(label: 'Reputación', value: reputation, color: ChronoTheme.purple),
+        Indicator(label: 'Dinero', value: (money / 20).clamp(0, 100).toDouble()),
       ],
     );
   }

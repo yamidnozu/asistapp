@@ -1,5 +1,5 @@
 {
-    "dart.flutterSdkPath": "C:\\flutter\\bin\\flutter.bat",
-    "dart.sdkPath": "C:\\flutter\\bin\\dart.bat",
+    "dart.flutterSdkPath": "C:/flutter",
+    "dart.sdkPath": "C:/flutter/bin/cache/dart-sdk",
     "flutter.hotReloadOnSave": "all"
 }

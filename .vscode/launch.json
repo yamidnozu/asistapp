@@ -5,18 +5,27 @@
             "name": "Flutter",
             "request": "launch",
             "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "deviceId": "13aee19651c4",
             "flutterMode": "debug"
         },
         {
             "name": "Flutter (profile mode)",
             "request": "launch",
             "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "deviceId": "13aee19651c4",
             "flutterMode": "profile"
         },
         {
             "name": "Flutter (release mode)",
             "request": "launch",
             "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "deviceId": "13aee19651c4",
             "flutterMode": "release"
         }
     ]

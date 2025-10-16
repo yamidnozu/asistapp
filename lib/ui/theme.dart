@@ -7,6 +7,7 @@ class ChronoTheme {
   static const Color ok = Color(0xFF34D399);
   static const Color warn = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
+  static const Color purple = Color(0xFF8B5CF6);
   static const Color text = Color(0xFFE5E7EB);
   static const Color textDim = Color(0xFF9CA3AF);
 

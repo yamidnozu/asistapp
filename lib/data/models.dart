@@ -1,3 +1,5 @@
+import 'goal.dart';
+
 class Stat {
   double value; // 0..100
   double trend; // -1..1
@@ -58,25 +60,37 @@ class DayState {
   DayState(this.day, this.plan);
 }
 
+class GameTime {
+  final int hour;
+  final int minute;
+  const GameTime({required this.hour, required this.minute});
+  String format() => '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+}
+
 class PlayerState {
   int day;
   double money;
   Stat physical;
   Stat mental;
-  List<Relationship> relations;
+  int reputation;
+  Map<String, double> relations;
   List<Investment> investments;
   List<Project> projects;
+  List<Goal> goals;
   PlayerState({
     this.day = 1,
     this.money = 500,
     Stat? physical,
     Stat? mental,
-    List<Relationship>? relations,
+    this.reputation = 50,
+    Map<String, double>? relations,
     List<Investment>? investments,
     List<Project>? projects,
+    List<Goal>? goals,
   })  : physical = physical ?? Stat(value: 70),
         mental = mental ?? Stat(value: 70),
-        relations = relations ?? [],
+        relations = relations ?? {},
         investments = investments ?? [],
-        projects = projects ?? [];
+        projects = projects ?? [],
+        goals = goals ?? [];
 }

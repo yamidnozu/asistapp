@@ -44,6 +44,7 @@ class EventEngine {
         money: s.money,
         physical: s.physical.value,
         mental: s.mental.value,
+        reputation: s.reputation.toDouble(),
         day: s.day,
       );
       if (suggestion != null) {
