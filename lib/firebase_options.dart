@@ -21,40 +21,40 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCk7eXlrfmfxHrEGLBg6uGKhlh3VzqPHYU',
-    appId: '1:145893311915:android:c73bff86d975f32ada3eee',
+    apiKey: 'AIzaSyDK6g2AAKmCJBqwrOa_DYIobLGC2mH-BhM',
+    appId: '1:145893311915:android:e89a9e0e847d4968da3eee',
     messagingSenderId: '145893311915',
     projectId: 'alacartes',
     storageBucket: 'alacartes.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCk7eXlrfmfxHrEGLBg6uGKhlh3VzqPHYU',
-    appId: '1:145893311915:ios:c73bff86d975f32ada3eee',
+    apiKey: 'AIzaSyDK6g2AAKmCJBqwrOa_DYIobLGC2mH-BhM',
+    appId: '1:145893311915:ios:e89a9e0e847d4968da3eee',
     messagingSenderId: '145893311915',
     projectId: 'alacartes',
     storageBucket: 'alacartes.firebasestorage.app',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCk7eXlrfmfxHrEGLBg6uGKhlh3VzqPHYU',
-    appId: '1:145893311915:web:c73bff86d975f32ada3eee',
+    apiKey: 'AIzaSyDK6g2AAKmCJBqwrOa_DYIobLGC2mH-BhM',
+    appId: '1:145893311915:web:e89a9e0e847d4968da3eee',
     messagingSenderId: '145893311915',
     projectId: 'alacartes',
     storageBucket: 'alacartes.firebasestorage.app',
   );
 
   static const FirebaseOptions macOS = FirebaseOptions(
-    apiKey: 'AIzaSyCk7eXlrfmfxHrEGLBg6uGKhlh3VzqPHYU',
-    appId: '1:145893311915:macos:c73bff86d975f32ada3eee',
+    apiKey: 'AIzaSyDK6g2AAKmCJBqwrOa_DYIobLGC2mH-BhM',
+    appId: '1:145893311915:macos:e89a9e0e847d4968da3eee',
     messagingSenderId: '145893311915',
     projectId: 'alacartes',
     storageBucket: 'alacartes.firebasestorage.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCk7eXlrfmfxHrEGLBg6uGKhlh3VzqPHYU',
-    appId: '1:145893311915:windows:c73bff86d975f32ada3eee',
+    apiKey: 'AIzaSyDK6g2AAKmCJBqwrOa_DYIobLGC2mH-BhM',
+    appId: '1:145893311915:windows:e89a9e0e847d4968da3eee',
     messagingSenderId: '145893311915',
     projectId: 'alacartes',
     storageBucket: 'alacartes.firebasestorage.app',

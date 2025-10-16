@@ -33,7 +33,7 @@ class AuthService {
       // Una vez que se firme en, devolver la UserCredential
       return await _auth.signInWithCredential(credential);
     } catch (e) {
-      print('Error al iniciar sesión con Google: $e');
+      // Error al iniciar sesión con Google
       return null;
     }
   }

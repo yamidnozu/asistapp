@@ -30,15 +30,17 @@ class MyApp extends StatelessWidget {
       child: WidgetsApp(
         title: 'Task Monitoring',
         color: const Color(0xFF000000),
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            if (authProvider.isAuthenticated) {
-              return const HomeScreen();
-            } else {
-              return const LoginScreen();
-            }
-          },
-        ),
+        builder: (context, child) {
+          return Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              if (authProvider.isAuthenticated) {
+                return const HomeScreen();
+              } else {
+                return const LoginScreen();
+              }
+            },
+          );
+        },
       ),
     );
   }
