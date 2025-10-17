@@ -63,11 +63,11 @@ class _AppTextInputState extends State<AppTextInput> {
             border: Border.all(
               color: _focusNode.hasFocus
                   ? AppColors.primary
-                  : (_error != null ? AppColors.error : AppColors.grey),
+                  : (_error != null ? AppColors.error : AppColors.border),
               width: _focusNode.hasFocus ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(8),
-            color: AppColors.white,
+            color: AppColors.surface,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -150,14 +150,14 @@ class _AppCheckboxState extends State<AppCheckbox> {
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(4),
-              color: widget.value ? AppColors.primary : AppColors.white,
+              color: widget.value ? AppColors.primary : const Color(0x00000000),
             ),
             child: widget.value
                 ? const Center(
                     child: Text(
                       '✓',
                       style: TextStyle(
-                        color: AppColors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),

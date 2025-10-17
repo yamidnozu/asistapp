@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/taskmonitoring/config) &&
+             get(/databases/$(database)/documents/taskmonitoring/config).data.superAdminUids.hasAny([request.auth.uid]);
+    }
+
+    function isSiteAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/taskmonitoring/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/taskmonitoring/users/$(request.auth.uid)).data.roles.hasAny(['site_admin']);
+    }
+
+    function isEmployee() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/taskmonitoring/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/taskmonitoring/users/$(request.auth.uid)).data.roles.hasAny(['employee']);
+    }
+
+    function userSites() {
+      return get(/databases/$(database)/documents/taskmonitoring/users/$(request.auth.uid)).data.sites;
+    }
+
+    function canAccessSite(siteId) {
+      return isSuperAdmin() || userSites().hasAny([siteId]);
+    }
+
+    // Config collection - only super_admin can write
+    match /taskmonitoring/config {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // Users collection
+    match /taskmonitoring/users/{userId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isSiteAdmin() || request.auth.uid == userId);
+      allow write: if isSuperAdmin() || isSiteAdmin();
+    }
+
+    // Sites collection
+    match /taskmonitoring/sites/{siteId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || (isSiteAdmin() && canAccessSite(siteId));
+    }
+
+    // Jobs collection
+    match /taskmonitoring/jobs/{jobId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || (isSiteAdmin() && canAccessSite(resource.data.siteIds));
+    }
+
+    // Responsibilities collection
+    match /taskmonitoring/responsibilities/{respId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || isSiteAdmin();
+    }
+
+    // Tasks collection
+    match /taskmonitoring/tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || isSiteAdmin();
+    }
+
+    // Assignments collection
+    match /taskmonitoring/assignments/{assignmentId} {
+      allow read: if isAuthenticated() &&
+                   (isSuperAdmin() ||
+                    isSiteAdmin() ||
+                    (isEmployee() && resource.data.userId == request.auth.uid));
+      allow write: if isAuthenticated() &&
+                    (isSuperAdmin() ||
+                     isSiteAdmin() ||
+                     (isEmployee() && resource.data.userId == request.auth.uid));
+    }
+
+    // Logs collection
+    match /taskmonitoring/logs/{logId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isSiteAdmin());
+      allow write: if isAuthenticated();
+    }
+  }
+}

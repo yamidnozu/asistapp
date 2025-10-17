@@ -52,7 +52,7 @@ class _AppButtonState extends State<AppButton> {
         decoration: BoxDecoration(
           color: widget.isEnabled
               ? (_isPressed ? AppColors.primaryDark : AppColors.primary)
-              : AppColors.greyDark,
+              : AppColors.grey,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
@@ -64,8 +64,8 @@ class _AppButtonState extends State<AppButton> {
                 )
               : Text(
                   widget.label,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.white,
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
         ),
@@ -131,21 +131,21 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: widget.isEnabled ? AppColors.primary : AppColors.greyDark,
+            color: widget.isEnabled ? AppColors.primary : AppColors.grey,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(8),
           color: _isPressed && widget.isEnabled
-              ? AppColors.background
-              : AppColors.white,
+              ? AppColors.surfaceLight
+              : const Color(0x00000000),
         ),
         child: Center(
           child: Text(
             widget.label,
-            style: AppTextStyles.titleMedium.copyWith(
+            style: AppTextStyles.labelLarge.copyWith(
               color: widget.isEnabled
                   ? AppColors.primary
-                  : AppColors.greyDark,
+                  : AppColors.grey,
             ),
           ),
         ),
@@ -159,7 +159,7 @@ class _SpinnerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white
+      ..color = AppColors.textPrimary
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 

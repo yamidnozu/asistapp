@@ -1,64 +1,105 @@
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import '../models/user.dart' as model;
+import '../services/user_service.dart';
 
 class UserProvider with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  final UserService _userService = UserService();
 
-  String? _userId;
-  String? _userRole;
+  model.User? _currentUser;
   bool _isLoading = false;
+  late final Stream<auth.User?> _authStateStream;
 
-  String? get userId => _userId;
-  String? get userRole => _userRole;
+  model.User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
+  bool get isLoggedIn => _currentUser != null;
+
+  UserProvider() {
+    _init();
+  }
+
+  void _init() {
+    _authStateStream = _auth.authStateChanges();
+    _authStateStream.listen((auth.User? firebaseUser) {
+      // Use addPostFrameCallback to avoid calling notifyListeners during build
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (firebaseUser != null) {
+          await _syncUserData();
+        } else {
+          _currentUser = null;
+          _isLoading = false;
+          notifyListeners();
+        }
+      });
+    });
+  }
 
   Future<void> syncUserData() async {
+    await _syncUserData();
+  }
+
+  Future<void> _syncUserData() async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      final user = _auth.currentUser;
-      if (user != null) {
-        _userId = user.uid;
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser != null) {
+        // Ensure user doc exists (role assignment is handled in UserService)
+        final user = model.User(
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName ?? '',
+          email: firebaseUser.email ?? '',
+          photoURL: firebaseUser.photoURL,
+          roles: [], // Will be set by UserService
+          sites: [],
+          status: 'active',
+          createdAt: DateTime.now(),
+        );
+        await _userService.ensureUserDocOnFirstLogin(user);
 
-        // Obtener rol desde Firestore
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          _userRole = userDoc.data()?['role'] ?? 'user';
-        } else {
-          // Crear documento de usuario si no existe
-          await _firestore.collection('users').doc(user.uid).set({
-            'email': user.email,
-            'role': 'user',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-          _userRole = 'user';
-        }
+        // Get updated user data
+        _currentUser = await _userService.getUser(firebaseUser.uid);
+      } else {
+        _currentUser = null;
       }
     } catch (e) {
-      // Error sincronizando usuario
       debugPrint('Error sincronizando usuario: $e');
+      _currentUser = null;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> setUserRole(String role) async {
-    try {
-      if (_userId != null) {
-        await _firestore.collection('users').doc(_userId).update({'role': role});
-        _userRole = role;
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('Error actualizando rol: $e');
+  Future<void> updateUserRoles(List<String> roles) async {
+    if (_currentUser != null) {
+      await _userService.updateUser(_currentUser!.uid, {'roles': roles});
+      _currentUser = _currentUser!.copyWith(roles: roles);
+      notifyListeners();
     }
   }
 
-  bool hasRole(String role) => _userRole == role;
-  bool isAdmin() => _userRole == 'admin';
-  bool isUser() => _userRole == 'user';
+  Future<void> updateUserSites(List<String> sites) async {
+    if (_currentUser != null) {
+      await _userService.updateUser(_currentUser!.uid, {'sites': sites});
+      _currentUser = _currentUser!.copyWith(sites: sites);
+      notifyListeners();
+    }
+  }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+    _currentUser = null;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  bool hasRole(String role) => _currentUser?.roles.contains(role) ?? false;
+  bool isSuperAdmin() => hasRole('super_admin');
+  bool isSiteAdmin() => hasRole('site_admin');
+  bool isEmployee() => hasRole('employee');
+  bool canManageUsers() => isSuperAdmin() || isSiteAdmin();
+  bool canResetDB() => isSuperAdmin();
 }

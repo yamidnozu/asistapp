@@ -28,7 +28,7 @@ class AppScaffold extends StatelessWidget {
         children: [
           // Header
           Container(
-            color: AppColors.white,
+            color: AppColors.surface,
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Row(
               children: [
@@ -82,7 +82,7 @@ class AppCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.onTap,
-    this.backgroundColor = AppColors.white,
+    this.backgroundColor = AppColors.surface,
     super.key,
   });
 
@@ -96,7 +96,7 @@ class AppCard extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.grey,
+            color: AppColors.border,
             width: 1,
           ),
         ),
@@ -134,7 +134,7 @@ class AppDialog extends StatelessWidget {
           margin: const EdgeInsets.all(AppSpacing.md),
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -191,7 +191,7 @@ class AppDialog extends StatelessWidget {
                             child: Text(
                               actionLabel!,
                               style: AppTextStyles.labelLarge.copyWith(
-                                color: AppColors.white,
+                                color: AppColors.surface,
                               ),
                             ),
                           ),
