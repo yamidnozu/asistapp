@@ -49,6 +49,65 @@
                 "focus": false,
                 "panel": "shared"
             }
+        },
+        {
+            "label": "flutter: build runner",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "pub",
+                "run",
+                "build_runner",
+                "build",
+                "--delete-conflicting-outputs"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "firebase: deploy functions",
+            "type": "shell",
+            "command": "cd functions && npm run build && cd .. && firebase deploy --only functions",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "firebase: deploy indexes",
+            "type": "shell",
+            "command": "firebase deploy --only firestore:indexes",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "firebase: deploy all",
+            "type": "shell",
+            "command": "firebase deploy",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
         }
     ]
 }

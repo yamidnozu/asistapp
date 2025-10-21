@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:io';
 import '../providers/user_provider.dart';
 import '../providers/assignment_provider.dart';
+import '../providers/admin_provider.dart';
 import '../models/assignment.dart';
 import '../theme/app_theme.dart';
 import '../ui/widgets/index.dart';
@@ -25,14 +26,25 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isInitialized = false;
+  bool _showAdminView = false; // Nueva variable para controlar la vista
 
   @override
   void initState() {
     super.initState();
-    // Initialize assignments after first frame
+    // Initialize assignments and stats after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeView();
       _loadAssignmentsIfNeeded();
+      _loadAdminStatsIfNeeded();
     });
+  }
+
+  void _initializeView() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    // Si solo es admin (no employee), mostrar vista admin por defecto
+    if (userProvider.canManageUsers() && !userProvider.isEmployee()) {
+      setState(() => _showAdminView = true);
+    }
   }
 
   void _loadAssignmentsIfNeeded() {
@@ -46,15 +58,203 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _loadAdminStatsIfNeeded() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.currentUser != null && userProvider.canManageUsers()) {
+      final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+      adminProvider.loadUsers();
+      adminProvider.loadDashboardStats();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    
+    // Si el usuario tiene ambos roles (admin Y employee), permitir cambiar
+    final hasMultipleRoles = userProvider.isEmployee() && userProvider.canManageUsers();
 
-    if (userProvider.isEmployee()) {
+    if (hasMultipleRoles) {
+      return _buildMultiRoleView(userProvider);
+    } else if (userProvider.isEmployee()) {
       return _buildEmployeeView();
     } else {
       return _buildAdminView();
     }
+  }
+
+  Widget _buildMultiRoleView(UserProvider userProvider) {
+    return Column(
+      children: [
+        // Header con selector de vista
+        Container(
+          color: AppColors.surface,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _showAdminView ? 'Panel de Administración' : 'Mis Tareas',
+                  style: AppTextStyles.headlineLarge,
+                ),
+              ),
+              // Toggle para cambiar entre vistas
+              GestureDetector(
+                onTap: () {
+                  setState(() => _showAdminView = !_showAdminView);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _showAdminView ? '👤' : '⚙️',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _showAdminView ? 'Vista Empleado' : 'Vista Admin',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              GestureDetector(
+                onTap: () => _showLogoutDialog(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '🚪',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Contenido según la vista seleccionada
+        Expanded(
+          child: _showAdminView ? _buildAdminContent() : _buildEmployeeContent(),
+        ),
+      ],
+    );
+  }
+
+  // Contenido solo para empleados (sin header)
+  Widget _buildEmployeeContent() {
+    final userProvider = Provider.of<UserProvider>(context);
+    return Consumer<AssignmentProvider>(
+      builder: (context, assignmentProvider, child) {
+        if (assignmentProvider.isLoading) {
+          return const Center(child: AppSpinner());
+        }
+
+        final assignments = assignmentProvider.assignments;
+        if (assignments.isEmpty) {
+          return const Center(
+            child: Text(
+              'No tienes tareas asignadas',
+              style: AppTextStyles.bodyLarge,
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          itemCount: assignments.length,
+          itemBuilder: (context, index) {
+            final assignment = assignments[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<String>(
+                      future: assignmentProvider.getTaskTitle(assignment.taskId),
+                      builder: (context, snapshot) {
+                        final title = snapshot.data ?? assignment.taskId;
+                        return Text(
+                          title,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Estado: ${assignment.status}',
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            label: 'Iniciar',
+                            onPressed: assignment.status == 'pending'
+                                ? () => assignmentProvider.updateAssignmentStatus(
+                                      assignment.id,
+                                      'in_progress',
+                                      userId: userProvider.currentUser!.uid,
+                                    )
+                                : () {},
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: AppButton(
+                            label: 'Finalizar',
+                            onPressed: assignment.status == 'in_progress'
+                                ? () => assignmentProvider.updateAssignmentStatus(
+                                      assignment.id,
+                                      'done',
+                                      userId: userProvider.currentUser!.uid,
+                                    )
+                                : () {},
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: AppButton(
+                            label: 'Evidencia',
+                            onPressed: assignment.status == 'in_progress'
+                                ? () => _uploadEvidence(context, assignment)
+                                : () {},
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildEmployeeView() {
@@ -107,33 +307,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        AppButton(
-                          label: 'Iniciar',
-                          onPressed: assignment.status == 'pending'
-                              ? () => assignmentProvider.updateAssignmentStatus(
-                                    assignment.id,
-                                    'in_progress',
-                                    userId: userProvider.currentUser!.uid,
-                                  )
-                              : () {},
+                        Expanded(
+                          child: AppButton(
+                            label: 'Iniciar',
+                            onPressed: assignment.status == 'pending'
+                                ? () => assignmentProvider.updateAssignmentStatus(
+                                      assignment.id,
+                                      'in_progress',
+                                      userId: userProvider.currentUser!.uid,
+                                    )
+                                : () {},
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        AppButton(
-                          label: 'Finalizar',
-                          onPressed: assignment.status == 'in_progress'
-                              ? () => assignmentProvider.updateAssignmentStatus(
-                                    assignment.id,
-                                    'done',
-                                    userId: userProvider.currentUser!.uid,
-                                  )
-                              : () {},
+                        Expanded(
+                          child: AppButton(
+                            label: 'Finalizar',
+                            onPressed: assignment.status == 'in_progress'
+                                ? () => assignmentProvider.updateAssignmentStatus(
+                                      assignment.id,
+                                      'done',
+                                      userId: userProvider.currentUser!.uid,
+                                    )
+                                : () {},
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        AppButton(
-                          label: 'Evidencia',
-                          onPressed: assignment.status == 'in_progress'
-                              ? () => _uploadEvidence(context, assignment)
-                              : () {},
+                        Expanded(
+                          child: AppButton(
+                            label: 'Evidencia',
+                            onPressed: assignment.status == 'in_progress'
+                                ? () => _uploadEvidence(context, assignment)
+                                : () {},
+                          ),
                         ),
                       ],
                     ),
@@ -147,8 +353,68 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Contenido solo para admins (sin header)
+  Widget _buildAdminContent() {
+    final userProvider = Provider.of<UserProvider>(context);
+    final adminProvider = Provider.of<AdminProvider>(context);
+    final tabs = [
+      const AssignmentsScreen(),
+      const UsersScreen(),
+      const CatalogScreens(),
+      if (userProvider.isSuperAdmin()) const ResetSeedScreen(),
+    ];
+
+    return Column(
+      children: [
+        // Dashboard KPIs
+        Container(
+          color: AppColors.background,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Dashboard',
+                style: AppTextStyles.headlineMedium,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  _buildKPICard('Total Usuarios', '${adminProvider.totalUsers}', AppColors.primary),
+                  const SizedBox(width: AppSpacing.md),
+                  _buildKPICard('Tareas Activas', '${adminProvider.activeAssignments}', AppColors.success),
+                  const SizedBox(width: AppSpacing.md),
+                  _buildKPICard('Completadas Hoy', '${adminProvider.completedToday}', AppColors.warning),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Navigation
+        Container(
+          height: 60,
+          color: AppColors.surface,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem('Asignaciones', 0),
+              _buildNavItem('Usuarios', 1),
+              _buildNavItem('Catálogo', 2),
+              if (userProvider.isSuperAdmin()) _buildNavItem('Reset', 3),
+            ],
+          ),
+        ),
+        // Body
+        Expanded(
+          child: tabs[_selectedIndex],
+        ),
+      ],
+    );
+  }
+
   Widget _buildAdminView() {
     final userProvider = Provider.of<UserProvider>(context);
+    final adminProvider = Provider.of<AdminProvider>(context);
     final tabs = [
       const AssignmentsScreen(),
       const UsersScreen(),
@@ -203,11 +469,11 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  _buildKPICard('Total Usuarios', '12', AppColors.primary),
+                  _buildKPICard('Total Usuarios', '${adminProvider.totalUsers}', AppColors.primary),
                   const SizedBox(width: 16),
-                  _buildKPICard('Tareas Activas', '8', AppColors.success),
+                  _buildKPICard('Tareas Activas', '${adminProvider.activeAssignments}', AppColors.success),
                   const SizedBox(width: 16),
-                  _buildKPICard('Completadas Hoy', '5', AppColors.warning),
+                  _buildKPICard('Completadas Hoy', '${adminProvider.completedToday}', AppColors.warning),
                 ],
               ),
             ],
@@ -314,24 +580,51 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildKPICard(String title, String value, Color color) {
+    // Íconos simples usando emojis o texto
+    String icon;
+    if (title.contains('Usuarios')) {
+      icon = '👥';
+    } else if (title.contains('Activas')) {
+      icon = '📋';
+    } else {
+      icon = '✓';
+    }
+
     return Expanded(
       child: AppCard(
         backgroundColor: AppColors.surface,
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                icon,
+                style: const TextStyle(fontSize: 24),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.displayMedium.copyWith(
                 color: color,
-                fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               title,
-              style: AppTextStyles.labelSmall,
-              textAlign: TextAlign.center,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textMuted,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

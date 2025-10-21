@@ -1,127 +1,250 @@
-# TaskMonitoring 2.0: Sistema Completo de Gestión de Tareas
+# ChronoLife - Sistema de Autenticación# TaskMonitoring 2.0: Sistema Completo de Gestión de Tareas
 
-Aplicación Flutter completa para monitoreo y gestión de tareas con roles RBAC, Firebase integrado, y arquitectura enterprise-ready.
 
-## 📋 Descripción
 
-**TaskMonitoring 2.0** es una aplicación Flutter multiplataforma que implementa un sistema completo de gestión de tareas con:
+Aplicación Flutter minimalista con autenticación Google Sign-In.Aplicación Flutter completa para monitoreo y gestión de tareas con roles RBAC, Firebase integrado, y arquitectura enterprise-ready.
 
-- 🔐 **Autenticación Firebase** con Google Sign-In
+
+
+## 📋 Descripción## 📋 Descripción
+
+
+
+**ChronoLife** es una aplicación Flutter que implementa un sistema básico de autenticación usando Firebase Authentication con Google Sign-In.**TaskMonitoring 2.0** es una aplicación Flutter multiplataforma que implementa un sistema completo de gestión de tareas con:
+
+
+
+## ✨ Características- 🔐 **Autenticación Firebase** con Google Sign-In
+
 - 👥 **RBAC (Role-Based Access Control)**: super_admin, site_admin, employee
-- 🏢 **Gestión jerárquica**: Sedes → Empleos → Responsabilidades → Tareas
-- 📅 **Recurrencias flexibles**: diaria, semanal, custom con múltiples horarios
-- 📊 **Dashboard administrativo** con KPIs y filtros
-- 📱 **Vista empleado** con assignments y evidencia
+
+- 🔐 **Autenticación Google**: Login seguro con Google Sign-In- 🏢 **Gestión jerárquica**: Sedes → Empleos → Responsabilidades → Tareas
+
+- 👤 **Gestión de usuarios**: Perfiles de usuario con Firebase- 📅 **Recurrencias flexibles**: diaria, semanal, custom con múltiples horarios
+
+- 📱 **UI personalizada**: Componentes sin Material Design- 📊 **Dashboard administrativo** con KPIs y filtros
+
+- ☁️ **Firebase integrado**: Auth y Firestore básicos- 📱 **Vista empleado** con assignments y evidencia
+
 - ☁️ **Firebase completo**: Auth, Firestore, Storage, Functions
-- 💾 **Offline-first** con Hive para assignments
+
+## 🚀 Inicio Rápido- 💾 **Offline-first** con Hive para assignments
+
 - 🎨 **UI personalizada** sin Material Design
-- 🔒 **Seguridad enterprise** con Firebase Rules
 
-## ✨ Características Principales
+### 1. Configuración Firebase- 🔒 **Seguridad enterprise** con Firebase Rules
 
-### 1. Arquitectura RBAC
+```bash
+
+# Instalar Firebase CLI## ✨ Características Principales
+
+npm install -g firebase-tools
+
+firebase login### 1. Arquitectura RBAC
+
 - **super_admin**: Reset BD, seed demo, gestión global
-- **site_admin**: Gestión de usuarios/tareas de sus sedes
-- **employee**: Vista de assignments propios, subir evidencia
+
+# Crear proyecto- **site_admin**: Gestión de usuarios/tareas de sus sedes
+
+firebase projects:create chronolife-prod- **employee**: Vista de assignments propios, subir evidencia
+
+firebase use chronolife-prod
 
 ### 2. Modelo Jerárquico
-```
-Sedes (sites) → Empleos (jobs) → Responsabilidades (responsibilities) → Tareas (tasks)
+
+# Inicializar servicios```
+
+firebase initSedes (sites) → Empleos (jobs) → Responsabilidades (responsibilities) → Tareas (tasks)
+
+# Seleccionar: Authentication, Firestore```
+
 ```
 
 ### 3. Recurrencias Avanzadas
-- Tipos: `once`, `daily`, `weekly`, `custom`
-- Múltiples horarios por día: `["08:00", "14:00"]`
-- Días específicos: `[1, 2, 3, 4, 5]` (Lunes-Viernes)
-- Rangos de fechas flexibles
 
-### 4. Estados de Assignment
-- `pending` → `in_progress` → `blocked` → `done`
-- Motivo de bloqueo opcional
+### 2. Configurar Flutter- Tipos: `once`, `daily`, `weekly`, `custom`
+
+```bash- Múltiples horarios por día: `["08:00", "14:00"]`
+
+# Instalar dependencias- Días específicos: `[1, 2, 3, 4, 5]` (Lunes-Viernes)
+
+flutter pub get- Rangos de fechas flexibles
+
+
+
+# Configurar Firebase### 4. Estados de Assignment
+
+flutterfire configure- `pending` → `in_progress` → `blocked` → `done`
+
+```- Motivo de bloqueo opcional
+
 - Evidencia requerida opcional (foto)
 
-### 5. Dashboard KPIs
-- % cumplimiento por sede/usuario/responsabilidad
-- Tareas pendientes/hoy/atrasadas
+### 3. Ejecutar App
+
+```bash### 5. Dashboard KPIs
+
+flutter run- % cumplimiento por sede/usuario/responsabilidad
+
+```- Tareas pendientes/hoy/atrasadas
+
 - Filtros por fecha/estado/sede
-
-## 🚀 Quick Start
-
-### 1. Configuración Firebase
-```bash
-# Instalar Firebase CLI
-npm install -g firebase-tools
-firebase login
-
-# Inicializar proyecto
-firebase init
-# Seleccionar: Firestore, Storage, Functions, Hosting
-```
-
-### 2. Configurar Flutter
-```bash
-# Instalar dependencias
-flutter pub get
-
-# Generar adaptadores Hive (si es necesario)
-flutter pub run build_runner build
-
-# Configurar Firebase
-flutterfire configure
-```
-
-### 3. Asignar Super Admin Inicial
-```javascript
-// En Firebase Console > Firestore, crear documento:
-db.collection('taskmonitoring').doc('config').set({
-  superAdminUids: ['TU_UID_AQUI'],
-  allowSeed: true,
-  version: '1.0.0',
-  createdAt: Timestamp.now()
-});
-```
-
-### 4. Ejecutar Seed Demo
-```bash
-# Desplegar Functions
-cd functions
-npm install
-npm run deploy
-
-# Ejecutar seed desde la app (como super_admin)
-# O desde Functions:
-firebase functions:call seedDemo
-```
-
-### 5. Ejecutar App
-```bash
-flutter run
-```
 
 ## 📁 Estructura del Proyecto
 
+## 🚀 Quick Start
+
 ```
+
+lib/### 1. Configuración Firebase
+
+├── models/```bash
+
+│   └── user.dart              # Modelo de usuario# Instalar Firebase CLI
+
+├── services/npm install -g firebase-tools
+
+│   ├── auth_service.dart      # Servicio de autenticaciónfirebase login
+
+│   └── user_service.dart      # Servicio de usuarios
+
+├── providers/# Inicializar proyecto
+
+│   ├── auth_provider.dart     # Provider de autenticaciónfirebase init
+
+│   └── user_provider.dart     # Provider de usuarios# Seleccionar: Firestore, Storage, Functions, Hosting
+
+├── screens/```
+
+│   └── login_screen.dart      # Pantalla de login
+
+├── ui/widgets/                # Componentes UI### 2. Configurar Flutter
+
+│   ├── app_button.dart```bash
+
+│   ├── app_input.dart# Instalar dependencias
+
+│   ├── app_layout.dartflutter pub get
+
+│   └── app_spinner.dart
+
+├── theme/# Generar adaptadores Hive (si es necesario)
+
+│   └── app_theme.dart         # Tema de la appflutter pub run build_runner build
+
+├── utils/
+
+│   └── route_guards.dart      # Guards de rutas# Configurar Firebase
+
+└── main.dart                  # Punto de entradaflutterfire configure
+
+``````
+
+
+
+## 🔐 Autenticación### 3. Asignar Super Admin Inicial
+
+```javascript
+
+### Google Sign-In// En Firebase Console > Firestore, crear documento:
+
+```dartdb.collection('taskmonitoring').doc('config').set({
+
+final authService = AuthService();  superAdminUids: ['TU_UID_AQUI'],
+
+final result = await authService.signInWithGoogle();  allowSeed: true,
+
+```  version: '1.0.0',
+
+  createdAt: Timestamp.now()
+
+### Estado de Usuario});
+
+```dart```
+
+final userProvider = Provider.of<UserProvider>(context);
+
+if (userProvider.isLoggedIn) {### 4. Ejecutar Seed Demo
+
+  // Usuario autenticado```bash
+
+}# Desplegar Functions
+
+```cd functions
+
+npm install
+
+## 📦 Dependenciasnpm run deploy
+
+
+
+```yaml# Ejecutar seed desde la app (como super_admin)
+
+firebase_core: ^3.0.0# O desde Functions:
+
+firebase_auth: ^5.0.0firebase functions:call seedDemo
+
+cloud_firestore: ^5.6.0```
+
+provider: ^6.1.2
+
+google_sign_in: ^6.2.1### 5. Ejecutar App
+
+``````bash
+
+flutter run
+
+## 🧪 Testing```
+
+
+
+```bash## 📁 Estructura del Proyecto
+
+# Análisis estático
+
+flutter analyze```
+
 lib/
-├── models/             # POJOs con fromJson/toJson
-│   ├── user.dart
-│   ├── site.dart
+
+# Ejecutar app├── models/             # POJOs con fromJson/toJson
+
+flutter run│   ├── user.dart
+
+```│   ├── site.dart
+
 │   ├── job.dart
-│   ├── responsibility.dart
+
+## 📱 Plataformas Soportadas│   ├── responsibility.dart
+
 │   ├── task.dart
-│   ├── assignment.dart
-│   ├── log.dart
-│   ├── config.dart
+
+- ✅ Android│   ├── assignment.dart
+
+- ✅ iOS│   ├── log.dart
+
+- ✅ Web│   ├── config.dart
+
 │   ├── date_range.dart
-│   └── task_hive.dart
+
+## 📝 Licencia│   └── task_hive.dart
+
 ├── services/           # Lógica de negocio
-│   ├── auth_service.dart
+
+MIT License│   ├── auth_service.dart
+
 │   ├── user_service.dart
-│   ├── admin_service.dart
+
+---│   ├── admin_service.dart
+
 │   ├── catalog_service.dart
-│   ├── assignment_service.dart
-│   ├── evidence_service.dart
-│   └── seed_service.dart
-├── providers/          # State management
+
+**ChronoLife** - Base de autenticación Flutter  │   ├── assignment_service.dart
+
+**Última actualización**: 20 de octubre de 2025  │   ├── evidence_service.dart
+
+**Versión**: 1.0.0  │   └── seed_service.dart
+
+**Estado**: ✅ Funcional├── providers/          # State management
 │   ├── user_provider.dart
 │   ├── admin_provider.dart
 │   ├── assignment_provider.dart

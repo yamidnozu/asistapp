@@ -37,7 +37,7 @@ class Task {
   final String id;
   final String title;
   final String description;
-  final String responsibilityId;
+  final String siteId; // Cambiado de responsibilityId a siteId
   final String? location;
   final bool evidenceRequired;
   final int? durationMin;
@@ -49,7 +49,7 @@ class Task {
     required this.id,
     required this.title,
     required this.description,
-    required this.responsibilityId,
+    required this.siteId, // Cambiado
     this.location,
     required this.evidenceRequired,
     this.durationMin,
@@ -63,7 +63,7 @@ class Task {
       id: id,
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      responsibilityId: json['responsibilityId'] ?? '',
+      siteId: json['siteId'] ?? '', // Cambiado
       location: json['location'],
       evidenceRequired: json['evidenceRequired'] ?? false,
       durationMin: json['durationMin'],
@@ -77,7 +77,7 @@ class Task {
     return {
       'title': title,
       'description': description,
-      'responsibilityId': responsibilityId,
+      'siteId': siteId, // Cambiado
       'location': location,
       'evidenceRequired': evidenceRequired,
       'durationMin': durationMin,
@@ -91,7 +91,7 @@ class Task {
     String? id,
     String? title,
     String? description,
-    String? responsibilityId,
+    String? siteId, // Cambiado
     String? location,
     bool? evidenceRequired,
     int? durationMin,
@@ -103,7 +103,7 @@ class Task {
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      responsibilityId: responsibilityId ?? this.responsibilityId,
+      siteId: siteId ?? this.siteId, // Cambiado
       location: location ?? this.location,
       evidenceRequired: evidenceRequired ?? this.evidenceRequired,
       durationMin: durationMin ?? this.durationMin,

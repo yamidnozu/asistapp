@@ -29,6 +29,37 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
+    final buttonChild = Container(
+      constraints: widget.width != null
+          ? BoxConstraints(minWidth: widget.width!)
+          : const BoxConstraints(minWidth: 0),
+      padding: widget.padding ??
+          const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+      decoration: BoxDecoration(
+        color: widget.isEnabled
+            ? (_isPressed ? AppColors.primaryDark : AppColors.primary)
+            : AppColors.grey,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: widget.isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: _buildLoadingSpinner(),
+              )
+            : Text(
+                widget.label,
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+      ),
+    );
+
     return GestureDetector(
       onTapDown: widget.isEnabled && !widget.isLoading
           ? (_) => setState(() => _isPressed = true)
@@ -42,34 +73,7 @@ class _AppButtonState extends State<AppButton> {
       onTapCancel: widget.isEnabled && !widget.isLoading
           ? () => setState(() => _isPressed = false)
           : null,
-      child: Container(
-        width: widget.width ?? double.infinity,
-        padding: widget.padding ??
-            const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.md,
-            ),
-        decoration: BoxDecoration(
-          color: widget.isEnabled
-              ? (_isPressed ? AppColors.primaryDark : AppColors.primary)
-              : AppColors.grey,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: widget.isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: _buildLoadingSpinner(),
-                )
-              : Text(
-                  widget.label,
-                  style: AppTextStyles.labelLarge.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-        ),
-      ),
+      child: buttonChild,
     );
   }
 
@@ -110,6 +114,36 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
 
   @override
   Widget build(BuildContext context) {
+    final buttonChild = Container(
+      constraints: widget.width != null
+          ? BoxConstraints(minWidth: widget.width!)
+          : const BoxConstraints(minWidth: 0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: widget.isEnabled ? AppColors.primary : AppColors.grey,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        color: _isPressed && widget.isEnabled
+            ? AppColors.surfaceLight
+            : const Color(0x00000000),
+      ),
+      child: Center(
+        child: Text(
+          widget.label,
+          style: AppTextStyles.labelLarge.copyWith(
+            color: widget.isEnabled
+                ? AppColors.primary
+                : AppColors.grey,
+          ),
+        ),
+      ),
+    );
+
     return GestureDetector(
       onTapDown: widget.isEnabled
           ? (_) => setState(() => _isPressed = true)
@@ -123,33 +157,7 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
       onTapCancel: widget.isEnabled
           ? () => setState(() => _isPressed = false)
           : null,
-      child: Container(
-        width: widget.width ?? double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: widget.isEnabled ? AppColors.primary : AppColors.grey,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color: _isPressed && widget.isEnabled
-              ? AppColors.surfaceLight
-              : const Color(0x00000000),
-        ),
-        child: Center(
-          child: Text(
-            widget.label,
-            style: AppTextStyles.labelLarge.copyWith(
-              color: widget.isEnabled
-                  ? AppColors.primary
-                  : AppColors.grey,
-            ),
-          ),
-        ),
-      ),
+      child: buttonChild,
     );
   }
 }

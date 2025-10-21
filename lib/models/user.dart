@@ -7,6 +7,7 @@ class User {
   final String? photoURL;
   final List<String> roles;
   final List<String> sites;
+  final String? jobId; // Empleo asignado al usuario
   final String status;
   final DateTime createdAt;
 
@@ -17,6 +18,7 @@ class User {
     this.photoURL,
     required this.roles,
     required this.sites,
+    this.jobId,
     required this.status,
     required this.createdAt,
   });
@@ -29,6 +31,7 @@ class User {
       photoURL: json['photoURL'],
       roles: List<String>.from(json['roles'] ?? []),
       sites: List<String>.from(json['sites'] ?? []),
+      jobId: json['jobId'],
       status: json['status'] ?? 'active',
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -41,6 +44,7 @@ class User {
       'photoURL': photoURL,
       'roles': roles,
       'sites': sites,
+      'jobId': jobId,
       'status': status,
       'createdAt': createdAt,
     };
@@ -53,6 +57,7 @@ class User {
     String? photoURL,
     List<String>? roles,
     List<String>? sites,
+    String? jobId,
     String? status,
     DateTime? createdAt,
   }) {
@@ -63,6 +68,7 @@ class User {
       photoURL: photoURL ?? this.photoURL,
       roles: roles ?? this.roles,
       sites: sites ?? this.sites,
+      jobId: jobId ?? this.jobId,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
     );

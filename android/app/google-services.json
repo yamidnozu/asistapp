@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:145893311915:android:e89a9e0e847d4968da3eee",
+        "mobilesdk_app_id": "1:145893311915:android:3a8a0e9092c03317da3eee",
         "android_client_info": {
-          "package_name": "com.example.chronolife"
+          "package_name": "com.edevcore.asistapp"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "145893311915-vgb6muhmnc53487sht3b4gnd23c527mc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.edevcore.asistapp",
+            "certificate_hash": "f92fbea2a98198933829a827ebeba9aecfe09d61"
+          }
+        },
         {
           "client_id": "145893311915-r5g4r3o5404rubd57keh516n51f3jop6.apps.googleusercontent.com",
           "client_type": 3

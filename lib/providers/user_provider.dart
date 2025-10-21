@@ -8,10 +8,12 @@ class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
   model.User? _currentUser;
+  List<model.User> _allUsers = [];
   bool _isLoading = false;
   late final Stream<auth.User?> _authStateStream;
 
   model.User? get currentUser => _currentUser;
+  List<model.User> get allUsers => _allUsers;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _currentUser != null;
 
@@ -81,11 +83,12 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateUserSites(List<String> sites) async {
-    if (_currentUser != null) {
-      await _userService.updateUser(_currentUser!.uid, {'sites': sites});
-      _currentUser = _currentUser!.copyWith(sites: sites);
+  Future<void> loadAllUsers() async {
+    try {
+      _allUsers = await _userService.getAllUsers();
       notifyListeners();
+    } catch (e) {
+      debugPrint('Error cargando todos los usuarios: $e');
     }
   }
 
