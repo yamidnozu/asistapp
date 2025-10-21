@@ -1,4 +1,4 @@
-package com.example.chronolife
+package com.edevcore.asistapp
 
 import io.flutter.embedding.android.FlutterActivity
 

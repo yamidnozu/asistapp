@@ -50,12 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'ChronoLife',
+                  'AsistApp',
                   style: AppTextStyles.displayLarge,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Sistema de Gestión de Tareas',
+                  'Sistema de Registro de Asistencia Escolar',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textMuted,
                   ),
