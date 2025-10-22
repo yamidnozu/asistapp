@@ -41,7 +41,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text(
+                const Text(
                   '¡Bienvenido!',
                   style: AppTextStyles.displayLarge,
                 ),
@@ -59,7 +59,7 @@ class WelcomeScreen extends StatelessWidget {
                 AppCard(
                   child: Column(
                     children: [
-                      Text(
+                      const Text(
                         'Has iniciado sesión correctamente',
                         style: AppTextStyles.bodyLarge,
                         textAlign: TextAlign.center,

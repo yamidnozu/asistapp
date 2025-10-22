@@ -16,65 +16,34 @@ class AuthService {
   // Iniciar sesión con Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      print('🔐 Iniciando proceso de Google Sign-In...');
-
-      // Verificar si ya hay un usuario conectado
-      if (_auth.currentUser != null) {
-        print('✅ Ya hay un usuario autenticado: ${_auth.currentUser!.email}');
-        return null;
-      }
-
-      // Iniciar el flujo de Google Sign-In
-      print('📱 Solicitando cuenta de Google...');
+      // Debug logs removed for production
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        print('❌ Usuario canceló el sign-in de Google');
         return null;
       }
 
-      print('✅ Usuario de Google seleccionado: ${googleUser.email}');
-
-      // Obtener los detalles de autenticación de la solicitud
-      print('🔑 Obteniendo tokens de autenticación...');
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      print('🔍 Debug - Access Token: ${googleAuth.accessToken != null ? "Presente" : "NULL"}');
-      print('🔍 Debug - ID Token: ${googleAuth.idToken != null ? "Presente" : "NULL"}');
-
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        print('❌ Error: Tokens de Google son null');
-        print('❌ Access Token: ${googleAuth.accessToken}');
-        print('❌ ID Token: ${googleAuth.idToken}');
         return null;
       }
 
-      print('✅ Tokens obtenidos correctamente');
-
-      // Crear una nueva credencial
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      print('🔐 Autenticando con Firebase...');
-      // Una vez que se firme en, devolver la UserCredential
       final userCredential = await _auth.signInWithCredential(credential);
-
-      print('✅ Autenticación exitosa con Firebase: ${userCredential.user?.email}');
       return userCredential;
 
     } catch (e) {
-      print('❌ Error al iniciar sesión con Google: $e');
-      print('Stack trace: ${StackTrace.current}');
-
       // Intentar desconectar si hay error
       try {
         await _googleSignIn.signOut();
       } catch (signOutError) {
-        print('⚠️ Error al desconectar Google Sign-In: $signOutError');
+        // Ignore sign out errors
       }
-
       return null;
     }
   }

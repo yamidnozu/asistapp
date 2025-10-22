@@ -74,11 +74,11 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
               color: AppColors.white,
               border: Border.all(color: AppColors.grey),
               borderRadius: BorderRadius.circular(8),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: AppColors.black.withOpacity(0.1),
+                  color: Color.fromRGBO(0, 0, 0, 0.1),
                   blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  offset: Offset(0, 2),
                 ),
               ],
             ),

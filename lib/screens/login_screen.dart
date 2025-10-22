@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart' show AlertDialog, TextButton, Navigator, showDialog;
-import '../providers/user_provider.dart';
 import '../services/auth_service.dart';
 import '../ui/widgets/index.dart';
 import '../theme/app_theme.dart';
@@ -49,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text(
+                const Text(
                   'AsistApp',
                   style: AppTextStyles.displayLarge,
                 ),
@@ -65,12 +63,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 AppCard(
                   child: Column(
                     children: [
-                      Text(
+                      const Text(
                         'Bienvenido',
                         style: AppTextStyles.headlineMedium,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Text(
+                      const Text(
                         'Administra tus tareas y asignaciones de forma eficiente',
                         style: AppTextStyles.bodyMedium,
                         textAlign: TextAlign.center,
@@ -104,14 +102,13 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      print('🚀 Iniciando login con Google desde UI...');
+      debugPrint('🚀 Iniciando login con Google desde UI...');
       final result = await _authService.signInWithGoogle();
 
       if (result != null && result.user != null) {
-        print('✅ Login exitoso: ${result.user!.email}');
+        debugPrint('✅ Login exitoso: ${result.user!.email}');
 
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
-        await userProvider.syncUserData();
+        // Usuario autenticado exitosamente - el provider se actualiza automáticamente
 
         if (mounted) {
           // Mostrar diálogo de éxito en lugar de SnackBar
@@ -130,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else {
-        print('⚠️ Login cancelado o fallido');
+        debugPrint('⚠️ Login cancelado o fallido');
         if (mounted) {
           // Mostrar diálogo de error en lugar de SnackBar
           showDialog(
@@ -149,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      print('❌ Error en UI de login: $e');
+      debugPrint('❌ Error en UI de login: $e');
 
       String errorMessage = 'Error desconocido al iniciar sesión';
 
@@ -195,9 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final result = await _authService.signInAnonymously();
       if (result != null) {
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
-        await userProvider.syncUserData();
-        // Usuario autenticado exitosamente - permanecer en la pantalla
+        // Usuario autenticado exitosamente - el provider se actualiza automáticamente
         if (mounted) {
           showDialog(
             context: context,

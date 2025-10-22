@@ -7,10 +7,10 @@ class ErrorLoggerWidget extends StatefulWidget {
   ErrorLoggerWidget() : super(key: errorLoggerKey);
 
   @override
-  State<ErrorLoggerWidget> createState() => _ErrorLoggerWidgetState();
+  State<ErrorLoggerWidget> createState() => ErrorLoggerWidgetState();
 }
 
-class _ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
+class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
   final List<String> _logs = [];
   bool _isExpanded = false;
   bool _isVisible = false;
@@ -63,11 +63,11 @@ class _ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.border),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Color.fromRGBO(0, 0, 0, 0.3),
                 blurRadius: 8,
-                offset: const Offset(0, 4),
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -120,31 +120,33 @@ class _ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
         // Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.surfaceLight,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
           ),
           child: Row(
             children: [
-              Text(
+              const Text(
                 'Logs de Debug',
                 style: AppTextStyles.labelLarge,
               ),
               const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.clear_all, size: 16),
-                onPressed: _clearLogs,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              GestureDetector(
+                onTap: _clearLogs,
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(Icons.clear_all, size: 16),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 16),
-                onPressed: () => setState(() => _isExpanded = false),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              GestureDetector(
+                onTap: () => setState(() => _isExpanded = false),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(Icons.close, size: 16),
+                ),
               ),
             ],
           ),
@@ -154,7 +156,7 @@ class _ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
           child: Container(
             padding: const EdgeInsets.all(8),
             child: _logs.isEmpty
-                ? Center(
+                ? const Center(
                     child: Text(
                       'No hay logs',
                       style: AppTextStyles.bodySmall,
@@ -186,7 +188,7 @@ class _ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
 }
 
 /// Función global para agregar logs desde cualquier parte de la app
-final GlobalKey<_ErrorLoggerWidgetState> errorLoggerKey = GlobalKey<_ErrorLoggerWidgetState>();
+final GlobalKey<ErrorLoggerWidgetState> errorLoggerKey = GlobalKey<ErrorLoggerWidgetState>();
 
 void addDebugLog(String message) {
   debugPrint(message);
