@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/user_provider.dart';
 import 'providers/auth_provider.dart';
-import 'screens/login_screen.dart';
-import 'screens/welcome_screen.dart';
+import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_constants.dart';
+import 'widgets/index.dart';
 import 'ui/widgets/index.dart';
 
 void main() async {
@@ -30,8 +30,21 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AppLifecycleManager _lifecycleManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleManager = AppLifecycleManager();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +52,13 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
       child: MaterialApp(
         title: 'AsistApp',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.defaultTheme,
-        home: const AuthWrapper(),
+        home: const LifecycleAwareWrapper(),
         builder: (context, child) {
           return DefaultTextStyle(
             style: TextStyle(
@@ -62,35 +76,6 @@ class MyApp extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
-        // Mostrar loading mientras se verifica el estado
-        if (userProvider.isLoading) {
-          return Container(
-            color: AppColors.instance.black,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        // Si hay usuario autenticado, mostrar pantalla de bienvenida
-        if (userProvider.currentUser != null) {
-          return const WelcomeScreen();
-        }
-
-        // Si no hay usuario, mostrar pantalla de login
-        return const LoginScreen();
-      },
     );
   }
 }

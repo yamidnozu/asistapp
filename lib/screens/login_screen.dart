@@ -117,17 +117,17 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      debugPrint('🚀 Iniciando login con Google desde UI...');
+      debugPrint('Iniciando login con Google desde UI...');
       final result = await _authService.signInWithGoogle();
 
       if (result != null && result.user != null) {
-        debugPrint('✅ Login exitoso: ${result.user!.email}');
+        debugPrint('Login exitoso: ${result.user!.email}');
         // Usuario autenticado exitosamente - el provider se actualiza automáticamente
       } else {
-        debugPrint('⚠️ Login cancelado o fallido');
+        debugPrint('Login cancelado o fallido');
       }
     } catch (e) {
-      debugPrint('❌ Error en UI de login: $e');
+      debugPrint('Error en UI de login: $e');
 
       // Manejar diferentes tipos de errores (solo logging, sin mostrar modales)
       if (e.toString().contains('network') || e.toString().contains('Network')) {
