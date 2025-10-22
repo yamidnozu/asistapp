@@ -32,26 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo o ícono
-                Container(
-                  width: AppConstants.instance.logoSize,
-                  height: AppConstants.instance.logoSize,
-                  decoration: BoxDecoration(
-                    color: colors.primary,
-                    borderRadius: BorderRadius.circular(AppConstants.instance.logoBorderRadius),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '✓',
-                      style: TextStyle(
-                        fontSize: AppConstants.instance.logoFontSize,
-                        color: colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: spacing.xl),
                 Text(
                   'AsistApp',
                   style: textStyles.displayLarge,

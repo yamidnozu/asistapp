@@ -25,26 +25,6 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo o ícono
-                Container(
-                  width: AppConstants.instance.logoSize,
-                  height: AppConstants.instance.logoSize,
-                  decoration: BoxDecoration(
-                    color: colors.success,
-                    borderRadius: BorderRadius.circular(AppConstants.instance.logoBorderRadius),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '✓',
-                      style: TextStyle(
-                        fontSize: AppConstants.instance.logoFontSize,
-                        color: colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: spacing.xl),
                 Text(
                   '¡Bienvenido!',
                   style: textStyles.displayLarge,
