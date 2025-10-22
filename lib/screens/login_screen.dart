@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show AlertDialog, TextButton, Navigator, showDialog;
 import '../services/auth_service.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
@@ -16,6 +15,56 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
+  // Función para calcular variables responsive
+  Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
+    final isSmallScreen = constraints.maxWidth < 600;
+    final horizontalPadding = isSmallScreen ? lg : xxl;
+    final verticalPadding = isSmallScreen ? xl : xxl * 2;
+    final titleSpacing = isSmallScreen ? sm : md;
+    final subtitleSpacing = isSmallScreen ? xl : xxl; // Reducido de xxl*2/xxl*3 a xl/xxl
+
+    return {
+      'isSmallScreen': isSmallScreen,
+      'horizontalPadding': horizontalPadding,
+      'verticalPadding': verticalPadding,
+      'titleSpacing': titleSpacing,
+      'subtitleSpacing': subtitleSpacing,
+    };
+  }
+
+  // Función para construir el título principal
+  Widget _buildMainTitle(TextStyle displayLarge, bool isSmallScreen) {
+    return Text(
+      'AsistApp',
+      style: displayLarge.copyWith(
+        fontSize: isSmallScreen ? 32 : 48,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  // Función para construir el subtítulo
+  Widget _buildSubtitle(TextStyle bodyMedium, Color textMuted, bool isSmallScreen) {
+    return Text(
+      'Sistema de Registro de Asistencia Escolar',
+      style: bodyMedium.copyWith(
+        color: textMuted,
+        fontSize: isSmallScreen ? 14 : 16,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  // Función para construir el botón de Google
+  Widget _buildGoogleButton() {
+    return AppButton(
+      label: _isLoading ? 'Iniciando sesión...' : 'Continuar con Google',
+      onPressed: _isLoading ? () {} : _signInWithGoogle,
+      isLoading: _isLoading,
+      isEnabled: !_isLoading,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -25,75 +74,40 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       color: colors.background,
       child: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
-            padding: EdgeInsets.all(spacing.xl),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'AsistApp',
-                  style: textStyles.displayLarge,
-                ),
-                SizedBox(height: spacing.sm),
-                Text(
-                  'Sistema de Registro de Asistencia Escolar',
-                  style: textStyles.bodyMedium.copyWith(
-                    color: colors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: spacing.xxl * 2),
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppConstants.instance.cardBorderRadius),
-                    border: Border.all(
-                      color: colors.border,
-                      width: AppConstants.instance.borderWidthThin,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.shadowLight,
-                        blurRadius: AppConstants.instance.shadowBlurRadius,
-                        offset: Offset(0, AppConstants.instance.shadowOffsetY),
-                      ),
-                    ],
-                  ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
+            final isSmallScreen = responsive['isSmallScreen'] as bool;
+            final horizontalPadding = responsive['horizontalPadding'] as double;
+            final verticalPadding = responsive['verticalPadding'] as double;
+            final titleSpacing = responsive['titleSpacing'] as double;
+            final subtitleSpacing = responsive['subtitleSpacing'] as double;
+
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'Bienvenido',
-                        style: textStyles.headlineMedium,
-                      ),
-                      SizedBox(height: spacing.md),
-                      Text(
-                        'Administra tus tareas y asignaciones de forma eficiente',
-                        style: textStyles.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: spacing.xl),
-                      AppButton(
-                        label: _isLoading ? 'Iniciando sesión...' : 'Continuar con Google',
-                        onPressed: _isLoading ? () {} : _signInWithGoogle,
-                        isLoading: _isLoading,
-                        isEnabled: !_isLoading,
-                      ),
-                      SizedBox(height: spacing.md),
-                      AppButton(
-                        label: _isLoading ? 'Cargando...' : 'Continuar como Invitado',
-                        onPressed: _isLoading ? () {} : _signInAnonymously,
-                        isLoading: _isLoading,
-                        isEnabled: !_isLoading,
-                      ),
+                      // Título principal
+                      _buildMainTitle(textStyles.displayLarge, isSmallScreen),
+                      SizedBox(height: titleSpacing),
+
+                      // Subtítulo
+                      _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
+                      SizedBox(height: subtitleSpacing),
+
+                      // Botón de Google
+                      _buildGoogleButton(),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -108,140 +122,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result != null && result.user != null) {
         debugPrint('✅ Login exitoso: ${result.user!.email}');
-
         // Usuario autenticado exitosamente - el provider se actualiza automáticamente
-
-        if (mounted) {
-          // Mostrar diálogo de éxito en lugar de SnackBar
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('¡Éxito!'),
-              content: Text('¡Bienvenido ${result.user!.displayName ?? result.user!.email}!'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
       } else {
         debugPrint('⚠️ Login cancelado o fallido');
-        if (mounted) {
-          // Mostrar diálogo de error en lugar de SnackBar
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Error'),
-              content: const Text('Login cancelado o no autorizado'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
       }
     } catch (e) {
       debugPrint('❌ Error en UI de login: $e');
 
-      String errorMessage = 'Error desconocido al iniciar sesión';
-
-      // Manejar diferentes tipos de errores
+      // Manejar diferentes tipos de errores (solo logging, sin mostrar modales)
       if (e.toString().contains('network') || e.toString().contains('Network')) {
-        errorMessage = 'Error de conexión. Verifica tu internet.';
+        debugPrint('Error de conexión. Verifica tu internet.');
       } else if (e.toString().contains('cancelled') || e.toString().contains('CANCELLED')) {
-        errorMessage = 'Login cancelado por el usuario';
+        debugPrint('Login cancelado por el usuario');
       } else if (e.toString().contains('unavailable') || e.toString().contains('UNAVAILABLE')) {
-        errorMessage = 'Servicio no disponible. Intenta más tarde.';
+        debugPrint('Servicio no disponible. Intenta más tarde.');
       } else if (e.toString().contains('sign_in_failed') || e.toString().contains('SIGN_IN_FAILED')) {
-        errorMessage = 'Error de configuración. Revisa la consola de Firebase.';
+        debugPrint('Error de configuración. Revisa la consola de Firebase.');
       } else if (e.toString().contains('developer_error') || e.toString().contains('DEVELOPER_ERROR')) {
-        errorMessage = 'Error de configuración. Configura SHA-1 en Google Cloud Console.';
+        debugPrint('Error de configuración. Configura SHA-1 en Google Cloud Console.');
       } else {
-        errorMessage = 'Error de autenticación. Revisa los logs para más detalles.';
-      }
-
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text(errorMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _signInAnonymously() async {
-    setState(() => _isLoading = true);
-    try {
-      final result = await _authService.signInAnonymously();
-      if (result != null) {
-        // Usuario autenticado exitosamente - el provider se actualiza automáticamente
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('¡Éxito!'),
-              content: const Text('¡Bienvenido! Has iniciado sesión como invitado'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Error'),
-              content: const Text('No se pudo completar el inicio de sesión'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Error signing in anonymously: $e');
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: const Text('Error al iniciar sesión como invitado'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        debugPrint('Error de autenticación. Revisa los logs para más detalles.');
       }
     } finally {
       if (mounted) {
