@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
+import '../../theme/theme_extensions.dart';
 
 /// Widget flotante para mostrar logs de errores y debugging
 /// Aparece en la parte inferior de la pantalla sin interferir con la UI principal
@@ -51,6 +51,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
   Widget build(BuildContext context) {
     if (!_isVisible) return const SizedBox.shrink();
 
+    final colors = context.colors;
+
     return Positioned(
       bottom: 20,
       right: 20,
@@ -60,9 +62,9 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
           width: _isExpanded ? 300 : 60,
           height: _isExpanded ? 200 : 60,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: colors.border),
             boxShadow: const [
               BoxShadow(
                 color: Color.fromRGBO(0, 0, 0, 0.3),
@@ -71,14 +73,16 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
               ),
             ],
           ),
-          child: _isExpanded ? _buildExpandedView() : _buildCollapsedView(),
+          child: _isExpanded ? _buildExpandedView(context) : _buildCollapsedView(context),
         ),
       ),
     );
   }
 
-  Widget _buildCollapsedView() {
+  Widget _buildCollapsedView(BuildContext context) {
+    final colors = context.colors;
     final errorCount = _logs.where((log) => log.contains('ERROR')).length;
+
     return GestureDetector(
       onTap: () => setState(() => _isExpanded = true),
       child: Container(
@@ -88,7 +92,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
           children: [
             Icon(
               errorCount > 0 ? Icons.error : Icons.bug_report,
-              color: errorCount > 0 ? AppColors.error : AppColors.warning,
+              color: errorCount > 0 ? colors.error : colors.warning,
               size: 24,
             ),
             if (errorCount > 0)
@@ -96,7 +100,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
                 margin: const EdgeInsets.only(top: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.error,
+                  color: colors.error,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -114,24 +118,27 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
     );
   }
 
-  Widget _buildExpandedView() {
+  Widget _buildExpandedView(BuildContext context) {
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+
     return Column(
       children: [
         // Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: const BoxDecoration(
-            color: AppColors.surfaceLight,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: colors.surfaceLight,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
           ),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'Logs de Debug',
-                style: AppTextStyles.labelLarge,
+                style: textStyles.labelLarge,
               ),
               const Spacer(),
               GestureDetector(
@@ -156,10 +163,10 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
           child: Container(
             padding: const EdgeInsets.all(8),
             child: _logs.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No hay logs',
-                      style: AppTextStyles.bodySmall,
+                      style: textStyles.bodySmall,
                     ),
                   )
                 : ListView.builder(
@@ -173,7 +180,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
                           log,
                           style: TextStyle(
                             fontSize: 10,
-                            color: isError ? AppColors.error : AppColors.textSecondary,
+                            color: isError ? colors.error : colors.textSecondary,
                             fontFamily: 'monospace',
                           ),
                         ),

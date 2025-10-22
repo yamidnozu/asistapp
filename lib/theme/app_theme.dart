@@ -1,154 +1,204 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'app_colors.dart';
+import 'app_spacing.dart';
+import 'app_text_styles.dart';
 
-/// Tema tipográfico consistente para tema oscuro
-class AppTextStyles {
-  // Display - Títulos principales
-  static const TextStyle displayLarge = TextStyle(
-    fontSize: 34,
-    fontWeight: FontWeight.bold,
-    height: 1.2,
-    letterSpacing: 0.4,
-    color: Color(0xFFFFFFFF),
-  );
+/// Theme principal de la aplicación - escalable y mantenible
+class AppTheme {
+  // Constructor privado para singleton
+  AppTheme._();
 
-  static const TextStyle displayMedium = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    height: 1.25,
-    letterSpacing: 0.36,
-    color: Color(0xFFFFFFFF),
-  );
+  // Instancia singleton
+  static final AppTheme instance = AppTheme._();
 
-  // Headline - Encabezados de sección
-  static const TextStyle headlineLarge = TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.w600,
-    height: 1.3,
-    letterSpacing: 0.35,
-    color: Color(0xFFFFFFFF),
-  );
+  /// Theme claro (si se necesita en el futuro)
+  static ThemeData get light => _createTheme(Brightness.light);
 
-  static const TextStyle headlineMedium = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: 0.25,
-    color: Color(0xFFFFFFFF),
-  );
+  /// Theme oscuro (principal)
+  static ThemeData get dark => _createTheme(Brightness.dark);
 
-  // Title - Títulos de tarjetas
-  static const TextStyle titleLarge = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: -0.41,
-    color: Color(0xFFFFFFFF),
-  );
+  /// Theme por defecto (oscuro)
+  static ThemeData get defaultTheme => dark;
 
-  static const TextStyle titleMedium = TextStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.w500,
-    height: 1.5,
-    letterSpacing: -0.24,
-    color: Color(0xFFFFFFFF),
-  );
+  static ThemeData _createTheme(Brightness brightness) {
+    final colors = AppColors.instance;
+    final textStyles = AppTextStyles.instance;
 
-  // Body - Texto de contenido
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.normal,
-    height: 1.47,
-    letterSpacing: -0.41,
-    color: Color(0xFFEBEBF5),
-  );
+    return ThemeData(
+      brightness: brightness,
+      useMaterial3: true,
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.normal,
-    height: 1.47,
-    letterSpacing: -0.24,
-    color: Color(0xFFEBEBF5),
-  );
+      // === COLOR SCHEME ===
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: colors.primary,
+        onPrimary: colors.textPrimary,
+        primaryContainer: colors.primaryContainer,
+        onPrimaryContainer: colors.textPrimary,
+        secondary: colors.secondary,
+        onSecondary: colors.textPrimary,
+        secondaryContainer: colors.secondaryContainer,
+        onSecondaryContainer: colors.textSecondary,
+        tertiary: colors.info,
+        onTertiary: colors.textPrimary,
+        error: colors.error,
+        onError: colors.textPrimary,
+        surface: colors.surface,
+        onSurface: colors.textPrimary,
+        surfaceContainerHighest: colors.surfaceLight,
+        onSurfaceVariant: colors.textMuted,
+        outline: colors.border,
+        outlineVariant: colors.borderLight,
+        shadow: colors.black.withValues(alpha: 0.1), // Sombra ligera 10%
+        scrim: colors.scrim,
+        inverseSurface: colors.surfaceLight,
+        onInverseSurface: colors.textPrimary,
+        inversePrimary: colors.primaryLight,
+        surfaceTint: colors.primary.withValues(alpha: 0.1),
+      ),
 
-  static const TextStyle bodySmall = TextStyle(
-    fontSize: 13,
-    fontWeight: FontWeight.normal,
-    height: 1.38,
-    letterSpacing: -0.08,
-    color: Color(0xFF8E8E93),
-  );
+      // === TEXT THEME ===
+      textTheme: TextTheme(
+        displayLarge: textStyles.displayLarge,
+        displayMedium: textStyles.displayMedium,
+        headlineLarge: textStyles.headlineLarge,
+        headlineMedium: textStyles.headlineMedium,
+        titleLarge: textStyles.titleLarge,
+        titleMedium: textStyles.titleMedium,
+        bodyLarge: textStyles.bodyLarge,
+        bodyMedium: textStyles.bodyMedium,
+        bodySmall: textStyles.bodySmall,
+        labelLarge: textStyles.labelLarge,
+        labelMedium: textStyles.labelMedium,
+        labelSmall: textStyles.labelSmall,
+      ),
 
-  // Label - Etiquetas y botones
-  static const TextStyle labelLarge = TextStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.w600,
-    height: 1.43,
-    letterSpacing: -0.5,
-    color: Color(0xFFFFFFFF),
-  );
+      // === COMPONENT THEMES ===
 
-  static const TextStyle labelMedium = TextStyle(
-    fontSize: 13,
-    fontWeight: FontWeight.w500,
-    height: 1.38,
-    letterSpacing: -0.08,
-    color: Color(0xFFEBEBF5),
-  );
+      // AppBar
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.white,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: textStyles.headlineMedium.copyWith(
+          color: colors.textPrimary,
+          fontWeight: FontWeight.bold,
+        ),
+        toolbarHeight: AppSpacing.instance.appBarHeight,
+        centerTitle: true,
+      ),
 
-  static const TextStyle labelSmall = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
-    height: 1.36,
-    letterSpacing: 0.06,
-    color: Color(0xFF8E8E93),
-  );
-}
+      // Cards
+      cardTheme: CardTheme(
+        color: colors.white,
+        shadowColor: colors.shadowLight,
+        elevation: 1, // Elevación sutil
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          side: BorderSide(color: colors.border, width: 0.5),
+        ),
+      ),
 
-/// Colores consistentes para tema oscuro
-class AppColors {
-  // Primarios - Azul más vibrante y legible
-  static const Color primary = Color(0xFF3B9CFF);
-  static const Color primaryDark = Color(0xFF2680E0);
-  static const Color primaryLight = Color(0xFF5DB4FF);
+      // Buttons
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primary,
+          foregroundColor: colors.white,
+          elevation: 1, // Elevación sutil
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.instance.buttonPadding,
+            vertical: AppSpacing.instance.md,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          ),
+          textStyle: textStyles.button,
+        ),
+      ),
 
-  // Secundarios
-  static const Color secondary = Color(0xFF8E8E93);
-  static const Color secondaryLight = Color(0xFFAEAEB2);
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.primary,
+          side: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+          elevation: 0,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.instance.buttonPadding,
+            vertical: AppSpacing.instance.md,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          ),
+          textStyle: textStyles.labelLarge,
+        ),
+      ),
 
-  // Estados con mejor contraste
-  static const Color success = Color(0xFF34C759);
-  static const Color warning = Color(0xFFFFB800);
-  static const Color error = Color(0xFFFF453A);
-  static const Color info = Color(0xFF007AFF);
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.instance.sm,
+            vertical: AppSpacing.instance.xs,
+          ),
+          textStyle: textStyles.labelMedium,
+        ),
+      ),
 
-  // Superficies con mejor jerarquía visual
-  static const Color surface = Color(0xFF1C1C1E);
-  static const Color surfaceLight = Color(0xFF2C2C2E);
-  static const Color background = Color(0xFF000000);
-  static const Color backgroundLight = Color(0xFF1C1C1E);
+      // Input fields
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(color: colors.primaryLight, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(color: colors.error, width: AppSpacing.instance.borderWidth),
+        ),
+        contentPadding: EdgeInsets.all(AppSpacing.instance.inputPadding),
+        labelStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
+        hintStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
+        errorStyle: textStyles.bodySmall.copyWith(color: colors.error),
+      ),
 
-  // Texto con mejor contraste
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFEBEBF5);
-  static const Color textMuted = Color(0xFF8E8E93);
+      // Dialog
+      dialogTheme: DialogTheme(
+        backgroundColor: colors.white,
+        elevation: 6, // Elevación media para diálogos
+        shadowColor: colors.shadowLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+        ),
+      ),
 
-  // Bordes y separadores más sutiles
-  static const Color border = Color(0xFF38383A);
-  static const Color borderLight = Color(0xFF48484A);
+      // Floating Action Button
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.white,
+        elevation: 2, // Elevación sutil
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
+        ),
+      ),
 
-  // Neutros
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color black = Color(0xFF000000);
-  static const Color grey = Color(0xFF48484A);
-  static const Color greyDark = Color(0xFF2C2C2E);
-}
+      // === OTROS ===
+      scaffoldBackgroundColor: colors.background,
+      dividerColor: colors.divider,
+      shadowColor: colors.shadow,
 
-/// Espacios consistentes
-class AppSpacing {
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 16;
-  static const double lg = 24;
-  static const double xl = 32;
-  static const double xxl = 48;
+      // Typography
+      typography: Typography.material2021(),
+    );
+  }
 }

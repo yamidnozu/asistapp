@@ -7,16 +7,19 @@ import 'providers/user_provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'theme/app_theme.dart';
+import 'theme/app_colors.dart';
+import 'theme/app_constants.dart';
 import 'ui/widgets/index.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Configurar la barra de estado
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: AppColors.instance.transparent,
     statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: Color(0xFF000000),
+    systemNavigationBarColor: AppColors.instance.black,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
   
@@ -40,14 +43,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'AsistApp',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(),
+        theme: AppTheme.defaultTheme,
         home: const AuthWrapper(),
         builder: (context, child) {
           return DefaultTextStyle(
-            style: const TextStyle(
+            style: TextStyle(
               decoration: TextDecoration.none,
-              color: Color(0xFFFFFFFF),
-              fontSize: 14,
+              color: AppColors.instance.white,
+              fontSize: AppConstants.instance.defaultFontSize,
               fontWeight: FontWeight.normal,
             ),
             child: Stack(
@@ -73,7 +76,7 @@ class AuthWrapper extends StatelessWidget {
         // Mostrar loading mientras se verifica el estado
         if (userProvider.isLoading) {
           return Container(
-            color: Colors.black,
+            color: AppColors.instance.black,
             child: const Center(
               child: CircularProgressIndicator(),
             ),

@@ -22,8 +22,12 @@ android {
 
     lintOptions {
         disable 'Deprecation'
+        disable 'Deprecated'
+        disable 'OldTargetApi'
         checkReleaseBuilds false
         abortOnError false
+        warningsAsErrors false
+        quiet true
     }
 
     defaultConfig {

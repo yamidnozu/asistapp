@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
+import '../theme/theme_extensions.dart';
+import '../theme/app_constants.dart';
 import '../ui/widgets/index.dart';
-import '../theme/app_theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -10,70 +11,89 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
     return Container(
-      color: AppColors.background,
+      color: colors.background,
       child: SafeArea(
         child: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
+            padding: EdgeInsets.all(spacing.xl),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo o ícono
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: AppConstants.instance.logoSize,
+                  height: AppConstants.instance.logoSize,
                   decoration: BoxDecoration(
-                    color: AppColors.success,
-                    borderRadius: BorderRadius.circular(20),
+                    color: colors.success,
+                    borderRadius: BorderRadius.circular(AppConstants.instance.logoBorderRadius),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       '✓',
                       style: TextStyle(
-                        fontSize: 48,
-                        color: AppColors.white,
+                        fontSize: AppConstants.instance.logoFontSize,
+                        color: colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                const Text(
+                SizedBox(height: spacing.xl),
+                Text(
                   '¡Bienvenido!',
-                  style: AppTextStyles.displayLarge,
+                  style: textStyles.displayLarge,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: spacing.sm),
                 Text(
                   userProvider.currentUser?.displayName ??
                   userProvider.currentUser?.email ??
                   'Usuario',
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    color: AppColors.primary,
+                  style: textStyles.headlineMedium.copyWith(
+                    color: colors.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                AppCard(
+                SizedBox(height: spacing.xl),
+                Container(
+                  padding: EdgeInsets.all(spacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(AppConstants.instance.cardBorderRadius),
+                    border: Border.all(
+                      color: colors.border,
+                      width: AppConstants.instance.borderWidthThin,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.shadowLight,
+                        blurRadius: AppConstants.instance.shadowBlurRadius,
+                        offset: Offset(0, AppConstants.instance.shadowOffsetY),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         'Has iniciado sesión correctamente',
-                        style: AppTextStyles.bodyLarge,
+                        style: textStyles.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: spacing.md),
                       Text(
                         'Estado: ${userProvider.currentUser != null ? 'Conectado' : 'Desconectado'}',
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: textStyles.bodyMedium.copyWith(
                           color: userProvider.currentUser != null
-                              ? AppColors.success
-                              : AppColors.error,
+                              ? colors.success
+                              : colors.error,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: spacing.xl),
                       AppButton(
                         label: 'Cerrar Sesión',
                         onPressed: () async {

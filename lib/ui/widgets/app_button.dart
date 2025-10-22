@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
-import '../../theme/app_theme.dart';
+import '../../theme/theme_extensions.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_constants.dart';
 
 /// Botón primario reutilizable
 class AppButton extends StatefulWidget {
@@ -29,32 +31,36 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
     final buttonChild = Container(
       constraints: widget.width != null
           ? BoxConstraints(minWidth: widget.width!)
           : const BoxConstraints(minWidth: 0),
       padding: widget.padding ??
-          const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.md,
+          EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.md,
           ),
       decoration: BoxDecoration(
         color: widget.isEnabled
-            ? (_isPressed ? AppColors.primaryDark : AppColors.primary)
-            : AppColors.grey,
-        borderRadius: BorderRadius.circular(8),
+            ? (_isPressed ? colors.primaryDark : colors.primary)
+            : colors.grey,
+        borderRadius: BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
       ),
       child: Center(
         child: widget.isLoading
             ? SizedBox(
-                width: 20,
-                height: 20,
-                child: _buildLoadingSpinner(),
+                width: AppConstants.instance.spinnerSize,
+                height: AppConstants.instance.spinnerSize,
+                child: _buildLoadingSpinner(context),
               )
             : Text(
                 widget.label,
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: AppColors.textPrimary,
+                style: textStyles.labelLarge.copyWith(
+                  color: colors.white, // Texto blanco sobre fondo primario
                 ),
               ),
       ),
@@ -77,13 +83,15 @@ class _AppButtonState extends State<AppButton> {
     );
   }
 
-  Widget _buildLoadingSpinner() {
+  Widget _buildLoadingSpinner(BuildContext context) {
+    final colors = context.colors;
+
     return Center(
       child: SizedBox(
-        width: 20,
-        height: 20,
+        width: AppConstants.instance.spinnerSize,
+        height: AppConstants.instance.spinnerSize,
         child: CustomPaint(
-          painter: _SpinnerPainter(),
+          painter: _SpinnerPainter(colors: colors),
         ),
       ),
     );
@@ -114,31 +122,35 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
     final buttonChild = Container(
       constraints: widget.width != null
           ? BoxConstraints(minWidth: widget.width!)
           : const BoxConstraints(minWidth: 0),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.md,
+        vertical: spacing.md,
       ),
       decoration: BoxDecoration(
         border: Border.all(
-          color: widget.isEnabled ? AppColors.primary : AppColors.grey,
-          width: 1,
+          color: widget.isEnabled ? colors.primary : colors.grey,
+          width: AppConstants.instance.borderWidthNormal,
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
         color: _isPressed && widget.isEnabled
-            ? AppColors.surfaceLight
-            : const Color(0x00000000),
+            ? colors.surfaceLight
+            : colors.transparent,
       ),
       child: Center(
         child: Text(
           widget.label,
-          style: AppTextStyles.labelLarge.copyWith(
+          style: textStyles.labelLarge.copyWith(
             color: widget.isEnabled
-                ? AppColors.primary
-                : AppColors.grey,
+                ? colors.primary // Texto primario sobre fondo transparente
+                : colors.grey,
           ),
         ),
       ),
@@ -164,10 +176,14 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
 
 /// Spinner personalizado sin Material Design
 class _SpinnerPainter extends CustomPainter {
+  final AppColors colors;
+
+  _SpinnerPainter({required this.colors});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.textPrimary
+      ..color = colors.white // Spinner blanco sobre fondo primario
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
