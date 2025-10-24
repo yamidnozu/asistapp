@@ -197,251 +197,272 @@ async function main() {
   // ============================================
   console.log('📅 Creando periodos académicos...');
 
-  const periodos = await Promise.all([
-    prisma.periodoAcademico.create({
-      data: {
-        institucionId: instituciones[0].id,
-        nombre: '2025',
-        fechaInicio: new Date('2025-01-15'),
-        fechaFin: new Date('2025-12-15'),
-        activo: true,
-      },
-    }),
-  ]);
+  // const periodos = await Promise.all([
+  //   prisma.periodoAcademico.upsert({
+  //     where: {
+  //       institucionId_activo: {
+  //         institucionId: instituciones[0].id,
+  //         activo: true,
+  //       },
+  //     },
+  //     update: {},
+  //     create: {
+  //       institucionId: instituciones[0].id,
+  //       nombre: '2025',
+  //       fechaInicio: new Date('2025-01-15'),
+  //       fechaFin: new Date('2025-12-15'),
+  //       activo: true,
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Periodos académicos creados:', periodos.length);
+  // console.log('✅ Periodos académicos creados:', periodos.length);
+
+  console.log('📅 Periodos académicos saltados temporalmente');
+
+  const periodos = [{ id: 'temp-id' }]; // Temporal
 
   // ============================================
   // 7. CREAR GRUPOS
   // ============================================
   console.log('👥 Creando grupos...');
 
-  const grupos = await Promise.all([
-    prisma.grupo.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        nombre: '10-A',
-        grado: '10',
-        seccion: 'A',
-      },
-    }),
-    prisma.grupo.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        nombre: '11-B',
-        grado: '11',
-        seccion: 'B',
-      },
-    }),
-  ]);
+  // const grupos = await Promise.all([
+  //   prisma.grupo.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       nombre: '10-A',
+  //       grado: '10',
+  //       seccion: 'A',
+  //     },
+  //   }),
+  //   prisma.grupo.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       nombre: '11-B',
+  //       grado: '11',
+  //       seccion: 'B',
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Grupos creados:', grupos.length);
+  // console.log('✅ Grupos creados:', grupos.length);
+
+  console.log('👥 Grupos saltados temporalmente');
+
+  const grupos = [{ id: 'temp-id' }]; // Temporal
 
   // ============================================
   // 8. CREAR MATERIAS
   // ============================================
   console.log('📚 Creando materias...');
 
-  const materias = await Promise.all([
-    prisma.materia.create({
-      data: {
-        institucionId: instituciones[0].id,
-        nombre: 'Matemáticas',
-        codigo: 'MAT101',
-      },
-    }),
-    prisma.materia.create({
-      data: {
-        institucionId: instituciones[0].id,
-        nombre: 'Español',
-        codigo: 'ESP101',
-      },
-    }),
-    prisma.materia.create({
-      data: {
-        institucionId: instituciones[0].id,
-        nombre: 'Ciencias',
-        codigo: 'CIE101',
-      },
-    }),
-  ]);
+  // const materias = await Promise.all([
+  //   prisma.materia.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       nombre: 'Matemáticas',
+  //       codigo: 'MAT101',
+  //     },
+  //   }),
+  //   prisma.materia.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       nombre: 'Español',
+  //       codigo: 'ESP101',
+  //     },
+  //   }),
+  //   prisma.materia.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       nombre: 'Ciencias',
+  //       codigo: 'CIE101',
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Materias creadas:', materias.length);
+  // console.log('✅ Materias creadas:', materias.length);
+
+  console.log('📚 Materias saltadas temporalmente');
+
+  const materias = [{ id: 'temp-id' }]; // Temporal
 
   // ============================================
   // 9. CREAR HORARIOS
   // ============================================
   console.log('⏰ Creando horarios...');
 
-  const horarios = await Promise.all([
-    // Matemáticas - Grupo 10-A - Lunes
-    prisma.horario.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        grupoId: grupos[0].id,
-        materiaId: materias[0].id,
-        profesorId: profesores[0].id,
-        diaSemana: 1, // Lunes
-        horaInicio: '07:00:00',
-        horaFin: '08:00:00',
-      },
-    }),
-    // Español - Grupo 10-A - Lunes
-    prisma.horario.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        grupoId: grupos[0].id,
-        materiaId: materias[1].id,
-        profesorId: profesores[1].id,
-        diaSemana: 1, // Lunes
-        horaInicio: '08:00:00',
-        horaFin: '09:00:00',
-      },
-    }),
-    // Ciencias - Grupo 10-A - Martes
-    prisma.horario.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        grupoId: grupos[0].id,
-        materiaId: materias[2].id,
-        profesorId: profesores[0].id,
-        diaSemana: 2, // Martes
-        horaInicio: '07:00:00',
-        horaFin: '08:00:00',
-      },
-    }),
-    // Matemáticas - Grupo 11-B - Miércoles
-    prisma.horario.create({
-      data: {
-        institucionId: instituciones[0].id,
-        periodoId: periodos[0].id,
-        grupoId: grupos[1].id,
-        materiaId: materias[0].id,
-        profesorId: profesores[0].id,
-        diaSemana: 3, // Miércoles
-        horaInicio: '07:00:00',
-        horaFin: '08:00:00',
-      },
-    }),
-  ]);
+  // const horarios = await Promise.all([
+  //   // Matemáticas - Grupo 10-A - Lunes
+  //   prisma.horario.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       grupoId: grupos[0].id,
+  //       materiaId: materias[0].id,
+  //       profesorId: profesores[0].id,
+  //       diaSemana: 1, // Lunes
+  //       horaInicio: '07:00:00',
+  //       horaFin: '08:00:00',
+  //     },
+  //   }),
+  //   // Español - Grupo 10-A - Lunes
+  //   prisma.horario.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       grupoId: grupos[0].id,
+  //       materiaId: materias[1].id,
+  //       profesorId: profesores[1].id,
+  //       diaSemana: 1, // Lunes
+  //       horaInicio: '08:00:00',
+  //       horaFin: '09:00:00',
+  //     },
+  //   }),
+  //   // Ciencias - Grupo 10-A - Martes
+  //   prisma.horario.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       grupoId: grupos[0].id,
+  //       materiaId: materias[2].id,
+  //       profesorId: profesores[0].id,
+  //       diaSemana: 2, // Martes
+  //       horaInicio: '07:00:00',
+  //       horaFin: '08:00:00',
+  //     },
+  //   }),
+  //   // Matemáticas - Grupo 11-B - Miércoles
+  //   prisma.horario.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       periodoId: periodos[0].id,
+  //       grupoId: grupos[1].id,
+  //       materiaId: materias[0].id,
+  //       profesorId: profesores[0].id,
+  //       diaSemana: 3, // Miércoles
+  //       horaInicio: '07:00:00',
+  //       horaFin: '08:00:00',
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Horarios creados:', horarios.length);
+  // console.log('✅ Horarios creados:', horarios.length);
+
+  console.log('⏰ Horarios saltados temporalmente');
 
   // ============================================
   // 10. ASIGNAR ESTUDIANTES A GRUPOS
   // ============================================
   console.log('🔗 Asignando estudiantes a grupos...');
 
-  await Promise.all([
-    // Estudiantes en 10-A
-    prisma.estudianteGrupo.create({
-      data: {
-        estudianteId: estudiantes[0].estudiante.id,
-        grupoId: grupos[0].id,
-      },
-    }),
-    prisma.estudianteGrupo.create({
-      data: {
-        estudianteId: estudiantes[1].estudiante.id,
-        grupoId: grupos[0].id,
-      },
-    }),
-    prisma.estudianteGrupo.create({
-      data: {
-        estudianteId: estudiantes[2].estudiante.id,
-        grupoId: grupos[0].id,
-      },
-    }),
-    // Estudiantes en 11-B
-    prisma.estudianteGrupo.create({
-      data: {
-        estudianteId: estudiantes[3].estudiante.id,
-        grupoId: grupos[1].id,
-      },
-    }),
-    prisma.estudianteGrupo.create({
-      data: {
-        estudianteId: estudiantes[4].estudiante.id,
-        grupoId: grupos[1].id,
-      },
-    }),
-  ]);
+  // await Promise.all([
+  //   // Estudiantes en 10-A
+  //   prisma.estudianteGrupo.create({
+  //     data: {
+  //       estudianteId: estudiantes[0].estudiante.id,
+  //       grupoId: grupos[0].id,
+  //     },
+  //   }),
+  //   prisma.estudianteGrupo.create({
+  //     data: {
+  //       estudianteId: estudiantes[1].estudiante.id,
+  //       grupoId: grupos[0].id,
+  //     },
+  //   }),
+  //   prisma.estudianteGrupo.create({
+  //     data: {
+  //       estudianteId: estudiantes[2].estudiante.id,
+  //       grupoId: grupos[0].id,
+  //     },
+  //   }),
+  //   // Estudiantes en 11-B
+  //   prisma.estudianteGrupo.create({
+  //     data: {
+  //       estudianteId: estudiantes[3].estudiante.id,
+  //       grupoId: grupos[1].id,
+  //     },
+  //   }),
+  //   prisma.estudianteGrupo.create({
+  //     data: {
+  //       estudianteId: estudiantes[4].estudiante.id,
+  //       grupoId: grupos[1].id,
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Estudiantes asignados a grupos');
+  console.log('🔗 Estudiantes asignados a grupos (saltado)');
 
   // ============================================
   // 11. CREAR ASISTENCIAS DE EJEMPLO
   // ============================================
   console.log('📝 Creando asistencias de ejemplo...');
 
-  const fechaHoy = new Date();
-  await Promise.all([
-    // Juan Pérez - Matemáticas (presente)
-    prisma.asistencia.create({
-      data: {
-        estudianteId: estudiantes[0].estudiante.id,
-        horarioId: horarios[0].id,
-        profesorId: profesores[0].id,
-        grupoId: grupos[0].id,
-        fecha: fechaHoy,
-        tipoRegistro: 'qr',
-        observaciones: 'Excelente participación en clase',
-      },
-    }),
-    // María García - Matemáticas (ausente)
-    prisma.asistencia.create({
-      data: {
-        estudianteId: estudiantes[1].estudiante.id,
-        horarioId: horarios[0].id,
-        profesorId: profesores[0].id,
-        grupoId: grupos[0].id,
-        fecha: fechaHoy,
-        tipoRegistro: 'manual',
-        observaciones: 'Enfermedad',
-      },
-    }),
-    // Carlos López - Español (presente)
-    prisma.asistencia.create({
-      data: {
-        estudianteId: estudiantes[2].estudiante.id,
-        horarioId: horarios[1].id,
-        profesorId: profesores[1].id,
-        grupoId: grupos[0].id,
-        fecha: fechaHoy,
-        tipoRegistro: 'qr',
-        observaciones: 'Muy atento en clase',
-      },
-    }),
-  ]);
+  // const fechaHoy = new Date();
+  // await Promise.all([
+  //   // Juan Pérez - Matemáticas (presente)
+  //   prisma.asistencia.create({
+  //     data: {
+  //       estudianteId: estudiantes[0].estudiante.id,
+  //       horarioId: 'temp-id', // Temporal, cambiar cuando se arreglen horarios
+  //       profesorId: profesores[0].id,
+  //       grupoId: grupos[0].id,
+  //       fecha: fechaHoy,
+  //       tipoRegistro: 'qr',
+  //       observaciones: 'Excelente participación en clase',
+  //     },
+  //   }),
+  //   // María García - Matemáticas (ausente)
+  //   prisma.asistencia.create({
+  //     data: {
+  //       estudianteId: estudiantes[1].estudiante.id,
+  //       horarioId: 'temp-id', // Temporal
+  //       profesorId: profesores[0].id,
+  //       grupoId: grupos[0].id,
+  //       fecha: fechaHoy,
+  //       tipoRegistro: 'manual',
+  //       observaciones: 'Enfermedad',
+  //     },
+  //   }),
+  //   // Carlos López - Español (presente)
+  //   prisma.asistencia.create({
+  //     data: {
+  //       estudianteId: estudiantes[2].estudiante.id,
+  //       horarioId: 'temp-id', // Temporal
+  //       profesorId: profesores[1].id,
+  //       grupoId: grupos[0].id,
+  //       fecha: fechaHoy,
+  //       tipoRegistro: 'qr',
+  //       observaciones: 'Muy atento en clase',
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Asistencias de ejemplo creadas');
+  console.log('📝 Asistencias de ejemplo creadas (saltado)');
 
   // ============================================
   // 12. CREAR CONFIGURACIONES
   // ============================================
   console.log('⚙️ Creando configuraciones...');
 
-  await Promise.all([
-    prisma.configuracion.create({
-      data: {
-        institucionId: instituciones[0].id,
-        notificacionesActivas: false,
-        modoNotificacion: 'diaria',
-        horaNotificacion: '18:00:00',
-        umbralFaltas: 3,
-        horaInicioClases: '07:00:00',
-        horaFinClases: '15:00:00',
-        diasLaborales: [1, 2, 3, 4, 5], // Lunes a Viernes
-      },
-    }),
-  ]);
+  // await Promise.all([
+  //   prisma.configuracion.create({
+  //     data: {
+  //       institucionId: instituciones[0].id,
+  //       notificacionesActivas: false,
+  //       modoNotificacion: 'diaria',
+  //       horaNotificacion: '18:00:00',
+  //       umbralFaltas: 3,
+  //       horaInicioClases: '07:00:00',
+  //       horaFinClases: '15:00:00',
+  //       diasLaborales: [1, 2, 3, 4, 5], // Lunes a Viernes
+  //     },
+  //   }),
+  // ]);
 
-  console.log('✅ Configuraciones creadas');
+  console.log('⚙️ Configuraciones creadas (saltado)');
 
   // ============================================
   // RESUMEN FINAL
@@ -453,12 +474,12 @@ async function main() {
   console.log('👨‍💼 Admins de institución:', adminsInstitucion.length);
   console.log('👨‍🏫 Profesores:', profesores.length);
   console.log('👨‍🎓 Estudiantes:', estudiantes.length);
-  console.log('📅 Periodos académicos:', periodos.length);
-  console.log('👥 Grupos:', grupos.length);
-  console.log('📚 Materias:', materias.length);
-  console.log('⏰ Horarios:', horarios.length);
-  console.log('📝 Asistencias:', 3);
-  console.log('⚙️ Configuraciones:', 1);
+  console.log('📅 Periodos académicos:', 0); // Temporalmente 0
+  console.log('👥 Grupos:', 0); // Temporalmente 0
+  console.log('📚 Materias:', 0); // Temporalmente 0
+  console.log('⏰ Horarios:', 0); // Temporalmente 0
+  console.log('📝 Asistencias:', 0); // Temporalmente 0
+  console.log('⚙️ Configuraciones:', 0); // Temporalmente 0
 
   console.log('\n🔐 Credenciales de acceso:');
   console.log('Super Admin: superadmin@asistapp.com / Admin123!');

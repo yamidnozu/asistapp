@@ -10,18 +10,30 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arroz -d asistapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://arroz:pollo@db:5432/asistapp?schema=public
+      - JWT_SECRET=asistapp_secret_key_2025
+      - JWT_EXPIRES_IN=24h
+      - PORT=3000
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - LOG_LEVEL=info
     volumes:
       - .:/app
-      - /app/node_modules
+    restart: unless-stopped
 
 volumes:
   postgres_data:

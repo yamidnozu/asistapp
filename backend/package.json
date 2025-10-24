@@ -9,7 +9,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cleanup-tokens": "ts-node src/scripts/cleanup-tokens.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -18,15 +20,44 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@fastify/rate-limit": "^8.0.3",
     "@prisma/client": "^5.15.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.2",
-    "fastify": "^4.28.1"
+    "fastify": "^4.28.1",
+    "fastify-cookie": "^5.6.1",
+    "fastify-formbody": "^5.2.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.14.10",
+    "jest": "^30.2.0",
     "prisma": "^5.15.0",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/tests"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
   }
 }

@@ -46,20 +46,23 @@ model Institucion {
 model Usuario {
   id             String      @id @default(uuid()) @db.Uuid
   institucionId  String?     @map("institucion_id") @db.Uuid
-  correoElectronico String   @unique @map("correo_electronico") @db.VarChar(255)
-  contrasena     String      @map("contrasena") @db.VarChar(255)
-  nombre         String      @db.VarChar(100)
-  apellidos      String      @db.VarChar(100)
+  email          String      @unique @db.VarChar(255)
+  passwordHash   String      @map("password_hash") @db.VarChar(255)
+  nombres        String      @db.VarChar(255)
+  apellidos      String      @db.VarChar(255)
   rol            String      @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante'
+  telefono       String?     @db.VarChar(20)
   activo         Boolean     @default(true)
-  fechaCreacion  DateTime    @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
+  tokenVersion   Int         @default(1) @map("token_version") // Para revocación rápida de tokens
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones
   institucion         Institucion? @relation(fields: [institucionId], references: [id], onDelete: Cascade)
   estudiante          Estudiante?
   horarios            Horario[]
   asistencias         Asistencia[]
+  refreshTokens       RefreshToken[]
 
   @@map("usuarios")
 }
@@ -251,4 +254,20 @@ model LogNotificacion {
   estudiante      Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
 
   @@map("logs_notificaciones")
+}
+
+// 12. REFRESH TOKENS (Para autenticación JWT)
+model RefreshToken {
+  id            String    @id @default(uuid()) @db.Uuid
+  usuarioId     String    @map("usuario_id") @db.Uuid
+  token         String    @unique @db.Text // El refresh token hasheado
+  expiresAt     DateTime  @map("expires_at") // Fecha de expiración
+  revoked       Boolean   @default(false) // Si fue revocado
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
 }
