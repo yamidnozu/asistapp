@@ -1,0 +1,254 @@
+// ============================================
+// AsistApp V2 - Prisma Schema (MVP)
+// Versión: 2.0.0
+// Fecha: 23 de Octubre 2025
+// Descripción: Esquema minimalista para MVP
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELOS PRINCIPALES
+// ============================================
+
+// 1. INSTITUCIONES (Colegios)
+model Institucion {
+  id        String   @id @default(uuid()) @db.Uuid
+  nombre    String   @db.VarChar(255)
+  codigo    String   @unique @db.VarChar(50) // Código corto único (ej: "sanjose")
+  direccion String?  @db.Text
+  telefono  String?  @db.VarChar(20)
+  email     String?  @db.VarChar(255)
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  usuarios             Usuario[]
+  periodosAcademicos   PeriodoAcademico[]
+  grupos               Grupo[]
+  materias             Materia[]
+  horarios             Horario[]
+  configuraciones      Configuracion?
+
+  @@map("instituciones")
+}
+
+// 2. USUARIOS (Admins, Profesores, Estudiantes)
+model Usuario {
+  id             String      @id @default(uuid()) @db.Uuid
+  institucionId  String?     @map("institucion_id") @db.Uuid
+  correoElectronico String   @unique @map("correo_electronico") @db.VarChar(255)
+  contrasena     String      @map("contrasena") @db.VarChar(255)
+  nombre         String      @db.VarChar(100)
+  apellidos      String      @db.VarChar(100)
+  rol            String      @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante'
+  activo         Boolean     @default(true)
+  fechaCreacion  DateTime    @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
+
+  // Relaciones
+  institucion         Institucion? @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+  estudiante          Estudiante?
+  horarios            Horario[]
+  asistencias         Asistencia[]
+
+  @@map("usuarios")
+}
+
+// 3. ESTUDIANTES (Info adicional de estudiantes)
+model Estudiante {
+  id                   String   @id @default(uuid()) @db.Uuid
+  usuarioId            String   @unique @map("usuario_id") @db.Uuid
+  identificacion       String   @unique @db.VarChar(50) // Documento de identidad
+  codigoQr             String   @unique @map("codigo_qr") @db.VarChar(255) // Para escaneo
+  nombreResponsable    String?  @map("nombre_responsable") @db.VarChar(255) // Padre/Tutor
+  telefonoResponsable  String?  @map("telefono_responsable") @db.VarChar(20) // WhatsApp del responsable
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  usuario              Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  estudiantesGrupos    EstudianteGrupo[]
+  asistencias          Asistencia[]
+  logsNotificaciones   LogNotificacion[]
+
+  @@map("estudiantes")
+}
+
+// 4. PERIODOS ACADÉMICOS (Años lectivos)
+model PeriodoAcademico {
+  id            String      @id @default(uuid()) @db.Uuid
+  institucionId String      @map("institucion_id") @db.Uuid
+  nombre        String      @db.VarChar(100) // "2025", "2025-1", "2026"
+  fechaInicio   DateTime    @map("fecha_inicio") @db.Date
+  fechaFin      DateTime    @map("fecha_fin") @db.Date
+  activo        Boolean     @default(true) // Solo un periodo puede estar activo a la vez por institución
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  // Relaciones
+  institucion   Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+  grupos        Grupo[]
+  horarios      Horario[]
+
+  @@map("periodos_academicos")
+}
+
+// 5. GRUPOS (Salones de clase)
+model Grupo {
+  id             String   @id @default(uuid()) @db.Uuid
+  institucionId  String   @map("institucion_id") @db.Uuid
+  periodoId      String   @map("periodo_id") @db.Uuid
+  nombre         String   @db.VarChar(50) // "10-A", "11-B"
+  grado          String   @db.VarChar(10) // "10", "11"
+  seccion        String?  @db.VarChar(10) // "A", "B"
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  institucion        Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+  periodoAcademico   PeriodoAcademico @relation(fields: [periodoId], references: [id], onDelete: Cascade)
+  estudiantesGrupos  EstudianteGrupo[]
+  horarios           Horario[]
+  asistencias        Asistencia[]
+
+  @@map("grupos")
+}
+
+// 6. MATERIAS (Asignaturas)
+model Materia {
+  id            String   @id @default(uuid()) @db.Uuid
+  institucionId String   @map("institucion_id") @db.Uuid
+  nombre        String   @db.VarChar(255) // "Matemáticas", "Español"
+  codigo        String?  @db.VarChar(50) // "MAT101", "ESP201"
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  institucion   Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+  horarios      Horario[]
+
+  @@map("materias")
+}
+
+// 7. HORARIOS (Qué clase, cuándo, quién la dicta)
+model Horario {
+  id            String   @id @default(uuid()) @db.Uuid
+  institucionId String   @map("institucion_id") @db.Uuid
+  periodoId     String   @map("periodo_id") @db.Uuid
+  grupoId       String   @map("grupo_id") @db.Uuid
+  materiaId     String   @map("materia_id") @db.Uuid
+  profesorId    String?  @map("profesor_id") @db.Uuid
+
+  // Días de la semana (1=Lunes, 7=Domingo)
+  diaSemana     Int // 1=Lunes, 2=Martes, ..., 7=Domingo
+
+  // Hora de inicio y fin
+  horaInicio    String @map("hora_inicio") @db.VarChar(8)
+  horaFin       String @map("hora_fin") @db.VarChar(8)
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  institucion      Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+  periodoAcademico PeriodoAcademico @relation(fields: [periodoId], references: [id], onDelete: Cascade)
+  grupo            Grupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  materia          Materia @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+  profesor         Usuario? @relation(fields: [profesorId], references: [id], onDelete: SetNull)
+  asistencias      Asistencia[]
+
+  @@map("horarios")
+}
+
+// 8. ESTUDIANTES_GRUPOS (Relación muchos a muchos)
+model EstudianteGrupo {
+  id           String    @id @default(uuid()) @db.Uuid
+  estudianteId String    @map("estudiante_id") @db.Uuid
+  grupoId      String    @map("grupo_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // Relaciones
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  grupo        Grupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+
+  @@map("estudiantes_grupos")
+}
+
+// 9. ASISTENCIAS (Registro de asistencia por clase)
+model Asistencia {
+  id            String   @id @default(uuid()) @db.Uuid
+  estudianteId  String   @map("estudiante_id") @db.Uuid
+  horarioId     String   @map("horario_id") @db.Uuid
+  grupoId       String   @map("grupo_id") @db.Uuid
+  profesorId    String?  @map("profesor_id") @db.Uuid
+
+  // Fecha y hora del registro
+  fecha         DateTime @db.Date
+  horaRegistro  DateTime @default(now()) @map("hora_registro")
+
+  // Tipo de registro
+  tipoRegistro  String   @default("qr") @map("tipo_registro") // 'qr', 'manual'
+
+  // Notas opcionales
+  observaciones String?  @db.Text
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  estudiante    Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  horario       Horario @relation(fields: [horarioId], references: [id], onDelete: Cascade)
+  grupo         Grupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  profesor      Usuario? @relation(fields: [profesorId], references: [id], onDelete: SetNull)
+
+  @@map("asistencias")
+}
+
+// 10. CONFIGURACIONES (Ajustes por institución)
+model Configuracion {
+  id                   String   @id @default(uuid()) @db.Uuid
+  institucionId        String   @unique @map("institucion_id") @db.Uuid
+
+  // Notificaciones WhatsApp
+  notificacionesActivas Boolean  @default(false) @map("notificaciones_activas")
+  modoNotificacion      String   @default("diaria") @map("modo_notificacion") // 'diaria', 'por_clase', 'umbral'
+  horaNotificacion      String   @default("18:00:00") @map("hora_notificacion") @db.VarChar(8)
+  umbralFaltas          Int      @default(3) @map("umbral_faltas") // Para modo 'umbral'
+
+  // Configuración de horarios
+  horaInicioClases      String   @default("07:00:00") @map("hora_inicio_clases") @db.VarChar(8)
+  horaFinClases         String   @default("15:00:00") @map("hora_fin_clases") @db.VarChar(8)
+
+  // Días laborales (JSON array: [1,2,3,4,5] = Lunes a Viernes)
+  diasLaborales         Json     @default("[1,2,3,4,5]") @map("dias_laborales")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  institucion           Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+
+  @@map("configuraciones")
+}
+
+// 11. LOGS_NOTIFICACIONES (Historial de notificaciones enviadas)
+model LogNotificacion {
+  id              String   @id @default(uuid()) @db.Uuid
+  estudianteId    String   @map("estudiante_id") @db.Uuid
+  telefonoDestino String   @map("telefono_destino") @db.VarChar(20)
+  mensaje         String   @db.Text
+  fechaEnvio      DateTime @default(now()) @map("fecha_envio")
+  exitoso         Boolean  @default(false)
+  errorMensaje    String?  @map("error_mensaje") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  estudiante      Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  @@map("logs_notificaciones")
+}
