@@ -1,67 +1,132 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+
+// Modelo para respuesta de login
+class LoginResponse {
+  final String accessToken;
+  final String refreshToken;
+  final Map<String, dynamic> user;
+
+  LoginResponse({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.user,
+  });
+
+  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    return LoginResponse(
+      accessToken: json['accessToken'],
+      refreshToken: json['refreshToken'],
+      user: json['user'],
+    );
+  }
+}
+
+// Modelo para respuesta de refresh
+class RefreshResponse {
+  final String accessToken;
+  final String refreshToken;
+
+  RefreshResponse({
+    required this.accessToken,
+    required this.refreshToken,
+  });
+
+  factory RefreshResponse.fromJson(Map<String, dynamic> json) {
+    return RefreshResponse(
+      accessToken: json['accessToken'],
+      refreshToken: json['refreshToken'],
+    );
+  }
+}
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile', 'openid'],
-  );
+  static const String baseUrl = 'http://localhost:3000'; // Cambiar según el backend
 
-  // Stream para escuchar cambios en el estado de autenticación
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  // Usuario actual
-  User? get currentUser => _auth.currentUser;
-
-  // Iniciar sesión con Google
-  Future<UserCredential?> signInWithGoogle() async {
+  // Login con email, password e institución
+  Future<LoginResponse?> login(String email, String password, String institutionId) async {
     try {
-      // Debug logs removed for production
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-
-      if (googleUser == null) {
-        return null;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        return null;
-      }
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'institutionId': institutionId,
+        }),
       );
 
-      final userCredential = await _auth.signInWithCredential(credential);
-      return userCredential;
-
-    } catch (e) {
-      // Intentar desconectar si hay error
-      try {
-        await _googleSignIn.signOut();
-      } catch (signOutError) {
-        // Ignore sign out errors
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return LoginResponse.fromJson(data);
+      } else {
+        debugPrint('Login failed: ${response.statusCode} - ${response.body}');
+        return null;
       }
-      return null;
-    }
-  }
-
-  // Iniciar sesión anónima
-  Future<UserCredential?> signInAnonymously() async {
-    try {
-      final userCredential = await _auth.signInAnonymously();
-      return userCredential;
     } catch (e) {
-      // Error al iniciar sesión anónima
+      debugPrint('Login error: $e');
       return null;
     }
   }
 
-  // Cerrar sesión
-  Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+  // Refresh token
+  Future<RefreshResponse?> refreshToken(String refreshToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/refresh'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'refreshToken': refreshToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return RefreshResponse.fromJson(data);
+      } else {
+        debugPrint('Refresh failed: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Refresh error: $e');
+      return null;
+    }
+  }
+
+  // Logout
+  Future<bool> logout(String refreshToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'refreshToken': refreshToken,
+        }),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Logout error: $e');
+      return false;
+    }
+  }
+
+  // Obtener lista de instituciones
+  Future<List<Map<String, dynamic>>?> getInstitutions() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/institutions'));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List;
+        return data.map((e) => e as Map<String, dynamic>).toList();
+      } else {
+        debugPrint('Get institutions failed: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Get institutions error: $e');
+      return null;
+    }
   }
 }

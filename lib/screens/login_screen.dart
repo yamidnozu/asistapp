@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
-import '../services/auth_service.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
 import '../ui/widgets/index.dart';
@@ -12,8 +13,29 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String? _selectedInstitutionId;
   bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInstitutions();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInstitutions() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.loadInstitutions();
+  }
 
   // Función para calcular variables responsive
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
@@ -55,13 +77,73 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Función para construir el botón de Google
-  Widget _buildGoogleButton() {
+  // Función para construir el selector de institución
+  Widget _buildInstitutionSelector() {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final institutions = authProvider.institutions;
+
+    return DropdownButtonFormField<String>(
+      value: _selectedInstitutionId,
+      decoration: const InputDecoration(
+        labelText: 'Seleccionar Institución',
+        border: OutlineInputBorder(),
+      ),
+      items: institutions?.map((institution) {
+        return DropdownMenuItem<String>(
+          value: institution['id'].toString(),
+          child: Text(institution['name'] ?? 'Sin nombre'),
+        );
+      }).toList() ?? [],
+      onChanged: (value) {
+        setState(() {
+          _selectedInstitutionId = value;
+        });
+      },
+    );
+  }
+
+  // Función para construir el campo de email
+  Widget _buildEmailField() {
+    return TextFormField(
+      controller: _emailController,
+      decoration: const InputDecoration(
+        labelText: 'Correo electrónico',
+        border: OutlineInputBorder(),
+      ),
+      keyboardType: TextInputType.emailAddress,
+    );
+  }
+
+  // Función para construir el campo de contraseña
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: _passwordController,
+      decoration: const InputDecoration(
+        labelText: 'Contraseña',
+        border: OutlineInputBorder(),
+      ),
+      obscureText: true,
+    );
+  }
+
+  // Función para construir el botón de login
+  Widget _buildLoginButton() {
     return AppButton(
-      label: _isLoading ? 'Iniciando sesión...' : 'Continuar con Google',
-      onPressed: _isLoading ? () {} : _signInWithGoogle,
+      label: _isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión',
+      onPressed: _isLoading ? () {} : _login,
       isLoading: _isLoading,
-      isEnabled: !_isLoading,
+      isEnabled: !_isLoading && _selectedInstitutionId != null,
+    );
+  }
+
+  // Función para construir el mensaje de error
+  Widget _buildErrorMessage() {
+    if (_errorMessage == null) return const SizedBox.shrink();
+
+    return Text(
+      _errorMessage!,
+      style: const TextStyle(color: Colors.red),
+      textAlign: TextAlign.center,
     );
   }
 
@@ -100,8 +182,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
                       SizedBox(height: subtitleSpacing),
 
-                      // Botón de Google
-                      _buildGoogleButton(),
+                      // Selector de institución
+                      _buildInstitutionSelector(),
+                      SizedBox(height: spacing.lg),
+
+                      // Campo de email
+                      _buildEmailField(),
+                      SizedBox(height: spacing.lg),
+
+                      // Campo de contraseña
+                      _buildPasswordField(),
+                      SizedBox(height: spacing.lg),
+
+                      // Mensaje de error
+                      _buildErrorMessage(),
+                      SizedBox(height: spacing.lg),
+
+                      // Botón de login
+                      _buildLoginButton(),
                     ],
                   ),
                 ),
@@ -113,39 +211,46 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
+  Future<void> _login() async {
+    if (_selectedInstitutionId == null ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Por favor complete todos los campos';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      debugPrint('Iniciando login con Google desde UI...');
-      final result = await _authService.signInWithGoogle();
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+        _selectedInstitutionId!,
+      );
 
-      if (result != null && result.user != null) {
-        debugPrint('Login exitoso: ${result.user!.email}');
-        // Usuario autenticado exitosamente - el provider se actualiza automáticamente
+      if (success) {
+        // Login exitoso - navegar a la pantalla principal
+        // TODO: Implementar navegación
       } else {
-        debugPrint('Login cancelado o fallido');
+        setState(() {
+          _errorMessage = 'Credenciales incorrectas';
+        });
       }
     } catch (e) {
-      debugPrint('Error en UI de login: $e');
-
-      // Manejar diferentes tipos de errores (solo logging, sin mostrar modales)
-      if (e.toString().contains('network') || e.toString().contains('Network')) {
-        debugPrint('Error de conexión. Verifica tu internet.');
-      } else if (e.toString().contains('cancelled') || e.toString().contains('CANCELLED')) {
-        debugPrint('Login cancelado por el usuario');
-      } else if (e.toString().contains('unavailable') || e.toString().contains('UNAVAILABLE')) {
-        debugPrint('Servicio no disponible. Intenta más tarde.');
-      } else if (e.toString().contains('sign_in_failed') || e.toString().contains('SIGN_IN_FAILED')) {
-        debugPrint('Error de configuración. Revisa la consola de Firebase.');
-      } else if (e.toString().contains('developer_error') || e.toString().contains('DEVELOPER_ERROR')) {
-        debugPrint('Error de configuración. Configura SHA-1 en Google Cloud Console.');
-      } else {
-        debugPrint('Error de autenticación. Revisa los logs para más detalles.');
-      }
+      setState(() {
+        _errorMessage = 'Error de conexión. Intente nuevamente.';
+      });
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
