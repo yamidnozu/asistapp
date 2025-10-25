@@ -7,7 +7,9 @@
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
             "cwd": "${workspaceFolder}",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "console": "debugConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "Flutter (profile mode)",
@@ -31,6 +33,53 @@
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Flutter Debug (Hot Reload)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "flutterMode": "debug",
+            "console": "debugConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "toolArgs": [
+                "--dart-define=Dart_DebugConnection=vmservice"
+            ]
+        },
+        {
+            "name": "Flutter Debug (Persistent)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "flutterMode": "debug",
+            "console": "debugConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "toolArgs": [
+                "--dart-define=Dart_DebugConnection=vmservice",
+                "--no-sound-null-safety"
+            ],
+            "args": [
+                "--enable-vm-service",
+                "--pause-isolates-on-start"
+            ],
+            "env": {
+                "FLUTTER_DEBUG": "true"
+            }
+        },
+        {
+            "name": "Flutter (Device Ready)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "flutterMode": "debug",
+            "deviceId": "2201116PG",
+            "toolArgs": [
+                "--device-user",
+                "0"
+            ]
         }
     ]
 }

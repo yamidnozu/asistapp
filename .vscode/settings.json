@@ -1,5 +1,25 @@
 {
     "dart.flutterSdkPath": "C:/flutter",
     "dart.sdkPath": "C:/flutter/bin/cache/dart-sdk",
-    "flutter.hotReloadOnSave": "all"
+    "flutter.hotReloadOnSave": "all",
+    "dart.debugExternalLibraries": false,
+    "dart.debugSdkLibraries": false,
+    "dart.vmAdditionalArgs": [
+        "--observe"
+    ],
+    "dart.openDevTools": "flutter",
+    "flutter.trackWidgetCreation": true,
+    "flutter.debugPaint": {
+        "baselines": false,
+        "pointers": false,
+        "repaintRainbow": false
+    },
+    "dart.showDebugger": true,
+    "dart.showDevToolsDebugTool": true,
+    "dart.previewFlutterUiGuides": true,
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "dart.flutterHotReloadOnSave": "all",
+    "dart.flutterHotRestartOnSave": "manual",
+    "dart.flutterShowEmulatorForAndroidDevices": true,
+    "dart.flutterShowEmulatorForIOSDevices": true
 }

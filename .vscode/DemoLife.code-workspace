@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "dart.flutterSdkPath": "C:/flutter",
+        "dart.sdkPath": "C:/flutter/bin/cache/dart-sdk",
+        "flutter.hotReloadOnSave": "all"
+    },
+    "extensions": {
+        "recommendations": [
+            "Dart-Code.flutter",
+            "Dart-Code.dart-code"
+        ]
+    }
+}

@@ -108,6 +108,83 @@
                 "panel": "shared"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "flutter: clean & pub get",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "clean",
+                "&&",
+                "flutter",
+                "pub",
+                "get"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "android: restart adb",
+            "type": "shell",
+            "command": "adb",
+            "args": [
+                "kill-server",
+                "&&",
+                "adb",
+                "start-server"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "android: check device",
+            "type": "shell",
+            "command": "adb",
+            "args": [
+                "devices"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "android: diagnostic",
+            "type": "shell",
+            "command": "${workspaceFolder}/android_debug_diagnostic.bat",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "android: force install",
+            "type": "shell",
+            "command": "${workspaceFolder}/force_install_apk.bat",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
         }
     ]
 }
