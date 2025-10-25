@@ -26,73 +26,30 @@ class TeacherDashboard extends StatelessWidget {
     };
   }
 
-  // Función para construir el título del dashboard
-  Widget _buildDashboardTitle(TextStyle displayLarge, bool isSmallScreen) {
-    return Text(
-      'Panel del Profesor',
-      style: displayLarge.copyWith(
-        fontSize: isSmallScreen ? 28 : 42,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  // Función para construir la información del usuario e institución
-  Widget _buildUserAndInstitutionInfo(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
-    final user = authProvider.user;
-    final userName = user?['nombres'] ?? user?['apellidos'] ?? 'Profesor';
+  // Función para construir el saludo del usuario
+  Widget _buildUserGreeting(String userName, AuthProvider authProvider, bool isSmallScreen) {
     final selectedInstitution = authProvider.selectedInstitution;
-
+    
     return Column(
       children: [
         Text(
-          'Bienvenido, $userName',
-          style: headlineMedium.copyWith(
-            color: primary,
-            fontSize: isSmallScreen ? 18 : 24,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Profesor',
+          'Hola, $userName',
           style: TextStyle(
-            color: primary.withValues(alpha: 0.7),
-            fontSize: isSmallScreen ? 14 : 16,
+            fontSize: isSmallScreen ? 28 : 38,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
           ),
           textAlign: TextAlign.center,
         ),
         if (selectedInstitution != null) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+          const SizedBox(height: 8),
+          Text(
+            selectedInstitution.name,
+            style: TextStyle(
+              fontSize: isSmallScreen ? 16 : 18,
+              color: Colors.grey[600],
             ),
-            child: Column(
-              children: [
-                Text(
-                  'Institución: ${selectedInstitution.name}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
-                    fontSize: isSmallScreen ? 16 : 18,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Rol: ${selectedInstitution.role ?? 'Profesor'}',
-                  style: TextStyle(
-                    color: Colors.blue[600],
-                    fontSize: isSmallScreen ? 14 : 16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ],
@@ -104,16 +61,6 @@ class TeacherDashboard extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 32),
-        Text(
-          'Herramientas de Docencia',
-          style: TextStyle(
-            fontSize: isSmallScreen ? 18 : 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -166,43 +113,7 @@ class TeacherDashboard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.school,
-                color: Colors.blue,
-                size: isSmallScreen ? 24 : 32,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Gestión Académica',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: isSmallScreen ? 16 : 18,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Accede a todas las herramientas necesarias para gestionar tus clases y el seguimiento de tus estudiantes.',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: isSmallScreen ? 12 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+
       ],
     );
   }
@@ -264,34 +175,46 @@ class TeacherDashboard extends StatelessWidget {
     );
   }
 
-  // Función para construir el botón de cerrar sesión
-  Widget _buildSignOutButton(AuthProvider authProvider) {
-    return ElevatedButton.icon(
-      onPressed: () async {
-        await authProvider.logout();
-      },
-      icon: const Icon(Icons.logout),
-      label: const Text('Cerrar Sesión'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
     final spacing = context.spacing;
-    final textStyles = context.textStyles;
+    
+    final user = authProvider.user;
+    final userName = user?['nombres'] ?? 'Usuario';
+    final userRole = 'Profesor';
 
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Profesor - AsistApp'),
+        title: const Text('AsistApp'),
         backgroundColor: colors.primary,
         actions: [
+          // Badge de rol
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.school, size: 16, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  userRole,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -307,7 +230,6 @@ class TeacherDashboard extends StatelessWidget {
             final isSmallScreen = responsive['isSmallScreen'] as bool;
             final horizontalPadding = responsive['horizontalPadding'] as double;
             final verticalPadding = responsive['verticalPadding'] as double;
-            final titleSpacing = responsive['titleSpacing'] as double;
             final cardSpacing = responsive['cardSpacing'] as double;
 
             return SingleChildScrollView(
@@ -317,22 +239,12 @@ class TeacherDashboard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Título del dashboard
-                    _buildDashboardTitle(textStyles.displayLarge, isSmallScreen),
-                    SizedBox(height: titleSpacing),
-
-                    // Información del usuario e institución
-                    _buildUserAndInstitutionInfo(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
+                    // Saludo personalizado
+                    _buildUserGreeting(userName, authProvider, isSmallScreen),
                     SizedBox(height: cardSpacing),
 
                     // Opciones del dashboard
                     _buildDashboardOptions(isSmallScreen),
-
-                    // Espacio adicional antes del botón
-                    SizedBox(height: cardSpacing * 2),
-
-                    // Botón de cerrar sesión
-                    _buildSignOutButton(authProvider),
 
                     // Espacio final
                     SizedBox(height: verticalPadding),

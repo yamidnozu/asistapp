@@ -24,38 +24,25 @@ class SuperAdminDashboard extends StatelessWidget {
     };
   }
 
-  // Función para construir el título del dashboard
-  Widget _buildDashboardTitle(TextStyle displayLarge, bool isSmallScreen) {
-    return Text(
-      'Panel de Super Administrador',
-      style: displayLarge.copyWith(
-        fontSize: isSmallScreen ? 28 : 42,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  // Función para construir la información del usuario
-  Widget _buildUserInfo(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
-    final user = authProvider.user;
-    final userName = user?['nombres'] ?? user?['apellidos'] ?? 'Super Admin';
-
+  // Función para construir el saludo del usuario
+  Widget _buildUserGreeting(String userName, bool isSmallScreen) {
     return Column(
       children: [
         Text(
-          'Bienvenido, $userName',
-          style: headlineMedium.copyWith(
-            color: primary,
-            fontSize: isSmallScreen ? 18 : 24,
+          'Hola, $userName',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 28 : 38,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          'Super Administrador del Sistema',
+          'Control Total del Sistema',
           style: TextStyle(
-            color: primary.withValues(alpha: 0.7),
-            fontSize: isSmallScreen ? 14 : 16,
+            fontSize: isSmallScreen ? 16 : 18,
+            color: Colors.grey[600],
           ),
           textAlign: TextAlign.center,
         ),
@@ -68,16 +55,6 @@ class SuperAdminDashboard extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 32),
-        Text(
-          'Gestión Global del Sistema',
-          style: TextStyle(
-            fontSize: isSmallScreen ? 18 : 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -127,43 +104,7 @@ class SuperAdminDashboard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.admin_panel_settings,
-                color: Colors.blue,
-                size: isSmallScreen ? 24 : 32,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Acceso Total al Sistema',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: isSmallScreen ? 16 : 18,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Como super administrador, tienes control completo sobre todas las instituciones y usuarios del sistema.',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: isSmallScreen ? 12 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+
       ],
     );
   }
@@ -225,34 +166,46 @@ class SuperAdminDashboard extends StatelessWidget {
     );
   }
 
-  // Función para construir el botón de cerrar sesión
-  Widget _buildSignOutButton(AuthProvider authProvider) {
-    return ElevatedButton.icon(
-      onPressed: () async {
-        await authProvider.logout();
-      },
-      icon: const Icon(Icons.logout),
-      label: const Text('Cerrar Sesión'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
     final spacing = context.spacing;
-    final textStyles = context.textStyles;
+    
+    final user = authProvider.user;
+    final userName = user?['nombres'] ?? 'Usuario';
+    final userRole = 'Super Admin';
 
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Super Admin - AsistApp'),
+        title: const Text('AsistApp'),
         backgroundColor: colors.primary,
         actions: [
+          // Badge de rol
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.verified_user, size: 16, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  userRole,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -268,7 +221,6 @@ class SuperAdminDashboard extends StatelessWidget {
             final isSmallScreen = responsive['isSmallScreen'] as bool;
             final horizontalPadding = responsive['horizontalPadding'] as double;
             final verticalPadding = responsive['verticalPadding'] as double;
-            final titleSpacing = responsive['titleSpacing'] as double;
             final cardSpacing = responsive['cardSpacing'] as double;
 
             return SingleChildScrollView(
@@ -278,22 +230,12 @@ class SuperAdminDashboard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Título del dashboard
-                    _buildDashboardTitle(textStyles.displayLarge, isSmallScreen),
-                    SizedBox(height: titleSpacing),
-
-                    // Información del usuario
-                    _buildUserInfo(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
+                    // Saludo personalizado
+                    _buildUserGreeting(userName, isSmallScreen),
                     SizedBox(height: cardSpacing),
 
                     // Opciones del dashboard
                     _buildDashboardOptions(isSmallScreen),
-
-                    // Espacio adicional antes del botón
-                    SizedBox(height: cardSpacing * 2),
-
-                    // Botón de cerrar sesión
-                    _buildSignOutButton(authProvider),
 
                     // Espacio final
                     SizedBox(height: verticalPadding),
