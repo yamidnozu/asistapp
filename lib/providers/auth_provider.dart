@@ -93,6 +93,39 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Limpiar datos pesados (ej. instituciones) pero mantener usuario y tokens
+  void clearHeavyData() {
+    _institutions = null;
+    notifyListeners();
+  }
+
+  // Limpiar todo excepto usuario básico (para cuando se vuelve a la app)
+  void clearTemporaryData() {
+    _institutions = null;
+    _selectedInstitutionId = null;
+    notifyListeners();
+  }
+
+  // Recuperar estado completo (llamar al volver a la app)
+  Future<void> recoverFullState() async {
+    if (_accessToken != null) {
+      debugPrint('Recuperando estado completo del usuario');
+      await loadUserInstitutions();
+      
+      // Si tenía una institución guardada, recuperarla
+      if (_selectedInstitutionId != null && _institutions != null) {
+        final institutionExists = _institutions!.any((i) => i.id == _selectedInstitutionId);
+        if (!institutionExists) {
+          debugPrint('Institución guardada ya no existe, limpiando');
+          _selectedInstitutionId = null;
+          await _saveTokensToStorage();
+        }
+      }
+      
+      notifyListeners();
+    }
+  }
+
   // Cargar instituciones del usuario
   Future<void> loadUserInstitutions() async {
     if (_accessToken == null) return;

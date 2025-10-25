@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
+import '../widgets/role_guard.dart';
+import '../utils/role_enum.dart';
 
 class StudentDashboard extends StatelessWidget {
   const StudentDashboard({super.key});
@@ -124,12 +126,15 @@ class StudentDashboard extends StatelessWidget {
               color: Colors.green,
               isSmallScreen: isSmallScreen,
             ),
-            _buildFeatureCard(
-              icon: Icons.calendar_today,
-              title: 'Mi Horario',
-              description: 'Ver clases del día',
-              color: Colors.blue,
-              isSmallScreen: isSmallScreen,
+            RoleGuard(
+              allowedRoles: [UserRole.estudiante],
+              child: _buildFeatureCard(
+                icon: Icons.calendar_today,
+                title: 'Mi Horario',
+                description: 'Ver clases del día',
+                color: Colors.blue,
+                isSmallScreen: isSmallScreen,
+              ),
             ),
             _buildFeatureCard(
               icon: Icons.assignment,

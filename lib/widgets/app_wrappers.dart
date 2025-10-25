@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/navigation_state_provider.dart';
 import '../screens/login_screen.dart';
 import '../screens/institution_selection_screen.dart';
 import '../screens/home_screen.dart';
@@ -8,6 +9,7 @@ import '../screens/super_admin_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
 import '../screens/student_dashboard.dart';
+import '../utils/app_routes.dart';
 
 /// Wrapper que maneja el ciclo de vida de la aplicación
 class LifecycleAwareWrapper extends StatefulWidget {
@@ -34,18 +36,27 @@ class _LifecycleAwareWrapperState extends State<LifecycleAwareWrapper>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // final authProvider = context.read<AuthProvider>();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final navigationProvider = Provider.of<NavigationStateProvider>(context, listen: false);
 
     switch (state) {
       case AppLifecycleState.resumed:
-        debugPrint('App resumed');
-        // authProvider.onAppResumed(); // TODO: Implementar si es necesario
+        debugPrint('App resumed - recovering full state');
+        // Recuperar estado completo del usuario y navegación
+        authProvider.recoverFullState();
+        
+        // Si el estado de navegación es muy antiguo, limpiarlo
+        if (!navigationProvider.hasValidState()) {
+          navigationProvider.clearNavigationState();
+        }
         break;
       case AppLifecycleState.inactive:
         debugPrint('App inactive - transitioning');
         break;
       case AppLifecycleState.paused:
-        debugPrint('App paused - preparing for background');
+        debugPrint('App paused - saving current state');
+        // Guardar estado actual antes de pausar
+        navigationProvider.refreshStateTimestamp();
         break;
       case AppLifecycleState.hidden:
         debugPrint('App hidden');
@@ -68,8 +79,8 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+    return Consumer2<AuthProvider, NavigationStateProvider>(
+      builder: (context, authProvider, navigationProvider, child) {
         // Si no hay usuario autenticado, mostrar pantalla de login
         if (!authProvider.isAuthenticated) {
           return const LoginScreen();
@@ -84,33 +95,75 @@ class AuthWrapper extends StatelessWidget {
           return const InstitutionSelectionScreen();
         }
 
-        // Si está autenticado, navegar según el rol del usuario
+        // Intentar recuperar estado de navegación previo
+        if (navigationProvider.hasValidState() && navigationProvider.currentRoute != null) {
+          final savedRoute = navigationProvider.currentRoute!;
+          debugPrint('Recuperando navegación guardada: $savedRoute');
+          
+          return _getScreenForRoute(savedRoute, authProvider);
+        }
+
+        // Si no hay estado guardado, navegar según el rol del usuario
         final user = authProvider.user;
         final userRole = user?['rol'] as String?;
 
         // Determinar qué dashboard mostrar según el rol
         Widget dashboard;
+        String route;
+        
         switch (userRole) {
           case 'super_admin':
             dashboard = const SuperAdminDashboard();
+            route = AppRoutes.superAdminDashboard;
             break;
           case 'admin_institucion':
             dashboard = const AdminDashboard();
+            route = AppRoutes.adminDashboard;
             break;
           case 'profesor':
             dashboard = const TeacherDashboard();
+            route = AppRoutes.teacherDashboard;
             break;
           case 'estudiante':
             dashboard = const StudentDashboard();
+            route = AppRoutes.studentDashboard;
             break;
           default:
-            // Fallback al dashboard genérico si el rol no está definido
             dashboard = const HomeScreen();
+            route = AppRoutes.home;
             break;
         }
+
+        // Guardar el estado de navegación actual
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          navigationProvider.saveNavigationState(route);
+        });
 
         return dashboard;
       },
     );
+  }
+
+  /// Obtiene la pantalla correspondiente a una ruta guardada
+  Widget _getScreenForRoute(String route, AuthProvider authProvider) {
+    switch (route) {
+      case AppRoutes.superAdminDashboard:
+        return const SuperAdminDashboard();
+      case AppRoutes.adminDashboard:
+        return const AdminDashboard();
+      case AppRoutes.teacherDashboard:
+        return const TeacherDashboard();
+      case AppRoutes.studentDashboard:
+        return const StudentDashboard();
+      case AppRoutes.institutionSelection:
+        return const InstitutionSelectionScreen();
+      case AppRoutes.home:
+        return const HomeScreen();
+      default:
+        // Si la ruta no es válida, ir al dashboard según rol
+        final userRole = authProvider.user?['rol'] as String?;
+        final defaultRoute = AppRoutes.getDashboardRouteForRole(userRole ?? '');
+        return _getScreenForRoute(defaultRoute, authProvider);
+    }
   }
 }

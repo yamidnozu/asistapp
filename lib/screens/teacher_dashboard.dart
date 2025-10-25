@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
+import '../widgets/role_guard.dart';
+import '../utils/role_enum.dart';
 
 class TeacherDashboard extends StatelessWidget {
   const TeacherDashboard({super.key});
@@ -145,12 +147,15 @@ class TeacherDashboard extends StatelessWidget {
               color: Colors.purple,
               isSmallScreen: isSmallScreen,
             ),
-            _buildFeatureCard(
-              icon: Icons.notifications,
-              title: 'Notificaciones',
-              description: 'Enviar avisos a padres',
-              color: Colors.teal,
-              isSmallScreen: isSmallScreen,
+            RoleGuard(
+              allowedRoles: [UserRole.profesor],
+              child: _buildFeatureCard(
+                icon: Icons.notifications,
+                title: 'Notificaciones',
+                description: 'Enviar avisos a padres',
+                color: Colors.teal,
+                isSmallScreen: isSmallScreen,
+              ),
             ),
             _buildFeatureCard(
               icon: Icons.calendar_today,

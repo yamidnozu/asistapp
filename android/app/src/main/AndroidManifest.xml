@@ -25,6 +25,34 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            
+            <!-- Deep linking para HTTP/HTTPS -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                
+                <!-- Dominio de producción - ajustar según tu dominio -->
+                <data
+                    android:scheme="https"
+                    android:host="asistapp.com"
+                    android:pathPrefix="/" />
+                <data
+                    android:scheme="http"
+                    android:host="asistapp.com"
+                    android:pathPrefix="/" />
+            </intent-filter>
+            
+            <!-- Deep linking con esquema personalizado -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                
+                <data
+                    android:scheme="asistapp"
+                    android:host="app" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
