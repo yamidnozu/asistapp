@@ -102,6 +102,145 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Función para construir la sección de usuarios de prueba
+  Widget _buildTestUsersSection(bool isSmallScreen) {
+    return Column(
+      children: [
+        const SizedBox(height: 32),
+        Text(
+          'Usuarios de Prueba (Desarrollo)',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 16 : 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[700],
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            _buildTestUserButton(
+              'Super Admin',
+              'superadmin@asistapp.com',
+              'Admin123!',
+              'super_admin',
+              'Todas',
+              Colors.blue,
+              isSmallScreen,
+            ),
+            _buildTestUserButton(
+              'Admin Multi',
+              'multi@asistapp.com',
+              'Multi123!',
+              'admin_institucion',
+              '2 instituciones',
+              Colors.green,
+              isSmallScreen,
+            ),
+            _buildTestUserButton(
+              'Admin San José',
+              'admin@sanjose.edu',
+              'SanJose123!',
+              'admin_institucion',
+              '1 institución',
+              Colors.orange,
+              isSmallScreen,
+            ),
+            _buildTestUserButton(
+              'Profesor',
+              'pedro.garcia@sanjose.edu',
+              'Prof123!',
+              'profesor',
+              '1 institución',
+              Colors.red,
+              isSmallScreen,
+            ),
+            _buildTestUserButton(
+              'Estudiante',
+              'juan.perez@sanjose.edu',
+              'Est123!',
+              'estudiante',
+              '1 institución',
+              Colors.purple,
+              isSmallScreen,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Presiona un botón para autocompletar los campos',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 12 : 14,
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  // Función para construir un botón de usuario de prueba
+  Widget _buildTestUserButton(
+    String name,
+    String email,
+    String password,
+    String role,
+    String institutions,
+    Color color,
+    bool isSmallScreen,
+  ) {
+    return SizedBox(
+      width: isSmallScreen ? 140 : 160,
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            _emailController.text = email;
+            _passwordController.text = password;
+            _errorMessage = null;
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color.withValues(alpha: 0.1),
+          foregroundColor: color,
+          side: BorderSide(color: color.withValues(alpha: 0.3)),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 11 : 12,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              role,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 9 : 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              institutions,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 8 : 9,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Función para construir el mensaje de error
   Widget _buildErrorMessage() {
     if (_errorMessage == null) return const SizedBox.shrink();
@@ -162,6 +301,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Botón de login
                       _buildLoginButton(),
+                      SizedBox(height: spacing.lg),
+
+                      // Usuarios de prueba (desarrollo)
+                      _buildTestUsersSection(isSmallScreen),
                     ],
                   ),
                 ),

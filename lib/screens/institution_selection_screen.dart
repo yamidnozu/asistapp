@@ -4,6 +4,10 @@ import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
 import '../screens/home_screen.dart';
+import '../screens/super_admin_dashboard.dart';
+import '../screens/admin_dashboard.dart';
+import '../screens/teacher_dashboard.dart';
+import '../screens/student_dashboard.dart';
 import '../models/institution.dart';
 
 class InstitutionSelectionScreen extends StatefulWidget {
@@ -180,11 +184,34 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       authProvider.selectInstitution(_selectedInstitutionId!);
 
-      // Navegar al dashboard
+      // Navegar al dashboard según el rol del usuario
       if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final user = authProvider.user;
+        final userRole = user?['rol'] as String?;
+
+        Widget dashboard;
+        switch (userRole) {
+          case 'super_admin':
+            dashboard = const SuperAdminDashboard();
+            break;
+          case 'admin_institucion':
+            dashboard = const AdminDashboard();
+            break;
+          case 'profesor':
+            dashboard = const TeacherDashboard();
+            break;
+          case 'estudiante':
+            dashboard = const StudentDashboard();
+            break;
+          default:
+            dashboard = const HomeScreen();
+            break;
+        }
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
+            builder: (context) => dashboard,
           ),
         );
       }

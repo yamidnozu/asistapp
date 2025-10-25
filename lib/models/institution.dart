@@ -17,9 +17,9 @@ class Institution {
   factory Institution.fromJson(Map<String, dynamic> json) {
     return Institution(
       id: json['id'] as String,
-      name: json['name'] as String? ?? 'Institución sin nombre',
+      name: json['nombre'] as String? ?? json['name'] as String? ?? 'Institución sin nombre', // Soporta tanto 'nombre' como 'name'
       description: json['description'] as String?,
-      role: json['role'] as String?,
+      role: json['rolEnInstitucion'] as String? ?? json['role'] as String?, // Soporta tanto 'rolEnInstitucion' como 'role'
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
@@ -28,9 +28,11 @@ class Institution {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'name': name, // Mantener 'name' para compatibilidad con otros usos
+      'nombre': name, // Agregar 'nombre' por si se necesita
       if (description != null) 'description': description,
       if (role != null) 'role': role,
+      if (role != null) 'rolEnInstitucion': role, // Agregar 'rolEnInstitucion' por si se necesita
       if (metadata != null) 'metadata': metadata,
     };
   }

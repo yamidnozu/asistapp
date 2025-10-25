@@ -4,6 +4,10 @@ import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
 import '../screens/institution_selection_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/super_admin_dashboard.dart';
+import '../screens/admin_dashboard.dart';
+import '../screens/teacher_dashboard.dart';
+import '../screens/student_dashboard.dart';
 
 /// Wrapper que maneja el ciclo de vida de la aplicación
 class LifecycleAwareWrapper extends StatefulWidget {
@@ -80,8 +84,32 @@ class AuthWrapper extends StatelessWidget {
           return const InstitutionSelectionScreen();
         }
 
-        // Si está autenticado y tiene institución seleccionada (o solo una), mostrar dashboard
-        return const HomeScreen();
+        // Si está autenticado, navegar según el rol del usuario
+        final user = authProvider.user;
+        final userRole = user?['rol'] as String?;
+
+        // Determinar qué dashboard mostrar según el rol
+        Widget dashboard;
+        switch (userRole) {
+          case 'super_admin':
+            dashboard = const SuperAdminDashboard();
+            break;
+          case 'admin_institucion':
+            dashboard = const AdminDashboard();
+            break;
+          case 'profesor':
+            dashboard = const TeacherDashboard();
+            break;
+          case 'estudiante':
+            dashboard = const StudentDashboard();
+            break;
+          default:
+            // Fallback al dashboard genérico si el rol no está definido
+            dashboard = const HomeScreen();
+            break;
+        }
+
+        return dashboard;
       },
     );
   }
