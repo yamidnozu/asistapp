@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../types';
 import { config } from './app';

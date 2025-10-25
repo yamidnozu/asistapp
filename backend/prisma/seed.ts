@@ -63,6 +63,62 @@ async function main() {
   console.log('✅ Super admin creado:', superAdmin.email);
 
   // ============================================
+  // 2.1. CREAR USUARIO MULTI-INSTITUCIÓN (PRUEBA)
+  // ============================================
+  console.log('👥 Creando usuario multi-institución...');
+
+  const multiUserPassword = await bcrypt.hash('Multi123!', 10);
+
+  const multiUser = await prisma.usuario.upsert({
+    where: { email: 'multi@asistapp.com' },
+    update: {},
+    create: {
+      email: 'multi@asistapp.com',
+      passwordHash: multiUserPassword,
+      nombres: 'Usuario',
+      apellidos: 'Multi',
+      rol: 'admin_institucion',
+      activo: true,
+    },
+  });
+
+  // Crear relaciones con ambas instituciones
+  await Promise.all([
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: multiUser.id,
+          institucionId: instituciones[0].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: multiUser.id,
+        institucionId: instituciones[0].id,
+        rolEnInstitucion: 'admin',
+        activo: true,
+      },
+    }),
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: multiUser.id,
+          institucionId: instituciones[1].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: multiUser.id,
+        institucionId: instituciones[1].id,
+        rolEnInstitucion: 'admin',
+        activo: true,
+      },
+    }),
+  ]);
+
+  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+
+  // ============================================
   // 3. CREAR ADMINS DE INSTITUCIÓN
   // ============================================
   console.log('👨‍💼 Creando admins de institución...');
@@ -75,7 +131,6 @@ async function main() {
       where: { email: 'admin@sanjose.edu' },
       update: {},
       create: {
-        institucionId: instituciones[0].id,
         email: 'admin@sanjose.edu',
         passwordHash: adminSanJosePassword,
         nombres: 'María',
@@ -89,13 +144,46 @@ async function main() {
       where: { email: 'admin@fps.edu' },
       update: {},
       create: {
-        institucionId: instituciones[1].id,
         email: 'admin@fps.edu',
         passwordHash: adminFpsPassword,
         nombres: 'Carlos',
         apellidos: 'Rodríguez',
         rol: 'admin_institucion',
         telefono: '555-0203',
+        activo: true,
+      },
+    }),
+  ]);
+
+  // Crear relaciones usuario-institución para admins
+  await Promise.all([
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: adminsInstitucion[0].id,
+          institucionId: instituciones[0].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: adminsInstitucion[0].id,
+        institucionId: instituciones[0].id,
+        rolEnInstitucion: 'admin',
+        activo: true,
+      },
+    }),
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: adminsInstitucion[1].id,
+          institucionId: instituciones[1].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: adminsInstitucion[1].id,
+        institucionId: instituciones[1].id,
+        rolEnInstitucion: 'admin',
         activo: true,
       },
     }),
@@ -116,7 +204,6 @@ async function main() {
       where: { email: 'pedro.garcia@sanjose.edu' },
       update: {},
       create: {
-        institucionId: instituciones[0].id,
         email: 'pedro.garcia@sanjose.edu',
         passwordHash: profesor1Password,
         nombres: 'Pedro',
@@ -130,13 +217,46 @@ async function main() {
       where: { email: 'ana.lopez@sanjose.edu' },
       update: {},
       create: {
-        institucionId: instituciones[0].id,
         email: 'ana.lopez@sanjose.edu',
         passwordHash: profesor2Password,
         nombres: 'Ana',
         apellidos: 'López',
         rol: 'profesor',
         telefono: '555-0105',
+        activo: true,
+      },
+    }),
+  ]);
+
+  // Crear relaciones usuario-institución para profesores
+  await Promise.all([
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: profesores[0].id,
+          institucionId: instituciones[0].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: profesores[0].id,
+        institucionId: instituciones[0].id,
+        rolEnInstitucion: 'profesor',
+        activo: true,
+      },
+    }),
+    prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: profesores[1].id,
+          institucionId: instituciones[0].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: profesores[1].id,
+        institucionId: instituciones[0].id,
+        rolEnInstitucion: 'profesor',
         activo: true,
       },
     }),
@@ -165,12 +285,28 @@ async function main() {
       where: { email: `${estudianteData.nombres.toLowerCase()}.${estudianteData.apellidos.toLowerCase()}@sanjose.edu` },
       update: {},
       create: {
-        institucionId: instituciones[0].id,
         email: `${estudianteData.nombres.toLowerCase()}.${estudianteData.apellidos.toLowerCase()}@sanjose.edu`,
         passwordHash: estudiantePassword,
         nombres: estudianteData.nombres,
         apellidos: estudianteData.apellidos,
         rol: 'estudiante',
+        activo: true,
+      },
+    });
+
+    // Crear relación usuario-institución para estudiante
+    await prisma.usuarioInstitucion.upsert({
+      where: {
+        usuarioId_institucionId: {
+          usuarioId: usuario.id,
+          institucionId: instituciones[0].id,
+        },
+      },
+      update: {},
+      create: {
+        usuarioId: usuario.id,
+        institucionId: instituciones[0].id,
+        rolEnInstitucion: 'estudiante',
         activo: true,
       },
     });
@@ -484,6 +620,8 @@ async function main() {
   console.log('\n🔐 Credenciales de acceso:');
   console.log('Super Admin: superadmin@asistapp.com / Admin123!');
   console.log('Admin San José: admin@sanjose.edu / SanJose123!');
+  console.log('Admin FPS: admin@fps.edu / Fps123!');
+  console.log('Usuario Multi-institución: multi@asistapp.com / Multi123!');
   console.log('Profesor Pedro: pedro.garcia@sanjose.edu / Prof123!');
   console.log('Estudiantes: [nombre].[apellido]@sanjose.edu / Est123!');
 }

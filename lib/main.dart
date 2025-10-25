@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'providers/user_provider.dart';
 import 'providers/auth_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
-import 'theme/app_constants.dart';
-import 'widgets/index.dart';
-import 'ui/widgets/index.dart';
+import 'widgets/app_wrappers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +41,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
@@ -58,13 +54,13 @@ class _MyAppState extends State<MyApp> {
             style: TextStyle(
               decoration: TextDecoration.none,
               color: AppColors.instance.white,
-              fontSize: AppConstants.instance.defaultFontSize,
+              fontSize: 14.0,
               fontWeight: FontWeight.normal,
             ),
             child: Stack(
               children: [
                 child!,
-                ErrorLoggerWidget(),
+                // ErrorLoggerWidget(), // Temporalmente comentado para evitar problemas
               ],
             ),
           );

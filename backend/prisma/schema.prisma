@@ -32,7 +32,7 @@ model Institucion {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones
-  usuarios             Usuario[]
+  usuarioInstituciones UsuarioInstitucion[]
   periodosAcademicos   PeriodoAcademico[]
   grupos               Grupo[]
   materias             Materia[]
@@ -42,10 +42,27 @@ model Institucion {
   @@map("instituciones")
 }
 
+// 1.1. USUARIO_INSTITUCIONES (Relación muchos a muchos)
+model UsuarioInstitucion {
+  id            String   @id @default(uuid()) @db.Uuid
+  usuarioId     String   @map("usuario_id") @db.Uuid
+  institucionId String   @map("institucion_id") @db.Uuid
+  rolEnInstitucion String? @map("rol_en_institucion") @db.VarChar(50) // Rol específico en esta institución (opcional)
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  usuario     Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  institucion Institucion @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, institucionId])
+  @@map("usuario_instituciones")
+}
+
 // 2. USUARIOS (Admins, Profesores, Estudiantes)
 model Usuario {
   id             String      @id @default(uuid()) @db.Uuid
-  institucionId  String?     @map("institucion_id") @db.Uuid
   email          String      @unique @db.VarChar(255)
   passwordHash   String      @map("password_hash") @db.VarChar(255)
   nombres        String      @db.VarChar(255)
@@ -58,8 +75,8 @@ model Usuario {
   updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones
-  institucion         Institucion? @relation(fields: [institucionId], references: [id], onDelete: Cascade)
   estudiante          Estudiante?
+  usuarioInstituciones UsuarioInstitucion[]
   horarios            Horario[]
   asistencias         Asistencia[]
   refreshTokens       RefreshToken[]

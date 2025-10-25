@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import AuthService from '../services/auth.service';
-import { JWTPayload } from '../types';
+import { AuthenticationError, AuthorizationError, JWTPayload, UserRole } from '../types';
 
 export interface AuthenticatedRequest extends FastifyRequest {
   user?: JWTPayload;
@@ -14,13 +14,13 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.code(401).send({ error: 'Token de autenticación requerido' });
+      throw new AuthenticationError('Token de autenticación requerido');
     }
 
     const token = authHeader.substring(7); // Remover 'Bearer '
 
     if (!token) {
-      return reply.code(401).send({ error: 'Token de autenticación requerido' });
+      throw new AuthenticationError('Token de autenticación requerido');
     }
 
     // Verificar token
@@ -28,21 +28,47 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
     request.user = decoded;
 
   } catch (error) {
-    return reply.code(401).send({ error: 'Token inválido o expirado' });
+    if (error instanceof AuthenticationError) {
+      return reply.code(error.statusCode).send({
+        success: false,
+        error: error.message,
+        code: error.code,
+      });
+    }
+    // Capturar errores de JWT inválido y convertirlos en AuthenticationError
+    if (error instanceof Error && (error.message.includes('inválido') || error.message.includes('expirado'))) {
+      return reply.code(401).send({
+        success: false,
+        error: 'Token de autenticación inválido',
+        code: 'AUTHENTICATION_ERROR',
+      });
+    }
+    throw error;
   }
 };
 
 /**
  * Middleware para verificar roles específicos
  */
-export const authorize = (allowedRoles: string[]) => {
+export const authorize = (allowedRoles: UserRole[]) => {
   return async (request: AuthenticatedRequest, reply: FastifyReply) => {
-    if (!request.user) {
-      return reply.code(401).send({ error: 'Usuario no autenticado' });
-    }
+    try {
+      if (!request.user) {
+        throw new AuthenticationError('Usuario no autenticado');
+      }
 
-    if (!allowedRoles.includes(request.user.rol)) {
-      return reply.code(403).send({ error: 'Acceso denegado: rol insuficiente' });
+      if (!allowedRoles.includes(request.user.rol)) {
+        throw new AuthorizationError('Acceso denegado: rol insuficiente');
+      }
+    } catch (error) {
+      if (error instanceof AuthenticationError || error instanceof AuthorizationError) {
+        return reply.code(error.statusCode).send({
+          success: false,
+          error: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
     }
   };
 };

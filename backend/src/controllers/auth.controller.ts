@@ -1,7 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { prisma } from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import AuthService from '../services/auth.service';
-import { ApiResponse, LoginRequest, RefreshTokenResponse } from '../types';
+import { ApiResponse, AuthenticationError, LoginRequest, NotFoundError, RefreshTokenResponse, UsuarioConInstituciones, ValidationError } from '../types';
 
 export class AuthController {
   /**
@@ -13,10 +14,7 @@ export class AuthController {
 
       // Validar entrada
       if (!credentials.email || !credentials.password) {
-        return reply.code(400).send({
-          success: false,
-          error: 'Email y contraseña son requeridos',
-        });
+        throw new ValidationError('Email y contraseña son requeridos');
       }
 
       // Intentar login
@@ -33,26 +31,49 @@ export class AuthController {
         }
       });
 
-    } catch (error: any) {
-      // El error será manejado por el error handler global
+    } catch (error) {
       throw error;
     }
   }
 
   /**
-   * Verifica el estado de autenticación del usuario
+   * Obtiene las instituciones del usuario autenticado
    */
-  public static async verify(request: AuthenticatedRequest, reply: FastifyReply) {
+  public static async getUserInstitutions(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      // Si llega aquí, el middleware de auth ya validó el token
+      const user = request.user;
+
+      if (!user) {
+        throw new AuthenticationError('Usuario no autenticado');
+      }
+
+      const usuario = await prisma.usuario.findUnique({
+        where: { id: user.id },
+        include: {
+          usuarioInstituciones: {
+            where: { activo: true },
+            include: {
+              institucion: true,
+            },
+          },
+        },
+      }) as UsuarioConInstituciones | null;
+
+      if (!usuario) {
+        throw new NotFoundError('Usuario');
+      }
+
+      const instituciones = usuario.usuarioInstituciones.map((ui) => ({
+        id: ui.institucion.id,
+        nombre: ui.institucion.nombre,
+        rolEnInstitucion: ui.rolEnInstitucion,
+      }));
+
       return reply.code(200).send({
         success: true,
-        data: {
-          valid: true,
-          user: request.user,
-        },
+        data: instituciones,
       });
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -70,7 +91,7 @@ export class AuthController {
       const user = authReq.user;
 
       if (!user) {
-        return reply.code(401).send({ success: false, error: 'Usuario no autenticado' });
+        throw new AuthenticationError('Usuario no autenticado');
       }
 
       await AuthService.revokeRefreshTokens(user.id, refreshToken);
@@ -79,7 +100,7 @@ export class AuthController {
         success: true,
         message: 'Sesión cerrada exitosamente',
       });
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -94,10 +115,7 @@ export class AuthController {
 
       // Validar entrada
       if (!refreshToken) {
-        return reply.code(400).send({
-          success: false,
-          error: 'Refresh token es requerido',
-        });
+        throw new ValidationError('Refresh token es requerido');
       }
 
       // Intentar refresh
@@ -112,7 +130,26 @@ export class AuthController {
         },
       } as ApiResponse<RefreshTokenResponse>);
 
-    } catch (error: any) {
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Verifica que el token del usuario es válido
+   */
+  public static async verify(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const user = request.user;
+
+      return reply.code(200).send({
+        success: true,
+        data: {
+          usuario: user,
+          valid: true,
+        },
+      });
+    } catch (error) {
       throw error;
     }
   }

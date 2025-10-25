@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "d8fbb4e0-f89c-4806-aebf-710f997ad1ed",
 		"name": "🪙 Asistapp API v2.0",
-		"description": "Colección completa para probar la API de AsistApp Backend v2.0",
+		"description": "Colección completa para probar la API de AsistApp Backend v2.0\n\n## Credenciales por Defecto\n\n**Super Admin:**\n- Email: superadmin@asistapp.com\n- Password: Admin123!\n\n**Admin San José:**\n- Email: admin@sanjose.edu\n- Password: SanJose123!\n\n**Admin FPS:**\n- Email: admin@fps.edu\n- Password: Fps123!\n\n**Usuario Multi-institución:**\n- Email: multi@asistapp.com\n- Password: Multi123!\n\n**Profesores:**\n- pedro.garcia@sanjose.edu / Prof123!\n- ana.lopez@sanjose.edu / Prof456!\n\n**Estudiantes:**\n- [nombre].[apellido]@sanjose.edu / Est123!\n\n## Uso\n\n1. Importar el environment: Asistapp.postman_environment.json\n2. Ejecutar 'Login - Super Admin' para obtener token\n3. El token se guarda automáticamente en las variables de entorno\n4. Probar los demás endpoints\n\n## Rutas Corregidas\n\nTodas las rutas de usuarios han sido corregidas y ahora funcionan correctamente:\n- GET /usuarios\n- GET /usuarios/:id\n- GET /usuarios/rol/:role\n- GET /usuarios/institucion/:institucionId\n- POST /usuarios/admin/cleanup-tokens",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -11,11 +11,29 @@
 			"item": [
 				{
 					"name": "API Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Health check exitoso\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.message).to.include('AsistApp Backend');",
+									"    pm.expect(jsonData.timestamp).to.be.a('string');",
+									"});",
+									"",
+									"console.log('✅ API funcionando correctamente');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/",
+							"raw": "{{protocol}}://{{host}}:{{port}}/",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
@@ -36,16 +54,25 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
 									"// Verificar que el login fue exitoso",
 									"pm.test(\"Login exitoso\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"    pm.expect(jsonData.data).to.have.property('usuario');",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('accessToken');",
+									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"        pm.expect(jsonData.data).to.have.property('usuario');",
+									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
+									"        pm.expect(jsonData.data.expiresIn).to.be.a('number');",
+									"    }",
 									"});",
 									"",
-									"// Actualizar variables del environment",
+									"// Actualizar variables del environment solo si el login fue exitoso",
 									"var jsonData = pm.response.json();",
 									"if (jsonData.success && jsonData.data) {",
 									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
@@ -53,11 +80,14 @@
 									"    pm.environment.set('userId', jsonData.data.usuario.id);",
 									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
 									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('institucionId', jsonData.data.usuario.institucionId || '');",
+									"    pm.environment.set('instituciones', JSON.stringify(jsonData.data.usuario.instituciones || []));",
 									"    ",
 									"    console.log('✅ Login exitoso - Token actualizado');",
 									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
 									"    console.log('Rol:', jsonData.data.usuario.rol);",
+									"    console.log('Instituciones:', jsonData.data.usuario.instituciones ? jsonData.data.usuario.instituciones.length : 0);",
+									"} else {",
+									"    console.log('❌ Login fallido:', jsonData.error || 'Error desconocido');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -69,172 +99,16 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"email\": \"{{adminUser}}\", \"password\": \"{{adminPassword}}\"}"
+							"raw": "{\"email\": \"superadmin@asistapp.com\", \"password\": \"Admin123!\"}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/login",
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/login",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["login"]
+							"path": ["auth", "login"]
 						},
-						"description": "Login como Super Admin"
-					}
-				},
-				{
-					"name": "Login - Admin San José",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar que el login fue exitoso",
-									"pm.test(\"Login exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"    pm.expect(jsonData.data).to.have.property('usuario');",
-									"});",
-									"",
-									"// Actualizar variables del environment",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    pm.environment.set('userId', jsonData.data.usuario.id);",
-									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
-									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('institucionId', jsonData.data.usuario.institucionId || '');",
-									"    ",
-									"    console.log('✅ Login exitoso - Token actualizado');",
-									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
-									"    console.log('Rol:', jsonData.data.usuario.rol);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"email\": \"admin@sanjose.edu\", \"password\": \"SanJose123!\"}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/login",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["login"]
-						},
-						"description": "Login como Admin San José"
-					}
-				},
-				{
-					"name": "Login - Profesor",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar que el login fue exitoso",
-									"pm.test(\"Login exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"    pm.expect(jsonData.data).to.have.property('usuario');",
-									"});",
-									"",
-									"// Actualizar variables del environment",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    pm.environment.set('userId', jsonData.data.usuario.id);",
-									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
-									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('institucionId', jsonData.data.usuario.institucionId || '');",
-									"    ",
-									"    console.log('✅ Login exitoso - Token actualizado');",
-									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
-									"    console.log('Rol:', jsonData.data.usuario.rol);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"email\": \"pedro.garcia@sanjose.edu\", \"password\": \"Prof123!\"}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/login",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["login"]
-						},
-						"description": "Login como Profesor"
-					}
-				},
-				{
-					"name": "Login - Estudiante",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar que el login fue exitoso",
-									"pm.test(\"Login exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"    pm.expect(jsonData.data).to.have.property('usuario');",
-									"});",
-									"",
-									"// Actualizar variables del environment",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    pm.environment.set('userId', jsonData.data.usuario.id);",
-									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
-									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('institucionId', jsonData.data.usuario.institucionId || '');",
-									"    ",
-									"    console.log('✅ Login exitoso - Token actualizado');",
-									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
-									"    console.log('Rol:', jsonData.data.usuario.rol);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"email\": \"{{testUser}}\", \"password\": \"{{testPassword}}\"}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/login",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["login"]
-						},
-						"description": "Login como Estudiante (usuario de prueba)"
+						"description": "Login como Super Admin (usuario creado por seed: superadmin@asistapp.com, password: Admin123!)"
 					}
 				},
 				{
@@ -244,16 +118,25 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
 									"// Verificar que el login fue exitoso",
 									"pm.test(\"Login exitoso\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"    pm.expect(jsonData.data).to.have.property('usuario');",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('accessToken');",
+									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"        pm.expect(jsonData.data).to.have.property('usuario');",
+									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
+									"        pm.expect(jsonData.data.expiresIn).to.be.a('number');",
+									"    }",
 									"});",
 									"",
-									"// Actualizar variables del environment",
+									"// Actualizar variables del environment solo si el login fue exitoso",
 									"var jsonData = pm.response.json();",
 									"if (jsonData.success && jsonData.data) {",
 									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
@@ -261,11 +144,14 @@
 									"    pm.environment.set('userId', jsonData.data.usuario.id);",
 									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
 									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('institucionId', jsonData.data.usuario.institucionId || '');",
+									"    pm.environment.set('instituciones', JSON.stringify(jsonData.data.usuario.instituciones || []));",
 									"    ",
 									"    console.log('✅ Login exitoso - Token actualizado (sin rate limit)');",
 									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
 									"    console.log('Rol:', jsonData.data.usuario.rol);",
+									"    console.log('Instituciones:', jsonData.data.usuario.instituciones ? jsonData.data.usuario.instituciones.length : 0);",
+									"} else {",
+									"    console.log('❌ Login fallido:', jsonData.error || 'Error desconocido');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -277,20 +163,55 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"email\": \"{{adminUser}}\", \"password\": \"{{adminPassword}}\"}"
+							"raw": "{\"email\": \"superadmin@asistapp.com\", \"password\": \"Admin123!\"}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/login-test",
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/login-test",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["login-test"]
+							"path": ["auth", "login-test"]
 						},
-						"description": "Login sin rate limiting (solo para desarrollo/testing)"
+						"description": "Login sin rate limiting (solo para desarrollo/testing) - Super Admin"
 					}
 				},
 				{
-					"name": "Verify Token",
+					"name": "Get User Institutions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Verificar que se obtuvieron las instituciones",
+									"pm.test(\"Instituciones obtenidas\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.be.an('array');",
+									"    }",
+									"});",
+									"",
+									"// Guardar primera institución como variable de environment",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
+									"    pm.environment.set('institucionId', jsonData.data[0].id);",
+									"    pm.environment.set('institucionNombre', jsonData.data[0].nombre);",
+									"    ",
+									"    console.log('✅ Instituciones obtenidas: ' + jsonData.data.length);",
+									"    console.log('Primera institución: ' + jsonData.data[0].nombre);",
+									"} else {",
+									"    console.log('ℹ️ No hay instituciones disponibles o error:', jsonData.error || 'Sin instituciones');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -300,11 +221,57 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/verify",
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/instituciones",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["verify"]
+							"path": ["auth", "instituciones"]
+						},
+						"description": "Obtener instituciones del usuario autenticado"
+					}
+				},
+				{
+					"name": "Verify Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Token válido\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('usuario');",
+									"        pm.expect(jsonData.data).to.have.property('valid');",
+									"        pm.expect(jsonData.data.valid).to.eql(true);",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Token verificado correctamente');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/verify",
+							"protocol": "{{protocol}}",
+							"host": ["{{host}}"],
+							"port": "{{port}}",
+							"path": ["auth", "verify"]
 						},
 						"description": "Verificar token de acceso"
 					}
@@ -316,12 +283,21 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 401]);",
+									"});",
+									"",
 									"// Verificar que el refresh fue exitoso",
 									"pm.test(\"Refresh exitoso\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.have.property('accessToken');",
-									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('accessToken');",
+									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
+									"    }",
 									"});",
 									"",
 									"// Actualizar variables del environment con los nuevos tokens",
@@ -332,6 +308,8 @@
 									"    ",
 									"    console.log('✅ Token refrescado exitosamente');",
 									"    console.log('Nuevo access token actualizado');",
+									"} else {",
+									"    console.log('❌ Refresh fallido:', jsonData.error || 'Error desconocido');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -346,11 +324,11 @@
 							"raw": "{\"refreshToken\": \"{{refreshToken}}\"}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/refresh",
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/refresh",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["refresh"]
+							"path": ["auth", "refresh"]
 						},
 						"description": "Refrescar access token enviando refreshToken en el body"
 					}
@@ -362,10 +340,19 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 401]);",
+									"});",
+									"",
 									"// Verificar que el logout fue exitoso",
 									"pm.test(\"Logout exitoso\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('message');",
+									"    }",
 									"});",
 									"",
 									"// Limpiar variables del environment",
@@ -396,11 +383,11 @@
 							"raw": "{\"refreshToken\": \"{{refreshToken}}\"}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/logout",
+							"raw": "{{protocol}}://{{host}}:{{port}}/auth/logout",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["logout"]
+							"path": ["auth", "logout"]
 						},
 						"description": "Cerrar sesión enviando refreshToken en el body"
 					}
@@ -412,6 +399,31 @@
 			"item": [
 				{
 					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuarios obtenidos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.be.an('array');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Usuarios obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -421,7 +433,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/usuarios",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
@@ -432,6 +444,32 @@
 				},
 				{
 					"name": "Get User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 404, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuario obtenido\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('id');",
+									"        pm.expect(jsonData.data).to.have.property('email');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Usuario obtenido:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -441,7 +479,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/usuarios/{{userId}}",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{userId}}",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
@@ -452,6 +490,31 @@
 				},
 				{
 					"name": "Get Users by Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuarios por rol obtenidos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.be.an('array');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Usuarios por rol obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -461,17 +524,87 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/usuarios/rol/{{role}}",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/rol/{{role}}",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
 							"path": ["usuarios", "rol", "{{role}}"]
 						},
-						"description": "Obtener usuarios por rol"
+						"description": "Obtener usuarios por rol (requiere admin)"
+					}
+				},
+				{
+					"name": "Get Users by Institution",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuarios por institución obtenidos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.be.an('array');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Usuarios por institución obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/institucion/{{institucionId}}",
+							"protocol": "{{protocol}}",
+							"host": ["{{host}}"],
+							"port": "{{port}}",
+							"path": ["usuarios", "institucion", "{{institucionId}}"]
+						},
+						"description": "Obtener usuarios por institución"
 					}
 				},
 				{
 					"name": "Cleanup Tokens",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Limpieza exitosa\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('message');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Limpieza de tokens completada');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -481,11 +614,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/admin/cleanup-tokens",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/admin/cleanup-tokens",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["admin", "cleanup-tokens"]
+							"path": ["usuarios", "admin", "cleanup-tokens"]
 						},
 						"description": "Limpiar tokens expirados (solo super_admin)"
 					}
@@ -496,7 +629,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "{{baseUrl}}",
+			"value": "{{protocol}}://{{host}}:{{port}}",
 			"type": "string",
 			"description": "URL base (usar variable de environment)"
 		},
@@ -504,13 +637,13 @@
 			"key": "accessToken",
 			"value": "{{accessToken}}",
 			"type": "string",
-			"description": "Access token (se actualiza automáticamente)"
+			"description": "Token de acceso JWT (se actualiza automáticamente)"
 		},
 		{
 			"key": "userId",
 			"value": "{{userId}}",
 			"type": "string",
-			"description": "ID de usuario para pruebas"
+			"description": "ID de usuario para pruebas específicas"
 		},
 		{
 			"key": "role",

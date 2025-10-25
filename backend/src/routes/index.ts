@@ -33,6 +33,6 @@ export default async function routes(fastify: FastifyInstance) {
   });
 
   // Registrar rutas de módulos
-  await fastify.register(authRoutes);
-  await fastify.register(userRoutes);
+  await fastify.register(authRoutes, { prefix: '/auth' });
+  await fastify.register(userRoutes, { prefix: '/usuarios' });
 }

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
-import '../ui/widgets/index.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,16 +12,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  String? _selectedInstitutionId;
+  // Valores por defecto para desarrollo
+  final _emailController = TextEditingController(text: 'superadmin@asistapp.com');
+  final _passwordController = TextEditingController(text: 'Admin123!');
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadInstitutions();
   }
 
   @override
@@ -30,11 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadInstitutions() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.loadInstitutions();
   }
 
   // Función para calcular variables responsive
@@ -77,31 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Función para construir el selector de institución
-  Widget _buildInstitutionSelector() {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final institutions = authProvider.institutions;
-
-    return DropdownButtonFormField<String>(
-      value: _selectedInstitutionId,
-      decoration: const InputDecoration(
-        labelText: 'Seleccionar Institución',
-        border: OutlineInputBorder(),
-      ),
-      items: institutions?.map((institution) {
-        return DropdownMenuItem<String>(
-          value: institution['id'].toString(),
-          child: Text(institution['name'] ?? 'Sin nombre'),
-        );
-      }).toList() ?? [],
-      onChanged: (value) {
-        setState(() {
-          _selectedInstitutionId = value;
-        });
-      },
-    );
-  }
-
   // Función para construir el campo de email
   Widget _buildEmailField() {
     return TextFormField(
@@ -128,11 +96,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Función para construir el botón de login
   Widget _buildLoginButton() {
-    return AppButton(
-      label: _isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión',
-      onPressed: _isLoading ? () {} : _login,
-      isLoading: _isLoading,
-      isEnabled: !_isLoading && _selectedInstitutionId != null,
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _login,
+      child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
     );
   }
 
@@ -153,9 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Container(
-      color: colors.background,
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
@@ -181,10 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Subtítulo
                       _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
                       SizedBox(height: subtitleSpacing),
-
-                      // Selector de institución
-                      _buildInstitutionSelector(),
-                      SizedBox(height: spacing.lg),
 
                       // Campo de email
                       _buildEmailField(),
@@ -212,8 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_selectedInstitutionId == null ||
-        _emailController.text.isEmpty ||
+    if (_emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Por favor complete todos los campos';
@@ -231,12 +192,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
-        _selectedInstitutionId!,
       );
 
       if (success) {
-        // Login exitoso - navegar a la pantalla principal
-        // TODO: Implementar navegación
+        // La navegación ahora la maneja el AuthWrapper basado en el estado de autenticación
+        // No necesitamos hacer nada más aquí, el AuthWrapper se encargará de la navegación
+        debugPrint('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {
           _errorMessage = 'Credenciales incorrectas';

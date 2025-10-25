@@ -2,12 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-             "name": "Flutter",
+            "name": "Flutter",
             "request": "launch",
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
             "cwd": "${workspaceFolder}",
-            "deviceId": "13aee19651c4",
             "flutterMode": "debug"
         },
         {
@@ -16,7 +15,6 @@
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
             "cwd": "${workspaceFolder}",
-            "deviceId": "13aee19651c4",
             "flutterMode": "profile"
         },
         {
@@ -25,8 +23,14 @@
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
             "cwd": "${workspaceFolder}",
-            "deviceId": "13aee19651c4",
             "flutterMode": "release"
+        },
+        {
+            "name": "Flutter: Attach to Device",
+            "request": "attach",
+            "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

@@ -1,5 +1,6 @@
-import Fastify from 'fastify';
+import fastifyCors from '@fastify/cors';
 import fastifyRateLimit from '@fastify/rate-limit';
+import Fastify from 'fastify';
 import { config } from './config/app';
 import { databaseService } from './config/database';
 import setupErrorHandler from './middleware/errorHandler';
@@ -9,6 +10,14 @@ import AuthService from './services/auth.service';
 // Crear instancia de Fastify con configuración
 const fastify = Fastify({
   logger: config.nodeEnv === 'development',
+});
+
+// Registrar CORS para permitir acceso desde cualquier origen
+fastify.register(fastifyCors, {
+  origin: true, // Permite cualquier origen
+  credentials: true, // Permite el envío de cookies y credenciales
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
 // Registrar rate limiting global
@@ -42,9 +51,11 @@ const start = async () => {
       host: config.host
     });
 
-    console.log('✅ Servidor corriendo en http://localhost:' + config.port);
+    console.log('✅ Servidor corriendo en:');
+    console.log(`   - Local:   http://localhost:${config.port}`);
+    console.log(`   - Red:     http://192.168.20.22:${config.port}`);
     console.log('🎯 API lista para recibir conexiones');
-    console.log('📚 Documentación disponible en: http://localhost:' + config.port);
+    console.log('📚 Documentación disponible en las URLs anteriores');
 
     // Mantener el proceso vivo solo en producción
     if (config.nodeEnv === 'production') {

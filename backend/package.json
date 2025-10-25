@@ -20,6 +20,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^8.5.0",
     "@fastify/rate-limit": "^8.0.3",
     "@prisma/client": "^5.15.0",
     "@types/bcryptjs": "^2.4.6",
@@ -42,6 +43,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.ts"
+    ],
     "roots": [
       "<rootDir>/src",
       "<rootDir>/tests"
@@ -54,10 +58,13 @@
       "src/**/*.ts",
       "!src/**/*.d.ts"
     ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tsconfig.json"
-      }
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.json"
+        }
+      ]
     }
   }
 }

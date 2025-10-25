@@ -2,6 +2,21 @@
 
 Esta colección contiene todas las pruebas necesarias para la API de AsistApp Backend v2.0 con autenticación JWT, refresh tokens y rate limiting.
 
+## ⚠️ IMPORTANTE - Correcciones Recientes
+
+**Fecha:** 24 de octubre de 2025
+
+Las rutas de usuarios han sido **corregidas** y ahora funcionan correctamente. El problema era que las rutas tenían el prefijo duplicado.
+
+### Rutas Corregidas:
+- ✅ `GET /usuarios` - Lista todos los usuarios
+- ✅ `GET /usuarios/:id` - Obtiene usuario por ID
+- ✅ `GET /usuarios/rol/:role` - Filtra usuarios por rol
+- ✅ `GET /usuarios/institucion/:institucionId` - Filtra usuarios por institución
+- ✅ `POST /usuarios/admin/cleanup-tokens` - Limpia tokens expirados
+
+Ver `BACKEND_FIXES_SUMMARY.md` para más detalles.
+
 ## 🚀 Inicio Rápido
 
 1. **Importar la colección**: Importa `Asistapp.postman_collection.json` en Postman
@@ -40,10 +55,10 @@ La colección incluye un archivo de environment (`Asistapp.postman_environment.j
 - **`currentUserRole`**: Rol del usuario autenticado
 
 ### Credenciales Pre-configuradas
-- **`adminUser`**: `superadmin@asistapp.com`
-- **`adminPassword`**: `Admin123!`
-- **`testUser`**: `juan.pérez@sanjose.edu`
-- **`testPassword`**: `Est123!`
+- **`adminUser`**: `admin@asistapp.com`
+- **`adminPassword`**: `pollo`
+- **`testStudentEmail`**: `student@test.com` (se crea en los tests)
+- **`testStudentPassword`**: `studentpass` (se crea en los tests)
 
 ## 🌍 Configuración de Entornos
 
@@ -100,13 +115,21 @@ Puedes crear diferentes environments para probar en varios entornos:
 
 | Rol | Email | Password | Descripción |
 |-----|-------|----------|-------------|
-| super_admin | superadmin@asistapp.com | Admin123! | Administrador global |
-| admin_institucion | admin@sanjose.edu | SanJose123! | Admin Colegio San José |
-| admin_institucion | admin@fps.edu | Fps123! | Admin IE Francisco de Paula Santander |
-| profesor | pedro.garcia@sanjose.edu | Prof123! | Profesor Pedro García |
-| profesor | ana.lopez@sanjose.edu | Prof456! | Profesora Ana López |
-| estudiante | juan.pérez@sanjose.edu | Est123! | Estudiante Juan Pérez |
-| estudiante | maría.garcía@sanjose.edu | Est123! | Estudiante María García |
+| super_admin | admin@asistapp.com | pollo | Administrador global (creado automáticamente) |
+
+**Nota:** Para crear más usuarios de prueba, ejecuta el seed del backend:
+
+```bash
+cd backend
+npm run prisma:seed
+```
+
+O ejecuta los tests de integración que crean usuarios temporales:
+
+```bash
+cd backend
+npm test
+```
 | estudiante | carlos.lópez@sanjose.edu | Est123! | Estudiante Carlos López |
 | estudiante | laura.martínez@sanjose.edu | Est123! | Estudiante Laura Martínez |
 | estudiante | miguel.rodríguez@sanjose.edu | Est123! | Estudiante Miguel Rodríguez |

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import UserService from '../services/user.service';
-import { ApiResponse, UsuarioExtendido } from '../types';
+import { ApiResponse, NotFoundError, UsuarioExtendido } from '../types';
 
 export class UserController {
   /**
@@ -15,7 +15,7 @@ export class UserController {
         data: users,
       } as ApiResponse<UsuarioExtendido[]>);
 
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -30,10 +30,7 @@ export class UserController {
       const user = await UserService.getUserById(id);
 
       if (!user) {
-        return reply.code(404).send({
-          success: false,
-          error: 'Usuario no encontrado',
-        });
+        throw new NotFoundError('Usuario');
       }
 
       return reply.code(200).send({
@@ -41,7 +38,7 @@ export class UserController {
         data: user,
       } as ApiResponse<UsuarioExtendido>);
 
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -60,7 +57,7 @@ export class UserController {
         data: users,
       } as ApiResponse<UsuarioExtendido[]>);
 
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
@@ -79,7 +76,7 @@ export class UserController {
         data: users,
       } as ApiResponse<UsuarioExtendido[]>);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error;
     }
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
+import '../models/institution.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -10,15 +11,27 @@ class AuthProvider with ChangeNotifier {
   String? _refreshToken;
   Map<String, dynamic>? _user;
   String? _selectedInstitutionId;
-  List<Map<String, dynamic>>? _institutions;
+  List<Institution>? _institutions;
 
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
   Map<String, dynamic>? get user => _user;
   String? get selectedInstitutionId => _selectedInstitutionId;
-  List<Map<String, dynamic>>? get institutions => _institutions;
+  List<Institution>? get institutions => _institutions;
 
   bool get isAuthenticated => _accessToken != null && _user != null;
+
+  // Obtener la institución seleccionada actualmente
+  Institution? get selectedInstitution {
+    if (_selectedInstitutionId == null || _institutions == null) return null;
+    try {
+      return _institutions!.firstWhere(
+        (institution) => institution.id == _selectedInstitutionId,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   AuthProvider() {
     _loadTokensFromStorage();
@@ -80,31 +93,48 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Cargar instituciones
-  Future<void> loadInstitutions() async {
+  // Cargar instituciones del usuario
+  Future<void> loadUserInstitutions() async {
+    if (_accessToken == null) return;
+
     try {
-      _institutions = await _authService.getInstitutions();
+      final institutionMaps = await _authService.getUserInstitutions(_accessToken!);
+      _institutions = institutionMaps?.map((map) => Institution.fromJson(map)).toList();
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading institutions: $e');
+      debugPrint('Error loading user institutions: $e');
     }
   }
 
   // Seleccionar institución
   void selectInstitution(String institutionId) {
     _selectedInstitutionId = institutionId;
+    _saveTokensToStorage();
     notifyListeners();
   }
 
   // Login
-  Future<bool> login(String email, String password, String institutionId) async {
+  Future<bool> login(String email, String password) async {
     try {
-      final result = await _authService.login(email, password, institutionId);
+      final result = await _authService.login(email, password);
       if (result != null) {
         _accessToken = result.accessToken;
         _refreshToken = result.refreshToken;
         _user = result.user;
-        _selectedInstitutionId = institutionId;
+
+        // Cargar instituciones del usuario después del login
+        await loadUserInstitutions();
+
+        // Si tiene solo una institución, seleccionarla automáticamente
+        if (_institutions != null && _institutions!.length == 1) {
+          _selectedInstitutionId = _institutions!.first.id;
+          debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
+        } else if (_institutions != null && _institutions!.length > 1) {
+          // Si tiene múltiples instituciones, no seleccionar ninguna por ahora
+          _selectedInstitutionId = null;
+          debugPrint('Múltiples instituciones encontradas, esperando selección manual');
+        }
+
         await _saveTokensToStorage();
         notifyListeners();
         return true;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
+import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../theme/app_constants.dart';
 import '../ui/widgets/index.dart';
@@ -37,11 +37,12 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   // Función para construir el nombre del usuario
-  Widget _buildUserName(UserProvider userProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
+  Widget _buildUserName(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
+    final user = authProvider.user;
+    final userName = user?['name'] ?? user?['email'] ?? 'Usuario';
+
     return Text(
-      userProvider.currentUser?.displayName ??
-      userProvider.currentUser?.email ??
-      'Usuario',
+      userName,
       style: headlineMedium.copyWith(
         color: primary,
         fontSize: isSmallScreen ? 18 : 24,
@@ -50,28 +51,26 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-
-
   // Función para construir el botón de cerrar sesión
-  Widget _buildSignOutButton(UserProvider userProvider) {
+  Widget _buildSignOutButton(AuthProvider authProvider) {
     return AppButton(
       label: 'Cerrar Sesión',
       onPressed: () async {
-        await userProvider.signOut();
+        await authProvider.logout();
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Container(
-      color: colors.background,
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
@@ -95,14 +94,18 @@ class WelcomeScreen extends StatelessWidget {
                       SizedBox(height: titleSpacing),
 
                       // Nombre del usuario
-                      _buildUserName(userProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
+                      _buildUserName(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
                       SizedBox(height: cardSpacing),
 
                       // Mensaje de éxito
-                    
+                      const Text(
+                        'Has iniciado sesión correctamente',
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: cardSpacing),
 
                       // Botón de cerrar sesión
-                      _buildSignOutButton(userProvider),
+                      _buildSignOutButton(authProvider),
                     ],
                   ),
                 ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
+import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
-import '../screens/welcome_screen.dart';
-import '../theme/app_colors.dart';
+import '../screens/institution_selection_screen.dart';
+import '../screens/home_screen.dart';
 
 /// Wrapper que maneja el ciclo de vida de la aplicación
 class LifecycleAwareWrapper extends StatefulWidget {
@@ -30,12 +30,12 @@ class _LifecycleAwareWrapperState extends State<LifecycleAwareWrapper>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final userProvider = context.read<UserProvider>();
+    // final authProvider = context.read<AuthProvider>();
 
     switch (state) {
       case AppLifecycleState.resumed:
-        debugPrint('App resumed - optimizing data loading');
-        userProvider.onAppResumed();
+        debugPrint('App resumed');
+        // authProvider.onAppResumed(); // TODO: Implementar si es necesario
         break;
       case AppLifecycleState.inactive:
         debugPrint('App inactive - transitioning');
@@ -64,25 +64,24 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
-        // Mostrar loading mientras se verifica el estado
-        if (userProvider.isLoading) {
-          return Container(
-            color: AppColors.instance.black,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Si no hay usuario autenticado, mostrar pantalla de login
+        if (!authProvider.isAuthenticated) {
+          return const LoginScreen();
         }
 
-        // Si hay usuario autenticado, mostrar pantalla de bienvenida
-        if (userProvider.currentUser != null) {
-          return const WelcomeScreen();
+        // Si está autenticado pero no tiene institución seleccionada
+        // y tiene múltiples instituciones, mostrar selector
+        final institutions = authProvider.institutions;
+        final selectedInstitutionId = authProvider.selectedInstitutionId;
+
+        if (institutions != null && institutions.length > 1 && selectedInstitutionId == null) {
+          return const InstitutionSelectionScreen();
         }
 
-        // Si no hay usuario, mostrar pantalla de login
-        return const LoginScreen();
+        // Si está autenticado y tiene institución seleccionada (o solo una), mostrar dashboard
+        return const HomeScreen();
       },
     );
   }

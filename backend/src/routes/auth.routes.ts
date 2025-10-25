@@ -6,14 +6,14 @@ export default async function authRoutes(fastify: FastifyInstance) {
   // Rate limiting estricto para login (5 intentos por 15 min)
   fastify.register(async function (authRoutes) {
 
-    // Ruta de login (pública) con rate limiting estricto
+    // Ruta de login (pública) SIN rate limiting (temporalmente desactivado)
     authRoutes.post('/login', {
-      config: {
-        rateLimit: {
-          max: 5,
-          timeWindow: '15 minutes',
-        },
-      },
+      // config: {
+      //   rateLimit: {
+      //     max: 5,
+      //     timeWindow: '15 minutes',
+      //   },
+      // },
       handler: AuthController.login,
     });
 
@@ -26,6 +26,11 @@ export default async function authRoutes(fastify: FastifyInstance) {
     authRoutes.get('/verify', {
       preHandler: authenticate,
       handler: AuthController.verify,
+    });
+
+    authRoutes.get('/instituciones', {
+      preHandler: authenticate,
+      handler: AuthController.getUserInstitutions,
     });
 
     authRoutes.post('/logout', {

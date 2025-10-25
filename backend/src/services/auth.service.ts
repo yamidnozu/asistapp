@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import JWTService from '../config/jwt';
-import { LoginRequest, LoginResponse, RefreshTokenResponse, UserRole } from '../types';
+import { AuthenticationError, LoginRequest, LoginResponse, RefreshTokenResponse, UserRole } from '../types';
 
 export class AuthService {
   /**
@@ -15,30 +15,34 @@ export class AuthService {
     const usuario = await prisma.usuario.findUnique({
       where: { email },
       include: {
-        institucion: true,
+        usuarioInstituciones: {
+          where: { activo: true },
+          include: {
+            institucion: true,
+          },
+        },
       },
     });
 
     if (!usuario) {
-      throw new Error('Credenciales inválidas');
+      throw new AuthenticationError('Credenciales inválidas');
     }
 
     // Verificar si el usuario está activo
     if (!usuario.activo) {
-      throw new Error('Usuario inactivo');
+      throw new AuthenticationError('Usuario inactivo');
     }
 
     // Verificar contraseña
     const passwordMatch = await bcrypt.compare(password, usuario.passwordHash);
     if (!passwordMatch) {
-      throw new Error('Credenciales inválidas');
+      throw new AuthenticationError('Credenciales inválidas');
     }
 
-    // Generar tokens JWT
+    // Generar tokens JWT (sin institucionId, será dinámico)
     const accessToken = JWTService.signAccessToken({
       id: usuario.id,
       rol: usuario.rol as UserRole,
-      institucionId: usuario.institucionId,
       email: usuario.email,
       tokenVersion: usuario.tokenVersion,
     });
@@ -46,7 +50,6 @@ export class AuthService {
     const refreshToken = JWTService.signRefreshToken({
       id: usuario.id,
       rol: usuario.rol as UserRole,
-      institucionId: usuario.institucionId,
       email: usuario.email,
       tokenVersion: usuario.tokenVersion,
     });
@@ -83,11 +86,11 @@ export class AuthService {
         nombres: usuario.nombres,
         apellidos: usuario.apellidos,
         rol: usuario.rol as UserRole,
-        institucionId: usuario.institucionId,
-        institucion: usuario.institucion ? {
-          id: usuario.institucion.id,
-          nombre: usuario.institucion.nombre,
-        } : null,
+        instituciones: usuario.usuarioInstituciones.map(ui => ({
+          id: ui.institucion.id,
+          nombre: ui.institucion.nombre,
+          rolEnInstitucion: ui.rolEnInstitucion,
+        })),
       },
       expiresIn,
     };
@@ -106,11 +109,11 @@ export class AuthService {
     });
 
     if (!usuario || !usuario.activo) {
-      throw new Error('Usuario no encontrado o inactivo');
+      throw new AuthenticationError('Usuario no encontrado o inactivo');
     }
 
     if (usuario.tokenVersion !== decoded.tokenVersion) {
-      throw new Error('Token revocado por cambio de versión');
+      throw new AuthenticationError('Token revocado por cambio de versión');
     }
 
     return decoded;
@@ -136,28 +139,35 @@ export class AuthService {
       });
 
       if (!tokenRecord) {
-        throw new Error('Refresh token inválido o revocado');
+        throw new AuthenticationError('Refresh token inválido o revocado');
       }
 
       if (tokenRecord.expiresAt <= new Date()) {
         // Marcar como revocado por seguridad
         await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
-        throw new Error('Refresh token expirado');
+        throw new AuthenticationError('Refresh token expirado');
       }
 
       // Verificar que el usuario aún existe y está activo
       const usuario = await prisma.usuario.findUnique({
         where: { id: decoded.id },
-        include: { institucion: true },
+        include: {
+          usuarioInstituciones: {
+            where: { activo: true },
+            include: {
+              institucion: true,
+            },
+          },
+        },
       });
 
       if (!usuario || !usuario.activo) {
-        throw new Error('Usuario no encontrado o inactivo');
+        throw new AuthenticationError('Usuario no encontrado o inactivo');
       }
 
       // Verificar tokenVersion
       if (usuario.tokenVersion !== decoded.tokenVersion) {
-        throw new Error('Refresh token revocado por cambio de versión');
+        throw new AuthenticationError('Refresh token revocado por cambio de versión');
       }
 
       // Rotación: revocar el refresh token usado
@@ -167,7 +177,6 @@ export class AuthService {
       const newAccessToken = JWTService.signAccessToken({
         id: usuario.id,
         rol: usuario.rol as UserRole,
-        institucionId: usuario.institucionId,
         email: usuario.email,
         tokenVersion: usuario.tokenVersion,
       });
@@ -175,7 +184,6 @@ export class AuthService {
       const newRefreshToken = JWTService.signRefreshToken({
         id: usuario.id,
         rol: usuario.rol as UserRole,
-        institucionId: usuario.institucionId,
         email: usuario.email,
         tokenVersion: usuario.tokenVersion,
       });
@@ -206,8 +214,11 @@ export class AuthService {
         refreshToken: newRefreshToken,
         expiresIn,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || 'Refresh token inválido');
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      throw new AuthenticationError(error instanceof Error ? error.message : 'Refresh token inválido');
     }
   }
 
