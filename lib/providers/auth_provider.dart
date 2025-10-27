@@ -19,7 +19,8 @@ class AuthProvider with ChangeNotifier {
   String? get selectedInstitutionId => _selectedInstitutionId;
   List<Institution>? get institutions => _institutions;
 
-  bool get isAuthenticated => _accessToken != null && _user != null;
+  bool get isAuthenticated => _accessToken != null && _user != null;
+
   Institution? get selectedInstitution {
     if (_selectedInstitutionId == null || _institutions == null) return null;
     try {
@@ -33,7 +34,8 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider() {
     _loadTokensFromStorage();
-  }
+  }
+
   Future<void> _loadTokensFromStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -48,7 +50,8 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading from storage: $e');
     }
-  }
+  }
+
   Future<void> _saveTokensToStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -75,7 +78,8 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       debugPrint('Error saving to storage: $e');
     }
-  }
+  }
+
   Future<void> _clearTokens() async {
     _accessToken = null;
     _refreshToken = null;
@@ -83,20 +87,24 @@ class AuthProvider with ChangeNotifier {
     _selectedInstitutionId = null;
     await _saveTokensToStorage();
     notifyListeners();
-  }
+  }
+
   void clearHeavyData() {
     _institutions = null;
     notifyListeners();
-  }
+  }
+
   void clearTemporaryData() {
     _institutions = null;
     _selectedInstitutionId = null;
     notifyListeners();
-  }
+  }
+
   Future<void> recoverFullState() async {
     if (_accessToken != null) {
       debugPrint('Recuperando estado completo del usuario');
-      await loadUserInstitutions();
+      await loadUserInstitutions();
+
       if (_selectedInstitutionId != null && _institutions != null) {
         final institutionExists = _institutions!.any((i) => i.id == _selectedInstitutionId);
         if (!institutionExists) {
@@ -108,35 +116,41 @@ class AuthProvider with ChangeNotifier {
       
       notifyListeners();
     }
-  }
-  Future<void> loadUserInstitutions() async {
+  }
+
+  Future<void> loadUserInstitutions({bool notify = true}) async {
     if (_accessToken == null) return;
 
     try {
       final institutionMaps = await _authService.getUserInstitutions(_accessToken!);
       _institutions = institutionMaps?.map((map) => Institution.fromJson(map)).toList();
-      notifyListeners();
+      if (notify) notifyListeners();
     } catch (e) {
       debugPrint('Error loading user institutions: $e');
     }
-  }
+  }
+
   void selectInstitution(String institutionId) {
     _selectedInstitutionId = institutionId;
     _saveTokensToStorage();
     notifyListeners();
-  }
+  }
+
   Future<bool> login(String email, String password) async {
     try {
       final result = await _authService.login(email, password);
       if (result != null) {
         _accessToken = result.accessToken;
         _refreshToken = result.refreshToken;
-        _user = result.user;
-        await loadUserInstitutions();
+        _user = result.user;
+
+        await loadUserInstitutions(notify: false);
+
         if (_institutions != null && _institutions!.length == 1) {
           _selectedInstitutionId = _institutions!.first.id;
           debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
-        } else if (_institutions != null && _institutions!.length > 1) {
+        } else if (_institutions != null && _institutions!.length > 1) {
+
           _selectedInstitutionId = null;
           debugPrint('Múltiples instituciones encontradas, esperando selección manual');
         }
@@ -150,7 +164,8 @@ class AuthProvider with ChangeNotifier {
       debugPrint('Login error: $e');
       return false;
     }
-  }
+  }
+
   Future<bool> refreshAccessToken() async {
     if (_refreshToken == null) return false;
 
@@ -168,7 +183,8 @@ class AuthProvider with ChangeNotifier {
       debugPrint('Refresh error: $e');
       return false;
     }
-  }
+  }
+
   Future<void> logout() async {
     if (_refreshToken != null) {
       await _authService.logout(_refreshToken!);

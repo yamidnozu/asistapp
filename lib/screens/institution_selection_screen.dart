@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../theme/app_constants.dart';
-import '../screens/home_screen.dart';
-import '../screens/super_admin_dashboard.dart';
-import '../screens/admin_dashboard.dart';
-import '../screens/teacher_dashboard.dart';
-import '../screens/student_dashboard.dart';
+import '../utils/app_routes.dart';
+import '../utils/responsive_utils.dart';
 import '../models/institution.dart';
 
 class InstitutionSelectionScreen extends StatefulWidget {
@@ -19,42 +16,42 @@ class InstitutionSelectionScreen extends StatefulWidget {
 
 class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> {
   String? _selectedInstitutionId;
-  bool _isLoading = false;
-  Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
-    final isSmallScreen = constraints.maxWidth < 600;
-    final horizontalPadding = isSmallScreen ? lg : xxl;
-    final verticalPadding = isSmallScreen ? xl : xxl * 2;
-    final titleSpacing = isSmallScreen ? sm : md;
-    final subtitleSpacing = isSmallScreen ? xl : xxl;
+  bool _isLoading = false;
 
-    return {
-      'isSmallScreen': isSmallScreen,
-      'horizontalPadding': horizontalPadding,
-      'verticalPadding': verticalPadding,
-      'titleSpacing': titleSpacing,
-      'subtitleSpacing': subtitleSpacing,
-    };
-  }
-  Widget _buildMainTitle(TextStyle displayLarge, bool isSmallScreen) {
+  Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints) {
+    return ResponsiveUtils.getResponsiveValues(constraints);
+  }
+
+  Widget _buildMainTitle(Map<String, dynamic> responsive) {
+    final titleFontSize = responsive['titleFontSize'] as double;
+
     return Text(
       'Seleccionar Institución',
-      style: displayLarge.copyWith(
-        fontSize: isSmallScreen ? 28 : 40,
+      style: TextStyle(
+        fontSize: titleFontSize,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[800],
       ),
       textAlign: TextAlign.center,
     );
-  }
-  Widget _buildSubtitle(TextStyle bodyMedium, Color textMuted, bool isSmallScreen) {
+  }
+
+  Widget _buildSubtitle(Map<String, dynamic> responsive, Color textMuted) {
+    final subtitleFontSize = responsive['subtitleFontSize'] as double;
+
     return Text(
       'Elija la institución con la que desea trabajar',
-      style: bodyMedium.copyWith(
+      style: TextStyle(
         color: textMuted,
-        fontSize: isSmallScreen ? 14 : 16,
+        fontSize: subtitleFontSize,
       ),
       textAlign: TextAlign.center,
     );
-  }
-  Widget _buildInstitutionList(List<Institution> institutions, ColorScheme colorScheme, TextStyle bodyLarge) {
+  }
+
+  Widget _buildInstitutionList(List<Institution> institutions, Map<String, dynamic> responsive) {
+    final bodyFontSize = responsive['bodyFontSize'] as double;
+
     return ListView.builder(
       shrinkWrap: true,
       itemCount: institutions.length,
@@ -64,7 +61,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+          color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
           child: ListTile(
             leading: Radio<String>(
               value: institution.id,
@@ -77,12 +74,13 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
             ),
             title: Text(
               institution.name,
-              style: bodyLarge.copyWith(
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+              style: TextStyle(
+                fontSize: bodyFontSize,
+                color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             subtitle: institution.role != null
-                ? Text('Rol: ${institution.role}')
+                ? Text('Rol: ${institution.role}', style: TextStyle(fontSize: bodyFontSize * 0.9))
                 : null,
             onTap: () {
               setState(() {
@@ -93,19 +91,23 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
         );
       },
     );
-  }
-  Widget _buildContinueButton() {
-    return ElevatedButton(
-      onPressed: _isLoading || _selectedInstitutionId == null ? null : _continue,
-      child: Text(_isLoading ? 'Continuando...' : 'Continuar'),
+  }
+
+  Widget _buildContinueButton(Map<String, dynamic> responsive) {
+    final buttonWidth = responsive['buttonWidth'] as double;
+
+    return SizedBox(
+      width: buttonWidth,
+      child: ElevatedButton(
+        onPressed: _isLoading || _selectedInstitutionId == null ? null : _continue,
+        child: Text(_isLoading ? 'Continuando...' : 'Continuar'),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
     final authProvider = Provider.of<AuthProvider>(context);
     final institutions = authProvider.institutions;
 
@@ -120,37 +122,37 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
-            final isSmallScreen = responsive['isSmallScreen'] as bool;
-            final horizontalPadding = responsive['horizontalPadding'] as double;
-            final verticalPadding = responsive['verticalPadding'] as double;
-            final titleSpacing = responsive['titleSpacing'] as double;
-            final subtitleSpacing = responsive['subtitleSpacing'] as double;
+        child: ResponsiveUtils.buildResponsiveContainer(
+          context: context,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final responsive = _getResponsiveValues(constraints);
+                    final elementSpacing = responsive['elementSpacing'] as double;
 
-            return Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildMainTitle(textStyles.displayLarge, isSmallScreen),
-                      SizedBox(height: titleSpacing),
-                      _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
-                      SizedBox(height: subtitleSpacing),
-                      _buildInstitutionList(institutions, context.colorScheme, textStyles.bodyLarge),
-                      SizedBox(height: spacing.xxl),
-                      _buildContinueButton(),
-                    ],
-                  ),
+                    return Column(
+                      children: [
+                        _buildMainTitle(responsive),
+                        SizedBox(height: elementSpacing),
+
+                        _buildSubtitle(responsive, colors.textMuted),
+                        SizedBox(height: elementSpacing * 1.5),
+
+                        _buildInstitutionList(institutions, responsive),
+                        SizedBox(height: elementSpacing * 2),
+
+                        _buildContinueButton(responsive),
+                      ],
+                    );
+                  },
                 ),
-              ),
-            );
-          },
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -165,38 +167,18 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.selectInstitution(_selectedInstitutionId!);
+      authProvider.selectInstitution(_selectedInstitutionId!);
+
       if (mounted) {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final user = authProvider.user;
         final userRole = user?['rol'] as String?;
 
-        Widget dashboard;
-        switch (userRole) {
-          case 'super_admin':
-            dashboard = const SuperAdminDashboard();
-            break;
-          case 'admin_institucion':
-            dashboard = const AdminDashboard();
-            break;
-          case 'profesor':
-            dashboard = const TeacherDashboard();
-            break;
-          case 'estudiante':
-            dashboard = const StudentDashboard();
-            break;
-          default:
-            dashboard = const HomeScreen();
-            break;
-        }
-
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => dashboard,
-          ),
-        );
+        final route = AppRoutes.getDashboardRouteForRole(userRole ?? '');
+        context.go(route);
       }
-    } catch (e) {
+    } catch (e) {
+
     } finally {
       if (mounted) {
         setState(() {

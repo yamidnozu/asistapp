@@ -2,26 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../theme/app_constants.dart';
 import '../ui/widgets/app_button.dart';
+import '../utils/responsive_utils.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-  Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
-    final isSmallScreen = constraints.maxWidth < 600;
-    final horizontalPadding = isSmallScreen ? lg : xxl;
-    final verticalPadding = isSmallScreen ? xl : xxl * 2;
-    final titleSpacing = isSmallScreen ? sm : md;
-    final cardSpacing = isSmallScreen ? lg : xl;
+  const HomeScreen({super.key});
 
-    return {
-      'isSmallScreen': isSmallScreen,
-      'horizontalPadding': horizontalPadding,
-      'verticalPadding': verticalPadding,
-      'titleSpacing': titleSpacing,
-      'cardSpacing': cardSpacing,
-    };
-  }
   Widget _buildDashboardTitle(TextStyle displayLarge, bool isSmallScreen) {
     return Text(
       'Dashboard',
@@ -30,7 +16,8 @@ class HomeScreen extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
     );
-  }
+  }
+
   Widget _buildUserInfo(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
     final user = authProvider.user;
     final userName = user?['nombres'] ?? user?['email'] ?? 'Usuario';
@@ -56,7 +43,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
+  }
+
   Widget _buildInstitutionInfo(AuthProvider authProvider, TextStyle bodyLarge, Color textMuted, bool isSmallScreen) {
     final selectedInstitution = authProvider.selectedInstitution;
 
@@ -119,7 +107,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
+  }
+
   Widget _buildDashboardOptions(bool isSmallScreen) {
     return Column(
       children: [
@@ -204,7 +193,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
+  }
+
   Widget _buildFeatureCard({
     required IconData icon,
     required String title,
@@ -258,7 +248,9 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
+  }
+
+
   Widget _buildSignOutButton(AuthProvider authProvider) {
     return AppButton(
       label: 'Cerrar Sesión',
@@ -268,60 +260,80 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  AppBar _buildAppBar(Color primaryColor) {
+    return AppBar(
+      title: const Text('AsistApp'),
+      backgroundColor: primaryColor,
+      actions: _buildAppBarActions(),
+    );
+  }
+
+  List<Widget> _buildAppBarActions() {
+    return [
+      IconButton(
+        icon: const Icon(Icons.logout),
+        onPressed: () async {
+          // TODO: Implement logout
+        },
+      ),
+    ];
+  }
+
+  Widget _buildBody(AuthProvider authProvider, dynamic textStyles, Color primaryColor, Color textMuted, Map<String, dynamic> responsive) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: responsive['maxWidth']),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive['horizontalPadding'],
+                  vertical: responsive['verticalPadding'],
+                ),
+                child: Column(
+                  children: [
+                    _buildDashboardTitle(textStyles.displayLarge, responsive['isSmallScreen']),
+                    SizedBox(height: responsive['elementSpacing']),
+
+                    _buildUserInfo(authProvider, textStyles.headlineMedium, primaryColor, responsive['isSmallScreen']),
+                    SizedBox(height: responsive['elementSpacing']),
+
+                    _buildInstitutionInfo(authProvider, textStyles.bodyLarge, textMuted, responsive['isSmallScreen']),
+                    SizedBox(height: responsive['elementSpacing']),
+
+                    _buildDashboardOptions(responsive['isSmallScreen']),
+
+                    SizedBox(height: responsive['elementSpacing'] * 2),
+
+                    _buildSignOutButton(authProvider),
+
+                    SizedBox(height: responsive['verticalPadding']),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
-    final spacing = context.spacing;
     final textStyles = context.textStyles;
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(
-        title: const Text('AsistApp'),
-        backgroundColor: colors.primary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await authProvider.logout();
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
-            final isSmallScreen = responsive['isSmallScreen'] as bool;
-            final horizontalPadding = responsive['horizontalPadding'] as double;
-            final verticalPadding = responsive['verticalPadding'] as double;
-            final titleSpacing = responsive['titleSpacing'] as double;
-            final cardSpacing = responsive['cardSpacing'] as double;
-
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildDashboardTitle(textStyles.displayLarge, isSmallScreen),
-                    SizedBox(height: titleSpacing),
-                    _buildUserInfo(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
-                    SizedBox(height: cardSpacing),
-                    _buildInstitutionInfo(authProvider, textStyles.bodyLarge, colors.textMuted, isSmallScreen),
-                    SizedBox(height: cardSpacing),
-                    _buildDashboardOptions(isSmallScreen),
-                    SizedBox(height: cardSpacing * 2),
-                    _buildSignOutButton(authProvider),
-                    SizedBox(height: verticalPadding),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+      appBar: _buildAppBar(colors.primary),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final responsive = ResponsiveUtils.getResponsiveValues(constraints);
+          return _buildBody(authProvider, textStyles, colors.primary, colors.textMuted, responsive);
+        },
       ),
     );
   }

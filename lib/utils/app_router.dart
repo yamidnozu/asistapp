@@ -29,35 +29,55 @@ class AppRouter {
     redirect: _checkAuth,
     routes: _allRoutes(),
     errorBuilder: _errorPage,
-  );
+  );
+
 
   /// Decide dónde empezar cuando abre la app
-  String _getStartRoute() {
+  String _getStartRoute() {
+
     if (navigationProvider.hasValidState() && 
         navigationProvider.currentRoute != null) {
       return navigationProvider.currentRoute!;
-    }
+    }
+
     if (authProvider.isAuthenticated) {
       final role = authProvider.user?['rol'] as String?;
       return AppRoutes.getDashboardRouteForRole(role ?? '');
-    }
+    }
+
     return AppRoutes.login;
-  }
+  }
+
 
   /// Verifica si puede entrar a cada ruta
   String? _checkAuth(BuildContext context, GoRouterState state) {
     final isLoggedIn = authProvider.isAuthenticated;
-    final currentRoute = state.matchedLocation;
-    if (currentRoute == AppRoutes.login) {
+    final currentRoute = state.matchedLocation;
+
+    // Si estamos en login y estamos logueados
+    if (currentRoute == AppRoutes.login) {
       if (isLoggedIn) {
+        final institutions = authProvider.institutions;
+        final selected = authProvider.selectedInstitutionId;
+        
+        // Si tenemos múltiples instituciones y no hay selección, ir a selección
+        if (institutions != null && institutions.length > 1 && selected == null) {
+          return AppRoutes.institutionSelection;
+        }
+        
+        // Si no, ir al dashboard correspondiente
         final role = authProvider.user?['rol'] as String?;
         return AppRoutes.getDashboardRouteForRole(role ?? '');
       }
       return null; // Dejar entrar al login
-    }
+    }
+
+    // Si no estamos logueados, ir al login
     if (!isLoggedIn) {
-      return AppRoutes.login; // No está logueado → login
-    }
+      return AppRoutes.login;
+    }
+
+    // Si estamos en una ruta protegida y necesitamos selección de institución
     final institutions = authProvider.institutions;
     final selected = authProvider.selectedInstitutionId;
     final needsSelection = institutions != null && 
@@ -70,11 +90,13 @@ class AppRouter {
     }
     
     return null; // Todo bien, dejar pasar
-  }
+  }
+
 
   /// Todas las rutas de la app
   List<RouteBase> _allRoutes() {
-    return [
+    return [
+
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
@@ -83,7 +105,8 @@ class AppRouter {
           state,
           const LoginScreen(),
         ),
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.institutionSelection,
         name: 'institution-selection',
@@ -92,7 +115,8 @@ class AppRouter {
           state,
           const InstitutionSelectionScreen(),
         ),
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.superAdminDashboard,
         name: 'super-admin',
@@ -100,7 +124,8 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const SuperAdminDashboard());
         },
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.adminDashboard,
         name: 'admin',
@@ -108,7 +133,8 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const AdminDashboard());
         },
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.teacherDashboard,
         name: 'teacher',
@@ -116,7 +142,8 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const TeacherDashboard());
         },
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.studentDashboard,
         name: 'student',
@@ -124,7 +151,8 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const StudentDashboard());
         },
-      ),
+      ),
+
       GoRoute(
         path: AppRoutes.home,
         name: 'home',
@@ -134,17 +162,20 @@ class AppRouter {
         },
       ),
     ];
-  }
+  }
+
 
   /// Guarda la ruta actual
   void _saveRoute(GoRouterState state) {
     final route = state.matchedLocation;
     final params = state.uri.queryParameters;
     
-    navigationProvider.saveNavigationState(
-      route,
-      arguments: params.isNotEmpty ? params : null,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationProvider.saveNavigationState(
+        route,
+        arguments: params.isNotEmpty ? params : null,
+      );
+    });
   }
 
   /// Crea página con transición fade

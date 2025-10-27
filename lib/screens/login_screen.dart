@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../theme/app_constants.dart';
+import '../utils/responsive_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +11,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
+
   final _emailController = TextEditingController(text: 'superadmin@asistapp.com');
   final _passwordController = TextEditingController(text: 'Admin123!');
   bool _isLoading = false;
@@ -27,41 +28,35 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-  Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
-    final isSmallScreen = constraints.maxWidth < 600;
-    final horizontalPadding = isSmallScreen ? lg : xxl;
-    final verticalPadding = isSmallScreen ? xl : xxl * 2;
-    final titleSpacing = isSmallScreen ? sm : md;
-    final subtitleSpacing = isSmallScreen ? xl : xxl; // Reducido de xxl*2/xxl*3 a xl/xxl
+  }
 
-    return {
-      'isSmallScreen': isSmallScreen,
-      'horizontalPadding': horizontalPadding,
-      'verticalPadding': verticalPadding,
-      'titleSpacing': titleSpacing,
-      'subtitleSpacing': subtitleSpacing,
-    };
-  }
-  Widget _buildMainTitle(TextStyle displayLarge, bool isSmallScreen) {
+  Widget _buildMainTitle(Map<String, dynamic> responsive) {
+    final titleFontSize = responsive['titleFontSize'] as double;
+
     return Text(
       'AsistApp',
-      style: displayLarge.copyWith(
-        fontSize: isSmallScreen ? 32 : 48,
+      style: TextStyle(
+        fontSize: titleFontSize,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[800],
       ),
       textAlign: TextAlign.center,
     );
-  }
-  Widget _buildSubtitle(TextStyle bodyMedium, Color textMuted, bool isSmallScreen) {
+  }
+
+  Widget _buildSubtitle(Map<String, dynamic> responsive, Color textMuted) {
+    final subtitleFontSize = responsive['subtitleFontSize'] as double;
+
     return Text(
       'Sistema de Registro de Asistencia Escolar',
-      style: bodyMedium.copyWith(
+      style: TextStyle(
         color: textMuted,
-        fontSize: isSmallScreen ? 14 : 16,
+        fontSize: subtitleFontSize,
       ),
       textAlign: TextAlign.center,
     );
-  }
+  }
+
   Widget _buildEmailField() {
     return TextFormField(
       controller: _emailController,
@@ -71,7 +66,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       keyboardType: TextInputType.emailAddress,
     );
-  }
+  }
+
   Widget _buildPasswordField() {
     return TextFormField(
       controller: _passwordController,
@@ -81,21 +77,30 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       obscureText: true,
     );
-  }
-  Widget _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _login,
-      child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
+  }
+
+  Widget _buildLoginButton(Map<String, dynamic> responsive) {
+    final buttonWidth = responsive['buttonWidth'] as double;
+
+    return SizedBox(
+      width: buttonWidth,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _login,
+        child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
+      ),
     );
-  }
-  Widget _buildTestUsersSection(bool isSmallScreen) {
+  }
+
+  Widget _buildTestUsersSection(Map<String, dynamic> responsive) {
+    final bodyFontSize = responsive['bodyFontSize'] as double;
+
     return Column(
       children: [
         const SizedBox(height: 32),
         Text(
           'Usuarios de Prueba (Desarrollo)',
           style: TextStyle(
-            fontSize: isSmallScreen ? 16 : 18,
+            fontSize: bodyFontSize,
             fontWeight: FontWeight.bold,
             color: Colors.grey[700],
           ),
@@ -114,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'super_admin',
               'Todas',
               Colors.blue,
-              isSmallScreen,
+              responsive,
             ),
             _buildTestUserButton(
               'Admin Multi',
@@ -123,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'admin_institucion',
               '2 instituciones',
               Colors.green,
-              isSmallScreen,
+              responsive,
             ),
             _buildTestUserButton(
               'Admin San José',
@@ -132,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'admin_institucion',
               '1 institución',
               Colors.orange,
-              isSmallScreen,
+              responsive,
             ),
             _buildTestUserButton(
               'Profesor',
@@ -141,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'profesor',
               '1 institución',
               Colors.red,
-              isSmallScreen,
+              responsive,
             ),
             _buildTestUserButton(
               'Estudiante',
@@ -150,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'estudiante',
               '1 institución',
               Colors.purple,
-              isSmallScreen,
+              responsive,
             ),
           ],
         ),
@@ -158,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           'Presiona un botón para autocompletar los campos',
           style: TextStyle(
-            fontSize: isSmallScreen ? 12 : 14,
+            fontSize: bodyFontSize * 0.8,
             color: Colors.grey[600],
             fontStyle: FontStyle.italic,
           ),
@@ -166,7 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
-  }
+  }
+
   Widget _buildTestUserButton(
     String name,
     String email,
@@ -174,10 +180,14 @@ class _LoginScreenState extends State<LoginScreen> {
     String role,
     String institutions,
     Color color,
-    bool isSmallScreen,
+    Map<String, dynamic> responsive,
   ) {
+    final isSmallScreen = responsive['isSmallScreen'] as bool;
+    final bodyFontSize = responsive['bodyFontSize'] as double;
+    final buttonWidth = isSmallScreen ? 140.0 : 160.0;
+
     return SizedBox(
-      width: isSmallScreen ? 140 : 160,
+      width: buttonWidth,
       child: ElevatedButton(
         onPressed: () {
           setState(() {
@@ -197,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               name,
               style: TextStyle(
-                fontSize: isSmallScreen ? 11 : 12,
+                fontSize: bodyFontSize * 0.9,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -206,14 +216,14 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               role,
               style: TextStyle(
-                fontSize: isSmallScreen ? 9 : 10,
+                fontSize: bodyFontSize * 0.8,
               ),
               textAlign: TextAlign.center,
             ),
             Text(
               institutions,
               style: TextStyle(
-                fontSize: isSmallScreen ? 8 : 9,
+                fontSize: bodyFontSize * 0.75,
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
@@ -222,7 +232,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
+  }
+
   Widget _buildErrorMessage() {
     if (_errorMessage == null) return const SizedBox.shrink();
 
@@ -236,45 +247,51 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
 
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final responsive = _getResponsiveValues(constraints, spacing.lg, spacing.xxl, spacing.xl, spacing.sm, spacing.md);
-            final isSmallScreen = responsive['isSmallScreen'] as bool;
-            final horizontalPadding = responsive['horizontalPadding'] as double;
-            final verticalPadding = responsive['verticalPadding'] as double;
-            final titleSpacing = responsive['titleSpacing'] as double;
-            final subtitleSpacing = responsive['subtitleSpacing'] as double;
+            final responsive = ResponsiveUtils.getResponsiveValues(constraints);
 
-            return Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildMainTitle(textStyles.displayLarge, isSmallScreen),
-                      SizedBox(height: titleSpacing),
-                      _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
-                      SizedBox(height: subtitleSpacing),
-                      _buildEmailField(),
-                      SizedBox(height: spacing.lg),
-                      _buildPasswordField(),
-                      SizedBox(height: spacing.lg),
-                      _buildErrorMessage(),
-                      SizedBox(height: spacing.lg),
-                      _buildLoginButton(),
-                      SizedBox(height: spacing.lg),
-                      _buildTestUsersSection(isSmallScreen),
-                    ],
-                  ),
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: responsive['maxWidth']),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: responsive['horizontalPadding'],
+                        vertical: responsive['verticalPadding'],
+                      ),
+                      child: Column(
+                        children: [
+                          _buildMainTitle(responsive),
+                          SizedBox(height: responsive['elementSpacing']),
+
+                          _buildSubtitle(responsive, colors.textMuted),
+                          SizedBox(height: responsive['elementSpacing'] * 1.5),
+
+                          _buildEmailField(),
+                          SizedBox(height: responsive['elementSpacing']),
+
+                          _buildPasswordField(),
+                          SizedBox(height: responsive['elementSpacing']),
+
+                          _buildErrorMessage(),
+                          SizedBox(height: responsive['elementSpacing']),
+
+                          _buildLoginButton(responsive),
+                          SizedBox(height: responsive['elementSpacing']),
+
+                          _buildTestUsersSection(responsive),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -305,7 +322,9 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
-      if (success) {
+      if (success) {
+
+
         debugPrint('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../theme/app_constants.dart';
 import '../widgets/scroll_state_keeper.dart';
 import '../utils/app_routes.dart';
+import '../utils/responsive_utils.dart';
 
 /// Ejemplo de Dashboard con persistencia de scroll
 class TeacherDashboardWithScroll extends StatelessWidget {
@@ -14,7 +14,6 @@ class TeacherDashboardWithScroll extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
-    final spacing = context.spacing;
     final textStyles = context.textStyles;
 
     return Scaffold(
@@ -38,40 +37,45 @@ class TeacherDashboardWithScroll extends StatelessWidget {
           builder: (context, scrollController) {
             return LayoutBuilder(
               builder: (context, constraints) {
-                final isSmallScreen = constraints.maxWidth < 600;
-                final horizontalPadding = isSmallScreen ? spacing.lg : spacing.xxl;
-                final verticalPadding = isSmallScreen ? spacing.xl : spacing.xxl * 2;
+                final responsive = ResponsiveUtils.getResponsiveValues(constraints);
 
                 return SingleChildScrollView(
                   controller: scrollController, // ← El scroll se guarda automáticamente
-                  padding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                    vertical: verticalPadding,
-                  ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: AppConstants.instance.maxScreenWidth,
+                      maxWidth: responsive['maxWidth'],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Panel del Profesor',
-                          style: textStyles.displayLarge.copyWith(
-                            fontSize: isSmallScreen ? 28 : 42,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: responsive['horizontalPadding'],
+                            vertical: responsive['verticalPadding'],
                           ),
-                          textAlign: TextAlign.center,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Panel del Profesor',
+                                style: textStyles.displayLarge.copyWith(
+                                  fontSize: responsive['isSmallScreen'] ? 28 : 42,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+
+                              ...List.generate(20, (index) => Card(
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                child: ListTile(
+                                  leading: CircleAvatar(child: Text('${index + 1}')),
+                                  title: Text('Clase ${index + 1}'),
+                                  subtitle: Text('Grupo ${index % 5 + 1}'),
+                                  trailing: const Icon(Icons.arrow_forward_ios),
+                                ),
+                              )),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        ...List.generate(20, (index) => Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            leading: CircleAvatar(child: Text('${index + 1}')),
-                            title: Text('Clase ${index + 1}'),
-                            subtitle: Text('Grupo ${index % 5 + 1}'),
-                            trailing: const Icon(Icons.arrow_forward_ios),
-                          ),
-                        )),
                       ],
                     ),
                   ),
