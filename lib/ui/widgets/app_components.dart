@@ -116,9 +116,7 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.softWrap,
     super.key,
-  });
-
-  // Constructores convenientes
+  });
   const AppText.headlineLarge(
     this.text, {
     this.textAlign,
@@ -162,8 +160,7 @@ class AppText extends StatelessWidget {
     TextStyle resolvedStyle;
     if (style != null) {
       resolvedStyle = style!;
-    } else {
-      // Determinar el estilo basado en el constructor usado
+    } else {
       final constructorName = runtimeType.toString();
       if (constructorName.contains('headlineLarge')) {
         resolvedStyle = textStyles.headlineLarge;
@@ -192,9 +189,7 @@ class AppSpacer extends StatelessWidget {
   final double? width;
   final double? height;
 
-  const AppSpacer({this.width, this.height, super.key});
-
-  // Espaciadores convenientes
+  const AppSpacer({this.width, this.height, super.key});
   const AppSpacer.xs({super.key}) : width = null, height = null;
   const AppSpacer.sm({super.key}) : width = null, height = null;
   const AppSpacer.md({super.key}) : width = null, height = null;
@@ -206,9 +201,7 @@ class AppSpacer extends StatelessWidget {
     final spacing = context.spacing;
 
     double resolvedWidth = width ?? 0;
-    double resolvedHeight = height ?? 0;
-
-    // Si no se especificaron dimensiones, usar el espaciado basado en el constructor
+    double resolvedHeight = height ?? 0;
     if (width == null && height == null) {
       final constructorName = runtimeType.toString();
       if (constructorName.contains('xs')) {

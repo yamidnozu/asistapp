@@ -10,17 +10,11 @@ export class AuthController {
    */
   public static async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
-      const credentials = request.body;
-
-      // Validar entrada
+      const credentials = request.body;
       if (!credentials.email || !credentials.password) {
         throw new ValidationError('Email y contraseña son requeridos');
-      }
-
-      // Intentar login
-      const result = await AuthService.login(credentials);
-
-      // Devolver respuesta con accessToken y refreshToken en el body
+      }
+      const result = await AuthService.login(credentials);
       return reply.code(200).send({
         success: true,
         data: {
@@ -82,11 +76,8 @@ export class AuthController {
    * Cierra la sesión (cliente debe eliminar el token)
    */
   public static async logout(request: FastifyRequest<{ Body: { refreshToken?: string } }>, reply: FastifyReply) {
-    try {
-      // Obtener refreshToken del body de la petición
-      const refreshToken = request.body.refreshToken;
-
-      // request.user viene del middleware authenticate
+    try {
+      const refreshToken = request.body.refreshToken;
       const authReq = request as unknown as AuthenticatedRequest;
       const user = authReq.user;
 
@@ -109,16 +100,11 @@ export class AuthController {
    * Refresca el access token usando un refresh token válido
    */
   public static async refreshToken(request: FastifyRequest<{ Body: { refreshToken: string } }>, reply: FastifyReply) {
-    try {
-      // Obtener refreshToken del body de la petición
-      const refreshToken = request.body.refreshToken;
-
-      // Validar entrada
+    try {
+      const refreshToken = request.body.refreshToken;
       if (!refreshToken) {
         throw new ValidationError('Refresh token es requerido');
-      }
-
-      // Intentar refresh
+      }
       const result = await AuthService.refreshToken(refreshToken);
 
       return reply.code(200).send({

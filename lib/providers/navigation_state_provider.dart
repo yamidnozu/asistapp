@@ -7,9 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class NavigationStateProvider with ChangeNotifier {
   String? _currentRoute;
   Map<String, dynamic>? _routeArguments;
-  DateTime? _lastStateUpdate;
-  
-  // Configuración: tiempo máximo para considerar un estado válido (30 minutos)
+  DateTime? _lastStateUpdate;
   static const int maxStateAgeMinutes = 30;
 
   String? get currentRoute => _currentRoute;
@@ -29,9 +27,7 @@ class NavigationStateProvider with ChangeNotifier {
       if (stateJson != null) {
         final state = jsonDecode(stateJson) as Map<String, dynamic>;
         final lastUpdate = DateTime.parse(state['lastStateUpdate'] as String);
-        final now = DateTime.now();
-        
-        // Verificar si el estado es reciente (no más de 30 minutos)
+        final now = DateTime.now();
         final difference = now.difference(lastUpdate).inMinutes;
         
         if (difference <= maxStateAgeMinutes) {
@@ -39,8 +35,7 @@ class NavigationStateProvider with ChangeNotifier {
           _routeArguments = state['routeArguments'] as Map<String, dynamic>?;
           _lastStateUpdate = lastUpdate;
           debugPrint('Estado de navegación recuperado: $_currentRoute (hace $difference minutos)');
-        } else {
-          // Estado muy antiguo, limpiarlo
+        } else {
           debugPrint('Estado de navegación obsoleto (hace $difference minutos), descartando');
           await clearNavigationState();
         }

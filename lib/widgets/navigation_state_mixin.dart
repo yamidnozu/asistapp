@@ -10,17 +10,14 @@ mixin NavigationStateMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void initState() {
-    super.initState();
-    
-    // Guardar estado al iniciar
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _saveCurrentState();
     });
   }
 
   @override
-  void dispose() {
-    // Actualizar timestamp al salir
+  void dispose() {
     _refreshStateTimestamp();
     super.dispose();
   }

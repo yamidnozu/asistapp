@@ -12,12 +12,12 @@ const auth_service_1 = __importDefault(require("../src/services/auth.service"));
 describe('Auth Integration Tests', () => {
     let fastify;
     beforeAll(async () => {
-        // Crear instancia de Fastify para tests
+
         fastify = (0, fastify_1.default)({ logger: false });
-        // Registrar plugins y rutas
+
         (0, errorHandler_1.default)(fastify);
         fastify.register(routes_1.default);
-        // Conectar DB
+
         await database_1.databaseService.connect();
         await auth_service_1.default.ensureAdminUser();
         await fastify.ready();
@@ -27,7 +27,7 @@ describe('Auth Integration Tests', () => {
         await database_1.databaseService.disconnect();
     });
     beforeEach(async () => {
-        // Limpiar datos de test, pero preservar usuario admin
+
         const client = database_1.databaseService.getClient();
         await client.refreshToken.deleteMany();
         await client.usuarioInstitucion.deleteMany();
@@ -43,7 +43,7 @@ describe('Auth Integration Tests', () => {
         });
     });
     it('should complete full auth flow: login -> get institutions -> refresh -> logout', async () => {
-        // Crear institución de test
+
         const institucion = await database_1.databaseService.getClient().institucion.create({
             data: {
                 nombre: 'Institución Integration',
@@ -51,7 +51,7 @@ describe('Auth Integration Tests', () => {
                 activa: true,
             },
         });
-        // Crear usuario de test
+
         const hashedPassword = await auth_service_1.default.hashPassword('integrationpass');
         const user = await database_1.databaseService.getClient().usuario.create({
             data: {
@@ -63,7 +63,7 @@ describe('Auth Integration Tests', () => {
                 activo: true,
             },
         });
-        // Crear relación usuario-institución
+
         await database_1.databaseService.getClient().usuarioInstitucion.create({
             data: {
                 usuarioId: user.id,
@@ -72,7 +72,7 @@ describe('Auth Integration Tests', () => {
                 activo: true,
             },
         });
-        // 1. Login - tokens vienen en el body de la respuesta
+
         const loginResponse = await fastify.inject({
             method: 'POST',
             url: '/auth/login',
@@ -90,7 +90,7 @@ describe('Auth Integration Tests', () => {
         expect(loginBody.data.usuario.instituciones).toHaveLength(1);
         const accessToken = loginBody.data.accessToken;
         const refreshToken = loginBody.data.refreshToken;
-        // 2. Obtener instituciones del usuario
+
         const institutionsResponse = await fastify.inject({
             method: 'GET',
             url: '/auth/instituciones',
@@ -103,7 +103,7 @@ describe('Auth Integration Tests', () => {
         expect(institutionsBody.success).toBe(true);
         expect(institutionsBody.data).toHaveLength(1);
         expect(institutionsBody.data[0].id).toBe(institucion.id);
-        // 3. Verificar token (usando access token en header Authorization)
+
         const verifyResponse = await fastify.inject({
             method: 'GET',
             url: '/auth/verify',
@@ -115,7 +115,7 @@ describe('Auth Integration Tests', () => {
         const verifyBody = JSON.parse(verifyResponse.body);
         expect(verifyBody.success).toBe(true);
         expect(verifyBody.data.valid).toBe(true);
-        // 4. Refresh token - enviar refreshToken en el body
+
         const refreshResponse = await fastify.inject({
             method: 'POST',
             url: '/auth/refresh',
@@ -128,11 +128,11 @@ describe('Auth Integration Tests', () => {
         expect(refreshBody.success).toBe(true);
         expect(refreshBody.data).toHaveProperty('accessToken');
         expect(refreshBody.data).toHaveProperty('refreshToken');
-        // Verificar que el refresh token fue rotado
+
         expect(refreshBody.data.refreshToken).not.toBe(refreshToken);
         const newAccessToken = refreshBody.data.accessToken;
         const newRefreshToken = refreshBody.data.refreshToken;
-        // 5. Logout - enviar refreshToken en el body junto con access token en header
+
         const logoutResponse = await fastify.inject({
             method: 'POST',
             url: '/auth/logout',
@@ -146,7 +146,7 @@ describe('Auth Integration Tests', () => {
         expect(logoutResponse.statusCode).toBe(200);
         const logoutBody = JSON.parse(logoutResponse.body);
         expect(logoutBody.success).toBe(true);
-        // Intentar refresh con el token revocado debería fallar
+
         const refreshAfterLogoutResponse = await fastify.inject({
             method: 'POST',
             url: '/auth/refresh',

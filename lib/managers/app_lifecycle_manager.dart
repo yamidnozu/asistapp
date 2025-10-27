@@ -61,15 +61,11 @@ class AppLifecycleManager extends ChangeNotifier {
     final now = DateTime.now();
     final timeInBackground = _lastPausedTime != null ? now.difference(_lastPausedTime!) : Duration.zero;
 
-    debugPrint('AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
-
-    // Si es la primera vez que se reanuda, no hacer nada especial
+    debugPrint('AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
     if (_isFirstResume) {
       _isFirstResume = false;
       return;
-    }
-
-    // Si estuvo en background por más de 30 segundos, forzar refresh de datos
+    }
     if (timeInBackground.inSeconds > 30) {
       debugPrint('AppLifecycleManager: Long background time, triggering data refresh');
       _triggerDataRefresh();
@@ -87,19 +83,15 @@ class AppLifecycleManager extends ChangeNotifier {
   }
 
   /// Fuerza la actualización de datos críticos
-  void _triggerDataRefresh() {
-    // Aquí se pueden agregar llamadas para refrescar datos importantes
-    // Por ejemplo: verificar estado de autenticación, actualizar cache, etc.
+  void _triggerDataRefresh() {
     debugPrint('AppLifecycleManager: Triggering data refresh...');
   }
 
   /// Método para que otros componentes se registren para eventos de lifecycle
-  void addLifecycleCallback(String key, VoidCallback callback) {
-    // Implementación futura si es necesaria
+  void addLifecycleCallback(String key, VoidCallback callback) {
   }
 
-  void removeLifecycleCallback(String key) {
-    // Implementación futura si es necesaria
+  void removeLifecycleCallback(String key) {
   }
 }
 
@@ -126,8 +118,7 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
       case AppLifecycleState.detached:
         mappedState = AppState.detached;
         break;
-      case AppLifecycleState.inactive:
-        // Tratamos inactive como paused para simplificar
+      case AppLifecycleState.inactive:
         mappedState = AppState.paused;
         break;
     }

@@ -6,9 +6,7 @@ import '../theme/app_constants.dart';
 import '../ui/widgets/index.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
-
-  // Función para calcular variables responsive
+  const WelcomeScreen({super.key});
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
     final isSmallScreen = constraints.maxWidth < 600;
     final horizontalPadding = isSmallScreen ? lg : xxl;
@@ -23,9 +21,7 @@ class WelcomeScreen extends StatelessWidget {
       'titleSpacing': titleSpacing,
       'cardSpacing': cardSpacing,
     };
-  }
-
-  // Función para construir el título de bienvenida
+  }
   Widget _buildWelcomeTitle(TextStyle displayLarge, bool isSmallScreen) {
     return Text(
       '¡Bienvenido!',
@@ -34,9 +30,7 @@ class WelcomeScreen extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir el nombre del usuario
+  }
   Widget _buildUserName(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
     final user = authProvider.user;
     final userName = user?['name'] ?? user?['email'] ?? 'Usuario';
@@ -49,9 +43,7 @@ class WelcomeScreen extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir el botón de cerrar sesión
+  }
   Widget _buildSignOutButton(AuthProvider authProvider) {
     return AppButton(
       label: 'Cerrar Sesión',
@@ -88,23 +80,16 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Título de bienvenida
+                    children: [
                       _buildWelcomeTitle(textStyles.displayLarge, isSmallScreen),
-                      SizedBox(height: titleSpacing),
-
-                      // Nombre del usuario
+                      SizedBox(height: titleSpacing),
                       _buildUserName(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
-                      SizedBox(height: cardSpacing),
-
-                      // Mensaje de éxito
+                      SizedBox(height: cardSpacing),
                       const Text(
                         'Has iniciado sesión correctamente',
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: cardSpacing),
-
-                      // Botón de cerrar sesión
+                      SizedBox(height: cardSpacing),
                       _buildSignOutButton(authProvider),
                     ],
                   ),

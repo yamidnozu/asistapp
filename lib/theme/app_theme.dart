@@ -4,11 +4,8 @@ import 'app_spacing.dart';
 import 'app_text_styles.dart';
 
 /// Theme principal de la aplicación - escalable y mantenible
-class AppTheme {
-  // Constructor privado para singleton
-  AppTheme._();
-
-  // Instancia singleton
+class AppTheme {
+  AppTheme._();
   static final AppTheme instance = AppTheme._();
 
   /// Theme claro (si se necesita en el futuro)
@@ -26,9 +23,7 @@ class AppTheme {
 
     return ThemeData(
       brightness: brightness,
-      useMaterial3: true,
-
-      // === COLOR SCHEME ===
+      useMaterial3: true,
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: colors.primary,
@@ -55,9 +50,7 @@ class AppTheme {
         onInverseSurface: colors.textPrimary,
         inversePrimary: colors.primaryLight,
         surfaceTint: colors.primary.withValues(alpha: 0.1),
-      ),
-
-      // === TEXT THEME ===
+      ),
       textTheme: TextTheme(
         displayLarge: textStyles.displayLarge,
         displayMedium: textStyles.displayMedium,
@@ -71,11 +64,7 @@ class AppTheme {
         labelLarge: textStyles.labelLarge,
         labelMedium: textStyles.labelMedium,
         labelSmall: textStyles.labelSmall,
-      ),
-
-      // === COMPONENT THEMES ===
-
-      // AppBar
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: colors.white,
         foregroundColor: colors.textPrimary,
@@ -88,9 +77,7 @@ class AppTheme {
         ),
         toolbarHeight: AppSpacing.instance.appBarHeight,
         centerTitle: true,
-      ),
-
-      // Cards
+      ),
       cardTheme: CardTheme(
         color: colors.white,
         shadowColor: colors.shadowLight,
@@ -100,9 +87,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
           side: BorderSide(color: colors.border, width: 0.5),
         ),
-      ),
-
-      // Buttons
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
@@ -144,9 +129,7 @@ class AppTheme {
           ),
           textStyle: textStyles.labelMedium,
         ),
-      ),
-
-      // Input fields
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.white,
@@ -170,9 +153,7 @@ class AppTheme {
         labelStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         hintStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         errorStyle: textStyles.bodySmall.copyWith(color: colors.error),
-      ),
-
-      // Dialog
+      ),
       dialogTheme: DialogTheme(
         backgroundColor: colors.white,
         elevation: 6, // Elevación media para diálogos
@@ -180,9 +161,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
         ),
-      ),
-
-      // Floating Action Button
+      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colors.primary,
         foregroundColor: colors.white,
@@ -190,14 +169,10 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
         ),
-      ),
-
-      // === OTROS ===
+      ),
       scaffoldBackgroundColor: colors.background,
       dividerColor: colors.divider,
-      shadowColor: colors.shadow,
-
-      // Typography
+      shadowColor: colors.shadow,
       typography: Typography.material2021(),
     );
   }

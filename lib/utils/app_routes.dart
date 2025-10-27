@@ -1,12 +1,8 @@
 /// Todas las rutas de la app en un solo lugar
 /// Usar estas constantes en lugar de escribir strings
 class AppRoutes {
-  AppRoutes._(); // No se puede instanciar
-
-  // Rutas públicas (sin login)
-  static const String login = '/login';
-
-  // Rutas que necesitan login
+  AppRoutes._(); // No se puede instanciar
+  static const String login = '/login';
   static const String institutionSelection = '/institution-selection';
   static const String superAdminDashboard = '/super-admin-dashboard';
   static const String adminDashboard = '/admin-dashboard';

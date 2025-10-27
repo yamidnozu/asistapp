@@ -1,18 +1,16 @@
 import { FastifyInstance } from 'fastify';
 import authRoutes from './auth.routes';
+import institucionRoutes from './institucion.routes';
 import userRoutes from './user.routes';
 
-export default async function routes(fastify: FastifyInstance) {
-  // Ruta de prueba (pública)
+export default async function routes(fastify: FastifyInstance) {
   fastify.get('/', async (request, reply) => {
     return {
       success: true,
       message: 'Hola Mundo desde AsistApp Backend v2.0!',
       timestamp: new Date().toISOString(),
     };
-  });
-
-  // Ruta de prueba para verificar estructura de respuesta
+  });
   fastify.get('/test', async (request, reply) => {
     return reply.code(200).send({
       success: true,
@@ -30,9 +28,8 @@ export default async function routes(fastify: FastifyInstance) {
         }
       }
     });
-  });
-
-  // Registrar rutas de módulos
+  });
   await fastify.register(authRoutes, { prefix: '/auth' });
   await fastify.register(userRoutes, { prefix: '/usuarios' });
+  await fastify.register(institucionRoutes, { prefix: '/instituciones' });
 }

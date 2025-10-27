@@ -188,12 +188,8 @@ class _SpinnerPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final radius = size.width / 2;
-    final center = Offset(size.width / 2, size.height / 2);
-
-    // Dibujar círculo
-    canvas.drawCircle(center, radius, paint);
-
-    // Dibujar arco (simulando rotación)
+    final center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(center, radius, paint);
     final rect = Rect.fromCircle(center: center, radius: radius);
     canvas.drawArc(rect, 0, 1.5, false, paint);
   }

@@ -6,11 +6,9 @@ import '../providers/auth_provider.dart';
 class SessionInfoFooter extends StatelessWidget {
   const SessionInfoFooter({super.key});
 
-  // Función para copiar al portapapeles
   Future<void> _copyToClipboard(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
-    
-    // Mostrar snackbar
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -52,7 +50,7 @@ class SessionInfoFooter extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              // Mostrar solo los primeros 20 caracteres
+
               'Token: ${accessToken.substring(0, 20)}...',
               style: TextStyle(
                 color: Colors.grey[400],
@@ -63,14 +61,14 @@ class SessionInfoFooter extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Botón para copiar
+
           IconButton(
             icon: const Icon(Icons.copy, size: 16),
             color: Colors.grey[400],
             tooltip: 'Copiar token',
             onPressed: () => _copyToClipboard(context, accessToken),
           ),
-          // Tiempo restante
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -87,7 +85,7 @@ class SessionInfoFooter extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '28:45',  // TODO: Implementar countdown real
+                  'Activo',
                   style: TextStyle(
                     color: Colors.green[300],
                     fontSize: 12,

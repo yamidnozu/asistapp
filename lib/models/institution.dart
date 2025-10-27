@@ -11,9 +11,7 @@ class Institution {
     this.description,
     this.role,
     this.metadata,
-  });
-
-  // Factory constructor para crear desde JSON/Map
+  });
   factory Institution.fromJson(Map<String, dynamic> json) {
     return Institution(
       id: json['id'] as String,
@@ -22,9 +20,7 @@ class Institution {
       role: json['rolEnInstitucion'] as String? ?? json['role'] as String?, // Soporta tanto 'rolEnInstitucion' como 'role'
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
-  }
-
-  // Convertir a JSON/Map
+  }
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -35,9 +31,7 @@ class Institution {
       if (role != null) 'rolEnInstitucion': role, // Agregar 'rolEnInstitucion' por si se necesita
       if (metadata != null) 'metadata': metadata,
     };
-  }
-
-  // Crear copia con cambios
+  }
   Institution copyWith({
     String? id,
     String? name,

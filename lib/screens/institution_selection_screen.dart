@@ -19,9 +19,7 @@ class InstitutionSelectionScreen extends StatefulWidget {
 
 class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> {
   String? _selectedInstitutionId;
-  bool _isLoading = false;
-
-  // Función para calcular variables responsive
+  bool _isLoading = false;
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
     final isSmallScreen = constraints.maxWidth < 600;
     final horizontalPadding = isSmallScreen ? lg : xxl;
@@ -36,9 +34,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       'titleSpacing': titleSpacing,
       'subtitleSpacing': subtitleSpacing,
     };
-  }
-
-  // Función para construir el título principal
+  }
   Widget _buildMainTitle(TextStyle displayLarge, bool isSmallScreen) {
     return Text(
       'Seleccionar Institución',
@@ -47,9 +43,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir el subtítulo
+  }
   Widget _buildSubtitle(TextStyle bodyMedium, Color textMuted, bool isSmallScreen) {
     return Text(
       'Elija la institución con la que desea trabajar',
@@ -59,9 +53,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir la lista de instituciones
+  }
   Widget _buildInstitutionList(List<Institution> institutions, ColorScheme colorScheme, TextStyle bodyLarge) {
     return ListView.builder(
       shrinkWrap: true,
@@ -101,9 +93,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
         );
       },
     );
-  }
-
-  // Función para construir el botón de continuar
+  }
   Widget _buildContinueButton() {
     return ElevatedButton(
       onPressed: _isLoading || _selectedInstitutionId == null ? null : _continue,
@@ -147,20 +137,13 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Título principal
+                    children: [
                       _buildMainTitle(textStyles.displayLarge, isSmallScreen),
-                      SizedBox(height: titleSpacing),
-
-                      // Subtítulo
+                      SizedBox(height: titleSpacing),
                       _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
-                      SizedBox(height: subtitleSpacing),
-
-                      // Lista de instituciones
+                      SizedBox(height: subtitleSpacing),
                       _buildInstitutionList(institutions, context.colorScheme, textStyles.bodyLarge),
-                      SizedBox(height: spacing.xxl),
-
-                      // Botón de continuar
+                      SizedBox(height: spacing.xxl),
                       _buildContinueButton(),
                     ],
                   ),
@@ -182,9 +165,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.selectInstitution(_selectedInstitutionId!);
-
-      // Navegar al dashboard según el rol del usuario
+      authProvider.selectInstitution(_selectedInstitutionId!);
       if (mounted) {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final user = authProvider.user;
@@ -215,8 +196,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
           ),
         );
       }
-    } catch (e) {
-      // Manejar error si es necesario
+    } catch (e) {
     } finally {
       if (mounted) {
         setState(() {

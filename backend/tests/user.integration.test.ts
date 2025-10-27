@@ -13,15 +13,10 @@ describe('User Integration Tests', () => {
   let institucionId: string;
   let studentUserId: string;
 
-  beforeAll(async () => {
-    // Crear instancia de Fastify para tests
-    fastify = Fastify({ logger: false });
-
-    // Registrar plugins y rutas
+  beforeAll(async () => {
+    fastify = Fastify({ logger: false });
     setupErrorHandler(fastify);
-    fastify.register(routes);
-
-    // Conectar DB
+    fastify.register(routes);
     await databaseService.connect();
     await AuthService.ensureAdminUser();
 
@@ -33,8 +28,7 @@ describe('User Integration Tests', () => {
     await databaseService.disconnect();
   });
 
-  beforeEach(async () => {
-    // Limpiar datos de test, pero preservar usuario admin
+  beforeEach(async () => {
     const client = databaseService.getClient();
     await client.refreshToken.deleteMany();
     await client.usuarioInstitucion.deleteMany();
@@ -47,9 +41,7 @@ describe('User Integration Tests', () => {
       where: {
         codigo: { not: 'DEFAULT' }
       }
-    });
-
-    // Crear institución de test
+    });
     const uniqueCode = `INT${Date.now()}`;
     const institucion = await client.institucion.create({
       data: {
@@ -58,9 +50,7 @@ describe('User Integration Tests', () => {
         activa: true,
       },
     });
-    institucionId = institucion.id;
-
-    // Crear usuario estudiante de test
+    institucionId = institucion.id;
     const hashedPassword = await AuthService.hashPassword('studentpass');
     const student = await client.usuario.create({
       data: {
@@ -72,9 +62,7 @@ describe('User Integration Tests', () => {
         activo: true,
       },
     });
-    studentUserId = student.id;
-
-    // Crear relación usuario-institución
+    studentUserId = student.id;
     await client.usuarioInstitucion.create({
       data: {
         usuarioId: student.id,
@@ -82,9 +70,7 @@ describe('User Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
-
-    // Login como admin y obtener token
+    });
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -127,8 +113,7 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
-      // Login como estudiante
+    it('should fail with student token (insufficient permissions)', async () => {
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -139,9 +124,7 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
-
-      // Intentar acceder con token de estudiante
+      const studentToken = loginBody.data.accessToken;
       const response = await fastify.inject({
         method: 'GET',
         url: '/usuarios',
@@ -248,8 +231,7 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
-      // Login como estudiante
+    it('should fail with student token (insufficient permissions)', async () => {
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -260,9 +242,7 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
-
-      // Intentar acceder con token de estudiante
+      const studentToken = loginBody.data.accessToken;
       const response = await fastify.inject({
         method: 'GET',
         url: '/usuarios/rol/estudiante',
@@ -295,8 +275,7 @@ describe('User Integration Tests', () => {
       expect(body.data.length).toBeGreaterThan(0);
     });
 
-    it('should return empty array for institution with no users', async () => {
-      // Crear institución sin usuarios
+    it('should return empty array for institution with no users', async () => {
       const uniqueCode = `INT${Date.now()}`;
       const emptyInstitution = await databaseService.getClient().institucion.create({
         data: {
@@ -362,8 +341,7 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
-      // Login como estudiante
+    it('should fail with student token (insufficient permissions)', async () => {
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -374,9 +352,7 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
-
-      // Intentar acceder con token de estudiante
+      const studentToken = loginBody.data.accessToken;
       const response = await fastify.inject({
         method: 'POST',
         url: '/usuarios/admin/cleanup-tokens',

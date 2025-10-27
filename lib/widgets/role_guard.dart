@@ -29,13 +29,11 @@ class RoleGuard extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final userRoleString = authProvider.user?['rol'] as String?;
-    
-    // ¿El usuario tiene rol?
+
     if (userRoleString == null) {
       return fallback ?? const SizedBox.shrink();
     }
-    
-    // Convertir string a enum
+
     UserRole? userRole;
     try {
       userRole = UserRoleExtension.fromString(userRoleString);
@@ -43,11 +41,10 @@ class RoleGuard extends StatelessWidget {
       return fallback ?? const SizedBox.shrink();
     }
 
-    // ¿Está en la lista de roles permitidos?
     if (allowedRoles.contains(userRole)) {
-      return child; // ✅ Tiene permiso
+      return child;
+    } else {
+      return fallback ?? const SizedBox.shrink();
     }
-
-    return fallback ?? const SizedBox.shrink(); // ❌ No tiene permiso
   }
 }

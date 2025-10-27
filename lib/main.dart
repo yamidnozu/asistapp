@@ -10,9 +10,7 @@ import 'theme/app_colors.dart';
 import 'utils/app_router.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configurar la barra de estado
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: AppColors.instance.transparent,
     statusBarIconBrightness: Brightness.light,
@@ -30,8 +28,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  // Servicios de la aplicación
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final AppLifecycleManager _lifecycleManager;
   late final AuthProvider _authProvider;
   late final NavigationStateProvider _navigationProvider;
@@ -40,15 +37,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    super.initState();
-    
-    // Inicializar servicios
+    super.initState();
     _lifecycleManager = AppLifecycleManager();
     _authProvider = AuthProvider();
     _navigationProvider = NavigationStateProvider();
-    _scrollProvider = ScrollStateProvider();
-    
-    // Escuchar cambios de ciclo de vida
+    _scrollProvider = ScrollStateProvider();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -60,16 +53,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Cuando la app vuelve del background
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _authProvider.recoverFullState();
       if (!_navigationProvider.hasValidState()) {
         _navigationProvider.clearNavigationState();
       }
-    }
-    
-    // Cuando la app va al background
+    }
     if (state == AppLifecycleState.paused) {
       _navigationProvider.refreshStateTimestamp();
     }
@@ -85,8 +75,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
       child: Builder(
-        builder: (context) {
-          // Crear router con providers
+        builder: (context) {
           _appRouter = AppRouter(
             authProvider: _authProvider,
             navigationProvider: _navigationProvider,

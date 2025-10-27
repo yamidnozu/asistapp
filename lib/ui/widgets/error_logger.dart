@@ -17,8 +17,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
 
   @override
   void initState() {
-    super.initState();
-    // No capturar errores de Flutter automáticamente para evitar setState durante build
+    super.initState();
   }
 
   void addLog(String message) {
@@ -123,8 +122,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
     final textStyles = context.textStyles;
 
     return Column(
-      children: [
-        // Header
+      children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
@@ -157,8 +155,7 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
               ),
             ],
           ),
-        ),
-        // Logs
+        ),
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(8),

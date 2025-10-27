@@ -7,9 +7,7 @@ import '../widgets/role_guard.dart';
 import '../utils/role_enum.dart';
 
 class TeacherDashboard extends StatelessWidget {
-  const TeacherDashboard({super.key});
-
-  // Función para calcular variables responsive
+  const TeacherDashboard({super.key});
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
     final isSmallScreen = constraints.maxWidth < 600;
     final horizontalPadding = isSmallScreen ? lg : xxl;
@@ -24,9 +22,7 @@ class TeacherDashboard extends StatelessWidget {
       'titleSpacing': titleSpacing,
       'cardSpacing': cardSpacing,
     };
-  }
-
-  // Función para construir el saludo del usuario
+  }
   Widget _buildUserGreeting(String userName, AuthProvider authProvider, bool isSmallScreen) {
     final selectedInstitution = authProvider.selectedInstitution;
     
@@ -54,9 +50,7 @@ class TeacherDashboard extends StatelessWidget {
         ],
       ],
     );
-  }
-
-  // Función para construir las opciones del dashboard
+  }
   Widget _buildDashboardOptions(bool isSmallScreen) {
     return Column(
       children: [
@@ -116,9 +110,7 @@ class TeacherDashboard extends StatelessWidget {
 
       ],
     );
-  }
-
-  // Función para construir una tarjeta de funcionalidad
+  }
   Widget _buildFeatureCard({
     required IconData icon,
     required String title,
@@ -190,8 +182,7 @@ class TeacherDashboard extends StatelessWidget {
       appBar: AppBar(
         title: const Text('AsistApp'),
         backgroundColor: colors.primary,
-        actions: [
-          // Badge de rol
+        actions: [
           Container(
             margin: const EdgeInsets.only(right: 12),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -238,15 +229,10 @@ class TeacherDashboard extends StatelessWidget {
                 constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Saludo personalizado
+                  children: [
                     _buildUserGreeting(userName, authProvider, isSmallScreen),
-                    SizedBox(height: cardSpacing),
-
-                    // Opciones del dashboard
-                    _buildDashboardOptions(isSmallScreen),
-
-                    // Espacio final
+                    SizedBox(height: cardSpacing),
+                    _buildDashboardOptions(isSmallScreen),
                     SizedBox(height: verticalPadding),
                   ],
                 ),

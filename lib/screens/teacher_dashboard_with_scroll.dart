@@ -54,8 +54,7 @@ class TeacherDashboardWithScroll extends StatelessWidget {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Contenido del dashboard
+                      children: [
                         Text(
                           'Panel del Profesor',
                           style: textStyles.displayLarge.copyWith(
@@ -63,9 +62,7 @@ class TeacherDashboardWithScroll extends StatelessWidget {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
-                        
-                        // Agregar mucho contenido para demostrar el scroll
+                        const SizedBox(height: 16),
                         ...List.generate(20, (index) => Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(

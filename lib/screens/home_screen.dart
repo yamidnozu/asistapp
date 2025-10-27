@@ -6,9 +6,7 @@ import '../theme/app_constants.dart';
 import '../ui/widgets/app_button.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  // Función para calcular variables responsive
+  const HomeScreen({super.key});
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
     final isSmallScreen = constraints.maxWidth < 600;
     final horizontalPadding = isSmallScreen ? lg : xxl;
@@ -23,9 +21,7 @@ class HomeScreen extends StatelessWidget {
       'titleSpacing': titleSpacing,
       'cardSpacing': cardSpacing,
     };
-  }
-
-  // Función para construir el título del dashboard
+  }
   Widget _buildDashboardTitle(TextStyle displayLarge, bool isSmallScreen) {
     return Text(
       'Dashboard',
@@ -34,9 +30,7 @@ class HomeScreen extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir la información del usuario
+  }
   Widget _buildUserInfo(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
     final user = authProvider.user;
     final userName = user?['nombres'] ?? user?['email'] ?? 'Usuario';
@@ -62,9 +56,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // Función para construir la información de la institución
+  }
   Widget _buildInstitutionInfo(AuthProvider authProvider, TextStyle bodyLarge, Color textMuted, bool isSmallScreen) {
     final selectedInstitution = authProvider.selectedInstitution;
 
@@ -127,9 +119,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // Función para construir las opciones del dashboard
+  }
   Widget _buildDashboardOptions(bool isSmallScreen) {
     return Column(
       children: [
@@ -214,9 +204,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // Función para construir una tarjeta de funcionalidad
+  }
   Widget _buildFeatureCard({
     required IconData icon,
     required String title,
@@ -270,10 +258,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // Función para construir el indicador de conexión
-  // Función para construir el botón de cerrar sesión
+  }
   Widget _buildSignOutButton(AuthProvider authProvider) {
     return AppButton(
       label: 'Cerrar Sesión',
@@ -320,29 +305,16 @@ class HomeScreen extends StatelessWidget {
                 constraints: BoxConstraints(maxWidth: AppConstants.instance.maxScreenWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Título del dashboard
+                  children: [
                     _buildDashboardTitle(textStyles.displayLarge, isSmallScreen),
-                    SizedBox(height: titleSpacing),
-
-                    // Información del usuario
+                    SizedBox(height: titleSpacing),
                     _buildUserInfo(authProvider, textStyles.headlineMedium, colors.primary, isSmallScreen),
-                    SizedBox(height: cardSpacing),
-
-                    // Información de la institución
+                    SizedBox(height: cardSpacing),
                     _buildInstitutionInfo(authProvider, textStyles.bodyLarge, colors.textMuted, isSmallScreen),
-                    SizedBox(height: cardSpacing),
-
-                    // Opciones del dashboard
-                    _buildDashboardOptions(isSmallScreen),
-
-                    // Espacio adicional antes del botón
-                    SizedBox(height: cardSpacing * 2),
-
-                    // Botón de cerrar sesión
-                    _buildSignOutButton(authProvider),
-
-                    // Espacio final
+                    SizedBox(height: cardSpacing),
+                    _buildDashboardOptions(isSmallScreen),
+                    SizedBox(height: cardSpacing * 2),
+                    _buildSignOutButton(authProvider),
                     SizedBox(height: verticalPadding),
                   ],
                 ),

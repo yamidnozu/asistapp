@@ -11,8 +11,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  // Valores por defecto para desarrollo
+class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController(text: 'superadmin@asistapp.com');
   final _passwordController = TextEditingController(text: 'Admin123!');
   bool _isLoading = false;
@@ -28,9 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  // Función para calcular variables responsive
+  }
   Map<String, dynamic> _getResponsiveValues(BoxConstraints constraints, double lg, double xxl, double xl, double sm, double md) {
     final isSmallScreen = constraints.maxWidth < 600;
     final horizontalPadding = isSmallScreen ? lg : xxl;
@@ -45,9 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'titleSpacing': titleSpacing,
       'subtitleSpacing': subtitleSpacing,
     };
-  }
-
-  // Función para construir el título principal
+  }
   Widget _buildMainTitle(TextStyle displayLarge, bool isSmallScreen) {
     return Text(
       'AsistApp',
@@ -56,9 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir el subtítulo
+  }
   Widget _buildSubtitle(TextStyle bodyMedium, Color textMuted, bool isSmallScreen) {
     return Text(
       'Sistema de Registro de Asistencia Escolar',
@@ -68,9 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       textAlign: TextAlign.center,
     );
-  }
-
-  // Función para construir el campo de email
+  }
   Widget _buildEmailField() {
     return TextFormField(
       controller: _emailController,
@@ -80,9 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       keyboardType: TextInputType.emailAddress,
     );
-  }
-
-  // Función para construir el campo de contraseña
+  }
   Widget _buildPasswordField() {
     return TextFormField(
       controller: _passwordController,
@@ -92,17 +81,13 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       obscureText: true,
     );
-  }
-
-  // Función para construir el botón de login
+  }
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: _isLoading ? null : _login,
       child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
     );
-  }
-
-  // Función para construir la sección de usuarios de prueba
+  }
   Widget _buildTestUsersSection(bool isSmallScreen) {
     return Column(
       children: [
@@ -181,9 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
-  }
-
-  // Función para construir un botón de usuario de prueba
+  }
   Widget _buildTestUserButton(
     String name,
     String email,
@@ -239,9 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  // Función para construir el mensaje de error
+  }
   Widget _buildErrorMessage() {
     if (_errorMessage == null) return const SizedBox.shrink();
 
@@ -278,32 +259,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Título principal
+                    children: [
                       _buildMainTitle(textStyles.displayLarge, isSmallScreen),
-                      SizedBox(height: titleSpacing),
-
-                      // Subtítulo
+                      SizedBox(height: titleSpacing),
                       _buildSubtitle(textStyles.bodyMedium, colors.textMuted, isSmallScreen),
-                      SizedBox(height: subtitleSpacing),
-
-                      // Campo de email
+                      SizedBox(height: subtitleSpacing),
                       _buildEmailField(),
-                      SizedBox(height: spacing.lg),
-
-                      // Campo de contraseña
+                      SizedBox(height: spacing.lg),
                       _buildPasswordField(),
-                      SizedBox(height: spacing.lg),
-
-                      // Mensaje de error
+                      SizedBox(height: spacing.lg),
                       _buildErrorMessage(),
-                      SizedBox(height: spacing.lg),
-
-                      // Botón de login
+                      SizedBox(height: spacing.lg),
                       _buildLoginButton(),
-                      SizedBox(height: spacing.lg),
-
-                      // Usuarios de prueba (desarrollo)
+                      SizedBox(height: spacing.lg),
                       _buildTestUsersSection(isSmallScreen),
                     ],
                   ),
@@ -337,9 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
-      if (success) {
-        // La navegación ahora la maneja el AuthWrapper basado en el estado de autenticación
-        // No necesitamos hacer nada más aquí, el AuthWrapper se encargará de la navegación
+      if (success) {
         debugPrint('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {

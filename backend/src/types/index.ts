@@ -1,10 +1,6 @@
 import { Institucion, Usuario } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
-
-// Tipos de roles
-export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
-
-// Tipos de request/response para autenticación
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
 export interface LoginRequest {
   email: string;
   password: string;
@@ -44,9 +40,7 @@ export interface LogoutRequest {
 export interface VerifyTokenResponse {
   usuario: JWTPayload;
   valid: boolean;
-}
-
-// Tipos de request/response para usuarios
+}
 export interface GetUserByIdRequest {
   id: string;
 }
@@ -73,35 +67,27 @@ export interface UserResponse {
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
-
-// Tipos extendidos de usuario
+}
 export interface UsuarioExtendido extends Omit<Usuario, 'institucionId'> {
   usuarioInstituciones?: {
     institucion: Institucion;
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
-
-// Tipo para usuario con instituciones incluidas
+}
 export interface UsuarioConInstituciones extends Usuario {
   usuarioInstituciones: {
     institucion: Institucion;
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
-
-// Tipos para respuestas de API
+}
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
   message?: string;
-}
-
-// Tipos para errores específicos
+}
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
@@ -145,12 +131,8 @@ export class ConflictError extends AppError {
   constructor(message: string) {
     super(message, 409, 'CONFLICT_ERROR');
   }
-}
-
-// Tipos para errores de Prisma
-export type DatabaseError = PrismaClientKnownRequestError | PrismaClientValidationError;
-
-// Tipos para JWT payload
+}
+export type DatabaseError = PrismaClientKnownRequestError | PrismaClientValidationError;
 export interface JWTPayload {
   id: string;
   rol: UserRole;
@@ -159,9 +141,7 @@ export interface JWTPayload {
   jti?: string; // JWT ID único
   iat?: number;
   exp?: number;
-}
-
-// Tipos para configuración
+}
 export interface AppConfig {
   port: number;
   host: string;
@@ -169,4 +149,32 @@ export interface AppConfig {
   jwtExpiresIn: string;
   nodeEnv: string;
   logLevel: string;
+}
+export interface CreateInstitucionRequest {
+  nombre: string;
+  codigo: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+}
+
+export interface UpdateInstitucionRequest {
+  nombre?: string;
+  codigo?: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+  activa?: boolean;
+}
+
+export interface InstitucionResponse {
+  id: string;
+  nombre: string;
+  codigo: string;
+  direccion?: string | null;
+  telefono?: string | null;
+  email?: string | null;
+  activa: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

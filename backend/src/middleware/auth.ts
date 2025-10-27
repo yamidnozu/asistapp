@@ -21,9 +21,7 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
 
     if (!token) {
       throw new AuthenticationError('Token de autenticación requerido');
-    }
-
-    // Verificar token
+    }
     const decoded = await AuthService.verifyToken(token);
     request.user = decoded;
 
@@ -34,8 +32,7 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
         error: error.message,
         code: error.code,
       });
-    }
-    // Capturar errores de JWT inválido y convertirlos en AuthenticationError
+    }
     if (error instanceof Error && (error.message.includes('inválido') || error.message.includes('expirado'))) {
       return reply.code(401).send({
         success: false,
@@ -87,8 +84,7 @@ export const optionalAuthenticate = async (request: AuthenticatedRequest, reply:
         request.user = decoded;
       }
     }
-  } catch (error) {
-    // Silenciar errores en autenticación opcional
+  } catch (error) {
     console.warn('Error en autenticación opcional:', error);
   }
 };

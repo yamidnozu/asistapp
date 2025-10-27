@@ -41,11 +41,8 @@ class _LifecycleAwareWrapperState extends State<LifecycleAwareWrapper>
 
     switch (state) {
       case AppLifecycleState.resumed:
-        debugPrint('App resumed - recovering full state');
-        // Recuperar estado completo del usuario y navegación
-        authProvider.recoverFullState();
-        
-        // Si el estado de navegación es muy antiguo, limpiarlo
+        debugPrint('App resumed - recovering full state');
+        authProvider.recoverFullState();
         if (!navigationProvider.hasValidState()) {
           navigationProvider.clearNavigationState();
         }
@@ -54,8 +51,7 @@ class _LifecycleAwareWrapperState extends State<LifecycleAwareWrapper>
         debugPrint('App inactive - transitioning');
         break;
       case AppLifecycleState.paused:
-        debugPrint('App paused - saving current state');
-        // Guardar estado actual antes de pausar
+        debugPrint('App paused - saving current state');
         navigationProvider.refreshStateTimestamp();
         break;
       case AppLifecycleState.hidden:
@@ -80,34 +76,24 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, NavigationStateProvider>(
-      builder: (context, authProvider, navigationProvider, child) {
-        // Si no hay usuario autenticado, mostrar pantalla de login
+      builder: (context, authProvider, navigationProvider, child) {
         if (!authProvider.isAuthenticated) {
           return const LoginScreen();
-        }
-
-        // Si está autenticado pero no tiene institución seleccionada
-        // y tiene múltiples instituciones, mostrar selector
+        }
         final institutions = authProvider.institutions;
         final selectedInstitutionId = authProvider.selectedInstitutionId;
 
         if (institutions != null && institutions.length > 1 && selectedInstitutionId == null) {
           return const InstitutionSelectionScreen();
-        }
-
-        // Intentar recuperar estado de navegación previo
+        }
         if (navigationProvider.hasValidState() && navigationProvider.currentRoute != null) {
           final savedRoute = navigationProvider.currentRoute!;
           debugPrint('Recuperando navegación guardada: $savedRoute');
           
           return _getScreenForRoute(savedRoute, authProvider);
-        }
-
-        // Si no hay estado guardado, navegar según el rol del usuario
+        }
         final user = authProvider.user;
-        final userRole = user?['rol'] as String?;
-
-        // Determinar qué dashboard mostrar según el rol
+        final userRole = user?['rol'] as String?;
         Widget dashboard;
         String route;
         
@@ -132,9 +118,7 @@ class AuthWrapper extends StatelessWidget {
             dashboard = const HomeScreen();
             route = AppRoutes.home;
             break;
-        }
-
-        // Guardar el estado de navegación actual
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           navigationProvider.saveNavigationState(route);
         });
@@ -159,8 +143,7 @@ class AuthWrapper extends StatelessWidget {
         return const InstitutionSelectionScreen();
       case AppRoutes.home:
         return const HomeScreen();
-      default:
-        // Si la ruta no es válida, ir al dashboard según rol
+      default:
         final userRole = authProvider.user?['rol'] as String?;
         final defaultRoute = AppRoutes.getDashboardRouteForRole(userRole ?? '');
         return _getScreenForRoute(defaultRoute, authProvider);

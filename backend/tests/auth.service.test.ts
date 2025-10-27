@@ -5,8 +5,7 @@ import AuthService from '../src/services/auth.service';
 import { testPrisma } from './test-database';
 
 describe('AuthService', () => {
-  beforeAll(async () => {
-    // Conectar a DB de test si es necesario
+  beforeAll(async () => {
     await testPrisma.$connect();
   });
 
@@ -14,8 +13,7 @@ describe('AuthService', () => {
     await testPrisma.$disconnect();
   });
 
-  beforeEach(async () => {
-    // Limpiar datos de test, pero preservar usuario admin
+  beforeEach(async () => {
     await testPrisma.refreshToken.deleteMany();
     await testPrisma.usuarioInstitucion.deleteMany();
     await testPrisma.usuario.deleteMany({
@@ -31,8 +29,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should login valid user and return tokens with user institutions', async () => {
-      // Crear institución de test
+    it('should login valid user and return tokens with user institutions', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
@@ -42,9 +39,7 @@ describe('AuthService', () => {
           email: 'test@institucion.com',
           activa: true,
         },
-      });
-
-      // Crear usuario de test
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -55,9 +50,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -75,15 +68,12 @@ describe('AuthService', () => {
       expect(result.usuario.instituciones).toBeDefined();
       expect(result.usuario.instituciones).toHaveLength(1);
       expect(result.usuario.instituciones[0].id).toBe(institucion.id);
-      expect(result.expiresIn).toBe(24 * 60 * 60);
-
-      // Verificar que se guardó el refresh token
+      expect(result.expiresIn).toBe(24 * 60 * 60);
       const tokens = await testPrisma.refreshToken.findMany({ where: { usuarioId: user.id } });
       expect(tokens.length).toBe(1);
     });
 
-    it('should login valid user without institutions', async () => {
-      // Crear usuario de test sin institución
+    it('should login valid user without institutions', async () => {
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -110,8 +100,7 @@ describe('AuthService', () => {
       await expect(AuthService.login({ email: 'invalid@example.com', password: 'wrong' })).rejects.toThrow('Credenciales inválidas');
     });
 
-    it('should throw error for wrong password', async () => {
-      // Crear institución de test
+    it('should throw error for wrong password', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
@@ -130,9 +119,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -145,8 +132,7 @@ describe('AuthService', () => {
       await expect(AuthService.login({ email: 'wrongpass@example.com', password: 'wrongpass' })).rejects.toThrow('Credenciales inválidas');
     });
 
-    it('should throw error for inactive user', async () => {
-      // Crear institución de test
+    it('should throw error for inactive user', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
@@ -165,9 +151,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: false,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -190,17 +174,14 @@ describe('AuthService', () => {
   });
 
   describe('refreshToken', () => {
-    it('should refresh token and rotate it', async () => {
-      // Crear institución de test
+    it('should refresh token and rotate it', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST004',
           activa: true,
         },
-      });
-
-      // Crear usuario y login para obtener token inicial
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -211,9 +192,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -224,22 +203,16 @@ describe('AuthService', () => {
       });
 
       const loginResult = await AuthService.login({ email: 'refresh@example.com', password: 'testpass' });
-      const oldRefreshToken = loginResult.refreshToken;
-
-      // Refresh
+      const oldRefreshToken = loginResult.refreshToken;
       const refreshResult = await AuthService.refreshToken(oldRefreshToken);
 
       expect(refreshResult).toHaveProperty('accessToken');
       expect(refreshResult).toHaveProperty('refreshToken');
-      expect(refreshResult.refreshToken).not.toBe(oldRefreshToken);
-
-      // Verificar que el token viejo está revocado
+      expect(refreshResult.refreshToken).not.toBe(oldRefreshToken);
       const oldTokenRecord = await testPrisma.refreshToken.findFirst({
         where: { usuarioId: user.id, revoked: true },
       });
-      expect(oldTokenRecord).toBeTruthy();
-
-      // Verificar que hay un nuevo token
+      expect(oldTokenRecord).toBeTruthy();
       const newTokens = await testPrisma.refreshToken.findMany({
         where: { usuarioId: user.id, revoked: false },
       });
@@ -254,17 +227,14 @@ describe('AuthService', () => {
       await expect(AuthService.refreshToken('not-a-jwt')).rejects.toThrow('Refresh token inválido');
     });
 
-    it('should throw error for revoked token', async () => {
-      // Crear institución de test
+    it('should throw error for revoked token', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST005',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -275,9 +245,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -288,26 +256,19 @@ describe('AuthService', () => {
       });
 
       const loginResult = await AuthService.login({ email: 'revoked@example.com', password: 'testpass' });
-      const refreshToken = loginResult.refreshToken;
-
-      // Revocar el token
-      await AuthService.revokeRefreshTokens(user.id, refreshToken);
-
-      // Intentar refresh con token revocado
+      const refreshToken = loginResult.refreshToken;
+      await AuthService.revokeRefreshTokens(user.id, refreshToken);
       await expect(AuthService.refreshToken(refreshToken)).rejects.toThrow('Refresh token inválido o revocado');
     });
 
-    it('should throw error for expired token', async () => {
-      // Crear institución de test
+    it('should throw error for expired token', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST006',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -318,9 +279,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -328,20 +287,13 @@ describe('AuthService', () => {
           rolEnInstitucion: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear un token expirado manualmente (esto es complicado de testear directamente)
-      // En su lugar, probamos con un token válido pero luego lo expiramos en la DB
+      });
       const loginResult = await AuthService.login({ email: 'expired@example.com', password: 'testpass' });
-      const refreshToken = loginResult.refreshToken;
-
-      // Hacer que el token expire inmediatamente
+      const refreshToken = loginResult.refreshToken;
       await testPrisma.refreshToken.updateMany({
         where: { usuarioId: user.id },
         data: { expiresAt: new Date(Date.now() - 1000) } // Expirado hace 1 segundo
-      });
-
-      // Intentar refresh con token expirado
+      });
       await expect(AuthService.refreshToken(refreshToken)).rejects.toThrow('Refresh token expirado');
     });
 
@@ -351,17 +303,14 @@ describe('AuthService', () => {
   });
 
   describe('revokeRefreshTokens', () => {
-    it('should revoke specific token', async () => {
-      // Crear institución de test
+    it('should revoke specific token', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST007',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -372,9 +321,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -395,17 +342,14 @@ describe('AuthService', () => {
       expect(tokenRecord?.revoked).toBe(true);
     });
 
-    it('should revoke all tokens for user', async () => {
-      // Crear institución de test
+    it('should revoke all tokens for user', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST008',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -416,9 +360,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -426,9 +368,7 @@ describe('AuthService', () => {
           rolEnInstitucion: 'estudiante',
           activo: true,
         },
-      });
-
-      // Login dos veces para tener dos tokens
+      });
       await AuthService.login({ email: 'revokeall@example.com', password: 'testpass' });
       await AuthService.login({ email: 'revokeall@example.com', password: 'testpass' });
 
@@ -440,17 +380,14 @@ describe('AuthService', () => {
       expect(tokens.every(t => t.revoked)).toBe(true);
     });
 
-    it('should handle non-existent token gracefully', async () => {
-      // Crear institución de test
+    it('should handle non-existent token gracefully', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST009',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -461,9 +398,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -471,9 +406,7 @@ describe('AuthService', () => {
           rolEnInstitucion: 'estudiante',
           activo: true,
         },
-      });
-
-      // Intentar revocar un token que no existe - no debería lanzar error
+      });
       await expect(AuthService.revokeRefreshTokens(user.id, 'non-existent-token')).resolves.not.toThrow();
     });
   });
@@ -499,17 +432,14 @@ describe('AuthService', () => {
   });
 
   describe('verifyToken', () => {
-    it('should verify valid token', async () => {
-      // Crear institución de test
+    it('should verify valid token', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST010',
           activa: true,
         },
-      });
-
-      // Crear usuario
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -520,9 +450,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true,
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -546,17 +474,14 @@ describe('AuthService', () => {
       await expect(AuthService.verifyToken('invalid-token')).rejects.toThrow('Access token inválido');
     });
 
-    it('should throw error for inactive user', async () => {
-      // Crear institución de test
+    it('should throw error for inactive user', async () => {
       const institucion = await testPrisma.institucion.create({
         data: {
           nombre: 'Institución Test',
           codigo: 'TEST011',
           activa: true,
         },
-      });
-
-      // Crear usuario activo inicialmente
+      });
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await testPrisma.usuario.create({
         data: {
@@ -567,9 +492,7 @@ describe('AuthService', () => {
           rol: 'estudiante',
           activo: true, // Usuario activo inicialmente
         },
-      });
-
-      // Crear relación usuario-institución
+      });
       await testPrisma.usuarioInstitucion.create({
         data: {
           usuarioId: user.id,
@@ -577,19 +500,13 @@ describe('AuthService', () => {
           rolEnInstitucion: 'estudiante',
           activo: true,
         },
-      });
-
-      // Login exitoso para obtener token
+      });
       const loginResult = await AuthService.login({ email: 'inactive-verify@example.com', password: 'testpass' });
-      const accessToken = loginResult.accessToken;
-
-      // Desactivar usuario después de obtener token
+      const accessToken = loginResult.accessToken;
       await testPrisma.usuario.update({
         where: { id: user.id },
         data: { activo: false },
-      });
-
-      // Ahora verificar token debería fallar porque usuario está inactivo
+      });
       await expect(AuthService.verifyToken(accessToken)).rejects.toThrow('Usuario no encontrado o inactivo');
     });
   });

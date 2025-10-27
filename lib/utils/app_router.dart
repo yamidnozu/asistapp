@@ -29,51 +29,35 @@ class AppRouter {
     redirect: _checkAuth,
     routes: _allRoutes(),
     errorBuilder: _errorPage,
-  );
-
-  // ==================== INICIO ====================
+  );
 
   /// Decide dónde empezar cuando abre la app
-  String _getStartRoute() {
-    // ¿Tiene estado guardado reciente?
+  String _getStartRoute() {
     if (navigationProvider.hasValidState() && 
         navigationProvider.currentRoute != null) {
       return navigationProvider.currentRoute!;
-    }
-    
-    // ¿Está logueado?
+    }
     if (authProvider.isAuthenticated) {
       final role = authProvider.user?['rol'] as String?;
       return AppRoutes.getDashboardRouteForRole(role ?? '');
-    }
-    
-    // No está logueado → login
+    }
     return AppRoutes.login;
-  }
-
-  // ==================== SEGURIDAD ====================
+  }
 
   /// Verifica si puede entrar a cada ruta
   String? _checkAuth(BuildContext context, GoRouterState state) {
     final isLoggedIn = authProvider.isAuthenticated;
-    final currentRoute = state.matchedLocation;
-    
-    // Ruta pública (login)
-    if (currentRoute == AppRoutes.login) {
-      // Si ya está logueado, mandarlo a su dashboard
+    final currentRoute = state.matchedLocation;
+    if (currentRoute == AppRoutes.login) {
       if (isLoggedIn) {
         final role = authProvider.user?['rol'] as String?;
         return AppRoutes.getDashboardRouteForRole(role ?? '');
       }
       return null; // Dejar entrar al login
-    }
-    
-    // Ruta protegida
+    }
     if (!isLoggedIn) {
       return AppRoutes.login; // No está logueado → login
-    }
-    
-    // ¿Necesita seleccionar institución?
+    }
     final institutions = authProvider.institutions;
     final selected = authProvider.selectedInstitutionId;
     final needsSelection = institutions != null && 
@@ -86,14 +70,11 @@ class AppRouter {
     }
     
     return null; // Todo bien, dejar pasar
-  }
-
-  // ==================== RUTAS ====================
+  }
 
   /// Todas las rutas de la app
   List<RouteBase> _allRoutes() {
-    return [
-      // Login
+    return [
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
@@ -102,9 +83,7 @@ class AppRouter {
           state,
           const LoginScreen(),
         ),
-      ),
-      
-      // Selección de institución
+      ),
       GoRoute(
         path: AppRoutes.institutionSelection,
         name: 'institution-selection',
@@ -113,9 +92,7 @@ class AppRouter {
           state,
           const InstitutionSelectionScreen(),
         ),
-      ),
-      
-      // Dashboard Super Admin
+      ),
       GoRoute(
         path: AppRoutes.superAdminDashboard,
         name: 'super-admin',
@@ -123,9 +100,7 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const SuperAdminDashboard());
         },
-      ),
-      
-      // Dashboard Admin
+      ),
       GoRoute(
         path: AppRoutes.adminDashboard,
         name: 'admin',
@@ -133,9 +108,7 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const AdminDashboard());
         },
-      ),
-      
-      // Dashboard Profesor
+      ),
       GoRoute(
         path: AppRoutes.teacherDashboard,
         name: 'teacher',
@@ -143,9 +116,7 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const TeacherDashboard());
         },
-      ),
-      
-      // Dashboard Estudiante
+      ),
       GoRoute(
         path: AppRoutes.studentDashboard,
         name: 'student',
@@ -153,9 +124,7 @@ class AppRouter {
           _saveRoute(state);
           return _fadePage(context, state, const StudentDashboard());
         },
-      ),
-      
-      // Home genérico
+      ),
       GoRoute(
         path: AppRoutes.home,
         name: 'home',
@@ -165,9 +134,7 @@ class AppRouter {
         },
       ),
     ];
-  }
-
-  // ==================== UTILIDADES ====================
+  }
 
   /// Guarda la ruta actual
   void _saveRoute(GoRouterState state) {

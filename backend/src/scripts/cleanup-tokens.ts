@@ -8,9 +8,7 @@ async function cleanupExpiredRefreshTokens() {
   try {
     console.log('🧹 Iniciando limpieza de refresh tokens expirados...');
 
-    const prisma = databaseService.getClient();
-
-    // Eliminar tokens expirados y revocados
+    const prisma = databaseService.getClient();
     const result = await prisma.refreshToken.deleteMany({
       where: {
         OR: [
@@ -20,9 +18,7 @@ async function cleanupExpiredRefreshTokens() {
       },
     });
 
-    console.log(`✅ Eliminados ${result.count} refresh tokens expirados/revocados`);
-
-    // Opcional: log de estadísticas
+    console.log(`✅ Eliminados ${result.count} refresh tokens expirados/revocados`);
     const remainingTokens = await prisma.refreshToken.count();
     console.log(`📊 Tokens restantes en DB: ${remainingTokens}`);
 
@@ -32,9 +28,7 @@ async function cleanupExpiredRefreshTokens() {
   } finally {
     await databaseService.disconnect();
   }
-}
-
-// Ejecutar si se llama directamente
+}
 if (require.main === module) {
   cleanupExpiredRefreshTokens();
 }

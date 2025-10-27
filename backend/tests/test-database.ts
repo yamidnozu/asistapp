@@ -37,10 +37,12 @@ class TestDatabaseService {
   public async reset(): Promise<void> {
     const client = this.getClient();
 
-    // Limpiar todas las tablas en orden inverso de dependencias
-    await client.refreshToken.deleteMany();
-    await client.asistencia.deleteMany();
+    // Eliminar en orden correcto respetando las dependencias de clave foránea
+    // Primero las tablas que tienen dependencias (hijas), luego las padre
+
+    // Tablas con dependencias (hijas)
     await client.logNotificacion.deleteMany();
+    await client.asistencia.deleteMany();
     await client.estudianteGrupo.deleteMany();
     await client.horario.deleteMany();
     await client.materia.deleteMany();
@@ -48,6 +50,9 @@ class TestDatabaseService {
     await client.periodoAcademico.deleteMany();
     await client.configuracion.deleteMany();
     await client.usuarioInstitucion.deleteMany();
+    await client.refreshToken.deleteMany();
+
+    // Tablas padre
     await client.estudiante.deleteMany();
     await client.usuario.deleteMany();
     await client.institucion.deleteMany();

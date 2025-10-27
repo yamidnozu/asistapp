@@ -7,9 +7,7 @@ export class JWTService {
   private static accessSecret: string = config.jwtSecret;
   private static refreshSecret: string = config.jwtSecret + '_refresh'; // Diferente secret para refresh
   private static accessExpiresIn: string = config.jwtExpiresIn;
-  private static refreshExpiresIn: string = '7d'; // 7 días para refresh tokens
-
-  // Access Token (corto tiempo de vida)
+  private static refreshExpiresIn: string = '7d'; // 7 días para refresh tokens
   public static signAccessToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
     return jwt.sign(payload, this.accessSecret, { expiresIn: this.accessExpiresIn } as any);
   }
@@ -21,9 +19,7 @@ export class JWTService {
     } catch (error) {
       throw new Error('Access token inválido o expirado');
     }
-  }
-
-  // Refresh Token (largo tiempo de vida)
+  }
   public static signRefreshToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
     const tokenPayload = {
       ...payload,
@@ -39,9 +35,7 @@ export class JWTService {
     } catch (error) {
       throw new Error('Refresh token inválido o expirado');
     }
-  }
-
-  // Método legacy para compatibilidad
+  }
   public static sign(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
     return this.signAccessToken(payload);
   }
