@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/role_guard.dart';
 import '../utils/role_enum.dart';
 import '../utils/responsive_utils.dart';
+import '../utils/app_routes.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class TeacherDashboard extends StatelessWidget {
@@ -20,8 +22,8 @@ class TeacherDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardOptions(Map<String, dynamic> responsive) {
-    final isSmallScreen = responsive['isSmallScreen'] as bool;
+  Widget _buildDashboardOptions(BuildContext context, Map<String, dynamic> responsive) {
+    final colors = context.colors;
 
     return Column(
       children: [
@@ -35,28 +37,28 @@ class TeacherDashboard extends StatelessWidget {
               icon: Icons.qr_code_scanner,
               title: 'Tomar Asistencia',
               description: 'Registrar asistencia con QR',
-              color: Colors.green,
+              color: colors.primary,  // Usar color primario consistente
               responsive: responsive,
             ),
             DashboardFeatureCard(
               icon: Icons.assignment,
               title: 'Mis Clases',
               description: 'Ver horarios y grupos asignados',
-              color: Colors.blue,
+              color: colors.primary,  // Usar color primario consistente
               responsive: responsive,
             ),
             DashboardFeatureCard(
               icon: Icons.people,
               title: 'Estudiantes',
               description: 'Lista de estudiantes por grupo',
-              color: Colors.orange,
+              color: colors.primary,  // Usar color primario consistente
               responsive: responsive,
             ),
             DashboardFeatureCard(
               icon: Icons.bar_chart,
               title: 'Reportes',
               description: 'Estadísticas de asistencia',
-              color: Colors.purple,
+              color: colors.primary,  // Usar color primario consistente
               responsive: responsive,
             ),
             RoleGuard(
@@ -65,7 +67,7 @@ class TeacherDashboard extends StatelessWidget {
                 icon: Icons.notifications,
                 title: 'Notificaciones',
                 description: 'Enviar avisos a padres',
-                color: Colors.teal,
+                color: colors.primary,  // Usar color primario consistente
                 responsive: responsive,
               ),
             ),
@@ -73,7 +75,7 @@ class TeacherDashboard extends StatelessWidget {
               icon: Icons.calendar_today,
               title: 'Horario',
               description: 'Mi horario de clases',
-              color: Colors.indigo,
+              color: colors.primary,  // Usar color primario consistente
               responsive: responsive,
             ),
           ],
@@ -82,22 +84,28 @@ class TeacherDashboard extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color primaryColor, String userRole) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider, Color primaryColor, String userRole) {
     return DashboardAppBar(
       backgroundColor: primaryColor,
       actions: [
         DashboardAppBarActions(
           userRole: userRole,
           roleIcon: Icons.school,
+          onLogout: () async {
+            await authProvider.logout();
+            if (context.mounted) {
+              context.go(AppRoutes.login);
+            }
+          },
         ),
       ],
     );
   }
 
-  Widget _buildBody(String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
+  Widget _buildBody(BuildContext context, String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
     return DashboardBody(
       userGreeting: _buildUserGreeting(userName, authProvider, responsive),
-      dashboardOptions: _buildDashboardOptions(responsive),
+      dashboardOptions: _buildDashboardOptions(context, responsive),
       responsive: responsive,
     );
   }
@@ -113,11 +121,11 @@ class TeacherDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: _buildAppBar(colors.primary, userRole),
+      appBar: _buildAppBar(context, authProvider, colors.primary, userRole),
       body: LayoutBuilder(
-        builder: (context, constraints) {
+        builder: (ctx, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(userName, authProvider, responsive);
+          return _buildBody(context, userName, authProvider, responsive);
         },
       ),
     );

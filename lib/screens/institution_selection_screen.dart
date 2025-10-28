@@ -25,14 +25,19 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
   Widget _buildMainTitle(Map<String, dynamic> responsive) {
     final titleFontSize = responsive['titleFontSize'] as double;
 
-    return Text(
-      'Seleccionar Institución',
-      style: TextStyle(
-        fontSize: titleFontSize,
-        fontWeight: FontWeight.bold,
-        color: Colors.grey[800],
-      ),
-      textAlign: TextAlign.center,
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Text(
+          'Seleccionar Institución',
+          style: TextStyle(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.bold,
+            color: colors.textPrimary,
+          ),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 

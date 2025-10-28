@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive_utils.dart';
 import '../theme/app_constants.dart';
+import '../theme/theme_extensions.dart';
 
 /// Widget reutilizable para las tarjetas de características en los dashboards
 class DashboardFeatureCard extends StatelessWidget {
@@ -25,6 +26,7 @@ class DashboardFeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bodyFontSize = responsive['bodyFontSize'] as double;
     final isDesktop = responsive['isDesktop'] as bool;
+    final colors = context.colors;
 
     return Card(
       elevation: 4,
@@ -52,7 +54,7 @@ class DashboardFeatureCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: bodyFontSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: colors.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -64,7 +66,7 @@ class DashboardFeatureCard extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: bodyFontSize * 0.9,
-                      color: Colors.grey[600],
+                      color: colors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -95,27 +97,17 @@ class UserGreetingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleFontSize = responsive['titleFontSize'] as double;
     final subtitleFontSize = responsive['subtitleFontSize'] as double;
+    final colors = context.colors;
 
     return Column(
       children: [
-        Text(
-          'Hola, $userName',
-          style: TextStyle(
-            fontSize: titleFontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
-          textAlign: TextAlign.center,
-        ),
         if (subtitle != null) ...[
-          const SizedBox(height: 8),
           Text(
             subtitle!,
             style: TextStyle(
               fontSize: subtitleFontSize,
-              color: Colors.grey[600],
+              color: colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -201,6 +193,8 @@ class DashboardAppBarActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -209,19 +203,19 @@ class DashboardAppBarActions extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           constraints: const BoxConstraints(maxWidth: 120), // Limitar ancho máximo
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: colors.roleBadgeBackground,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(roleIcon, size: 14, color: Colors.white),
+              Icon(roleIcon, size: 14, color: colors.roleBadgeIcon),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
                   userRole,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colors.roleBadgeText,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),

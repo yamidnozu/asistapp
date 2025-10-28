@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../theme/theme_extensions.dart';
 
 class SessionInfoFooter extends StatelessWidget {
   const SessionInfoFooter({super.key});
@@ -10,11 +11,15 @@ class SessionInfoFooter extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: text));
 
     if (context.mounted) {
+      final colors = context.colors;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Token copiado al portapapeles'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Text(
+            'Token copiado al portapapeles',
+            style: TextStyle(color: colors.getTextColorForBackground(colors.success)),
+          ),
+          duration: const Duration(seconds: 2),
+          backgroundColor: colors.success,
         ),
       );
     }
@@ -22,19 +27,20 @@ class SessionInfoFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final authProvider = Provider.of<AuthProvider>(context);
     final accessToken = authProvider.accessToken;
-    
+
     if (accessToken == null) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: colors.primary,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: colors.shadow,
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -42,18 +48,17 @@ class SessionInfoFooter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.security,
             size: 16,
-            color: Colors.green,
+            color: colors.success,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-
               'Token: ${accessToken.substring(0, 20)}...',
               style: TextStyle(
-                color: Colors.grey[400],
+                color: colors.textOnDark,
                 fontSize: 12,
                 fontFamily: 'monospace',
               ),
@@ -61,18 +66,16 @@ class SessionInfoFooter extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-
           IconButton(
             icon: const Icon(Icons.copy, size: 16),
-            color: Colors.grey[400],
+            color: colors.textOnDarkSecondary,
             tooltip: 'Copiar token',
             onPressed: () => _copyToClipboard(context, accessToken),
           ),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
+              color: colors.success.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
@@ -81,13 +84,13 @@ class SessionInfoFooter extends StatelessWidget {
                 Icon(
                   Icons.timer,
                   size: 14,
-                  color: Colors.green[300],
+                  color: colors.success,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'Activo',
                   style: TextStyle(
-                    color: Colors.green[300],
+                    color: colors.getTextColorForBackground(colors.success),
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),

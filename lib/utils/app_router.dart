@@ -9,6 +9,10 @@ import '../screens/super_admin_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
 import '../screens/student_dashboard.dart';
+import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/institutions/institution_form_screen.dart';
+import '../models/institution.dart';
+import '../theme/theme_extensions.dart';
 import 'app_routes.dart';
 
 /// Router principal de la aplicación
@@ -83,10 +87,20 @@ class AppRouter {
     final needsSelection = institutions != null && 
                           institutions.length > 1 && 
                           selected == null &&
-                          currentRoute != AppRoutes.institutionSelection;
+                          currentRoute != AppRoutes.institutionSelection &&
+                          !currentRoute.startsWith('/institutions'); // Excluir rutas de instituciones
     
     if (needsSelection) {
       return AppRoutes.institutionSelection;
+    }
+
+    // Verificar permisos para rutas de instituciones (solo super_admin)
+    if (currentRoute.startsWith('/institutions')) {
+      final role = authProvider.user?['rol'] as String?;
+      if (role != 'super_admin') {
+        // Si no es super_admin, redirigir al dashboard correspondiente
+        return AppRoutes.getDashboardRouteForRole(role ?? '');
+      }
     }
     
     return null; // Todo bien, dejar pasar
@@ -161,6 +175,34 @@ class AppRouter {
           return _fadePage(context, state, const HomeScreen());
         },
       ),
+
+      // Rutas de instituciones (solo para super_admin)
+      GoRoute(
+        path: AppRoutes.institutionsList,
+        name: 'institutions-list',
+        pageBuilder: (context, state) {
+          _saveRoute(state);
+          return _fadePage(context, state, const InstitutionsListScreen());
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.institutionForm,
+        name: 'institution-form',
+        pageBuilder: (context, state) {
+          final institutionId = state.uri.queryParameters['id'];
+          final institution = institutionId != null
+              ? state.extra as Institution?
+              : null;
+
+          _saveRoute(state);
+          return _fadePage(
+            context,
+            state,
+            InstitutionFormScreen(institution: institution),
+          );
+        },
+      ),
     ];
   }
 
@@ -192,23 +234,28 @@ class AppRouter {
   /// Página de error
   Widget _errorPage(BuildContext context, GoRouterState state) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            const Text('Error de Navegación', 
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('${state.error}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go(AppRoutes.login),
-              child: const Text('Ir al inicio'),
+      body: Builder(
+        builder: (ctx) {
+          final colors = ctx.colors;
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: colors.error),
+                const SizedBox(height: 16),
+                const Text('Error de Navegación', 
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('${state.error}'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.go(AppRoutes.login),
+                  child: const Text('Ir al inicio'),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

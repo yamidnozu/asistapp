@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../utils/responsive_utils.dart';
+import '../utils/app_routes.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -18,48 +20,50 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardOptions(Map<String, dynamic> responsive) {
+  Widget _buildDashboardOptions(BuildContext context, Map<String, dynamic> responsive) {
+    final colors = context.colors;
+    
     final cards = [
       DashboardFeatureCard(
         icon: Icons.people,
         title: 'Usuarios',
         description: 'Gestionar profesores y estudiantes',
-        color: Colors.blue,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.class_,
         title: 'Grupos',
         description: 'Administrar salones de clase',
-        color: Colors.green,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.schedule,
         title: 'Horarios',
         description: 'Configurar horarios de clases',
-        color: Colors.orange,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.assignment,
         title: 'Asistencia',
         description: 'Control y registro de asistencia',
-        color: Colors.purple,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.bar_chart,
         title: 'Reportes',
         description: 'Estadísticas de la institución',
-        color: Colors.teal,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.settings,
         title: 'Configuración',
         description: 'Ajustes de la institución',
-        color: Colors.indigo,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
     ];
@@ -70,22 +74,28 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color primaryColor, String userRole) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider, Color primaryColor, String userRole) {
     return DashboardAppBar(
       backgroundColor: primaryColor,
       actions: [
         DashboardAppBarActions(
           userRole: userRole,
           roleIcon: Icons.admin_panel_settings,
+          onLogout: () async {
+            await authProvider.logout();
+            if (context.mounted) {
+              context.go(AppRoutes.login);
+            }
+          },
         ),
       ],
     );
   }
 
-  Widget _buildBody(String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
+  Widget _buildBody(BuildContext context, String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
     return DashboardBody(
       userGreeting: _buildUserGreeting(userName, authProvider, responsive),
-      dashboardOptions: _buildDashboardOptions(responsive),
+      dashboardOptions: _buildDashboardOptions(context, responsive),
       responsive: responsive,
     );
   }
@@ -101,11 +111,11 @@ class AdminDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: _buildAppBar(colors.primary, userRole),
+      appBar: _buildAppBar(context, authProvider, colors.primary, userRole),
       body: LayoutBuilder(
-        builder: (context, constraints) {
+        builder: (ctx, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(userName, authProvider, responsive);
+          return _buildBody(context, userName, authProvider, responsive);
         },
       ),
     );

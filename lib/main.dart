@@ -4,13 +4,15 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/navigation_state_provider.dart';
 import 'providers/scroll_state_provider.dart';
+import 'providers/institution_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'utils/app_router.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: AppColors.instance.transparent,
     statusBarIconBrightness: Brightness.light,
@@ -28,20 +30,25 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+
   late final AppLifecycleManager _lifecycleManager;
   late final AuthProvider _authProvider;
   late final NavigationStateProvider _navigationProvider;
   late final ScrollStateProvider _scrollProvider;
+  late final InstitutionProvider _institutionProvider;
   late AppRouter _appRouter;
 
   @override
   void initState() {
-    super.initState();
+    super.initState();
+
     _lifecycleManager = AppLifecycleManager();
     _authProvider = AuthProvider();
     _navigationProvider = NavigationStateProvider();
-    _scrollProvider = ScrollStateProvider();
+    _scrollProvider = ScrollStateProvider();
+    _institutionProvider = InstitutionProvider();
+
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -53,13 +60,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+
     if (state == AppLifecycleState.resumed) {
       _authProvider.recoverFullState();
       if (!_navigationProvider.hasValidState()) {
         _navigationProvider.clearNavigationState();
       }
-    }
+    }
+
     if (state == AppLifecycleState.paused) {
       _navigationProvider.refreshStateTimestamp();
     }
@@ -72,10 +81,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider.value(value: _authProvider),
         ChangeNotifierProvider.value(value: _navigationProvider),
         ChangeNotifierProvider.value(value: _scrollProvider),
+        ChangeNotifierProvider.value(value: _institutionProvider),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
       child: Builder(
-        builder: (context) {
+        builder: (context) {
+
           _appRouter = AppRouter(
             authProvider: _authProvider,
             navigationProvider: _navigationProvider,

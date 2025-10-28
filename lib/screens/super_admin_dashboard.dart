@@ -1,55 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../utils/responsive_utils.dart';
+import '../utils/app_routes.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class SuperAdminDashboard extends StatelessWidget {
   const SuperAdminDashboard({super.key});
 
-  Widget _buildDashboardOptions(Map<String, dynamic> responsive) {
+  Widget _buildDashboardOptions(BuildContext context, Map<String, dynamic> responsive) {
+    final colors = context.colors;
+    
     final cards = [
       DashboardFeatureCard(
         icon: Icons.business,
         title: 'Instituciones',
         description: 'Gestionar todas las instituciones del sistema',
-        color: Colors.blue,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
+        onTap: () => context.go(AppRoutes.institutionsList),
       ),
       DashboardFeatureCard(
         icon: Icons.people,
         title: 'Usuarios Globales',
         description: 'Administrar usuarios de todo el sistema',
-        color: Colors.green,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.security,
         title: 'Permisos',
         description: 'Configurar permisos y roles del sistema',
-        color: Colors.orange,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.analytics,
         title: 'Reportes Globales',
         description: 'Estadísticas y métricas del sistema completo',
-        color: Colors.purple,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.settings,
         title: 'Configuración',
         description: 'Ajustes globales del sistema',
-        color: Colors.teal,
+        color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
       ),
       DashboardFeatureCard(
         icon: Icons.backup,
         title: 'Backup & Restore',
         description: 'Gestión de respaldos del sistema',
-        color: Colors.red,
+        color: colors.error,  // Este puede mantener error para destacar su criticidad
         responsive: responsive,
       ),
     ];
@@ -60,26 +65,31 @@ class SuperAdminDashboard extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color primaryColor, String userRole) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider, Color primaryColor, String userRole) {
     return DashboardAppBar(
       backgroundColor: primaryColor,
       actions: [
         DashboardAppBarActions(
           userRole: userRole,
           roleIcon: Icons.verified_user,
+          onLogout: () async {
+            await authProvider.logout();
+            if (context.mounted) {
+              context.go(AppRoutes.login);
+            }
+          },
         ),
       ],
     );
   }
 
-  Widget _buildBody(String userName, Map<String, dynamic> responsive) {
+  Widget _buildBody(BuildContext context, String userName, Map<String, dynamic> responsive) {
     return DashboardBody(
       userGreeting: UserGreetingWidget(
         userName: userName,
         responsive: responsive,
-        subtitle: 'Control Total del Sistema',
       ),
-      dashboardOptions: _buildDashboardOptions(responsive),
+      dashboardOptions: _buildDashboardOptions(context, responsive),
       responsive: responsive,
     );
   }
@@ -95,11 +105,11 @@ class SuperAdminDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: _buildAppBar(colors.primary, userRole),
+      appBar: _buildAppBar(context, authProvider, colors.primary, userRole),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(userName, responsive);
+          return _buildBody(context, userName, responsive);
         },
       ),
     );

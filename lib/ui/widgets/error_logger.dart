@@ -17,7 +17,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
 
   @override
   void initState() {
-    super.initState();
+    super.initState();
+
   }
 
   void addLog(String message) {
@@ -104,8 +105,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
                 ),
                 child: Text(
                   errorCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colors.getTextColorForBackground(colors.error),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -122,7 +123,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
     final textStyles = context.textStyles;
 
     return Column(
-      children: [
+      children: [
+
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
@@ -155,7 +157,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
               ),
             ],
           ),
-        ),
+        ),
+
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(8),

@@ -2,21 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../ui/widgets/index.dart';
 import '../utils/responsive_utils.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
-
-  Widget _buildWelcomeTitle(TextStyle displayLarge, bool isSmallScreen) {
-    return Text(
-      '¡Bienvenido!',
-      style: displayLarge.copyWith(
-        fontSize: isSmallScreen ? 32 : 48,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
 
   Widget _buildUserName(AuthProvider authProvider, TextStyle headlineMedium, Color primary, bool isSmallScreen) {
     final user = authProvider.user;
@@ -33,11 +22,11 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   Widget _buildSignOutButton(AuthProvider authProvider) {
-    return AppButton(
-      label: 'Cerrar Sesión',
+    return ElevatedButton(
       onPressed: () async {
         await authProvider.logout();
       },
+      child: const Text('Cerrar Sesión'),
     );
   }
 
@@ -60,9 +49,6 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildWelcomeTitle(textStyles.displayLarge, responsive['isSmallScreen']),
-                          SizedBox(height: responsive['elementSpacing']),
-
                           _buildUserName(authProvider, textStyles.headlineMedium, primaryColor, responsive['isSmallScreen']),
                           SizedBox(height: responsive['elementSpacing']),
 

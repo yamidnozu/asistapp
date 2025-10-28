@@ -1,14 +1,21 @@
 /// Todas las rutas de la app en un solo lugar
 /// Usar estas constantes en lugar de escribir strings
 class AppRoutes {
-  AppRoutes._(); // No se puede instanciar
-  static const String login = '/login';
+  AppRoutes._(); // No se puede instanciar
+
+  static const String login = '/login';
+
   static const String institutionSelection = '/institution-selection';
   static const String superAdminDashboard = '/super-admin-dashboard';
   static const String adminDashboard = '/admin-dashboard';
   static const String teacherDashboard = '/teacher-dashboard';
   static const String studentDashboard = '/student-dashboard';
   static const String home = '/home';
+
+  // Rutas de instituciones (solo para super_admin)
+  static const String institutionsList = '/institutions';
+  static const String institutionForm = '/institutions/form';
+  static const String institutionDetail = '/institutions/:id';
 
   /// Qué dashboard le corresponde a cada rol
   static String getDashboardRouteForRole(String role) {

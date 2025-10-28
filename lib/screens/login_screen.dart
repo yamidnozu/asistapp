@@ -33,14 +33,19 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildMainTitle(Map<String, dynamic> responsive) {
     final titleFontSize = responsive['titleFontSize'] as double;
 
-    return Text(
-      'AsistApp',
-      style: TextStyle(
-        fontSize: titleFontSize,
-        fontWeight: FontWeight.bold,
-        color: Colors.grey[800],
-      ),
-      textAlign: TextAlign.center,
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Text(
+          'AsistApp',
+          style: TextStyle(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.bold,
+            color: colors.textPrimary,
+          ),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 
@@ -62,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _emailController,
       decoration: const InputDecoration(
         labelText: 'Correo electrónico',
-        border: OutlineInputBorder(),
+        // No especificar border, fillColor, etc. - usa el tema
       ),
       keyboardType: TextInputType.emailAddress,
     );
@@ -73,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _passwordController,
       decoration: const InputDecoration(
         labelText: 'Contraseña',
-        border: OutlineInputBorder(),
+        // No especificar border, fillColor, etc. - usa el tema
       ),
       obscureText: true,
     );
@@ -94,82 +99,72 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildTestUsersSection(Map<String, dynamic> responsive) {
     final bodyFontSize = responsive['bodyFontSize'] as double;
 
-    return Column(
-      children: [
-        const SizedBox(height: 32),
-        Text(
-          'Usuarios de Prueba (Desarrollo)',
-          style: TextStyle(
-            fontSize: bodyFontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[700],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Column(
           children: [
-            _buildTestUserButton(
-              'Super Admin',
-              'superadmin@asistapp.com',
-              'Admin123!',
-              'super_admin',
-              'Todas',
-              Colors.blue,
-              responsive,
+            const SizedBox(height: 32),
+            Text(
+              'Usuarios de Prueba (Desarrollo)',
+              style: TextStyle(
+                fontSize: bodyFontSize,
+                fontWeight: FontWeight.bold,
+                color: colors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            _buildTestUserButton(
-              'Admin Multi',
-              'multi@asistapp.com',
-              'Multi123!',
-              'admin_institucion',
-              '2 instituciones',
-              Colors.green,
-              responsive,
-            ),
-            _buildTestUserButton(
-              'Admin San José',
-              'admin@sanjose.edu',
-              'SanJose123!',
-              'admin_institucion',
-              '1 institución',
-              Colors.orange,
-              responsive,
-            ),
-            _buildTestUserButton(
-              'Profesor',
-              'pedro.garcia@sanjose.edu',
-              'Prof123!',
-              'profesor',
-              '1 institución',
-              Colors.red,
-              responsive,
-            ),
-            _buildTestUserButton(
-              'Estudiante',
-              'juan.perez@sanjose.edu',
-              'Est123!',
-              'estudiante',
-              '1 institución',
-              Colors.purple,
-              responsive,
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildTestUserButton(
+                  'Super Admin',
+                  'superadmin@asistapp.com',
+                  'Admin123!',
+                  'super_admin',
+                  'Todas',
+                  responsive,
+                ),
+                _buildTestUserButton(
+                  'Admin Multi',
+                  'multi@asistapp.com',
+                  'Multi123!',
+                  'admin_institucion',
+                  '2 instituciones',
+                  responsive,
+                ),
+                _buildTestUserButton(
+                  'Admin San José',
+                  'admin@sanjose.edu',
+                  'SanJose123!',
+                  'admin_institucion',
+                  '1 institución',
+                  responsive,
+                ),
+                _buildTestUserButton(
+                  'Profesor',
+                  'pedro.garcia@sanjose.edu',
+                  'Prof123!',
+                  'profesor',
+                  '1 institución',
+                  responsive,
+                ),
+                _buildTestUserButton(
+                  'Estudiante',
+                  'juan.perez@sanjose.edu',
+                  'Est123!',
+                  'estudiante',
+                  '1 institución',
+                  responsive,
+                ),
+              ],
             ),
           ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Presiona un botón para autocompletar los campos',
-          style: TextStyle(
-            fontSize: bodyFontSize * 0.8,
-            color: Colors.grey[600],
-            fontStyle: FontStyle.italic,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -179,68 +174,74 @@ class _LoginScreenState extends State<LoginScreen> {
     String password,
     String role,
     String institutions,
-    Color color,
     Map<String, dynamic> responsive,
   ) {
     final isSmallScreen = responsive['isSmallScreen'] as bool;
-    final bodyFontSize = responsive['bodyFontSize'] as double;
     final buttonWidth = isSmallScreen ? 140.0 : 160.0;
 
-    return SizedBox(
-      width: buttonWidth,
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _emailController.text = email;
-            _passwordController.text = password;
-            _errorMessage = null;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color.withValues(alpha: 0.1),
-          foregroundColor: color,
-          side: BorderSide(color: color.withValues(alpha: 0.3)),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-        ),
-        child: Column(
-          children: [
-            Text(
-              name,
-              style: TextStyle(
-                fontSize: bodyFontSize * 0.9,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        final textStyles = context.textStyles;
+
+        return SizedBox(
+          width: buttonWidth,
+          child: OutlinedButton(
+            onPressed: () {
+              setState(() {
+                _emailController.text = email;
+                _passwordController.text = password;
+                _errorMessage = null;
+              });
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              side: BorderSide(color: colors.primary.withValues(alpha: 0.5)),
             ),
-            const SizedBox(height: 2),
-            Text(
-              role,
-              style: TextStyle(
-                fontSize: bodyFontSize * 0.8,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              children: [
+                Text(
+                  name,
+                  style: textStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  role,
+                  style: textStyles.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  institutions,
+                  style: textStyles.bodySmall.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: colors.textMuted,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            Text(
-              institutions,
-              style: TextStyle(
-                fontSize: bodyFontSize * 0.75,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildErrorMessage() {
     if (_errorMessage == null) return const SizedBox.shrink();
 
-    return Text(
-      _errorMessage!,
-      style: const TextStyle(color: Colors.red),
-      textAlign: TextAlign.center,
+    return Builder(
+      builder: (context) {
+        final textStyles = context.textStyles;
+        final colors = context.colors;
+        return Text(
+          _errorMessage!,
+          style: textStyles.bodyMedium.copyWith(color: colors.error),  // Usar estilo del tema
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 
