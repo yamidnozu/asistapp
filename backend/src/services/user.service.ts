@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserRole, UsuarioExtendido, ValidationError, UserFilters } from '../types';
+import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
 
 export class UserService {
   /**

@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import InstitucionService from '../services/institucion.service';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { ConflictError, InstitucionResponse, NotFoundError, ValidationError } from '../types';
+import InstitucionService from '../services/institucion.service';
+import { NotFoundError } from '../types';
 
 interface GetInstitucionParams {
   id: string;
