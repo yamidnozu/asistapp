@@ -1,0 +1,31 @@
+{
+  "total": 5,
+  "passed": 1,
+  "failed": 4,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login de Usuario",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Obtener Perfil de Usuario",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Listar Pacientes",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Listar Citas",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    }
+  ]
+}

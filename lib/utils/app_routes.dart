@@ -17,6 +17,13 @@ class AppRoutes {
   static const String institutionForm = '/institutions/form';
   static const String institutionDetail = '/institutions/:id';
 
+  // Rutas de usuarios (para admin_institucion y super_admin)
+  static const String usersList = '/users';
+  static const String userForm = '/users/form';
+  static const String userDetail = '/users/:id';
+  static const String createProfessor = '/users/professor/create';
+  static const String createStudent = '/users/student/create';
+
   /// Qué dashboard le corresponde a cada rol
   static String getDashboardRouteForRole(String role) {
     switch (role) {

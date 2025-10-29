@@ -1,0 +1,28 @@
+{
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Verificación de Token",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Obtener Instituciones",
+      "status": "PASSED"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "PASSED",
+      "result": true
+    }
+  ]
+}

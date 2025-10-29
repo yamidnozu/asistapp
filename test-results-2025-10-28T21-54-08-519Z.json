@@ -1,0 +1,35 @@
+{
+  "total": 6,
+  "passed": 2,
+  "failed": 4,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Verificación de Token",
+      "status": "FAILED",
+      "error": "Token no válido"
+    },
+    {
+      "name": "Super Admin - Listar Admins de Institución",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Super Admin - Crear Admin de Institución",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "FAILED",
+      "error": "Error inesperado: Request failed with status code 404"
+    }
+  ]
+}

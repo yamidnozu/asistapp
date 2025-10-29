@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,8 @@ import '../../theme/app_text_styles.dart';
 import '../../utils/responsive_utils.dart';
 import '../../utils/app_routes.dart';
 import '../../widgets/dashboard_widgets.dart';
+import '../../widgets/common/empty_state_widget.dart';
+import '../../widgets/common/management_scaffold.dart';
 import 'institution_form_screen.dart';
 
 class InstitutionsListScreen extends StatefulWidget {
@@ -22,12 +25,17 @@ class InstitutionsListScreen extends StatefulWidget {
 
 class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   final TextEditingController _searchController = TextEditingController();
-  bool _showActiveOnly = true;
-  bool _isSearching = false;
+  final ScrollController _scrollController = ScrollController();
+  Timer? _searchDebounceTimer;
+  
+  // Estado centralizado de filtros
+  String _searchQuery = '';
+  bool? _statusFilter; // null = todas, true = activas, false = inactivas
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     // Cargar instituciones después de que el widget se construya completamente
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInstitutions();
@@ -36,8 +44,25 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
   @override
   void dispose() {
+    _searchDebounceTimer?.cancel();
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+
+      if (authProvider.accessToken != null && institutionProvider.hasMoreData && !institutionProvider.isLoadingMore) {
+        institutionProvider.loadMoreInstitutions(
+          authProvider.accessToken!,
+          search: _searchQuery.isNotEmpty ? _searchQuery : null,
+          activa: _statusFilter,
+        );
+      }
+    }
   }
 
   Future<void> _loadInstitutions() async {
@@ -46,7 +71,11 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
     if (authProvider.accessToken != null) {
       debugPrint('Cargando instituciones con token: ${authProvider.accessToken!.substring(0, 20)}...');
-      await institutionProvider.loadInstitutions(authProvider.accessToken!);
+      await institutionProvider.loadInstitutions(
+        authProvider.accessToken!,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        activa: _statusFilter,
+      );
       debugPrint('Instituciones cargadas: ${institutionProvider.institutions.length}');
       debugPrint('Estado del provider: ${institutionProvider.state}');
       if (institutionProvider.hasError) {
@@ -58,252 +87,178 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _isSearching = query.isNotEmpty;
+    _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        _searchQuery = query;
+      });
+      _loadInstitutions();
     });
   }
 
-  List<Institution> _getFilteredInstitutions(InstitutionProvider provider) {
-    List<Institution> institutions;
-
-    if (_isSearching) {
-      institutions = provider.searchInstitutions(_searchController.text);
-    } else {
-      institutions = _showActiveOnly ? provider.activeInstitutions : provider.institutions;
-    }
-
-    return institutions;
+  void _onStatusFilterChanged(bool? status) {
+    setState(() {
+      _statusFilter = status;
+    });
+    _loadInstitutions();
   }
 
+  Future<void> _loadPage(int page) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+
+    if (authProvider.accessToken != null) {
+      await institutionProvider.loadInstitutions(
+        authProvider.accessToken!,
+        page: page,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        activa: _statusFilter,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Consumer2<AuthProvider, InstitutionProvider>(
+      builder: (context, authProvider, institutionProvider, child) {
+        return ManagementScaffold(
+          title: "Gestión de Instituciones",
+          isLoading: institutionProvider.isLoading && institutionProvider.institutions.isEmpty,
+          hasError: institutionProvider.hasError,
+          errorMessage: institutionProvider.errorMessage ?? 'Error desconocido',
+          itemCount: institutionProvider.institutions.length,
+          itemBuilder: (context, index) => _buildInstitutionCard(
+            institutionProvider.institutions[index],
+            institutionProvider,
+            context,
+          ),
+          hasMoreData: institutionProvider.hasMoreData,
+          onRefresh: () => _loadInstitutions(),
+          scrollController: _scrollController,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _navigateToForm(context),
+            backgroundColor: context.colors.primary,
+            child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
+          ),
+          filterWidgets: _buildFilterWidgets(context),
+          statisticWidgets: _buildStatisticWidgets(context, institutionProvider),
+          paginationInfo: institutionProvider.paginationInfo,
+          onPageChange: _loadPage,
+          emptyStateTitle: _searchQuery.isNotEmpty ? 'No se encontraron instituciones' : 'No hay instituciones',
+          emptyStateMessage: _searchQuery.isNotEmpty ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primera institución',
+          emptyStateIcon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildFilterWidgets(BuildContext context) {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: 'Gestión de Instituciones',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Super Admin',
-            roleIcon: Icons.verified_user,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go(AppRoutes.login);
-              }
-            },
+    return [
+      TextField(
+        controller: _searchController,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          hintText: 'Buscar por nombre, código o email...',
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          prefixIcon: Icon(Icons.search, color: colors.textSecondary),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear, color: colors.textSecondary),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
           ),
-        ],
-      ),
-      body: Consumer2<AuthProvider, InstitutionProvider>(
-        builder: (context, authProvider, institutionProvider, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-              return DashboardBody(
-                userGreeting: UserGreetingWidget(
-                  userName: authProvider.user?['nombres'] ?? 'Super Admin',
-                  responsive: responsive,
-                ),
-                dashboardOptions: _buildInstitutionsContent(institutionProvider, responsive, colors, spacing, textStyles),
-                responsive: responsive,
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToForm(context),
-        backgroundColor: colors.primary,
-        child: Icon(Icons.add, color: colors.getTextColorForBackground(colors.primary)),
-      ),
-    );
-  }
-
-  Widget _buildInstitutionsContent(InstitutionProvider provider, Map<String, dynamic> responsive, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    if (provider.isLoading && provider.institutions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (provider.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: colors.error),
-            SizedBox(height: spacing.lg),
-            Text(
-              'Error al cargar instituciones',
-              style: textStyles.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            Text(
-              provider.errorMessage ?? 'Error desconocido',
-              style: textStyles.bodyMedium.withColor(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.lg),
-            ElevatedButton(
-              onPressed: _loadInstitutions,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary, // Color consistente con el tema
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.lg,
-                  vertical: spacing.md,
-                ),
-              ),
-              child: Text('Reintentar', style: textStyles.button), // Usar estilo de botón sin color fijo
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        _buildSearchAndFilters(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.lg),
-        _buildStatisticsCards(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.lg),
-        // Usar ConstrainedBox en lugar de Expanded para evitar problemas de layout
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: 200, // Altura mínima
-            maxHeight: MediaQuery.of(context).size.height * 0.6, // Máximo 60% de la pantalla
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
           ),
-          child: _buildInstitutionsList(provider, colors, spacing, textStyles),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: colors.surface,
+          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
         ),
-      ],
-    );
-  }
-
-  Widget _buildSearchAndFilters(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        onChanged: _onSearchChanged,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md), // Reducido de lg a md
-        child: Column(
-          children: [
-            TextField(
-              controller: _searchController,
-              style: textStyles.bodyLarge,
-              decoration: InputDecoration(
-                hintText: 'Buscar por nombre, código o email...',
-                hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-                prefixIcon: Icon(Icons.search, color: colors.textSecondary),
-                suffixIcon: _isSearching
-                    ? IconButton(
-                        icon: Icon(Icons.clear, color: colors.textSecondary),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.borderLight),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: colors.surface,
-                contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm), // Reducido padding vertical
-              ),
-              onChanged: _onSearchChanged,
-            ),
-            SizedBox(height: spacing.sm), // Reducido de md a sm
-            Row(
-              children: [
-                Text('Mostrar:', style: textStyles.labelMedium),
-                SizedBox(width: spacing.md),
-                FilterChip(
-                  label: const Text('Activas'),  // Sin estilo manual - usa el tema
-                  selected: _showActiveOnly && !_isSearching,
-                  onSelected: !_isSearching ? (selected) {
-                    setState(() => _showActiveOnly = selected);
-                  } : null,
-                ),
-                SizedBox(width: spacing.md),
-                FilterChip(
-                  label: const Text('Todas'),  // Sin estilo manual - usa el tema
-                  selected: !_showActiveOnly && !_isSearching,
-                  onSelected: !_isSearching ? (selected) {
-                    setState(() => _showActiveOnly = !selected);
-                  } : null,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatisticsCards(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-        border: Border.all(color: colors.borderLight),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      SizedBox(height: spacing.sm),
+      Row(
         children: [
-          _buildCompactStat(
-            'Total',
-            provider.totalInstitutions.toString(),
-            Icons.business,
-            colors.primary,
-            textStyles,
+          Text('Mostrar:', style: textStyles.labelMedium),
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Todas'),
+            selected: _statusFilter == null,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(null);
+            },
           ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Activas'),
+            selected: _statusFilter == true,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(true);
+            },
           ),
-          _buildCompactStat(
-            'Activas',
-            provider.activeInstitutionsCount.toString(),
-            Icons.check_circle,
-            colors.success,
-            textStyles,
-          ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
-          ),
-          _buildCompactStat(
-            'Inactivas',
-            provider.inactiveInstitutionsCount.toString(),
-            Icons.cancel,
-            colors.error,
-            textStyles,
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Inactivas'),
+            selected: _statusFilter == false,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(false);
+            },
           ),
         ],
       ),
-    );
+    ];
+  }
+
+  List<Widget> _buildStatisticWidgets(BuildContext context, InstitutionProvider provider) {
+    return [
+      _buildCompactStat(
+        'Total',
+        provider.totalInstitutions.toString(),
+        Icons.business,
+        context.colors.primary,
+        context.textStyles,
+      ),
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
+      ),
+      _buildCompactStat(
+        'Activas',
+        provider.activeInstitutionsCount.toString(),
+        Icons.check_circle,
+        context.colors.success,
+        context.textStyles,
+      ),
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
+      ),
+      _buildCompactStat(
+        'Inactivas',
+        provider.inactiveInstitutionsCount.toString(),
+        Icons.cancel,
+        context.colors.error,
+        context.textStyles,
+      ),
+    ];
   }
 
   Widget _buildCompactStat(String title, String value, IconData icon, Color color, AppTextStyles textStyles) {
@@ -335,48 +290,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     );
   }
 
-  Widget _buildInstitutionsList(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    final filteredInstitutions = _getFilteredInstitutions(provider);
-
-    if (filteredInstitutions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _isSearching ? Icons.search_off : Icons.business,
-              size: 64,
-              color: colors.textMuted,
-            ),
-            SizedBox(height: spacing.lg),
-            Text(
-              _isSearching
-                  ? 'No se encontraron instituciones'
-                  : 'No hay instituciones ${_showActiveOnly ? 'activas' : ''}',
-              style: textStyles.headlineMedium.withColor(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: filteredInstitutions.isEmpty ? 200 : null, // Altura fija si está vacío, null si tiene contenido
-      child: ListView.builder(
-        shrinkWrap: filteredInstitutions.isNotEmpty, // Solo shrinkWrap si hay contenido
-        physics: filteredInstitutions.isNotEmpty ? const NeverScrollableScrollPhysics() : null,
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-        itemCount: filteredInstitutions.length,
-        itemBuilder: (context, index) {
-          final institution = filteredInstitutions[index];
-          return _buildInstitutionCard(institution, provider, colors, spacing, textStyles);
-        },
-      ),
-    );
-  }
-
-  Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Card(
       margin: EdgeInsets.only(bottom: spacing.xs),
       elevation: 1,
@@ -398,9 +315,21 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Código: ${institution.codigo}', style: textStyles.bodySmall),
-            if (institution.email != null) Text('Email: ${institution.email}', style: textStyles.bodySmall),
-            if (institution.telefono != null) Text('Teléfono: ${institution.telefono}', style: textStyles.bodySmall),
+            Row(children: [
+              Icon(Icons.tag, size: 14, color: colors.textSecondary),
+              SizedBox(width: 4),
+              Text(institution.codigo, style: textStyles.bodySmall),
+            ]),
+            if (institution.email != null) Row(children: [
+              Icon(Icons.email_outlined, size: 14, color: colors.textSecondary),
+              SizedBox(width: 4),
+              Text(institution.email!, style: textStyles.bodySmall),
+            ]),
+            if (institution.telefono != null) Row(children: [
+              Icon(Icons.phone_outlined, size: 14, color: colors.textSecondary),
+              SizedBox(width: 4),
+              Text(institution.telefono!, style: textStyles.bodySmall),
+            ]),
           ],
         ),
         trailing: PopupMenuButton<String>(

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../services/institution_service.dart';
 import '../models/institution.dart';
+import '../models/user.dart';
 
 enum InstitutionState {
   initial,
@@ -17,16 +18,24 @@ class InstitutionProvider with ChangeNotifier {
   String? _errorMessage;
   List<Institution> _institutions = [];
   Institution? _selectedInstitution;
+  PaginationInfo? _paginationInfo;
+  
+  // Scroll infinito
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
 
   // Getters
   InstitutionState get state => _state;
   String? get errorMessage => _errorMessage;
   List<Institution> get institutions => _institutions;
   Institution? get selectedInstitution => _selectedInstitution;
+  PaginationInfo? get paginationInfo => _paginationInfo;
 
   bool get isLoading => _state == InstitutionState.loading;
   bool get hasError => _state == InstitutionState.error;
   bool get isLoaded => _state == InstitutionState.loaded;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasMoreData => _hasMoreData;
 
   // Computed properties
   List<Institution> get activeInstitutions =>
@@ -45,19 +54,32 @@ class InstitutionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Carga todas las instituciones
-  Future<void> loadInstitutions(String accessToken) async {
+  /// Reinicia la paginación para scroll infinito
+  void resetPagination() {
+    _hasMoreData = true;
+    _isLoadingMore = false;
+  }
+
+  /// Carga todas las instituciones con paginación
+  Future<void> loadInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
     if (_state == InstitutionState.loading) return;
 
     _setState(InstitutionState.loading);
+    resetPagination(); // Resetear para scroll infinito
 
     try {
       debugPrint('InstitutionProvider: Iniciando carga de instituciones...');
-      final institutions = await _institutionService.getAllInstitutions(accessToken);
-      debugPrint('InstitutionProvider: Recibidas ${institutions.length} instituciones');
-      _institutions = institutions;
-      _setState(InstitutionState.loaded);
-      debugPrint('InstitutionProvider: Estado cambiado a loaded');
+      final response = await _institutionService.getAllInstitutions(accessToken, page: page ?? 1, limit: limit, activa: activa, search: search);
+      if (response != null) {
+        debugPrint('InstitutionProvider: Recibidas ${response.institutions.length} instituciones');
+        _institutions = response.institutions;
+        _paginationInfo = response.pagination;
+        _hasMoreData = response.pagination.hasNext;
+        _setState(InstitutionState.loaded);
+        debugPrint('InstitutionProvider: Estado cambiado a loaded');
+      } else {
+        _setState(InstitutionState.error, 'Error al cargar instituciones');
+      }
     } catch (e) {
       debugPrint('InstitutionProvider: Error loading institutions: $e');
       _setState(InstitutionState.error, e.toString());
@@ -96,7 +118,9 @@ class InstitutionProvider with ChangeNotifier {
       );
 
       // Agregar la nueva institución a la lista
-      _institutions.insert(0, newInstitution);
+      if (newInstitution != null) {
+        _institutions.insert(0, newInstitution);
+      }
       _setState(InstitutionState.loaded);
       return true;
     } catch (e) {
@@ -133,12 +157,12 @@ class InstitutionProvider with ChangeNotifier {
 
       // Actualizar la institución en la lista
       final index = _institutions.indexWhere((inst) => inst.id == id);
-      if (index != -1) {
+      if (index != -1 && updatedInstitution != null) {
         _institutions[index] = updatedInstitution;
       }
 
       // Actualizar la institución seleccionada si es la misma
-      if (_selectedInstitution?.id == id) {
+      if (_selectedInstitution?.id == id && updatedInstitution != null) {
         _selectedInstitution = updatedInstitution;
       }
 
@@ -211,9 +235,39 @@ class InstitutionProvider with ChangeNotifier {
     }).toList();
   }
 
-  /// Filtra instituciones por estado activo/inactivo
-  List<Institution> filterInstitutions({bool? active}) {
-    if (active == null) return _institutions;
-    return _institutions.where((inst) => inst.activa == active).toList();
+  /// Carga más instituciones para scroll infinito
+  Future<void> loadMoreInstitutions(String accessToken, {bool? activa, String? search}) async {
+    if (_isLoadingMore || !_hasMoreData || _paginationInfo == null) return;
+
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final nextPage = _paginationInfo!.page + 1;
+      debugPrint('InstitutionProvider: Cargando más instituciones, página $nextPage...');
+      
+      final response = await _institutionService.getAllInstitutions(
+        accessToken, 
+        page: nextPage, 
+        limit: _paginationInfo!.limit,
+        activa: activa, 
+        search: search
+      );
+      
+      if (response != null && response.institutions.isNotEmpty) {
+        debugPrint('InstitutionProvider: Recibidas ${response.institutions.length} instituciones adicionales');
+        _institutions.addAll(response.institutions);
+        _paginationInfo = response.pagination;
+        _hasMoreData = response.pagination.hasNext;
+      } else {
+        _hasMoreData = false;
+      }
+    } catch (e) {
+      debugPrint('InstitutionProvider: Error loading more institutions: $e');
+      _hasMoreData = false;
+    } finally {
+      _isLoadingMore = false;
+      notifyListeners();
+    }
   }
 }

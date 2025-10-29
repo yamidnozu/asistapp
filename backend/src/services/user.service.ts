@@ -1,12 +1,44 @@
+import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { UserRole, UsuarioExtendido, ValidationError } from '../types';
+import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserRole, UsuarioExtendido, ValidationError, UserFilters } from '../types';
 
 export class UserService {
   /**
-   * Obtiene todos los usuarios
+   * Obtiene todos los usuarios con paginación y filtros
    */
-  public static async getAllUsers(): Promise<UsuarioExtendido[]> {
+  public static async getAllUsers(pagination?: PaginationParams, filters?: UserFilters): Promise<PaginatedResponse<UsuarioExtendido>> {
     try {
+      const page = pagination?.page || 1;
+      const limit = pagination?.limit || 50; // Default limit
+      const skip = (page - 1) * limit;
+
+      // Construir cláusula where dinámicamente
+      const where: any = {};
+
+      if (filters?.activo !== undefined) {
+        where.activo = filters.activo;
+      }
+      if (filters?.rol) {
+        where.rol = filters.rol;
+      }
+      if (filters?.institucionId) {
+        where.usuarioInstituciones = {
+          some: { institucionId: filters.institucionId, activo: true },
+        };
+      }
+      if (filters?.search) {
+        where.OR = [
+          { nombres: { contains: filters.search, mode: 'insensitive' } },
+          { apellidos: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+
+      // Get total count
+      const total = await prisma.usuario.count({ where });
+
+      // Get paginated users
       const users = await prisma.usuario.findMany({
         include: {
           usuarioInstituciones: {
@@ -19,9 +51,24 @@ export class UserService {
         orderBy: {
           createdAt: 'desc',
         },
+        skip,
+        take: limit,
+        where,
       });
 
-      return users;
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: users,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
     } catch (error) {
       console.error('Error al obtener todos los usuarios:', error);
       throw error;
@@ -46,6 +93,7 @@ export class UserService {
               institucion: true,
             },
           },
+          estudiante: true,
         },
       });
 
@@ -85,73 +133,251 @@ export class UserService {
   }
 
   /**
-   * Obtiene usuarios por rol
+   * Obtiene usuarios por rol con paginación
    */
-  public static async getUsersByRole(role: string): Promise<UsuarioExtendido[]> {
+  public static async getUsersByRole(role: string, pagination?: PaginationParams, filters?: UserFilters): Promise<PaginatedResponse<UsuarioExtendido>> {
+    const combinedFilters = { ...filters, rol: role as UserRole };
+    return this.getAllUsers(pagination, combinedFilters);
+  }
+
+  /**
+   * Obtiene usuarios por institución con paginación y filtros
+   */
+  public static async getUsersByInstitution(institucionId: string, pagination?: PaginationParams, filters?: UserFilters): Promise<PaginatedResponse<UsuarioExtendido>> {
+    const combinedFilters = { ...filters, institucionId };
+    return this.getAllUsers(pagination, combinedFilters);
+  }
+
+  /**
+   * Crea un nuevo usuario
+   */
+  public static async createUser(userData: CreateUserRequest): Promise<CreateUserResponse> {
     try {
+      // Validaciones
+      if (!userData.email || !userData.password || !userData.nombres || !userData.apellidos || !userData.rol) {
+        throw new ValidationError('Campos requeridos faltantes');
+      }
+
       const validRoles: UserRole[] = ['super_admin', 'admin_institucion', 'profesor', 'estudiante'];
-      if (!role || !validRoles.includes(role as UserRole)) {
+      if (!validRoles.includes(userData.rol)) {
         throw new ValidationError('Rol inválido');
       }
 
-      const users = await prisma.usuario.findMany({
-        where: { rol: role },
-        include: {
-          usuarioInstituciones: {
-            where: { activo: true },
-            include: {
-              institucion: true,
-            },
+      // Verificar si el email ya existe
+      const emailAvailable = await this.isEmailAvailable(userData.email);
+      if (!emailAvailable) {
+        throw new ConflictError('El email ya está registrado');
+      }
+
+      // Hash de la contraseña
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+      // Generar código QR único para estudiantes
+      let codigoQr: string | undefined;
+      if (userData.rol === 'estudiante') {
+        if (!userData.identificacion) {
+          throw new ValidationError('La identificación es requerida para estudiantes');
+        }
+        codigoQr = this.generateUniqueQRCode();
+      }
+
+      // Crear usuario en una transacción
+      const result = await prisma.$transaction(async (tx) => {
+        // Crear usuario base
+        const newUser = await tx.usuario.create({
+          data: {
+            email: userData.email.toLowerCase(),
+            passwordHash: hashedPassword,
+            nombres: userData.nombres,
+            apellidos: userData.apellidos,
+            rol: userData.rol,
+            telefono: userData.telefono,
           },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        });
+
+        // Si se especifica institución, crear relación
+        if (userData.institucionId) {
+          await tx.usuarioInstitucion.create({
+            data: {
+              usuarioId: newUser.id,
+              institucionId: userData.institucionId,
+              rolEnInstitucion: userData.rolEnInstitucion,
+            },
+          });
+        }
+
+        // Si es estudiante, crear registro de estudiante
+        let estudianteData: {
+          id: string;
+          usuarioId: string;
+          identificacion: string;
+          codigoQr: string;
+          nombreResponsable: string | null;
+          telefonoResponsable: string | null;
+        } | null = null;
+        if (userData.rol === 'estudiante' && userData.identificacion) {
+          estudianteData = await tx.estudiante.create({
+            data: {
+              usuarioId: newUser.id,
+              identificacion: userData.identificacion,
+              codigoQr: codigoQr!,
+              nombreResponsable: userData.nombreResponsable,
+              telefonoResponsable: userData.telefonoResponsable,
+            },
+          });
+        }
+
+        return { newUser, estudianteData };
       });
 
-      return users;
+      // Obtener usuario completo con relaciones
+      const userWithRelations = await this.getUserById(result.newUser.id);
+      if (!userWithRelations) {
+        throw new Error('Error al obtener usuario creado');
+      }
+
+      // Formatear respuesta
+      const response: CreateUserResponse = {
+        id: userWithRelations.id,
+        email: userWithRelations.email,
+        nombres: userWithRelations.nombres,
+        apellidos: userWithRelations.apellidos,
+        rol: userWithRelations.rol as UserRole,
+        telefono: userWithRelations.telefono,
+        activo: userWithRelations.activo,
+        instituciones: userWithRelations.usuarioInstituciones?.map(ui => ({
+          id: ui.institucion.id,
+          nombre: ui.institucion.nombre,
+          rolEnInstitucion: ui.rolEnInstitucion,
+          activo: ui.activo,
+        })) || [],
+      };
+
+      if (result.estudianteData) {
+        response.estudiante = {
+          id: result.estudianteData.id,
+          identificacion: result.estudianteData.identificacion,
+          codigoQr: result.estudianteData.codigoQr,
+          nombreResponsable: result.estudianteData.nombreResponsable,
+          telefonoResponsable: result.estudianteData.telefonoResponsable,
+        };
+      }
+
+      return response;
+
     } catch (error) {
-      console.error(`Error al obtener usuarios con rol ${role}:`, error);
+      console.error('Error al crear usuario:', error);
       throw error;
     }
   }
 
   /**
-   * Obtiene usuarios por institución
+   * Actualiza un usuario
    */
-  public static async getUsersByInstitution(institucionId: string): Promise<UsuarioExtendido[]> {
+  public static async updateUser(id: string, userData: UpdateUserRequest): Promise<UsuarioExtendido | null> {
     try {
-      if (!institucionId || typeof institucionId !== 'string') {
-        throw new ValidationError('ID de institución inválido');
+      if (!id || typeof id !== 'string') {
+        throw new ValidationError('ID de usuario inválido');
       }
 
-      const users = await prisma.usuario.findMany({
-        where: {
-          usuarioInstituciones: {
-            some: {
-              institucionId: institucionId,
-              activo: true,
-            },
-          },
-        },
-        include: {
-          usuarioInstituciones: {
-            where: { activo: true },
-            include: {
-              institucion: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
+      // Verificar si el usuario existe
+      const existingUser = await this.getUserById(id);
+      if (!existingUser) {
+        throw new ValidationError('Usuario no encontrado');
+      }
+
+      // Verificar email si se está cambiando
+      if (userData.email && userData.email !== existingUser.email) {
+        const emailAvailable = await this.isEmailAvailable(userData.email, id);
+        if (!emailAvailable) {
+          throw new ConflictError('El email ya está registrado');
+        }
+      }
+
+      // Actualizar usuario en transacción
+      const result = await prisma.$transaction(async (tx) => {
+        // Actualizar usuario base
+        const updateData: {
+          email?: string;
+          nombres?: string;
+          apellidos?: string;
+          telefono?: string | null;
+          activo?: boolean;
+        } = {};
+        if (userData.email !== undefined) updateData.email = userData.email.toLowerCase();
+        if (userData.nombres !== undefined) updateData.nombres = userData.nombres;
+        if (userData.apellidos !== undefined) updateData.apellidos = userData.apellidos;
+        if (userData.telefono !== undefined) updateData.telefono = userData.telefono;
+        if (userData.activo !== undefined) updateData.activo = userData.activo;
+
+        const updatedUser = await tx.usuario.update({
+          where: { id },
+          data: updateData,
+        });
+
+        // Actualizar datos de estudiante si aplica
+        if (existingUser.rol === 'estudiante' && (userData.identificacion || userData.nombreResponsable || userData.telefonoResponsable)) {
+          const estudianteUpdateData: {
+            identificacion?: string;
+            nombreResponsable?: string | null;
+            telefonoResponsable?: string | null;
+          } = {};
+          if (userData.identificacion !== undefined) estudianteUpdateData.identificacion = userData.identificacion;
+          if (userData.nombreResponsable !== undefined) estudianteUpdateData.nombreResponsable = userData.nombreResponsable;
+          if (userData.telefonoResponsable !== undefined) estudianteUpdateData.telefonoResponsable = userData.telefonoResponsable;
+
+          await tx.estudiante.update({
+            where: { usuarioId: id },
+            data: estudianteUpdateData,
+          });
+        }
+
+        return updatedUser;
       });
 
-      return users;
+      // Obtener usuario actualizado con relaciones
+      return await this.getUserById(id);
+
     } catch (error) {
-      console.error(`Error al obtener usuarios de institución ${institucionId}:`, error);
+      console.error(`Error al actualizar usuario con ID ${id}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Elimina un usuario (desactivación lógica)
+   */
+  public static async deleteUser(id: string): Promise<boolean> {
+    try {
+      if (!id || typeof id !== 'string') {
+        throw new ValidationError('ID de usuario inválido');
+      }
+
+      // Verificar si el usuario existe
+      const existingUser = await this.getUserById(id);
+      if (!existingUser) {
+        throw new ValidationError('Usuario no encontrado');
+      }
+
+      // Desactivar usuario (borrado lógico)
+      await prisma.usuario.update({
+        where: { id },
+        data: { activo: false },
+      });
+
+      return true;
+
+    } catch (error) {
+      console.error(`Error al eliminar usuario con ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Genera un código QR único
+   */
+  private static generateUniqueQRCode(): string {
+    return randomBytes(16).toString('hex').toUpperCase();
   }
 
   /**
@@ -183,7 +409,10 @@ export class UserService {
         return false;
       }
 
-      const whereClause: any = { email: email.toLowerCase() };
+      const whereClause: {
+        email: string;
+        id?: { not: string };
+      } = { email: email.toLowerCase() };
       if (excludeUserId) {
         whereClause.id = { not: excludeUserId };
       }

@@ -5,6 +5,7 @@ import 'providers/auth_provider.dart';
 import 'providers/navigation_state_provider.dart';
 import 'providers/scroll_state_provider.dart';
 import 'providers/institution_provider.dart';
+import 'providers/user_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
@@ -82,6 +83,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider.value(value: _navigationProvider),
         ChangeNotifierProvider.value(value: _scrollProvider),
         ChangeNotifierProvider.value(value: _institutionProvider),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
       child: Builder(

@@ -20,15 +20,15 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@fastify/cors": "^8.5.0",
-    "@fastify/rate-limit": "^8.0.3",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/rate-limit": "^10.3.0",
     "@prisma/client": "^5.15.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.2",
-    "fastify": "^4.28.1",
+    "fastify": "^5.6.1",
     "fastify-cookie": "^5.6.1",
-    "fastify-formbody": "^5.2.0",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
@@ -62,7 +62,7 @@
       "^.+\\.ts$": [
         "ts-jest",
         {
-          "tsconfig": "tsconfig.json"
+          "tsconfig": "tsconfig.test.json"
         }
       ]
     }

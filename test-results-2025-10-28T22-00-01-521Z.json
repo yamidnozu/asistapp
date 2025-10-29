@@ -1,0 +1,61 @@
+{
+  "total": 12,
+  "passed": 7,
+  "failed": 5,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Verificación de Token",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Obtener Instituciones",
+      "status": "PASSED"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "PASSED",
+      "result": true
+    },
+    {
+      "name": "Login Admin de Institución",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Login Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Listar Admins de Institución",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Super Admin - Listar Admins (Paginación)",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Super Admin - Buscar Admins por Email",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Super Admin - Acceso a Gestión de Profesores",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Profesor - Acceso Denegado a Gestión de Profesores",
+      "status": "PASSED"
+    }
+  ]
+}

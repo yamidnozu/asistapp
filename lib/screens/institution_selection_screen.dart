@@ -183,7 +183,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
         context.go(route);
       }
     } catch (e) {
-
+      // Error silenciado - El usuario selecciona institución manualmente si falla
     } finally {
       if (mounted) {
         setState(() {

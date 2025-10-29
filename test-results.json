@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-10-28T21:12:27.510Z",
+  "summary": {
+    "total": 12,
+    "passed": 0,
+    "failed": 12,
+    "coverage": "0.0%"
+  },
+  "results": [
+    {
+      "test": "auth_super_admin",
+      "assertion": "Super Admin login exitoso",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.148Z"
+    },
+    {
+      "test": "auth_super_admin_role",
+      "assertion": "Rol correcto: super_admin",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.148Z"
+    },
+    {
+      "test": "auth_admin_inst_1",
+      "assertion": "Admin Institución 1 login exitoso",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.257Z"
+    },
+    {
+      "test": "auth_admin_inst_1_role",
+      "assertion": "Rol correcto: admin_institucion",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.257Z"
+    },
+    {
+      "test": "auth_admin_inst_2",
+      "assertion": "Admin Institución 2 login exitoso",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.357Z"
+    },
+    {
+      "test": "auth_admin_inst_2_role",
+      "assertion": "Rol correcto: admin_institucion",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.357Z"
+    },
+    {
+      "test": "auth_profesor",
+      "assertion": "Profesor login exitoso",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.496Z"
+    },
+    {
+      "test": "auth_profesor_role",
+      "assertion": "Rol correcto: profesor",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.497Z"
+    },
+    {
+      "test": "super_admin_workflow_token",
+      "assertion": "No hay token de Super Admin",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.499Z"
+    },
+    {
+      "test": "admin_inst_workflow_token",
+      "assertion": "No hay token de Admin Institución 1",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.500Z"
+    },
+    {
+      "test": "profesor_workflow_token",
+      "assertion": "No hay token de Profesor",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.501Z"
+    },
+    {
+      "test": "filters_token",
+      "assertion": "No hay token de Admin Institución 1",
+      "passed": false,
+      "timestamp": "2025-10-28T21:12:27.501Z"
+    }
+  ]
+}

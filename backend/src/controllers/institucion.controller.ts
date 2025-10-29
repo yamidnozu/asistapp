@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../config/database';
+import InstitucionService from '../services/institucion.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { ConflictError, InstitucionResponse, NotFoundError, ValidationError } from '../types';
 
@@ -25,30 +25,31 @@ interface UpdateInstitucionBody {
 }
 
 export class InstitucionController {
-  /**
-   * Obtiene todas las instituciones (solo super_admin)
-   */
   public static async getAll(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const instituciones = await prisma.institucion.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
+      const { page, limit, activa, search } = request.query as {
+        page?: string;
+        limit?: string;
+        activa?: string;
+        search?: string;
+      };
 
-      const response: InstitucionResponse[] = instituciones.map(inst => ({
-        id: inst.id,
-        nombre: inst.nombre,
-        codigo: inst.codigo,
-        direccion: inst.direccion,
-        telefono: inst.telefono,
-        email: inst.email,
-        activa: inst.activa,
-        createdAt: inst.createdAt.toISOString(),
-        updatedAt: inst.updatedAt.toISOString(),
-      }));
+      const pagination = {
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : 10,
+      };
+
+      const filters = {
+        activa: activa !== undefined ? activa === 'true' : undefined,
+        search: search || undefined,
+      };
+
+      const result = await InstitucionService.getAllInstitutions(pagination, filters);
 
       return reply.code(200).send({
         success: true,
-        data: response,
+        data: result.data,
+        pagination: result.pagination,
       });
     } catch (error) {
       throw error;
@@ -62,29 +63,15 @@ export class InstitucionController {
     try {
       const { id } = request.params;
 
-      const institucion = await prisma.institucion.findUnique({
-        where: { id },
-      });
+      const institution = await InstitucionService.getInstitutionById(id);
 
-      if (!institucion) {
+      if (!institution) {
         throw new NotFoundError('Institución');
       }
 
-      const response: InstitucionResponse = {
-        id: institucion.id,
-        nombre: institucion.nombre,
-        codigo: institucion.codigo,
-        direccion: institucion.direccion,
-        telefono: institucion.telefono,
-        email: institucion.email,
-        activa: institucion.activa,
-        createdAt: institucion.createdAt.toISOString(),
-        updatedAt: institucion.updatedAt.toISOString(),
-      };
-
       return reply.code(200).send({
         success: true,
-        data: response,
+        data: institution,
       });
     } catch (error) {
       throw error;
@@ -96,43 +83,13 @@ export class InstitucionController {
    */
   public static async create(request: AuthenticatedRequest & FastifyRequest<{ Body: CreateInstitucionBody }>, reply: FastifyReply) {
     try {
-      const data = request.body;
-      if (!data.nombre || !data.codigo) {
-        throw new ValidationError('Nombre y código son requeridos');
-      }
-      const existingInstitucion = await prisma.institucion.findUnique({
-        where: { codigo: data.codigo },
-      });
+      const data = request.body;
 
-      if (existingInstitucion) {
-        throw new ConflictError('Ya existe una institución con este código');
-      }
-
-      const institucion = await prisma.institucion.create({
-        data: {
-          nombre: data.nombre,
-          codigo: data.codigo,
-          direccion: data.direccion,
-          telefono: data.telefono,
-          email: data.email,
-        },
-      });
-
-      const response: InstitucionResponse = {
-        id: institucion.id,
-        nombre: institucion.nombre,
-        codigo: institucion.codigo,
-        direccion: institucion.direccion,
-        telefono: institucion.telefono,
-        email: institucion.email,
-        activa: institucion.activa,
-        createdAt: institucion.createdAt.toISOString(),
-        updatedAt: institucion.updatedAt.toISOString(),
-      };
+      const institution = await InstitucionService.createInstitution(data);
 
       return reply.code(201).send({
         success: true,
-        data: response,
+        data: institution,
         message: 'Institución creada exitosamente',
       });
     } catch (error) {
@@ -146,51 +103,17 @@ export class InstitucionController {
   public static async update(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams; Body: UpdateInstitucionBody }>, reply: FastifyReply) {
     try {
       const { id } = request.params;
-      const data = request.body;
-      const existingInstitucion = await prisma.institucion.findUnique({
-        where: { id },
-      });
+      const data = request.body;
 
-      if (!existingInstitucion) {
+      const institution = await InstitucionService.updateInstitution(id, data);
+
+      if (!institution) {
         throw new NotFoundError('Institución');
-      }
-      if (data.codigo && data.codigo !== existingInstitucion.codigo) {
-        const codigoExists = await prisma.institucion.findUnique({
-          where: { codigo: data.codigo },
-        });
-
-        if (codigoExists) {
-          throw new ConflictError('Ya existe una institución con este código');
-        }
       }
-
-      const institucion = await prisma.institucion.update({
-        where: { id },
-        data: {
-          nombre: data.nombre,
-          codigo: data.codigo,
-          direccion: data.direccion,
-          telefono: data.telefono,
-          email: data.email,
-          activa: data.activa,
-        },
-      });
-
-      const response: InstitucionResponse = {
-        id: institucion.id,
-        nombre: institucion.nombre,
-        codigo: institucion.codigo,
-        direccion: institucion.direccion,
-        telefono: institucion.telefono,
-        email: institucion.email,
-        activa: institucion.activa,
-        createdAt: institucion.createdAt.toISOString(),
-        updatedAt: institucion.updatedAt.toISOString(),
-      };
 
       return reply.code(200).send({
         success: true,
-        data: response,
+        data: institution,
         message: 'Institución actualizada exitosamente',
       });
     } catch (error) {
@@ -203,25 +126,9 @@ export class InstitucionController {
    */
   public static async delete(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams }>, reply: FastifyReply) {
     try {
-      const { id } = request.params;
-      const existingInstitucion = await prisma.institucion.findUnique({
-        where: { id },
-      });
+      const { id } = request.params;
 
-      if (!existingInstitucion) {
-        throw new NotFoundError('Institución');
-      }
-      const usuariosCount = await prisma.usuarioInstitucion.count({
-        where: { institucionId: id, activo: true },
-      });
-
-      if (usuariosCount > 0) {
-        throw new ConflictError('No se puede eliminar la institución porque tiene usuarios activos asociados');
-      }
-
-      await prisma.institucion.delete({
-        where: { id },
-      });
+      const success = await InstitucionService.deleteInstitution(id);
 
       return reply.code(200).send({
         success: true,

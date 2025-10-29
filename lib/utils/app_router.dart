@@ -9,11 +9,10 @@ import '../screens/super_admin_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
 import '../screens/student_dashboard.dart';
+import '../screens/users/users_list_screen.dart';
+import '../screens/users/create_professor_screen.dart';
+import '../screens/users/create_student_screen.dart';
 import '../screens/institutions/institutions_list_screen.dart';
-import '../screens/institutions/institution_form_screen.dart';
-import '../models/institution.dart';
-import '../theme/theme_extensions.dart';
-import 'app_routes.dart';
 
 /// Router principal de la aplicación
 /// Maneja rutas, autenticación y deep linking
@@ -35,10 +34,8 @@ class AppRouter {
     errorBuilder: _errorPage,
   );
 
-
   /// Decide dónde empezar cuando abre la app
   String _getStartRoute() {
-
     if (navigationProvider.hasValidState() && 
         navigationProvider.currentRoute != null) {
       return navigationProvider.currentRoute!;
@@ -46,12 +43,11 @@ class AppRouter {
 
     if (authProvider.isAuthenticated) {
       final role = authProvider.user?['rol'] as String?;
-      return AppRoutes.getDashboardRouteForRole(role ?? '');
+      return _getDashboardRouteForRole(role ?? '');
     }
 
-    return AppRoutes.login;
+    return '/login';
   }
-
 
   /// Verifica si puede entrar a cada ruta
   String? _checkAuth(BuildContext context, GoRouterState state) {
@@ -59,26 +55,26 @@ class AppRouter {
     final currentRoute = state.matchedLocation;
 
     // Si estamos en login y estamos logueados
-    if (currentRoute == AppRoutes.login) {
+    if (currentRoute == '/login') {
       if (isLoggedIn) {
         final institutions = authProvider.institutions;
         final selected = authProvider.selectedInstitutionId;
         
         // Si tenemos múltiples instituciones y no hay selección, ir a selección
         if (institutions != null && institutions.length > 1 && selected == null) {
-          return AppRoutes.institutionSelection;
+          return '/institution-selection';
         }
         
         // Si no, ir al dashboard correspondiente
         final role = authProvider.user?['rol'] as String?;
-        return AppRoutes.getDashboardRouteForRole(role ?? '');
+        return _getDashboardRouteForRole(role ?? '');
       }
       return null; // Dejar entrar al login
     }
 
     // Si no estamos logueados, ir al login
     if (!isLoggedIn) {
-      return AppRoutes.login;
+      return '/login';
     }
 
     // Si estamos en una ruta protegida y necesitamos selección de institución
@@ -87,32 +83,20 @@ class AppRouter {
     final needsSelection = institutions != null && 
                           institutions.length > 1 && 
                           selected == null &&
-                          currentRoute != AppRoutes.institutionSelection &&
-                          !currentRoute.startsWith('/institutions'); // Excluir rutas de instituciones
+                          currentRoute != '/institution-selection';
     
     if (needsSelection) {
-      return AppRoutes.institutionSelection;
+      return '/institution-selection';
     }
 
-    // Verificar permisos para rutas de instituciones (solo super_admin)
-    if (currentRoute.startsWith('/institutions')) {
-      final role = authProvider.user?['rol'] as String?;
-      if (role != 'super_admin') {
-        // Si no es super_admin, redirigir al dashboard correspondiente
-        return AppRoutes.getDashboardRouteForRole(role ?? '');
-      }
-    }
-    
     return null; // Todo bien, dejar pasar
   }
-
 
   /// Todas las rutas de la app
   List<RouteBase> _allRoutes() {
     return [
-
       GoRoute(
-        path: AppRoutes.login,
+        path: '/login',
         name: 'login',
         pageBuilder: (context, state) => _fadePage(
           context,
@@ -122,7 +106,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.institutionSelection,
+        path: '/institution-selection',
         name: 'institution-selection',
         pageBuilder: (context, state) => _fadePage(
           context,
@@ -132,7 +116,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.superAdminDashboard,
+        path: '/super-admin-dashboard',
         name: 'super-admin',
         pageBuilder: (context, state) {
           _saveRoute(state);
@@ -141,7 +125,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.adminDashboard,
+        path: '/admin-dashboard',
         name: 'admin',
         pageBuilder: (context, state) {
           _saveRoute(state);
@@ -150,7 +134,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.teacherDashboard,
+        path: '/teacher-dashboard',
         name: 'teacher',
         pageBuilder: (context, state) {
           _saveRoute(state);
@@ -159,7 +143,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.studentDashboard,
+        path: '/student-dashboard',
         name: 'student',
         pageBuilder: (context, state) {
           _saveRoute(state);
@@ -168,7 +152,7 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: AppRoutes.home,
+        path: '/home',
         name: 'home',
         pageBuilder: (context, state) {
           _saveRoute(state);
@@ -176,36 +160,45 @@ class AppRouter {
         },
       ),
 
+      // Rutas de usuarios (para admin_institucion y super_admin)
+      GoRoute(
+        path: '/users',
+        name: 'users-list',
+        pageBuilder: (context, state) {
+          _saveRoute(state);
+          return _fadePage(context, state, const UsersListScreen());
+        },
+      ),
+
+      GoRoute(
+        path: '/users/professor/create',
+        name: 'create-professor',
+        pageBuilder: (context, state) {
+          _saveRoute(state);
+          return _fadePage(context, state, const CreateProfessorScreen());
+        },
+      ),
+
+      GoRoute(
+        path: '/users/student/create',
+        name: 'create-student',
+        pageBuilder: (context, state) {
+          _saveRoute(state);
+          return _fadePage(context, state, const CreateStudentScreen());
+        },
+      ),
+
       // Rutas de instituciones (solo para super_admin)
       GoRoute(
-        path: AppRoutes.institutionsList,
+        path: '/institutions',
         name: 'institutions-list',
         pageBuilder: (context, state) {
           _saveRoute(state);
           return _fadePage(context, state, const InstitutionsListScreen());
         },
       ),
-
-      GoRoute(
-        path: AppRoutes.institutionForm,
-        name: 'institution-form',
-        pageBuilder: (context, state) {
-          final institutionId = state.uri.queryParameters['id'];
-          final institution = institutionId != null
-              ? state.extra as Institution?
-              : null;
-
-          _saveRoute(state);
-          return _fadePage(
-            context,
-            state,
-            InstitutionFormScreen(institution: institution),
-          );
-        },
-      ),
     ];
   }
-
 
   /// Guarda la ruta actual
   void _saveRoute(GoRouterState state) {
@@ -234,30 +227,41 @@ class AppRouter {
   /// Página de error
   Widget _errorPage(BuildContext context, GoRouterState state) {
     return Scaffold(
-      body: Builder(
-        builder: (ctx) {
-          final colors = ctx.colors;
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: colors.error),
-                const SizedBox(height: 16),
-                const Text('Error de Navegación', 
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('${state.error}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.go(AppRoutes.login),
-                  child: const Text('Ir al inicio'),
-                ),
-              ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('Error de Navegación', 
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('${state.error}'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Ir al inicio'),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
+  }
+
+  /// Qué dashboard le corresponde a cada rol
+  String _getDashboardRouteForRole(String role) {
+    switch (role) {
+      case 'super_admin':
+        return '/super-admin-dashboard';
+      case 'admin_institucion':
+        return '/admin-dashboard';
+      case 'profesor':
+        return '/teacher-dashboard';
+      case 'estudiante':
+        return '/student-dashboard';
+      default:
+        return '/home';
+    }
   }
 
   /// Limpiar al cerrar

@@ -2,32 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/institution.dart';
+import '../models/user.dart';
 
-class InstitutionResponse {
-  final bool success;
-  final String? message;
-  final Institution? data;
-  final List<Institution>? dataList;
+class PaginatedInstitutionResponse {
+  final List<Institution> institutions;
+  final PaginationInfo pagination;
 
-  InstitutionResponse({
-    required this.success,
-    this.message,
-    this.data,
-    this.dataList,
+  PaginatedInstitutionResponse({
+    required this.institutions,
+    required this.pagination,
   });
-
-  factory InstitutionResponse.fromJson(Map<String, dynamic> json) {
-    return InstitutionResponse(
-      success: json['success'] ?? false,
-      message: json['message'],
-      data: json['data'] != null && json['data'] is! List
-          ? Institution.fromJson(json['data'])
-          : null,
-      dataList: json['data'] != null && json['data'] is List
-          ? (json['data'] as List).map((e) => Institution.fromJson(e)).toList()
-          : null,
-    );
-  }
 }
 
 class InstitutionService {
@@ -48,14 +32,20 @@ class InstitutionService {
     return 'http://$ip:3000';
   }
 
-  /// Obtiene todas las instituciones
-  Future<List<Institution>> getAllInstitutions(String accessToken) async {
+  /// Obtiene todas las instituciones con paginación y filtros
+  Future<PaginatedInstitutionResponse?> getAllInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
     try {
       final baseUrlValue = await baseUrl;
-      final url = '$baseUrlValue/instituciones';
-
+      final queryParams = <String, String>{};
+      if (page != null) queryParams['page'] = page.toString();
+      if (limit != null) queryParams['limit'] = limit.toString();
+      if (activa != null) queryParams['activa'] = activa.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      
+      final uri = Uri.parse('$baseUrlValue/instituciones').replace(queryParameters: queryParams);
+      
       final response = await http.get(
-        Uri.parse(url),
+        uri,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -67,39 +57,35 @@ class InstitutionService {
         },
       );
 
-      debugPrint('GET $url - Status: ${response.statusCode}');
+      debugPrint('GET /instituciones - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        debugPrint('Response body: ${response.body}');
-        final institutionResponse = InstitutionResponse.fromJson(jsonDecode(response.body));
-        debugPrint('InstitutionResponse success: ${institutionResponse.success}');
-        debugPrint('InstitutionResponse dataList length: ${institutionResponse.dataList?.length ?? 0}');
-        if (institutionResponse.success && institutionResponse.dataList != null) {
-          debugPrint('Returning ${institutionResponse.dataList!.length} institutions');
-          return institutionResponse.dataList!;
-        } else {
-          debugPrint('No success or no dataList: ${institutionResponse.message}');
-          throw Exception(institutionResponse.message ?? 'Error al obtener instituciones');
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final institutions = (responseData['data'] as List)
+              .map((institutionJson) => Institution.fromJson(institutionJson))
+              .toList();
+          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedInstitutionResponse(institutions: institutions, pagination: pagination);
         }
       } else {
-        debugPrint('Error response: ${response.body}');
-        throw Exception('Error ${response.statusCode}: ${response.body}');
+        debugPrint('Error getting institutions: ${response.statusCode} - ${response.body}');
+        return null;
       }
     } catch (e, stackTrace) {
       debugPrint('Error getting institutions: $e');
       debugPrint('StackTrace: $stackTrace');
-      throw Exception('Error al obtener instituciones: $e');
+      return null;
     }
+    return null;
   }
 
   /// Obtiene una institución por ID
-  Future<Institution> getInstitutionById(String accessToken, String id) async {
+  Future<Institution?> getInstitutionById(String accessToken, String id) async {
     try {
       final baseUrlValue = await baseUrl;
-      final url = '$baseUrlValue/instituciones/$id';
-
       final response = await http.get(
-        Uri.parse(url),
+        Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -111,28 +97,29 @@ class InstitutionService {
         },
       );
 
-      debugPrint('GET $url - Status: ${response.statusCode}');
+      debugPrint('GET /instituciones/$id - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        final institutionResponse = InstitutionResponse.fromJson(jsonDecode(response.body));
-        if (institutionResponse.success && institutionResponse.data != null) {
-          return institutionResponse.data!;
-        } else {
-          throw Exception(institutionResponse.message ?? 'Institución no encontrada');
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error response: ${response.body}');
-        throw Exception('Error ${response.statusCode}: ${response.body}');
+        debugPrint('Error getting institution: ${response.statusCode} - ${response.body}');
+        return null;
       }
     } catch (e, stackTrace) {
       debugPrint('Error getting institution: $e');
       debugPrint('StackTrace: $stackTrace');
-      throw Exception('Error al obtener institución: $e');
+      return null;
     }
+    return null;
   }
 
+
+
   /// Crea una nueva institución
-  Future<Institution> createInstitution(
+  Future<Institution?> createInstitution(
     String accessToken, {
     required String nombre,
     required String codigo,
@@ -142,23 +129,19 @@ class InstitutionService {
   }) async {
     try {
       final baseUrlValue = await baseUrl;
-      final url = '$baseUrlValue/instituciones';
-
-      final requestBody = jsonEncode({
-        'nombre': nombre,
-        'codigo': codigo,
-        if (direccion != null) 'direccion': direccion,
-        if (telefono != null) 'telefono': telefono,
-        if (email != null) 'email': email,
-      });
-
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse('$baseUrlValue/instituciones'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: requestBody,
+        body: jsonEncode({
+          'nombre': nombre,
+          'codigo': codigo,
+          if (direccion != null) 'direccion': direccion,
+          if (telefono != null) 'telefono': telefono,
+          if (email != null) 'email': email,
+        }),
       ).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
@@ -166,30 +149,27 @@ class InstitutionService {
         },
       );
 
-      debugPrint('POST $url - Status: ${response.statusCode}');
-      debugPrint('Request body: $requestBody');
+      debugPrint('POST /instituciones - Status: ${response.statusCode}');
 
       if (response.statusCode == 201) {
-        final institutionResponse = InstitutionResponse.fromJson(jsonDecode(response.body));
-        if (institutionResponse.success && institutionResponse.data != null) {
-          return institutionResponse.data!;
-        } else {
-          throw Exception(institutionResponse.message ?? 'Error al crear institución');
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error response: ${response.body}');
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Error ${response.statusCode}');
+        debugPrint('Error creating institution: ${response.statusCode} - ${response.body}');
+        return null;
       }
     } catch (e, stackTrace) {
       debugPrint('Error creating institution: $e');
       debugPrint('StackTrace: $stackTrace');
-      throw Exception('Error al crear institución: $e');
+      return null;
     }
+    return null;
   }
 
   /// Actualiza una institución
-  Future<Institution> updateInstitution(
+  Future<Institution?> updateInstitution(
     String accessToken,
     String id, {
     String? nombre,
@@ -201,24 +181,20 @@ class InstitutionService {
   }) async {
     try {
       final baseUrlValue = await baseUrl;
-      final url = '$baseUrlValue/instituciones/$id';
-
-      final requestBody = jsonEncode({
-        if (nombre != null) 'nombre': nombre,
-        if (codigo != null) 'codigo': codigo,
-        if (direccion != null) 'direccion': direccion,
-        if (telefono != null) 'telefono': telefono,
-        if (email != null) 'email': email,
-        if (activa != null) 'activa': activa,
-      });
-
       final response = await http.put(
-        Uri.parse(url),
+        Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: requestBody,
+        body: jsonEncode({
+          if (nombre != null) 'nombre': nombre,
+          if (codigo != null) 'codigo': codigo,
+          if (direccion != null) 'direccion': direccion,
+          if (telefono != null) 'telefono': telefono,
+          if (email != null) 'email': email,
+          if (activa != null) 'activa': activa,
+        }),
       ).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
@@ -226,65 +202,55 @@ class InstitutionService {
         },
       );
 
-      debugPrint('PUT $url - Status: ${response.statusCode}');
-      debugPrint('Request body: $requestBody');
-
-      if (response.statusCode == 200) {
-        final institutionResponse = InstitutionResponse.fromJson(jsonDecode(response.body));
-        if (institutionResponse.success && institutionResponse.data != null) {
-          return institutionResponse.data!;
-        } else {
-          throw Exception(institutionResponse.message ?? 'Error al actualizar institución');
-        }
-      } else {
-        debugPrint('Error response: ${response.body}');
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Error ${response.statusCode}');
-      }
-    } catch (e, stackTrace) {
-      debugPrint('Error updating institution: $e');
-      debugPrint('StackTrace: $stackTrace');
-      throw Exception('Error al actualizar institución: $e');
-    }
-  }
-
-  /// Elimina una institución
-  Future<void> deleteInstitution(String accessToken, String id) async {
-    try {
-      final baseUrlValue = await baseUrl;
-      final url = '$baseUrlValue/instituciones/$id';
-
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Timeout: El servidor no responde');
-        },
-      );
-
-      debugPrint('DELETE $url - Status: ${response.statusCode}');
+      debugPrint('PUT /instituciones/$id - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          return;
-        } else {
-          throw Exception(responseData['message'] ?? 'Error al eliminar institución');
+          return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error response: ${response.body}');
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Error ${response.statusCode}');
+        debugPrint('Error updating institution: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error updating institution: $e');
+      debugPrint('StackTrace: $stackTrace');
+      return null;
+    }
+    return null;
+  }
+
+  /// Elimina una institución (desactivación lógica)
+  Future<bool> deleteInstitution(String accessToken, String id) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final response = await http.delete(
+        Uri.parse('$baseUrlValue/instituciones/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('DELETE /instituciones/$id - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['success'] == true;
+      } else {
+        debugPrint('Error deleting institution: ${response.statusCode} - ${response.body}');
+        return false;
       }
     } catch (e, stackTrace) {
       debugPrint('Error deleting institution: $e');
       debugPrint('StackTrace: $stackTrace');
-      throw Exception('Error al eliminar institución: $e');
+      return false;
     }
   }
 }

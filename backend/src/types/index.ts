@@ -1,6 +1,8 @@
 import { Institucion, Usuario } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
-export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+
+export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -40,7 +42,8 @@ export interface LogoutRequest {
 export interface VerifyTokenResponse {
   usuario: JWTPayload;
   valid: boolean;
-}
+}
+
 export interface GetUserByIdRequest {
   id: string;
 }
@@ -67,27 +70,31 @@ export interface UserResponse {
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
+}
+
 export interface UsuarioExtendido extends Omit<Usuario, 'institucionId'> {
   usuarioInstituciones?: {
     institucion: Institucion;
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
+}
+
 export interface UsuarioConInstituciones extends Usuario {
   usuarioInstituciones: {
     institucion: Institucion;
     rolEnInstitucion?: string | null;
     activo: boolean;
   }[];
-}
-export interface ApiResponse<T = any> {
+}
+
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
   message?: string;
-}
+}
+
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
@@ -131,8 +138,10 @@ export class ConflictError extends AppError {
   constructor(message: string) {
     super(message, 409, 'CONFLICT_ERROR');
   }
-}
-export type DatabaseError = PrismaClientKnownRequestError | PrismaClientValidationError;
+}
+
+export type DatabaseError = PrismaClientKnownRequestError | PrismaClientValidationError;
+
 export interface JWTPayload {
   id: string;
   rol: UserRole;
@@ -141,7 +150,8 @@ export interface JWTPayload {
   jti?: string; // JWT ID único
   iat?: number;
   exp?: number;
-}
+}
+
 export interface AppConfig {
   port: number;
   host: string;
@@ -149,7 +159,8 @@ export interface AppConfig {
   jwtExpiresIn: string;
   nodeEnv: string;
   logLevel: string;
-}
+}
+
 export interface CreateInstitucionRequest {
   nombre: string;
   codigo: string;
@@ -177,4 +188,66 @@ export interface InstitucionResponse {
   activa: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+  nombres: string;
+  apellidos: string;
+  rol: UserRole;
+  telefono?: string;
+  institucionId?: string; // Para asignar institución inicial
+  rolEnInstitucion?: string; // Rol específico en la institución
+  // Campos específicos para estudiantes
+  identificacion?: string; // Solo para estudiantes
+  nombreResponsable?: string; // Solo para estudiantes
+  telefonoResponsable?: string; // Solo para estudiantes
+}
+
+export interface UpdateUserRequest {
+  email?: string;
+  nombres?: string;
+  apellidos?: string;
+  telefono?: string;
+  activo?: boolean;
+  // Para estudiantes
+  identificacion?: string;
+  nombreResponsable?: string;
+  telefonoResponsable?: string;
+}
+
+export interface CreateUserResponse extends UserResponse {
+  estudiante?: {
+    id: string;
+    identificacion: string;
+    codigoQr: string;
+    nombreResponsable?: string | null;
+    telefonoResponsable?: string | null;
+  };
+}
+
+// Paginación
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export interface UserFilters {
+  activo?: boolean;
+  rol?: UserRole;
+  institucionId?: string;
+  search?: string;
 }

@@ -2,14 +2,15 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import JWTService from '../config/jwt';
-import { AuthenticationError, LoginRequest, LoginResponse, RefreshTokenResponse, UserRole } from '../types';
+import { AuthenticationError, JWTPayload, LoginRequest, LoginResponse, RefreshTokenResponse, UserRole } from '../types';
 
 export class AuthService {
   /**
    * Autentica un usuario con email y contraseña
    */
   public static async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const { email, password } = credentials;
+    const { email, password } = credentials;
+
     const usuario = await prisma.usuario.findUnique({
       where: { email },
       include: {
@@ -24,14 +25,17 @@ export class AuthService {
 
     if (!usuario) {
       throw new AuthenticationError('Credenciales inválidas');
-    }
+    }
+
     if (!usuario.activo) {
       throw new AuthenticationError('Usuario inactivo');
-    }
+    }
+
     const passwordMatch = await bcrypt.compare(password, usuario.passwordHash);
     if (!passwordMatch) {
       throw new AuthenticationError('Credenciales inválidas');
-    }
+    }
+
     const accessToken = JWTService.signAccessToken({
       id: usuario.id,
       rol: usuario.rol as UserRole,
@@ -44,9 +48,10 @@ export class AuthService {
       rol: usuario.rol as UserRole,
       email: usuario.email,
       tokenVersion: usuario.tokenVersion,
-    });
+    });
+
     try {
-      const decodedRefresh = JWTService.decode(refreshToken) as any;
+      const decodedRefresh = JWTService.decode(refreshToken) as JWTPayload & { exp?: number };
       const exp = decodedRefresh?.exp; // segundos desde epoch
       const expiresAt = exp ? new Date(exp * 1000) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -59,10 +64,13 @@ export class AuthService {
           expiresAt,
         },
       });
-    } catch (err) {
+    } catch (err) {
+
       console.warn('No se pudo guardar refresh token en DB:', err);
-    }
-    const expiresIn = 24 * 60 * 60; // 24 horas en segundos
+    }
+
+    const expiresIn = 24 * 60 * 60; // 24 horas en segundos
+
     return {
       accessToken,
       refreshToken,
@@ -85,7 +93,8 @@ export class AuthService {
    * Verifica y decodifica un token JWT
    */
   public static async verifyToken(token: string) {
-    const decoded = JWTService.verify(token);
+    const decoded = JWTService.verify(token);
+
     const usuario = await prisma.usuario.findUnique({
       where: { id: decoded.id },
       select: { tokenVersion: true, activo: true },
@@ -106,8 +115,10 @@ export class AuthService {
    * Refresca un access token usando un refresh token válido
    */
   public static async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    try {
-      const decoded = JWTService.verifyRefreshToken(refreshToken);
+    try {
+
+      const decoded = JWTService.verifyRefreshToken(refreshToken);
+
       const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
       const tokenRecord = await prisma.refreshToken.findFirst({
@@ -122,10 +133,12 @@ export class AuthService {
         throw new AuthenticationError('Refresh token inválido o revocado');
       }
 
-      if (tokenRecord.expiresAt <= new Date()) {
+      if (tokenRecord.expiresAt <= new Date()) {
+
         await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
         throw new AuthenticationError('Refresh token expirado');
-      }
+      }
+
       const usuario = await prisma.usuario.findUnique({
         where: { id: decoded.id },
         include: {
@@ -140,11 +153,14 @@ export class AuthService {
 
       if (!usuario || !usuario.activo) {
         throw new AuthenticationError('Usuario no encontrado o inactivo');
-      }
+      }
+
       if (usuario.tokenVersion !== decoded.tokenVersion) {
         throw new AuthenticationError('Refresh token revocado por cambio de versión');
-      }
-      await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+      }
+
+      await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+
       const newAccessToken = JWTService.signAccessToken({
         id: usuario.id,
         rol: usuario.rol as UserRole,
@@ -157,9 +173,10 @@ export class AuthService {
         rol: usuario.rol as UserRole,
         email: usuario.email,
         tokenVersion: usuario.tokenVersion,
-      });
+      });
+
       try {
-        const decodedNew = JWTService.decode(newRefreshToken) as any;
+        const decodedNew = JWTService.decode(newRefreshToken) as JWTPayload & { exp?: number };
         const exp = decodedNew?.exp;
         const expiresAt = exp ? new Date(exp * 1000) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         const hashedNew = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
@@ -173,7 +190,8 @@ export class AuthService {
         });
       } catch (err) {
         console.warn('No se pudo guardar nuevo refresh token en DB:', err);
-      }
+      }
+
       const expiresIn = 24 * 60 * 60; // 24 horas en segundos
 
       return {

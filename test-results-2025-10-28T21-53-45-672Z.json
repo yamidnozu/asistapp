@@ -1,0 +1,21 @@
+{
+  "total": 3,
+  "passed": 1,
+  "failed": 2,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "FAILED",
+      "error": "No se recibió token de acceso"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "FAILED",
+      "error": "Error inesperado: Request failed with status code 404"
+    }
+  ]
+}

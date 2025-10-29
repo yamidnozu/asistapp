@@ -579,169 +579,7 @@
 					}
 				},
 				{
-					"name": "Cleanup Tokens",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Limpieza exitosa\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Limpieza de tokens completada');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/admin/cleanup-tokens",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "admin", "cleanup-tokens"]
-						},
-						"description": "Limpiar tokens expirados (solo super_admin)"
-					}
-				}
-			]
-		},
-		{
-			"name": "Institutions Management",
-			"item": [
-				{
-					"name": "Get All Institutions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Instituciones obtenidas\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.be.an('array');",
-									"        if (jsonData.data.length > 0) {",
-									"            pm.expect(jsonData.data[0]).to.have.property('id');",
-									"            pm.expect(jsonData.data[0]).to.have.property('nombre');",
-									"            pm.expect(jsonData.data[0]).to.have.property('codigo');",
-									"            pm.expect(jsonData.data[0]).to.have.property('activa');",
-									"        }",
-									"    }",
-									"});",
-									"",
-									"// Guardar primera institución como variable de environment",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
-									"    pm.environment.set('institucionId', jsonData.data[0].id);",
-									"    pm.environment.set('institucionNombre', jsonData.data[0].nombre);",
-									"    pm.environment.set('institucionCodigo', jsonData.data[0].codigo);",
-									"    ",
-									"    console.log('✅ Instituciones obtenidas: ' + jsonData.data.length);",
-									"    console.log('Primera institución: ' + jsonData.data[0].nombre + ' (' + jsonData.data[0].codigo + ')');",
-									"} else {",
-									"    console.log('❌ Error al obtener instituciones:', jsonData.error || 'Sin instituciones');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["instituciones"]
-						},
-						"description": "Obtener todas las instituciones (requiere rol super_admin)"
-					}
-				},
-				{
-					"name": "Get Institution by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 401]);",
-									"});",
-									"",
-									"pm.test(\"Institución obtenida\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('nombre');",
-									"        pm.expect(jsonData.data).to.have.property('codigo');",
-									"        pm.expect(jsonData.data).to.have.property('activa');",
-									"        pm.expect(jsonData.data).to.have.property('createdAt');",
-									"        pm.expect(jsonData.data).to.have.property('updatedAt');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Institución obtenida:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["instituciones", "{{institucionId}}"]
-						},
-						"description": "Obtener institución por ID"
-					}
-				},
-				{
-					"name": "Create Institution",
+					"name": "Create Professor",
 					"event": [
 						{
 							"listen": "test",
@@ -753,28 +591,28 @@
 									"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
 									"});",
 									"",
-									"pm.test(\"Institución creada\", function () {",
+									"pm.test(\"Profesor creado\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('success');",
 									"    if (jsonData.success) {",
 									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('nombre');",
-									"        pm.expect(jsonData.data).to.have.property('codigo');",
-									"        pm.expect(jsonData.data).to.have.property('activa');",
-									"        pm.expect(jsonData.data.activa).to.eql(true); // Por defecto true",
+									"        pm.expect(jsonData.data).to.have.property('email');",
+									"        pm.expect(jsonData.data).to.have.property('rol');",
+									"        pm.expect(jsonData.data.rol).to.eql('profesor');",
+									"        pm.expect(jsonData.data).to.have.property('instituciones');",
 									"        pm.expect(jsonData).to.have.property('message');",
 									"    }",
 									"});",
 									"",
-									"// Guardar ID de la institución creada para pruebas posteriores",
+									"// Guardar ID del profesor creado para pruebas posteriores",
 									"var jsonData = pm.response.json();",
 									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('createdInstitucionId', jsonData.data.id);",
-									"    pm.environment.set('createdInstitucionNombre', jsonData.data.nombre);",
+									"    pm.environment.set('createdProfesorId', jsonData.data.id);",
+									"    pm.environment.set('createdProfesorEmail', jsonData.data.email);",
 									"    ",
-									"    console.log('✅ Institución creada:', jsonData.data.nombre + ' (ID: ' + jsonData.data.id + ')');",
+									"    console.log('✅ Profesor creado:', jsonData.data.email + ' (ID: ' + jsonData.data.id + ')');",
 									"} else {",
-									"    console.log('❌ Error al crear institución:', jsonData.error || 'Error desconocido');",
+									"    console.log('❌ Error al crear profesor:', jsonData.error || 'Error desconocido');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -792,20 +630,20 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombre\": \"Colegio {{institucionNombre}} Test\",\n    \"codigo\": \"TEST{{institucionCodigo}}\",\n    \"direccion\": \"Dirección de prueba\",\n    \"telefono\": \"555-9999\",\n    \"email\": \"test@colegio.com\"\n}"
+							"raw": "{\n    \"email\": \"profesor.test@asistapp.com\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Profesor\",\n    \"apellidos\": \"Test\",\n    \"rol\": \"profesor\",\n    \"telefono\": \"+123456789\",\n    \"institucionId\": \"{{institucionId}}\"\n}"
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["instituciones"]
+							"path": ["usuarios"]
 						},
-						"description": "Crear nueva institución (requiere rol super_admin)"
+						"description": "Crear nuevo profesor"
 					}
 				},
 				{
-					"name": "Update Institution",
+					"name": "Create Student",
 					"event": [
 						{
 							"listen": "test",
@@ -814,21 +652,86 @@
 									"// Verificar respuesta del servidor",
 									"pm.test(\"Respuesta del servidor\", function () {",
 									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
+									"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
 									"});",
 									"",
-									"pm.test(\"Institución actualizada\", function () {",
+									"pm.test(\"Estudiante creado\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('success');",
 									"    if (jsonData.success) {",
 									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('nombre');",
-									"        pm.expect(jsonData.data).to.have.property('codigo');",
+									"        pm.expect(jsonData.data).to.have.property('email');",
+									"        pm.expect(jsonData.data).to.have.property('rol');",
+									"        pm.expect(jsonData.data.rol).to.eql('estudiante');",
+									"        pm.expect(jsonData.data).to.have.property('estudiante');",
+									"        pm.expect(jsonData.data.estudiante).to.have.property('codigoQr');",
 									"        pm.expect(jsonData).to.have.property('message');",
 									"    }",
 									"});",
 									"",
-									"console.log('✅ Institución actualizada:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
+									"// Guardar ID del estudiante creado para pruebas posteriores",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data) {",
+									"    pm.environment.set('createdEstudianteId', jsonData.data.id);",
+									"    pm.environment.set('createdEstudianteEmail', jsonData.data.email);",
+									"    ",
+									"    console.log('✅ Estudiante creado:', jsonData.data.email + ' (ID: ' + jsonData.data.id + ')');",
+									"    console.log('QR Code:', jsonData.data.estudiante ? jsonData.data.estudiante.codigoQr : 'N/A');",
+									"} else {",
+									"    console.log('❌ Error al crear estudiante:', jsonData.error || 'Error desconocido');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"estudiante.test@asistapp.com\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Estudiante\",\n    \"apellidos\": \"Test\",\n    \"rol\": \"estudiante\",\n    \"telefono\": \"+987654321\",\n    \"institucionId\": \"{{institucionId}}\",\n    \"identificacion\": \"999999999\",\n    \"nombreResponsable\": \"Padre Test\",\n    \"telefonoResponsable\": \"+111222333\"\n}"
+						},
+						"url": {
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
+							"protocol": "{{protocol}}",
+							"host": ["{{host}}"],
+							"port": "{{port}}",
+							"path": ["usuarios"]
+						},
+						"description": "Crear nuevo estudiante con QR code generado automáticamente"
+					}
+				},
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuario actualizado\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('id');",
+									"        pm.expect(jsonData.data).to.have.property('email');",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Usuario actualizado:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
 								],
 								"type": "text/javascript"
 							}
@@ -845,20 +748,20 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombre\": \"{{institucionNombre}} Actualizado\",\n    \"direccion\": \"Nueva dirección actualizada\",\n    \"telefono\": \"555-0000\",\n    \"activa\": false\n}"
+							"raw": "{\n    \"nombres\": \"Usuario Actualizado\",\n    \"telefono\": \"+555444333\"\n}"
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdProfesorId}}",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["instituciones", "{{institucionId}}"]
+							"path": ["usuarios", "{{createdProfesorId}}"]
 						},
-						"description": "Actualizar institución existente (requiere rol super_admin)"
+						"description": "Actualizar datos de un usuario existente"
 					}
 				},
 				{
-					"name": "Delete Institution",
+					"name": "Update Student Details",
 					"event": [
 						{
 							"listen": "test",
@@ -867,10 +770,62 @@
 									"// Verificar respuesta del servidor",
 									"pm.test(\"Respuesta del servidor\", function () {",
 									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
+									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
 									"});",
 									"",
-									"pm.test(\"Institución eliminada\", function () {",
+									"pm.test(\"Estudiante actualizado\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.data).to.have.property('estudiante');",
+									"        pm.expect(jsonData.data.estudiante).to.have.property('nombreResponsable');",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Estudiante actualizado:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombres\": \"Estudiante Actualizado\",\n    \"telefono\": \"+999888777\",\n    \"nombreResponsable\": \"Madre Actualizada\"\n}"
+						},
+						"url": {
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdEstudianteId}}",
+							"protocol": "{{protocol}}",
+							"host": ["{{host}}"],
+							"port": "{{port}}",
+							"path": ["usuarios", "{{createdEstudianteId}}"]
+						},
+						"description": "Actualizar datos específicos del estudiante (responsable, teléfono)"
+					}
+				},
+				{
+					"name": "Delete User (Deactivate)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"pm.test(\"Respuesta del servidor\", function () {",
+									"    var status = pm.response.code;",
+									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
+									"});",
+									"",
+									"pm.test(\"Usuario eliminado\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('success');",
 									"    if (jsonData.success) {",
@@ -878,14 +833,14 @@
 									"    }",
 									"});",
 									"",
-									"console.log('✅ Institución eliminada:', pm.response.json().message || 'Sin mensaje');"
+									"console.log('✅ Usuario eliminado (desactivado):', pm.response.json().message || 'Sin mensaje');"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
@@ -893,18 +848,110 @@
 							}
 						],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{createdInstitucionId}}",
+							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdProfesorId}}",
 							"protocol": "{{protocol}}",
 							"host": ["{{host}}"],
 							"port": "{{port}}",
-							"path": ["instituciones", "{{createdInstitucionId}}"]
+							"path": ["usuarios", "{{createdProfesorId}}"]
 						},
-						"description": "Eliminar institución (requiere rol super_admin). NOTA: Solo funciona si la institución no tiene usuarios asociados."
+						"description": "Eliminar (desactivar) un usuario. NOTA: Es un soft delete, el usuario queda inactivo pero mantiene integridad referencial."
 					}
 				},
 				{
 					"name": "Test Error Cases",
 					"item": [
+						{
+							"name": "409 - Email duplicado",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Error 409 esperado\", function () {",
+											"    pm.response.to.have.status(409);",
+											"});",
+											"",
+											"pm.test(\"Mensaje de error correcto\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.eql(false);",
+											"    pm.expect(jsonData.code).to.eql('CONFLICT_ERROR');",
+											"});",
+											"",
+											"console.log('✅ Error 409 confirmado: Email duplicado');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"{{createdProfesorEmail}}\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Duplicado\",\n    \"apellidos\": \"Profesor\",\n    \"rol\": \"profesor\",\n    \"telefono\": \"+123456789\",\n    \"institucionId\": \"{{institucionId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["usuarios"]
+								},
+								"description": "Probar error 409 - Intentar crear usuario con email que ya existe"
+							}
+						},
+						{
+							"name": "400 - Campos requeridos faltantes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Error 400 esperado\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"pm.test(\"Mensaje de error correcto\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.eql(false);",
+											"    pm.expect(jsonData.code).to.eql('VALIDATION_ERROR');",
+											"});",
+											"",
+											"console.log('✅ Error 400 confirmado: Campos requeridos faltantes');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"incompleto@test.com\"\n}"
+								},
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["usuarios"]
+								},
+								"description": "Probar error 400 - Crear usuario con campos requeridos faltantes"
+							}
+						},
 						{
 							"name": "401 - Sin autenticación",
 							"event": [
@@ -932,58 +979,17 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
 									"protocol": "{{protocol}}",
 									"host": ["{{host}}"],
 									"port": "{{port}}",
-									"path": ["instituciones"]
+									"path": ["usuarios"]
 								},
-								"description": "Probar error 401 - Sin token de autenticación"
+								"description": "Probar error 401 - Acceder sin token de autenticación"
 							}
 						},
 						{
-							"name": "403 - Sin permisos (admin_institucion)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Error 403 esperado\", function () {",
-											"    pm.response.to.have.status(403);",
-											"});",
-											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('AUTHORIZATION_ERROR');",
-											"});",
-											"",
-											"console.log('✅ Error 403 confirmado: Sin permisos super_admin');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones"]
-								},
-								"description": "Probar error 403 - Usuario admin_institucion intentando acceder a instituciones (requiere super_admin)"
-							}
-						},
-						{
-							"name": "404 - Institución no encontrada",
+							"name": "404 - Usuario no encontrado",
 							"event": [
 								{
 									"listen": "test",
@@ -999,7 +1005,7 @@
 											"    pm.expect(jsonData.code).to.eql('NOT_FOUND_ERROR');",
 											"});",
 											"",
-											"console.log('✅ Error 404 confirmado: Institución no encontrada');"
+											"console.log('✅ Error 404 confirmado: Usuario no encontrado');"
 										],
 										"type": "text/javascript"
 									}
@@ -1014,33 +1020,168 @@
 									}
 								],
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/non-existent-id",
+									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/non-existent-id",
 									"protocol": "{{protocol}}",
 									"host": ["{{host}}"],
 									"port": "{{port}}",
-									"path": ["instituciones", "non-existent-id"]
+									"path": ["usuarios", "non-existent-id"]
 								},
-								"description": "Probar error 404 - Institución con ID inexistente"
+								"description": "Probar error 404 - Usuario con ID inexistente"
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "Institutions Management",
+					"item": [
 						{
-							"name": "409 - Código duplicado",
+							"name": "Get All Institutions",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Error 409 esperado\", function () {",
-											"    pm.response.to.have.status(409);",
+											"// Verificar respuesta del servidor",
+											"pm.test(\"Respuesta del servidor\", function () {",
+											"    var status = pm.response.code;",
+											"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
 											"});",
 											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
+											"pm.test(\"Instituciones obtenidas\", function () {",
 											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('CONFLICT_ERROR');",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"    if (jsonData.success) {",
+											"        pm.expect(jsonData.data).to.be.an('array');",
+											"        if (jsonData.data.length > 0) {",
+											"            pm.expect(jsonData.data[0]).to.have.property('id');",
+											"            pm.expect(jsonData.data[0]).to.have.property('nombre');",
+											"            pm.expect(jsonData.data[0]).to.have.property('codigo');",
+											"            pm.expect(jsonData.data[0]).to.have.property('activa');",
+											"        }",
+											"    }",
 											"});",
 											"",
-											"console.log('✅ Error 409 confirmado: Código duplicado');"
+											"// Guardar primera institución como variable de environment",
+											"var jsonData = pm.response.json();",
+											"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
+											"    pm.environment.set('institucionId', jsonData.data[0].id);",
+											"    pm.environment.set('institucionNombre', jsonData.data[0].nombre);",
+											"    pm.environment.set('institucionCodigo', jsonData.data[0].codigo);",
+											"    ",
+											"    console.log('✅ Instituciones obtenidas: ' + jsonData.data.length);",
+											"    console.log('Primera institución: ' + jsonData.data[0].nombre + ' (' + jsonData.data[0].codigo + ')');",
+											"} else {",
+											"    console.log('❌ Error al obtener instituciones:', jsonData.error || 'Sin instituciones');",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["instituciones"]
+								},
+								"description": "Obtener todas las instituciones (requiere rol super_admin)"
+							}
+						},
+						{
+							"name": "Get Institution by ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Verificar respuesta del servidor",
+											"pm.test(\"Respuesta del servidor\", function () {",
+											"    var status = pm.response.code;",
+											"    pm.expect(status).to.be.oneOf([200, 404, 401]);",
+											"});",
+											"",
+											"pm.test(\"Institución obtenida\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"    if (jsonData.success) {",
+											"        pm.expect(jsonData.data).to.have.property('id');",
+											"        pm.expect(jsonData.data).to.have.property('nombre');",
+											"        pm.expect(jsonData.data).to.have.property('codigo');",
+											"        pm.expect(jsonData.data).to.have.property('activa');",
+											"        pm.expect(jsonData.data).to.have.property('createdAt');",
+											"        pm.expect(jsonData.data).to.have.property('updatedAt');",
+											"    }",
+											"});",
+											"",
+											"console.log('✅ Institución obtenida:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["instituciones", "{{institucionId}}"]
+								},
+								"description": "Obtener institución por ID"
+							}
+						},
+						{
+							"name": "Create Institution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Verificar respuesta del servidor",
+											"pm.test(\"Respuesta del servidor\", function () {",
+											"    var status = pm.response.code;",
+											"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
+											"});",
+											"",
+											"pm.test(\"Institución creada\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"    if (jsonData.success) {",
+											"        pm.expect(jsonData.data).to.have.property('id');",
+											"        pm.expect(jsonData.data).to.have.property('nombre');",
+											"        pm.expect(jsonData.data).to.have.property('codigo');",
+											"        pm.expect(jsonData.data).to.have.property('activa');",
+											"        pm.expect(jsonData.data.activa).to.eql(true); // Por defecto true",
+											"        pm.expect(jsonData).to.have.property('message');",
+											"    }",
+											"});",
+											"",
+											"// Guardar ID de la institución creada para pruebas posteriores",
+											"var jsonData = pm.response.json();",
+											"if (jsonData.success && jsonData.data) {",
+											"    pm.environment.set('createdInstitucionId', jsonData.data.id);",
+											"    pm.environment.set('createdInstitucionNombre', jsonData.data.nombre);",
+											"    ",
+											"    console.log('✅ Institución creada:', jsonData.data.nombre + ' (ID: ' + jsonData.data.id + ')');",
+											"} else {",
+											"    console.log('❌ Error al crear institución:', jsonData.error || 'Error desconocido');",
+											"}"
 										],
 										"type": "text/javascript"
 									}
@@ -1057,16 +1198,286 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"nombre\": \"Institución Duplicada\",\n    \"codigo\": \"{{institucionCodigo}}\"\n}"
+									"raw": "{\n    \"nombre\": \"Colegio {{institucionNombre}} Test\",\n    \"codigo\": \"TEST{{institucionCodigo}}\",\n    \"direccion\": \"Dirección de prueba\",\n    \"telefono\": \"555-9999\",\n    \"email\": \"test@colegio.com\"\n}"
 								},
 								"url": {
 									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
 									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
 									"port": "{{port}}",
 									"path": ["instituciones"]
 								},
-						"description": "Probar error 409 - Intentar crear institución con código que ya existe"
-					}
+								"description": "Crear nueva institución (requiere rol super_admin)"
+							}
+						},
+						{
+							"name": "Update Institution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Verificar respuesta del servidor",
+											"pm.test(\"Respuesta del servidor\", function () {",
+											"    var status = pm.response.code;",
+											"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
+											"});",
+											"",
+											"pm.test(\"Institución actualizada\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"    if (jsonData.success) {",
+											"        pm.expect(jsonData.data).to.have.property('id');",
+											"        pm.expect(jsonData.data).to.have.property('nombre');",
+											"        pm.expect(jsonData.data).to.have.property('codigo');",
+											"        pm.expect(jsonData).to.have.property('message');",
+											"    }",
+											"});",
+											"",
+											"console.log('✅ Institución actualizada:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nombre\": \"{{institucionNombre}} Actualizado\",\n    \"direccion\": \"Nueva dirección actualizada\",\n    \"telefono\": \"555-0000\",\n    \"activa\": false\n}"
+								},
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["instituciones", "{{institucionId}}"]
+								},
+								"description": "Actualizar institución existente (requiere rol super_admin)"
+							}
+						},
+						{
+							"name": "Delete Institution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Verificar respuesta del servidor",
+											"pm.test(\"Respuesta del servidor\", function () {",
+											"    var status = pm.response.code;",
+											"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
+											"});",
+											"",
+											"pm.test(\"Institución eliminada\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"    if (jsonData.success) {",
+											"        pm.expect(jsonData).to.have.property('message');",
+											"    }",
+											"});",
+											"",
+											"console.log('✅ Institución eliminada:', pm.response.json().message || 'Sin mensaje');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{createdInstitucionId}}",
+									"protocol": "{{protocol}}",
+									"host": ["{{host}}"],
+									"port": "{{port}}",
+									"path": ["instituciones", "{{createdInstitucionId}}"]
+								},
+								"description": "Eliminar institución (requiere rol super_admin). NOTA: Solo funciona si la institución no tiene usuarios asociados."
+							}
+						},
+						{
+							"name": "Test Error Cases",
+							"item": [
+								{
+									"name": "401 - Sin autenticación",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Error 401 esperado\", function () {",
+													"    pm.response.to.have.status(401);",
+													"});",
+													"",
+													"pm.test(\"Mensaje de error correcto\", function () {",
+													"    var jsonData = pm.response.json();",
+													"    pm.expect(jsonData.success).to.eql(false);",
+													"    pm.expect(jsonData.code).to.eql('AUTHENTICATION_ERROR');",
+													"});",
+													"",
+													"console.log('✅ Error 401 confirmado: Sin autenticación');"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+											"protocol": "{{protocol}}",
+											"host": ["{{host}}"],
+											"port": "{{port}}",
+											"path": ["instituciones"]
+										},
+										"description": "Probar error 401 - Sin token de autenticación"
+									}
+								},
+								{
+									"name": "403 - Sin permisos (admin_institucion)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Error 403 esperado\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});",
+													"",
+													"pm.test(\"Mensaje de error correcto\", function () {",
+													"    var jsonData = pm.response.json();",
+													"    pm.expect(jsonData.success).to.eql(false);",
+													"    pm.expect(jsonData.code).to.eql('AUTHORIZATION_ERROR');",
+													"});",
+													"",
+													"console.log('✅ Error 403 confirmado: Sin permisos super_admin');"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{accessToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+											"protocol": "{{protocol}}",
+											"host": ["{{host}}"],
+											"port": "{{port}}",
+											"path": ["instituciones"]
+										},
+										"description": "Probar error 403 - Usuario admin_institucion intentando acceder a instituciones (requiere super_admin)"
+									}
+								},
+								{
+									"name": "404 - Institución no encontrada",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Error 404 esperado\", function () {",
+													"    pm.response.to.have.status(404);",
+													"});",
+													"",
+													"pm.test(\"Mensaje de error correcto\", function () {",
+													"    var jsonData = pm.response.json();",
+													"    pm.expect(jsonData.success).to.eql(false);",
+													"    pm.expect(jsonData.code).to.eql('NOT_FOUND_ERROR');",
+													"});",
+													"",
+													"console.log('✅ Error 404 confirmado: Institución no encontrada');"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{accessToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/non-existent-id",
+											"protocol": "{{protocol}}",
+											"host": ["{{host}}"],
+											"port": "{{port}}",
+											"path": ["instituciones", "non-existent-id"]
+										},
+										"description": "Probar error 404 - Institución con ID inexistente"
+									}
+								},
+								{
+									"name": "409 - Código duplicado",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Error 409 esperado\", function () {",
+													"    pm.response.to.have.status(409);",
+													"});",
+													"",
+													"pm.test(\"Mensaje de error correcto\", function () {",
+													"    var jsonData = pm.response.json();",
+													"    pm.expect(jsonData.success).to.eql(false);",
+													"    pm.expect(jsonData.code).to.eql('CONFLICT_ERROR');",
+													"});",
+													"",
+													"console.log('✅ Error 409 confirmado: Código duplicado');"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{"key": "Content-Type", "value": "application/json"},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{accessToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"nombre\": \"Institución Duplicada\",\n    \"codigo\": \"{{institucionCodigo}}\"\n}"
+										},
+										"url": {
+											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
+											"protocol": "{{protocol}}",
+											"host": ["{{host}}"],
+											"port": "{{port}}",
+											"path": ["instituciones"]
+										},
+										"description": "Probar error 409 - Intentar crear institución con código que ya existe"
+									}
+								}
+							]
+						}
+					]
 				}
 			]
 		}
@@ -1097,5 +1508,4 @@
 			"description": "Rol para filtrar usuarios"
 		}
 	]
-}        ]
 }

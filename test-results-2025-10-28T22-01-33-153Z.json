@@ -1,0 +1,69 @@
+{
+  "total": 14,
+  "passed": 9,
+  "failed": 5,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Verificación de Token",
+      "status": "PASSED"
+    },
+    {
+      "name": "Super Admin - Obtener Instituciones",
+      "status": "PASSED"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "PASSED",
+      "result": true
+    },
+    {
+      "name": "Login Admin de Institución",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores (Paginación)",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Admin Inst - Buscar Profesores por Nombre",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Admin Inst - Filtrar Profesores Activos",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Admin Inst - Crear Profesor",
+      "status": "FAILED",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Super Admin - Acceso Restringido a Gestión de Profesores",
+      "status": "PASSED"
+    },
+    {
+      "name": "Profesor - Acceso Denegado a Gestión de Profesores",
+      "status": "PASSED"
+    }
+  ]
+}

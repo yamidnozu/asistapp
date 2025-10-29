@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../utils/responsive_utils.dart';
-import '../utils/app_routes.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -30,6 +29,7 @@ class AdminDashboard extends StatelessWidget {
         description: 'Gestionar profesores y estudiantes',
         color: colors.primary,  // Usar color primario consistente
         responsive: responsive,
+        onTap: () => context.go('/users'),
       ),
       DashboardFeatureCard(
         icon: Icons.class_,
@@ -84,7 +84,7 @@ class AdminDashboard extends StatelessWidget {
           onLogout: () async {
             await authProvider.logout();
             if (context.mounted) {
-              context.go(AppRoutes.login);
+              context.go('/login');
             }
           },
         ),

@@ -2,38 +2,40 @@ import { FastifyInstance } from 'fastify';
 import UserController from '../controllers/user.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
-export default async function userRoutes(fastify: FastifyInstance) {
+/**
+ * Rutas para gestión de usuarios
+ */
+export default async function userRoutes(fastify: FastifyInstance) {
+  // Todas las rutas requieren autenticación
+  fastify.addHook('preHandler', authenticate);
+
+  /**
+   * GET /usuarios
+   * Obtiene todos los usuarios con paginación y filtros
+   * Solo para super_admin
+   */
   fastify.get('/', {
-    preHandler: [authenticate, authorize(['super_admin', 'admin_institucion'])],
+    preHandler: authorize(['super_admin']),
     handler: UserController.getAllUsers,
-  });
-  fastify.get('/:id', {
-    preHandler: authenticate,
-    handler: UserController.getUserById,
-  });
-  fastify.get('/rol/:role', {
-    preHandler: [authenticate, authorize(['super_admin', 'admin_institucion'])],
-    handler: UserController.getUsersByRole,
-  });
-  fastify.get('/institucion/:institucionId', {
-    preHandler: authenticate,
-    handler: UserController.getUsersByInstitution,
-  });
-  fastify.post('/admin/cleanup-tokens', {
-    preHandler: [authenticate, authorize(['super_admin'])],
-    handler: async (request, reply) => {
-      try {
-        const cleanupTokens = (await import('../scripts/cleanup-tokens')).default;
-        await cleanupTokens();
-        return reply.code(200).send({
-          success: true,
-          data: {
-            message: 'Limpieza de tokens completada',
-          }
-        });
-      } catch (error) {
-        throw error;
-      }
-    },
   });
+
+  /**
+   * GET /usuarios/:id
+   * Obtiene un usuario específico por ID
+   */
+  fastify.get('/:id', UserController.getUserById);
+
+  /**
+   * GET /usuarios/rol/:role
+   * Obtiene usuarios por rol con paginación y filtros adicionales
+   */
+  fastify.get('/rol/:role', UserController.getUsersByRole);
+
+  /**
+   * GET /usuarios/institucion/:institucionId
+   * Obtiene usuarios por institución con paginación y filtros adicionales
+   */
+  fastify.get('/institucion/:institucionId', UserController.getUsersByInstitution);
+
+  // TODO: Agregar rutas para crear, actualizar, eliminar usuarios si es necesario
 }

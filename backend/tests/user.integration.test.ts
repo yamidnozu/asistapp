@@ -1,22 +1,25 @@
 /// <reference types="jest" />
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import { databaseService } from '../src/config/database';
 import setupErrorHandler from '../src/middleware/errorHandler';
 import routes from '../src/routes';
 import AuthService from '../src/services/auth.service';
 
 describe('User Integration Tests', () => {
-  let fastify: any;
+  let fastify: FastifyInstance;
   let adminToken: string;
   let institucionId: string;
   let studentUserId: string;
 
-  beforeAll(async () => {
-    fastify = Fastify({ logger: false });
+  beforeAll(async () => {
+
+    fastify = Fastify({ logger: false });
+
     setupErrorHandler(fastify);
-    fastify.register(routes);
+    fastify.register(routes);
+
     await databaseService.connect();
     await AuthService.ensureAdminUser();
 
@@ -28,7 +31,8 @@ describe('User Integration Tests', () => {
     await databaseService.disconnect();
   });
 
-  beforeEach(async () => {
+  beforeEach(async () => {
+
     const client = databaseService.getClient();
     await client.refreshToken.deleteMany();
     await client.usuarioInstitucion.deleteMany();
@@ -41,7 +45,8 @@ describe('User Integration Tests', () => {
       where: {
         codigo: { not: 'DEFAULT' }
       }
-    });
+    });
+
     const uniqueCode = `INT${Date.now()}`;
     const institucion = await client.institucion.create({
       data: {
@@ -50,7 +55,8 @@ describe('User Integration Tests', () => {
         activa: true,
       },
     });
-    institucionId = institucion.id;
+    institucionId = institucion.id;
+
     const hashedPassword = await AuthService.hashPassword('studentpass');
     const student = await client.usuario.create({
       data: {
@@ -62,7 +68,8 @@ describe('User Integration Tests', () => {
         activo: true,
       },
     });
-    studentUserId = student.id;
+    studentUserId = student.id;
+
     await client.usuarioInstitucion.create({
       data: {
         usuarioId: student.id,
@@ -70,7 +77,8 @@ describe('User Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -113,7 +121,8 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
+    it('should fail with student token (insufficient permissions)', async () => {
+
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -124,7 +133,8 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
+      const studentToken = loginBody.data.accessToken;
+
       const response = await fastify.inject({
         method: 'GET',
         url: '/usuarios',
@@ -231,7 +241,8 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
+    it('should fail with student token (insufficient permissions)', async () => {
+
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -242,7 +253,8 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
+      const studentToken = loginBody.data.accessToken;
+
       const response = await fastify.inject({
         method: 'GET',
         url: '/usuarios/rol/estudiante',
@@ -275,7 +287,8 @@ describe('User Integration Tests', () => {
       expect(body.data.length).toBeGreaterThan(0);
     });
 
-    it('should return empty array for institution with no users', async () => {
+    it('should return empty array for institution with no users', async () => {
+
       const uniqueCode = `INT${Date.now()}`;
       const emptyInstitution = await databaseService.getClient().institucion.create({
         data: {
@@ -341,7 +354,8 @@ describe('User Integration Tests', () => {
       expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
 
-    it('should fail with student token (insufficient permissions)', async () => {
+    it('should fail with student token (insufficient permissions)', async () => {
+
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -352,7 +366,8 @@ describe('User Integration Tests', () => {
       });
 
       const loginBody = JSON.parse(loginResponse.body);
-      const studentToken = loginBody.data.accessToken;
+      const studentToken = loginBody.data.accessToken;
+
       const response = await fastify.inject({
         method: 'POST',
         url: '/usuarios/admin/cleanup-tokens',
@@ -365,6 +380,315 @@ describe('User Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.success).toBe(false);
       expect(body.code).toBe('AUTHORIZATION_ERROR');
+    });
+  });
+
+  describe('POST /usuarios', () => {
+    it('should create a new profesor user with admin token', async () => {
+      const newUser = {
+        email: 'profesor@test.com',
+        password: 'password123',
+        nombres: 'Juan',
+        apellidos: 'Pérez',
+        rol: 'profesor',
+        telefono: '+1234567890',
+        institucionId: institucionId,
+        rolEnInstitucion: 'profesor',
+      };
+
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/usuarios',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: newUser,
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(true);
+      expect(body.data).toHaveProperty('id');
+      expect(body.data.email).toBe(newUser.email);
+      expect(body.data.nombres).toBe(newUser.nombres);
+      expect(body.data.rol).toBe(newUser.rol);
+      expect(body.data.instituciones).toHaveLength(1);
+    });
+
+    it('should create a new estudiante user with admin token', async () => {
+      const newUser = {
+        email: 'estudiante2@test.com',
+        password: 'password123',
+        nombres: 'María',
+        apellidos: 'García',
+        rol: 'estudiante',
+        telefono: '+0987654321',
+        institucionId: institucionId,
+        rolEnInstitucion: 'estudiante',
+        identificacion: '123456789',
+        nombreResponsable: 'Padre de María',
+        telefonoResponsable: '+111111111',
+      };
+
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/usuarios',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: newUser,
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(true);
+      expect(body.data).toHaveProperty('id');
+      expect(body.data.email).toBe(newUser.email);
+      expect(body.data.estudiante).toBeDefined();
+      expect(body.data.estudiante.identificacion).toBe(newUser.identificacion);
+      expect(body.data.estudiante.nombreResponsable).toBe(newUser.nombreResponsable);
+    });
+
+    it('should fail to create user with duplicate email', async () => {
+      const newUser = {
+        email: 'student@test.com', // Email ya existente
+        password: 'password123',
+        nombres: 'Duplicado',
+        apellidos: 'Usuario',
+        rol: 'profesor',
+      };
+
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/usuarios',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: newUser,
+      });
+
+      expect(response.statusCode).toBe(409);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('CONFLICT_ERROR');
+    });
+
+    it('should fail to create estudiante without identificacion', async () => {
+      const newUser = {
+        email: 'estudiante3@test.com',
+        password: 'password123',
+        nombres: 'Pedro',
+        apellidos: 'López',
+        rol: 'estudiante',
+        // Falta identificacion
+      };
+
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/usuarios',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: newUser,
+      });
+
+      expect(response.statusCode).toBe(400);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should fail without authentication token', async () => {
+      const newUser = {
+        email: 'test@test.com',
+        password: 'password123',
+        nombres: 'Test',
+        apellidos: 'User',
+        rol: 'profesor',
+      };
+
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/usuarios',
+        payload: newUser,
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('AUTHENTICATION_ERROR');
+    });
+  });
+
+  describe('PUT /usuarios/:id', () => {
+    it('should update user with admin token', async () => {
+      const updateData = {
+        nombres: 'Estudiante Actualizado',
+        telefono: '+555555555',
+      };
+
+      const response = await fastify.inject({
+        method: 'PUT',
+        url: `/usuarios/${studentUserId}`,
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: updateData,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(true);
+      expect(body.data.nombres).toBe(updateData.nombres);
+      expect(body.data.telefono).toBe(updateData.telefono);
+    });
+
+    it('should update estudiante data', async () => {
+      const updateData = {
+        nombreResponsable: 'Madre Actualizada',
+        telefonoResponsable: '+999999999',
+      };
+
+      const response = await fastify.inject({
+        method: 'PUT',
+        url: `/usuarios/${studentUserId}`,
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: updateData,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(true);
+      expect(body.data.estudiante.nombreResponsable).toBe(updateData.nombreResponsable);
+      expect(body.data.estudiante.telefonoResponsable).toBe(updateData.telefonoResponsable);
+    });
+
+    it('should fail to update with duplicate email', async () => {
+      // Crear otro usuario primero
+      const otherUser = await databaseService.getClient().usuario.create({
+        data: {
+          email: 'other@test.com',
+          passwordHash: await AuthService.hashPassword('password'),
+          nombres: 'Otro',
+          apellidos: 'Usuario',
+          rol: 'profesor',
+          activo: true,
+        },
+      });
+
+      const updateData = {
+        email: 'student@test.com', // Email ya existente
+      };
+
+      const response = await fastify.inject({
+        method: 'PUT',
+        url: `/usuarios/${otherUser.id}`,
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: updateData,
+      });
+
+      expect(response.statusCode).toBe(409);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('CONFLICT_ERROR');
+    });
+
+    it('should fail with invalid user id', async () => {
+      const updateData = {
+        nombres: 'Nombre Actualizado',
+      };
+
+      const response = await fastify.inject({
+        method: 'PUT',
+        url: '/usuarios/invalid-id-123',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+        payload: updateData,
+      });
+
+      expect(response.statusCode).toBe(404);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('NOT_FOUND_ERROR');
+    });
+
+    it('should fail without authentication token', async () => {
+      const updateData = {
+        nombres: 'Nombre Actualizado',
+      };
+
+      const response = await fastify.inject({
+        method: 'PUT',
+        url: `/usuarios/${studentUserId}`,
+        payload: updateData,
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('AUTHENTICATION_ERROR');
+    });
+  });
+
+  describe('DELETE /usuarios/:id', () => {
+    it('should delete user with super_admin token', async () => {
+      const response = await fastify.inject({
+        method: 'DELETE',
+        url: `/usuarios/${studentUserId}`,
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(true);
+      expect(body.message).toBe('Usuario eliminado exitosamente');
+
+      // Verificar que el usuario esté desactivado
+      const checkResponse = await fastify.inject({
+        method: 'GET',
+        url: `/usuarios/${studentUserId}`,
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      });
+
+      expect(checkResponse.statusCode).toBe(200);
+      const checkBody = JSON.parse(checkResponse.body);
+      expect(checkBody.data.activo).toBe(false);
+    });
+
+    it('should fail with invalid user id', async () => {
+      const response = await fastify.inject({
+        method: 'DELETE',
+        url: '/usuarios/invalid-id-123',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      });
+
+      expect(response.statusCode).toBe(404);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('NOT_FOUND_ERROR');
+    });
+
+    it('should fail without authentication token', async () => {
+      const response = await fastify.inject({
+        method: 'DELETE',
+        url: `/usuarios/${studentUserId}`,
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe('AUTHENTICATION_ERROR');
     });
   });
 });
