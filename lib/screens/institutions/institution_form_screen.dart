@@ -5,11 +5,6 @@ import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_text_styles.dart';
-import '../../utils/app_routes.dart';
-import '../../widgets/dashboard_widgets.dart';
 
 class InstitutionFormScreen extends StatefulWidget {
   final Institution? institution;
@@ -112,7 +107,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
-        Navigator.of(context).pop();
+        context.pop();
       }
     } catch (e) {
       if (mounted) {
@@ -139,45 +134,33 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: isEditing ? 'Editar Institución' : 'Nueva Institución',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Super Admin',
-            roleIcon: Icons.verified_user,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go(AppRoutes.login);
-              }
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(spacing.lg),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildFormCard(colors, spacing, textStyles),
-                    SizedBox(height: spacing.xl),
-                    _buildActionButtons(colors, spacing, textStyles),
-                  ],
-                ),
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            padding: EdgeInsets.all(spacing.lg),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEditing ? 'Editar Institución' : 'Nueva Institución',
+                    style: textStyles.headlineMedium.bold,
+                  ),
+                  SizedBox(height: spacing.lg),
+                  _buildFormCard(),
+                  SizedBox(height: spacing.xl),
+                  _buildActionButtons(),
+                ],
               ),
             ),
-    );
+          );
   }
 
-  Widget _buildFormCard(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildFormCard() {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -207,9 +190,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.business,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -226,9 +206,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.tag,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -237,9 +214,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
               hint: 'Dirección completa de la institución',
               maxLines: 3,
               prefixIcon: Icons.location_on,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -248,9 +222,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
               hint: '+56912345678',
               keyboardType: TextInputType.phone,
               prefixIcon: Icons.phone,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -268,9 +239,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.email,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             SwitchListTile(
@@ -294,10 +262,10 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     TextInputType? keyboardType,
     int maxLines = 1,
     IconData? prefixIcon,
-    required AppColors colors,
-    required AppSpacing spacing,
-    required AppTextStyles textStyles,
   }) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return TextFormField(
       controller: controller,
       style: textStyles.bodyLarge,
@@ -336,12 +304,15 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     );
   }
 
-  Widget _buildActionButtons(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildActionButtons() {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+            onPressed: _isLoading ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),
               side: BorderSide(color: colors.primary),

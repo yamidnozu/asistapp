@@ -226,7 +226,6 @@ class ProfesorService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(

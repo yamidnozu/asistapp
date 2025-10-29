@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/user_service.dart';
+import '../services/user_service.dart' as user_service;
+import '../services/profesor_service.dart' as profesor_service;
 import '../models/user.dart';
 
 enum UserState {
@@ -11,7 +12,8 @@ enum UserState {
 }
 
 class UserProvider with ChangeNotifier {
-  final UserService _userService = UserService();
+  final user_service.UserService _userService = user_service.UserService();
+  final profesor_service.ProfesorService _profesorService = profesor_service.ProfesorService();
 
   UserState _state = UserState.initial;
   String? _errorMessage;
@@ -209,29 +211,28 @@ class UserProvider with ChangeNotifier {
   }
 
   /// Elimina un usuario (desactivación lógica)
-  Future<bool> deleteUser(String accessToken, String userId) async {
-    _setState(UserState.loading);
-
+  Future<bool> deleteUser(String accessToken, String userId, String currentUserRole, String targetUserRole) async {
+    // Este método ya no gestionará el estado de la lista.
+    // La pantalla se encargará de solicitar la recarga, que sí gestiona el estado.
     try {
-      final success = await _userService.deleteUser(accessToken, userId);
-      if (success) {
-        // Remover el usuario de la lista
-        _users.removeWhere((user) => user.id == userId);
+      bool success = false;
 
-        // Limpiar el usuario seleccionado si es el mismo
-        if (_selectedUser?.id == userId) {
-          _selectedUser = null;
-        }
-
-        _setState(UserState.loaded);
-        return true;
+      // Para admin_institucion eliminando profesores, usar el servicio de profesores
+      if (currentUserRole == 'admin_institucion' && targetUserRole == 'profesor') {
+        success = await _profesorService.deleteProfesor(accessToken, userId);
       } else {
-        _setState(UserState.error, 'Error al eliminar usuario');
-        return false;
+        // Para otros casos, usar el servicio general de usuarios
+        success = await _userService.deleteUser(accessToken, userId);
       }
+
+      if (!success) {
+        // Guardamos el mensaje de error para que la UI pueda mostrarlo.
+        _errorMessage = 'Error al eliminar el usuario desde el servicio.';
+      }
+      return success;
     } catch (e) {
       debugPrint('Error deleting user: $e');
-      _setState(UserState.error, e.toString());
+      _errorMessage = e.toString();
       return false;
     }
   }
@@ -347,7 +348,7 @@ class UserProvider with ChangeNotifier {
     try {
       final nextPage = _paginationInfo!.page + 1;
 
-      PaginatedUserResponse? response;
+      user_service.PaginatedUserResponse? response;
       if (_selectedInstitutionId != null) {
         response = await _userService.getUsersByInstitution(
           accessToken,

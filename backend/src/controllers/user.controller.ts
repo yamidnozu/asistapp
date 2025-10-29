@@ -165,7 +165,82 @@ export class UserController {
     }
   }
 
-  // TODO: Agregar métodos para crear, actualizar, eliminar usuarios si es necesario
+  /**
+   * Crea un nuevo usuario
+   * POST /usuarios
+   */
+  public static async createUser(
+    request: FastifyRequest<{ Body: any }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const userData = request.body as any;
+
+      const result = await UserService.createUser(userData);
+
+      return reply.code(201).send({
+        success: true,
+        data: result,
+        message: 'Usuario creado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Actualiza un usuario existente
+   * PUT /usuarios/:id
+   */
+  public static async updateUser(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: any;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const userData = request.body as any;
+
+      const result = await UserService.updateUser(id, userData);
+
+      if (!result) {
+        throw new NotFoundError('Usuario');
+      }
+
+      return reply.code(200).send({
+        success: true,
+        data: result,
+        message: 'Usuario actualizado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un usuario (desactivación lógica)
+   * DELETE /usuarios/:id
+   */
+  public static async deleteUser(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+
+      const result = await UserService.deleteUser(id);
+
+      return reply.code(200).send({
+        success: true,
+        data: { deleted: result },
+        message: 'Usuario eliminado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default UserController;

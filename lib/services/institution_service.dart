@@ -228,7 +228,6 @@ class InstitutionService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(

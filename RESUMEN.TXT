@@ -1,6 +1,6 @@
 
 /* Directorio: \lib */
-├── main.dart [118]
+├── main.dart [94]
 ├── 📂 managers
 │   └── app_lifecycle_manager.dart [110]
 ├── 📂 models
@@ -9,15 +9,14 @@
 ├── 📂 providers
 │   ├── auth_provider.dart [194]
 │   ├── institution_provider.dart [233]
-│   ├── navigation_state_provider.dart [91]
-│   ├── scroll_state_provider.dart [55]
-│   └── user_provider.dart [334]
+│   └── user_provider.dart [332]
 ├── 📂 screens
 │   ├── admin_dashboard.dart [123]
+│   ├── app_shell.dart [62]
 │   ├── home_screen.dart [339]
 │   ├── 📂 institutions
-│   │   ├── institutions_list_screen.dart [642]
-│   │   └── institution_form_screen.dart [371]
+│   │   ├── institutions_list_screen.dart [466]
+│   │   └── institution_form_screen.dart [342]
 │   ├── institution_selection_screen.dart [194]
 │   ├── login_screen.dart [344]
 │   ├── student_dashboard.dart [133]
@@ -27,14 +26,15 @@
 │   ├── 📂 users
 │   │   ├── create_professor_screen.dart [11]
 │   │   ├── create_student_screen.dart [11]
-│   │   ├── users_list_screen.dart [803]
-│   │   └── user_form_screen.dart [549]
+│   │   ├── users_list_screen.dart [614]
+│   │   ├── user_detail_screen.dart [161]
+│   │   └── user_form_screen.dart [627]
 │   └── welcome_screen.dart [91]
 ├── 📂 services
 │   ├── auth_service.dart [190]
-│   ├── institution_service.dart [244]
-│   ├── profesor_service.dart [273]
-│   └── user_service.dart [265]
+│   ├── institution_service.dart [243]
+│   ├── profesor_service.dart [272]
+│   └── user_service.dart [264]
 ├── 📂 theme
 │   ├── app_colors.dart [95]
 │   ├── app_constants.dart [59]
@@ -51,23 +51,21 @@
 │       └── index.dart [4]
 ├── 📂 utils
 │   ├── app_constants.dart [6]
-│   ├── app_router.dart [239]
+│   ├── app_router.dart [213]
 │   ├── app_routes.dart [48]
 │   ├── responsive_utils.dart [166]
 │   ├── role_enum.dart [53]
 │   └── route_guards.dart [32]
 └── 📂 widgets
-    ├── app_wrappers.dart [146]
     ├── 📂 common
     │   ├── empty_state_widget.dart [47]
+    │   ├── management_scaffold.dart [215]
     │   └── shimmer_list_widget.dart [32]
     ├── dashboard_widgets.dart [268]
     ├── form_widgets.dart [296]
     ├── index.dart [2]
-    ├── navigation_state_mixin.dart [72]
     ├── pagination_widget.dart [411]
     ├── role_guard.dart [39]
-    ├── scroll_state_keeper.dart [120]
     └── session_info_footer.dart [105]
 
 
@@ -80,9 +78,9 @@
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.js [103]
 │   │   ├── auth.controller.js [127]
-│   │   ├── institucion.controller.js [188]
+│   │   ├── institucion.controller.js [100]
 │   │   ├── institution-admin.controller.js [247]
-│   │   └── user.controller.js [122]
+│   │   └── user.controller.js [171]
 │   ├── index.js [84]
 │   ├── 📂 middleware
 │   │   ├── auth.js [88]
@@ -93,14 +91,15 @@
 │   │   ├── index.js [44]
 │   │   ├── institucion.routes.js [30]
 │   │   ├── institution-admin.routes.js [28]
-│   │   └── user.routes.js [26]
+│   │   └── user.routes.js [41]
 │   ├── 📂 scripts
 │   │   └── cleanup-tokens.js [33]
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.js [247]
 │   │   ├── auth.service.js [232]
+│   │   ├── institucion.service.js [234]
 │   │   ├── profesor.service.js [310]
-│   │   └── user.service.js [425]
+│   │   └── user.service.js [361]
 │   ├── 📂 types
 │   │   └── index.js [44]
 │   └── 📂 utils
@@ -118,7 +117,7 @@
 │   │   ├── auth.controller.ts [130]
 │   │   ├── institucion.controller.ts [131]
 │   │   ├── institution-admin.controller.ts [285]
-│   │   └── user.controller.ts [138]
+│   │   └── user.controller.ts [203]
 │   ├── index.ts [98]
 │   ├── 📂 middleware
 │   │   ├── auth.ts [87]
@@ -129,7 +128,7 @@
 │   │   ├── index.ts [42]
 │   │   ├── institucion.routes.ts [25]
 │   │   ├── institution-admin.routes.ts [20]
-│   │   └── user.routes.ts [18]
+│   │   └── user.routes.ts [33]
 │   ├── 📂 scripts
 │   │   └── cleanup-tokens.ts [32]
 │   ├── 📂 services
@@ -160,10 +159,10 @@
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 20224
-Total de archivos: 122
+Total de líneas resumidas: 20033
+Total de archivos: 121
 Promedio de líneas por archivo: 166
-Archivo más grande: users_list_screen.dart (803 líneas)
+Archivo más grande: user.integration.test.ts (691 líneas)
 
 
 /* Inicio lib\main.dart */
@@ -171,8 +170,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
-import 'providers/navigation_state_provider.dart';
-import 'providers/scroll_state_provider.dart';
 import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
@@ -204,8 +201,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   late final AppLifecycleManager _lifecycleManager;
   late final AuthProvider _authProvider;
-  late final NavigationStateProvider _navigationProvider;
-  late final ScrollStateProvider _scrollProvider;
   late final InstitutionProvider _institutionProvider;
   late AppRouter _appRouter;
 
@@ -215,8 +210,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     _lifecycleManager = AppLifecycleManager();
     _authProvider = AuthProvider();
-    _navigationProvider = NavigationStateProvider();
-    _scrollProvider = ScrollStateProvider();
     _institutionProvider = InstitutionProvider();
 
     WidgetsBinding.instance.addObserver(this);
@@ -230,27 +223,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-
-    if (state == AppLifecycleState.resumed) {
-      _authProvider.recoverFullState();
-      if (!_navigationProvider.hasValidState()) {
-        _navigationProvider.clearNavigationState();
-      }
-    }
-
-    if (state == AppLifecycleState.paused) {
-      _navigationProvider.refreshStateTimestamp();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
-        ChangeNotifierProvider.value(value: _navigationProvider),
-        ChangeNotifierProvider.value(value: _scrollProvider),
         ChangeNotifierProvider.value(value: _institutionProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
@@ -260,7 +236,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
           _appRouter = AppRouter(
             authProvider: _authProvider,
-            navigationProvider: _navigationProvider,
           );
 
           return MaterialApp.router(
@@ -1232,162 +1207,11 @@ class InstitutionProvider with ChangeNotifier {
 }
 /* Fin lib\providers\institution_provider.dart */
 
-/* Inicio lib\providers\navigation_state_provider.dart */
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-class NavigationStateProvider with ChangeNotifier {
-  String? _currentRoute;
-  Map<String, dynamic>? _routeArguments;
-  DateTime? _lastStateUpdate;
-  static const int maxStateAgeMinutes = 30;
-
-  String? get currentRoute => _currentRoute;
-  Map<String, dynamic>? get routeArguments => _routeArguments;
-  DateTime? get lastStateUpdate => _lastStateUpdate;
-
-  NavigationStateProvider() {
-    _loadNavigationState();
-  }
-  Future<void> _loadNavigationState() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final stateJson = prefs.getString('navigationState');
-
-      if (stateJson != null) {
-        final state = jsonDecode(stateJson) as Map<String, dynamic>;
-        final lastUpdate = DateTime.parse(state['lastStateUpdate'] as String);
-        final now = DateTime.now();
-        final difference = now.difference(lastUpdate).inMinutes;
-
-        if (difference <= maxStateAgeMinutes) {
-          _currentRoute = state['currentRoute'] as String?;
-          _routeArguments = state['routeArguments'] as Map<String, dynamic>?;
-          _lastStateUpdate = lastUpdate;
-          debugPrint('Estado de navegación recuperado: $_currentRoute (hace $difference minutos)');
-        } else {
-          debugPrint('Estado de navegación obsoleto (hace $difference minutos), descartando');
-          await clearNavigationState();
-        }
-      }
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error loading navigation state: $e');
-    }
-  }
-  Future<void> saveNavigationState(String route, {Map<String, dynamic>? arguments}) async {
-    try {
-      _currentRoute = route;
-      _routeArguments = arguments;
-      _lastStateUpdate = DateTime.now();
-
-      final prefs = await SharedPreferences.getInstance();
-      final state = {
-        'currentRoute': _currentRoute,
-        'routeArguments': _routeArguments,
-        'lastStateUpdate': _lastStateUpdate!.toIso8601String(),
-      };
-
-      await prefs.setString('navigationState', jsonEncode(state));
-      debugPrint('Estado de navegación guardado: $_currentRoute');
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error saving navigation state: $e');
-    }
-  }
-  Future<void> clearNavigationState() async {
-    try {
-      _currentRoute = null;
-      _routeArguments = null;
-      _lastStateUpdate = null;
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('navigationState');
-
-      debugPrint('Estado de navegación limpiado');
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error clearing navigation state: $e');
-    }
-  }
-  bool hasValidState() {
-    if (_lastStateUpdate == null || _currentRoute == null) return false;
-
-    final difference = DateTime.now().difference(_lastStateUpdate!).inMinutes;
-    return difference <= maxStateAgeMinutes;
-  }
-  Future<void> refreshStateTimestamp() async {
-    if (_currentRoute != null) {
-      await saveNavigationState(_currentRoute!, arguments: _routeArguments);
-    }
-  }
-}
-
-/* Fin lib\providers\navigation_state_provider.dart */
-
-/* Inicio lib\providers\scroll_state_provider.dart */
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-class ScrollStateProvider with ChangeNotifier {
-  final Map<String, double> _scrollPositions = {};
-  static const String _storageKey = 'scrollPositions';
-
-  ScrollStateProvider() {
-    _loadScrollPositions();
-  }
-  double getScrollPosition(String route) {
-    return _scrollPositions[route] ?? 0.0;
-  }
-  Future<void> saveScrollPosition(String route, double position) async {
-    _scrollPositions[route] = position;
-    await _persistScrollPositions();
-    notifyListeners();
-  }
-  Future<void> clearScrollPosition(String route) async {
-    _scrollPositions.remove(route);
-    await _persistScrollPositions();
-    notifyListeners();
-  }
-  Future<void> clearAllScrollPositions() async {
-    _scrollPositions.clear();
-    await _persistScrollPositions();
-    notifyListeners();
-  }
-  Future<void> _loadScrollPositions() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final positionsJson = prefs.getString(_storageKey);
-
-      if (positionsJson != null) {
-        final positions = jsonDecode(positionsJson) as Map<String, dynamic>;
-        _scrollPositions.clear();
-        positions.forEach((key, value) {
-          _scrollPositions[key] = (value as num).toDouble();
-        });
-        debugPrint('Posiciones de scroll cargadas: ${_scrollPositions.length} rutas');
-      }
-    } catch (e) {
-      debugPrint('Error loading scroll positions: $e');
-    }
-  }
-  Future<void> _persistScrollPositions() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_storageKey, jsonEncode(_scrollPositions));
-    } catch (e) {
-      debugPrint('Error persisting scroll positions: $e');
-    }
-  }
-}
-
-/* Fin lib\providers\scroll_state_provider.dart */
-
 /* Inicio lib\providers\user_provider.dart */
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/user_service.dart';
+import '../services/user_service.dart' as user_service;
+import '../services/profesor_service.dart' as profesor_service;
 import '../models/user.dart';
 
 enum UserState {
@@ -1398,7 +1222,8 @@ enum UserState {
 }
 
 class UserProvider with ChangeNotifier {
-  final UserService _userService = UserService();
+  final user_service.UserService _userService = user_service.UserService();
+  final profesor_service.ProfesorService _profesorService = profesor_service.ProfesorService();
 
   UserState _state = UserState.initial;
   String? _errorMessage;
@@ -1572,26 +1397,22 @@ class UserProvider with ChangeNotifier {
       return false;
     }
   }
-  Future<bool> deleteUser(String accessToken, String userId) async {
-    _setState(UserState.loading);
-
+  Future<bool> deleteUser(String accessToken, String userId, String currentUserRole, String targetUserRole) async {
     try {
-      final success = await _userService.deleteUser(accessToken, userId);
-      if (success) {
-        _users.removeWhere((user) => user.id == userId);
-        if (_selectedUser?.id == userId) {
-          _selectedUser = null;
-        }
-
-        _setState(UserState.loaded);
-        return true;
-      } else {
-        _setState(UserState.error, 'Error al eliminar usuario');
-        return false;
+      bool success = false;
+      if (currentUserRole == 'admin_institucion' && targetUserRole == 'profesor') {
+        success = await _profesorService.deleteProfesor(accessToken, userId);
+      } else {
+        success = await _userService.deleteUser(accessToken, userId);
       }
+
+      if (!success) {
+        _errorMessage = 'Error al eliminar el usuario desde el servicio.';
+      }
+      return success;
     } catch (e) {
       debugPrint('Error deleting user: $e');
-      _setState(UserState.error, e.toString());
+      _errorMessage = e.toString();
       return false;
     }
   }
@@ -1683,7 +1504,7 @@ class UserProvider with ChangeNotifier {
     try {
       final nextPage = _paginationInfo!.page + 1;
 
-      PaginatedUserResponse? response;
+      user_service.PaginatedUserResponse? response;
       if (_selectedInstitutionId != null) {
         response = await _userService.getUsersByInstitution(
           accessToken,
@@ -1846,6 +1667,71 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 /* Fin lib\screens\admin_dashboard.dart */
+
+/* Inicio lib\screens\app_shell.dart */
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+
+class AppShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const AppShell({
+    super.key,
+    required this.navigationShell,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userRole = authProvider.user?['rol'] as String?;
+    final allBranches = [
+      (label: 'Dashboard', icon: Icons.dashboard, branchIndex: 0, roles: ['super_admin', 'admin_institucion', 'profesor', 'estudiante']),
+      (label: 'Instituciones', icon: Icons.business, branchIndex: 1, roles: ['super_admin']),
+      (label: 'Usuarios', icon: Icons.people, branchIndex: 2, roles: ['super_admin', 'admin_institucion']),
+    ];
+    final accessibleBranches = allBranches.where((branch) => branch.roles.contains(userRole)).toList();
+    int selectedIndex = 0
+    for (int i = 0; i < accessibleBranches.length; i++) {
+      if (accessibleBranches[i].branchIndex == navigationShell.currentIndex) {
+        selectedIndex = i;
+        break;
+      }
+    }
+    if (selectedIndex >= accessibleBranches.length) {
+      selectedIndex = 0
+    }
+
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) {
+              final branchIndex = accessibleBranches[index].branchIndex;
+              navigationShell.goBranch(branchIndex);
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: [
+              for (final branch in accessibleBranches)
+                NavigationRailDestination(
+                  icon: Icon(branch.icon),
+                  selectedIcon: Icon(branch.icon), // Puedes cambiar a outlined si tienes íconos diferentes
+                  label: Text(branch.label),
+                ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(
+            child: navigationShell,
+          ),
+        ],
+      ),
+    );
+  }
+}
+/* Fin lib\screens\app_shell.dart */
 
 /* Inicio lib\screens\home_screen.dart */
 import 'package:flutter/material.dart';
@@ -2205,8 +2091,7 @@ import '../../utils/responsive_utils.dart';
 import '../../utils/app_routes.dart';
 import '../../widgets/dashboard_widgets.dart';
 import '../../widgets/common/empty_state_widget.dart';
-import '../../widgets/common/shimmer_list_widget.dart';
-import '../../widgets/pagination_widget.dart';
+import '../../widgets/common/management_scaffold.dart';
 import 'institution_form_screen.dart';
 
 class InstitutionsListScreen extends StatefulWidget {
@@ -2311,257 +2196,146 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer2<AuthProvider, InstitutionProvider>(
+      builder: (context, authProvider, institutionProvider, child) {
+        return ManagementScaffold(
+          title: "Gestión de Instituciones",
+          isLoading: institutionProvider.isLoading && institutionProvider.institutions.isEmpty,
+          hasError: institutionProvider.hasError,
+          errorMessage: institutionProvider.errorMessage ?? 'Error desconocido',
+          itemCount: institutionProvider.institutions.length,
+          itemBuilder: (context, index) => _buildInstitutionCard(
+            institutionProvider.institutions[index],
+            institutionProvider,
+            context,
+          ),
+          hasMoreData: institutionProvider.hasMoreData,
+          onRefresh: () => _loadInstitutions(),
+          scrollController: _scrollController,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _navigateToForm(context),
+            backgroundColor: context.colors.primary,
+            child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
+          ),
+          filterWidgets: _buildFilterWidgets(context),
+          statisticWidgets: _buildStatisticWidgets(context, institutionProvider),
+          paginationInfo: institutionProvider.paginationInfo,
+          onPageChange: _loadPage,
+          emptyStateTitle: _searchQuery.isNotEmpty ? 'No se encontraron instituciones' : 'No hay instituciones',
+          emptyStateMessage: _searchQuery.isNotEmpty ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primera institución',
+          emptyStateIcon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildFilterWidgets(BuildContext context) {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: 'Gestión de Instituciones',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Super Admin',
-            roleIcon: Icons.verified_user,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go(AppRoutes.login);
-              }
+    return [
+      TextField(
+        controller: _searchController,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          hintText: 'Buscar por nombre, código o email...',
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          prefixIcon: Icon(Icons.search, color: colors.textSecondary),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear, color: colors.textSecondary),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: colors.surface,
+          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+        ),
+        onChanged: _onSearchChanged,
+      ),
+      SizedBox(height: spacing.sm),
+      Row(
+        children: [
+          Text('Mostrar:', style: textStyles.labelMedium),
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Todas'),
+            selected: _statusFilter == null,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(null);
+            },
+          ),
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Activas'),
+            selected: _statusFilter == true,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(true);
+            },
+          ),
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Inactivas'),
+            selected: _statusFilter == false,
+            onSelected: (selected) {
+              if (selected) _onStatusFilterChanged(false);
             },
           ),
         ],
       ),
-      body: Consumer2<AuthProvider, InstitutionProvider>(
-        builder: (context, authProvider, institutionProvider, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-              return DashboardBody(
-                userGreeting: UserGreetingWidget(
-                  userName: authProvider.user?['nombres'] ?? 'Super Admin',
-                  responsive: responsive,
-                ),
-                dashboardOptions: _buildInstitutionsContent(institutionProvider, responsive, colors, spacing, textStyles),
-                responsive: responsive,
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToForm(context),
-        backgroundColor: colors.primary,
-        child: Icon(Icons.add, color: colors.getTextColorForBackground(colors.primary)),
-      ),
-    );
+    ];
   }
 
-  Widget _buildInstitutionsContent(InstitutionProvider provider, Map<String, dynamic> responsive, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    if (provider.isLoading && provider.institutions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (provider.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: colors.error),
-            SizedBox(height: spacing.lg),
-            Text(
-              'Error al cargar instituciones',
-              style: textStyles.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            Text(
-              provider.errorMessage ?? 'Error desconocido',
-              style: textStyles.bodyMedium.withColor(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.lg),
-            ElevatedButton(
-              onPressed: _loadInstitutions,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary, // Color consistente con el tema
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.lg,
-                  vertical: spacing.md,
-                ),
-              ),
-              child: Text('Reintentar', style: textStyles.button), // Usar estilo de botón sin color fijo
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        _buildSearchAndFilters(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.lg),
-        _buildStatisticsCards(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.lg),
-
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: 200, // Altura mínima
-            maxHeight: MediaQuery.of(context).size.height * 0.6, // Máximo 60% de la pantalla
-          ),
-          child: _buildInstitutionsList(provider, colors, spacing, textStyles),
-        ),
-        SizedBox(height: spacing.md),
-        if (provider.paginationInfo != null)
-          PaginationWidget(
-            currentPage: provider.paginationInfo!.page,
-            totalPages: provider.paginationInfo!.totalPages,
-            totalItems: provider.paginationInfo!.total,
-            onPageChange: _loadPage,
-            isLoading: provider.isLoading,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildSearchAndFilters(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
+  List<Widget> _buildStatisticWidgets(BuildContext context, InstitutionProvider provider) {
+    return [
+      _buildCompactStat(
+        'Total',
+        provider.totalInstitutions.toString(),
+        Icons.business,
+        context.colors.primary,
+        context.textStyles,
       ),
-      child: ExpansionTile(
-        title: Text('Filtros y Búsqueda', style: textStyles.titleMedium),
-        children: [
-          Padding(
-            padding: EdgeInsets.all(spacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _searchController,
-                  style: textStyles.bodyLarge,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por nombre, código o email...',
-                    hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-                    prefixIcon: Icon(Icons.search, color: colors.textSecondary),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: colors.textSecondary),
-                            onPressed: () {
-                              _searchController.clear();
-                              _onSearchChanged('');
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      borderSide: BorderSide(color: colors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      borderSide: BorderSide(color: colors.borderLight),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      borderSide: BorderSide(color: colors.primary, width: 2),
-                    ),
-                    filled: true,
-                    fillColor: colors.surface,
-                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-                  ),
-                  onChanged: _onSearchChanged,
-                ),
-                SizedBox(height: spacing.sm),
-                Row(
-                  children: [
-                    Text('Mostrar:', style: textStyles.labelMedium),
-                    SizedBox(width: spacing.md),
-                    FilterChip(
-                      label: const Text('Todas'),
-                      selected: _statusFilter == null,
-                      onSelected: (selected) {
-                        if (selected) _onStatusFilterChanged(null);
-                      },
-                    ),
-                    SizedBox(width: spacing.md),
-                    FilterChip(
-                      label: const Text('Activas'),
-                      selected: _statusFilter == true,
-                      onSelected: (selected) {
-                        if (selected) _onStatusFilterChanged(true);
-                      },
-                    ),
-                    SizedBox(width: spacing.md),
-                    FilterChip(
-                      label: const Text('Inactivas'),
-                      selected: _statusFilter == false,
-                      onSelected: (selected) {
-                        if (selected) _onStatusFilterChanged(false);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
       ),
-    );
-  }
-
-  Widget _buildStatisticsCards(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-        border: Border.all(color: colors.borderLight),
+      _buildCompactStat(
+        'Activas',
+        provider.activeInstitutionsCount.toString(),
+        Icons.check_circle,
+        context.colors.success,
+        context.textStyles,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCompactStat(
-            'Total',
-            provider.totalInstitutions.toString(),
-            Icons.business,
-            colors.primary,
-            textStyles,
-          ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
-          ),
-          _buildCompactStat(
-            'Activas',
-            provider.activeInstitutionsCount.toString(),
-            Icons.check_circle,
-            colors.success,
-            textStyles,
-          ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
-          ),
-          _buildCompactStat(
-            'Inactivas',
-            provider.inactiveInstitutionsCount.toString(),
-            Icons.cancel,
-            colors.error,
-            textStyles,
-          ),
-        ],
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
       ),
-    );
+      _buildCompactStat(
+        'Inactivas',
+        provider.inactiveInstitutionsCount.toString(),
+        Icons.cancel,
+        context.colors.error,
+        context.textStyles,
+      ),
+    ];
   }
 
   Widget _buildCompactStat(String title, String value, IconData icon, Color color, AppTextStyles textStyles) {
@@ -2593,74 +2367,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     );
   }
 
-  Widget _buildInstitutionsList(InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-
-    if (provider.isLoading && provider.institutions.isEmpty) {
-      return ShimmerListWidget(
-        itemCount: 5,
-        cardBuilder: (context) => _buildShimmerCard(colors, spacing),
-      );
-    }
-
-    if (provider.institutions.isEmpty) {
-      return EmptyStateWidget(
-        icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
-        title: _searchQuery.isNotEmpty
-            ? 'No se encontraron instituciones'
-            : 'No hay instituciones',
-        message: _searchQuery.isNotEmpty
-            ? 'Intenta con otros términos de búsqueda'
-            : 'Comienza creando tu primera institución',
-      );
-    }
-
-    return SizedBox(
-      height: provider.institutions.isEmpty ? 200 : null,
-      child: ListView.builder(
-        controller: _scrollController,
-        shrinkWrap: provider.institutions.isNotEmpty,
-        physics: provider.institutions.isNotEmpty ? const NeverScrollableScrollPhysics() : null,
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-        itemCount: provider.institutions.length + (provider.isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-
-          if (index == provider.institutions.length) {
-            return ShimmerListWidget(
-              itemCount: 1,
-              cardBuilder: (context) => _buildShimmerCard(colors, spacing),
-            );
-          }
-
-          final institution = provider.institutions[index];
-          return _buildInstitutionCard(institution, provider, colors, spacing, textStyles);
-        },
-      ),
-    );
-  }
-
-  Widget _buildShimmerCard(AppColors colors, AppSpacing spacing) {
-    return Card(
-      margin: EdgeInsets.only(bottom: spacing.xs),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: const ListTile(
-        leading: CircleAvatar(),
-        title: SizedBox(height: 16),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 12),
-            SizedBox(height: 12),
-          ],
-        ),
-        trailing: SizedBox(width: 24, height: 24),
-      ),
-    );
-  }
-
-  Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Card(
       margin: EdgeInsets.only(bottom: spacing.xs),
       elevation: 1,
@@ -2842,11 +2552,6 @@ import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_text_styles.dart';
-import '../../utils/app_routes.dart';
-import '../../widgets/dashboard_widgets.dart';
 
 class InstitutionFormScreen extends StatefulWidget {
   final Institution? institution;
@@ -2947,7 +2652,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
-        Navigator.of(context).pop();
+        context.pop();
       }
     } catch (e) {
       if (mounted) {
@@ -2974,45 +2679,33 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: isEditing ? 'Editar Institución' : 'Nueva Institución',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Super Admin',
-            roleIcon: Icons.verified_user,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go(AppRoutes.login);
-              }
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(spacing.lg),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildFormCard(colors, spacing, textStyles),
-                    SizedBox(height: spacing.xl),
-                    _buildActionButtons(colors, spacing, textStyles),
-                  ],
-                ),
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            padding: EdgeInsets.all(spacing.lg),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEditing ? 'Editar Institución' : 'Nueva Institución',
+                    style: textStyles.headlineMedium.bold,
+                  ),
+                  SizedBox(height: spacing.lg),
+                  _buildFormCard(),
+                  SizedBox(height: spacing.xl),
+                  _buildActionButtons(),
+                ],
               ),
             ),
-    );
+          );
   }
 
-  Widget _buildFormCard(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildFormCard() {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -3042,9 +2735,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.business,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -3061,9 +2751,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.tag,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -3072,9 +2759,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
               hint: 'Dirección completa de la institución',
               maxLines: 3,
               prefixIcon: Icons.location_on,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -3083,9 +2767,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
               hint: '+56912345678',
               keyboardType: TextInputType.phone,
               prefixIcon: Icons.phone,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -3103,9 +2784,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.email,
-              colors: colors,
-              spacing: spacing,
-              textStyles: textStyles,
             ),
             SizedBox(height: spacing.lg),
             SwitchListTile(
@@ -3129,10 +2807,10 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     TextInputType? keyboardType,
     int maxLines = 1,
     IconData? prefixIcon,
-    required AppColors colors,
-    required AppSpacing spacing,
-    required AppTextStyles textStyles,
   }) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return TextFormField(
       controller: controller,
       style: textStyles.bodyLarge,
@@ -3171,12 +2849,15 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     );
   }
 
-  Widget _buildActionButtons(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildActionButtons() {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+            onPressed: _isLoading ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),
               side: BorderSide(color: colors.primary),
@@ -4270,17 +3951,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
-import '../../utils/responsive_utils.dart';
-import '../../widgets/dashboard_widgets.dart';
+import '../../widgets/common/management_scaffold.dart';
 
 class UsersListScreen extends StatefulWidget {
   const UsersListScreen({super.key});
@@ -4370,323 +4046,228 @@ class _UsersListScreenState extends State<UsersListScreen> {
     });
   }
 
-  List<User> _getFilteredUsers(UserProvider provider) {
-    return provider.users;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+    return Consumer2<AuthProvider, UserProvider>(
+      builder: (context, authProvider, userProvider, child) {
         final userRole = authProvider.user?['rol'] as String?;
         final title = userRole == 'admin_institucion'
           ? 'Gestión de Profesores'
           : 'Gestión de Usuarios';
-        final roleDisplay = userRole == 'admin_institucion' ? 'Admin Institución' : 'Super Admin';
 
-        return Scaffold(
-          backgroundColor: colors.background,
-          appBar: DashboardAppBar(
-            title: title,
-            backgroundColor: colors.primary,
-            actions: [
-              DashboardAppBarActions(
-                userRole: roleDisplay,
-                roleIcon: Icons.admin_panel_settings,
-                onLogout: () async {
-                  await authProvider.logout();
-                  if (context.mounted) {
-                    context.go('/login');
-                  }
-                },
-              ),
-            ],
+        return ManagementScaffold(
+          title: title,
+          isLoading: userProvider.isLoading && userProvider.users.isEmpty,
+          hasError: userProvider.hasError,
+          errorMessage: userProvider.errorMessage ?? 'Error desconocido',
+          itemCount: userProvider.users.length,
+          itemBuilder: (context, index) => _buildUserCard(
+            userProvider.users[index],
+            userProvider,
+            context,
           ),
-          body: Consumer2<AuthProvider, UserProvider>(
-            builder: (context, authProvider, userProvider, child) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-                  return DashboardBody(
-                    userGreeting: UserGreetingWidget(
-                      userName: authProvider.user?['nombres'] ?? 'Admin',
-                      responsive: responsive,
-                    ),
-                    dashboardOptions: _buildUsersContent(userProvider, responsive, colors, spacing, textStyles),
-                    responsive: responsive,
-                  );
-                },
+          hasMoreData: userProvider.hasMoreData,
+          onRefresh: () => _loadUsers(),
+          scrollController: _scrollController,
+          floatingActionButton: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              final userRole = authProvider.user?['rol'] as String?;
+              final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+
+              if (!canCreateUsers) return const SizedBox.shrink();
+
+              return SpeedDial(
+                icon: Icons.add,
+                activeIcon: Icons.close,
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                children: [
+                  SpeedDialChild(
+                    child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                    backgroundColor: context.colors.primary,
+                    label: 'Crear Profesor',
+                    onTap: _navigateToCreateProfessor,
+                  ),
+                  SpeedDialChild(
+                    child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                    backgroundColor: context.colors.primary,
+                    label: 'Crear Estudiante',
+                    onTap: _navigateToCreateStudent,
+                  ),
+                ],
               );
             },
           ),
-          floatingActionButton: SpeedDial(
-            icon: Icons.add,
-            activeIcon: Icons.close,
-            backgroundColor: colors.primary,
-            foregroundColor: colors.getTextColorForBackground(colors.primary),
-            children: [
-              SpeedDialChild(
-                child: Icon(Icons.school, color: colors.getTextColorForBackground(colors.primary)),
-                backgroundColor: colors.primary,
-                label: 'Crear Profesor',
-                onTap: _navigateToCreateProfessor,
-              ),
-              SpeedDialChild(
-                child: Icon(Icons.person, color: colors.getTextColorForBackground(colors.primary)),
-                backgroundColor: colors.primary,
-                label: 'Crear Estudiante',
-                onTap: _navigateToCreateStudent,
-              ),
-            ],
-          ),
+          filterWidgets: _buildFilterWidgets(context, authProvider),
+          statisticWidgets: _buildStatisticWidgets(context, userProvider),
+          paginationInfo: null, // No pagination widget for users
+          onPageChange: (_) async {}, // Not used
+          emptyStateTitle: _isSearching ? 'No se encontraron resultados para tu búsqueda' : 'Aún no has creado ningún usuario',
+          emptyStateMessage: _isSearching ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer usuario',
+          emptyStateIcon: _isSearching ? Icons.search_off : Icons.people,
         );
       },
     );
   }
 
-  Widget _buildUsersContent(UserProvider provider, Map<String, dynamic> responsive, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    if (provider.isLoading && provider.users.isEmpty) {
-      return _buildShimmerLoading(colors, spacing, textStyles);
-    }
+  List<Widget> _buildFilterWidgets(BuildContext context, AuthProvider authProvider) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
-    if (provider.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: colors.error),
-            SizedBox(height: spacing.lg),
-            Text(
-              'Error al cargar usuarios',
-              style: textStyles.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            Text(
-              provider.errorMessage ?? 'Error desconocido',
-              style: textStyles.bodyMedium.withColor(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.lg),
-            ElevatedButton(
-              onPressed: _loadUsers,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.lg,
-                  vertical: spacing.md,
-                ),
-              ),
-              child: Text('Reintentar', style: textStyles.button),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        _buildSearchAndFilters(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.md),
-        _buildStatisticsCards(provider, colors, spacing, textStyles),
-        SizedBox(height: spacing.md),
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: 200, // Altura mínima
-            maxHeight: MediaQuery.of(context).size.height * 0.6, // Máximo 60% de la pantalla
+    return [
+      TextField(
+        controller: _searchController,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          hintText: 'Buscar por nombre, email o teléfono...',
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          prefixIcon: Icon(Icons.search, color: colors.textSecondary),
+          suffixIcon: _isSearching
+              ? IconButton(
+                  icon: Icon(Icons.clear, color: colors.textSecondary),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
           ),
-          child: _buildUsersListWithScroll(provider, colors, spacing, textStyles),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: colors.surface,
+          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
         ),
-      ],
-    );
-  }
-
-  Widget _buildSearchAndFilters(UserProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        onChanged: _onSearchChanged,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Filtros y Búsqueda', style: textStyles.titleMedium),
-            SizedBox(height: spacing.md),
-            TextField(
-              controller: _searchController,
-              style: textStyles.bodyLarge,
-              decoration: InputDecoration(
-                hintText: 'Buscar por nombre, email o teléfono...',
-                hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-                prefixIcon: Icon(Icons.search, color: colors.textSecondary),
-                suffixIcon: _isSearching
-                    ? IconButton(
-                        icon: Icon(Icons.clear, color: colors.textSecondary),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.borderLight),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  borderSide: BorderSide(color: colors.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: colors.surface,
-                contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-              ),
-              onChanged: _onSearchChanged,
-            ),
-            SizedBox(height: spacing.sm),
-            Row(
-              children: [
-                Text('Mostrar:', style: textStyles.labelMedium),
-                SizedBox(width: spacing.md),
-                FilterChip(
-                  label: const Text('Activos'),
-                  selected: _statusFilter == true && !_isSearching,
-                  onSelected: !_isSearching ? (selected) {
-                    setState(() => _statusFilter = selected ? true : null);
-                    _loadUsers();
-                  } : null,
-                ),
-                SizedBox(width: spacing.md),
-                FilterChip(
-                  label: const Text('Inactivos'),
-                  selected: _statusFilter == false && !_isSearching,
-                  onSelected: !_isSearching ? (selected) {
-                    setState(() => _statusFilter = selected ? false : null);
-                    _loadUsers();
-                  } : null,
-                ),
-                SizedBox(width: spacing.md),
-                FilterChip(
-                  label: const Text('Todos'),
-                  selected: _statusFilter == null && !_isSearching,
-                  onSelected: !_isSearching ? (selected) {
-                    setState(() => _statusFilter = selected ? null : true);
-                    _loadUsers();
-                  } : null,
-                ),
-                SizedBox(width: spacing.md),
-                Expanded(
-                  child: Consumer<AuthProvider>(
-                    builder: (context, authProvider, child) {
-                      final userRole = authProvider.user?['rol'] as String?;
-                      final isAdminInstitucion = userRole == 'admin_institucion';
-
-                      return DropdownButtonFormField<String>(
-                        value: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
-                        hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
-                        items: isAdminInstitucion ? [
-                          DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
-                          DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
-                          DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
-                        ] : [
-                          DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
-                          DropdownMenuItem(value: 'profesor', child: Text('Profesores', style: textStyles.bodyMedium)),
-                          DropdownMenuItem(value: 'estudiante', child: Text('Estudiantes', style: textStyles.bodyMedium)),
-                          DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
-                        ],
-                        onChanged: (value) {
-                          setState(() => _selectedRoleFilter = value ?? '');
-                          _loadUsers();
-                        },
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(spacing.borderRadius),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatisticsCards(UserProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    final stats = provider.getUserStatistics();
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-        border: Border.all(color: colors.borderLight),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      SizedBox(height: spacing.sm),
+      Row(
         children: [
-          _buildCompactStat(
-            'Total',
-            stats['total'].toString(),
-            Icons.people,
-            colors.primary,
-            textStyles,
+          Text('Mostrar:', style: textStyles.labelMedium),
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Activos'),
+            selected: _statusFilter == true && !_isSearching,
+            onSelected: !_isSearching ? (selected) {
+              setState(() => _statusFilter = selected ? true : null);
+              _loadUsers();
+            } : null,
           ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Inactivos'),
+            selected: _statusFilter == false && !_isSearching,
+            onSelected: !_isSearching ? (selected) {
+              setState(() => _statusFilter = selected ? false : null);
+              _loadUsers();
+            } : null,
           ),
-          _buildCompactStat(
-            'Activos',
-            stats['activos'].toString(),
-            Icons.check_circle,
-            colors.success,
-            textStyles,
+          SizedBox(width: spacing.md),
+          FilterChip(
+            label: const Text('Todos'),
+            selected: _statusFilter == null && !_isSearching,
+            onSelected: !_isSearching ? (selected) {
+              setState(() => _statusFilter = selected ? null : true);
+              _loadUsers();
+            } : null,
           ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
-          ),
-          _buildCompactStat(
-            'Profesores',
-            stats['profesores'].toString(),
-            Icons.school,
-            colors.info,
-            textStyles,
-          ),
-          Container(
-            height: 24,
-            width: 1,
-            color: colors.border,
-          ),
-          _buildCompactStat(
-            'Estudiantes',
-            stats['estudiantes'].toString(),
-            Icons.person,
-            colors.warning,
-            textStyles,
+          SizedBox(width: spacing.md),
+          Expanded(
+            child: Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                final userRole = authProvider.user?['rol'] as String?;
+                final isAdminInstitucion = userRole == 'admin_institucion';
+
+                return DropdownButtonFormField<String>(
+                  value: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
+                  hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
+                  items: isAdminInstitucion ? [
+                    DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
+                  ] : [
+                    DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'profesor', child: Text('Profesores', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'estudiante', child: Text('Estudiantes', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedRoleFilter = value ?? '');
+                    _loadUsers();
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(spacing.borderRadius),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
-    );
+    ];
+  }
+
+  List<Widget> _buildStatisticWidgets(BuildContext context, UserProvider provider) {
+    final stats = provider.getUserStatistics();
+
+    return [
+      _buildCompactStat(
+        'Total',
+        stats['total'].toString(),
+        Icons.people,
+        context.colors.primary,
+        context.textStyles,
+      ),
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
+      ),
+      _buildCompactStat(
+        'Activos',
+        stats['activos'].toString(),
+        Icons.check_circle,
+        context.colors.success,
+        context.textStyles,
+      ),
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
+      ),
+      _buildCompactStat(
+        'Profesores',
+        stats['profesores'].toString(),
+        Icons.school,
+        context.colors.info,
+        context.textStyles,
+      ),
+      Container(
+        height: 24,
+        width: 1,
+        color: context.colors.border,
+      ),
+      _buildCompactStat(
+        'Estudiantes',
+        stats['estudiantes'].toString(),
+        Icons.person,
+        context.colors.warning,
+        context.textStyles,
+      ),
+    ];
   }
 
   Widget _buildCompactStat(String title, String value, IconData icon, Color color, AppTextStyles textStyles) {
@@ -4718,65 +4299,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
     );
   }
 
-  Widget _buildUsersListWithScroll(UserProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    final filteredUsers = _getFilteredUsers(provider);
-
-    if (filteredUsers.isEmpty && !provider.isLoading) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _isSearching ? Icons.search_off : Icons.people,
-              size: 64,
-              color: colors.textMuted,
-            ),
-            SizedBox(height: spacing.lg),
-            Text(
-              _isSearching
-                  ? 'No se encontraron resultados para tu búsqueda'
-                  : 'Aún no has creado ningún usuario',
-              style: textStyles.headlineMedium.withColor(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return AnimationLimiter(
-      child: ListView.builder(
-        shrinkWrap: true,
-        controller: _scrollController,
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.sm),
-        itemCount: filteredUsers.length + (provider.isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == filteredUsers.length) {
-            return Padding(
-              padding: EdgeInsets.all(spacing.md),
-              child: Center(
-                child: CircularProgressIndicator(color: colors.primary),
-              ),
-            );
-          }
-
-          final user = filteredUsers[index];
-          return AnimationConfiguration.staggeredList(
-            position: index,
-            duration: const Duration(milliseconds: 375),
-            child: SlideAnimation(
-              verticalOffset: 50.0,
-              child: FadeInAnimation(
-                child: _buildUserCard(user, provider, colors, spacing, textStyles),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildUserCard(User user, UserProvider provider, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildUserCard(User user, UserProvider provider, BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
     return Card(
       margin: EdgeInsets.only(bottom: spacing.xs),
       elevation: 1,
@@ -4840,40 +4366,49 @@ class _UsersListScreenState extends State<UsersListScreen> {
             ),
           ],
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, user, provider),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Editar', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'toggle_status',
-              child: Row(
-                children: [
-                  Icon(Icons.toggle_on, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Cambiar Estado', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: colors.error),
-                  SizedBox(width: spacing.sm),
-                  Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
-                ],
-              ),
-            ),
-          ],
+        trailing: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            final userRole = authProvider.user?['rol'] as String?;
+            final canEditUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+
+            if (!canEditUsers) return const SizedBox.shrink();
+
+            return PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(value, user, provider),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: context.colors.textSecondary),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Editar', style: context.textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'toggle_status',
+                  child: Row(
+                    children: [
+                      Icon(Icons.toggle_on, color: context.colors.textSecondary),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Cambiar Estado', style: context.textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: context.colors.error),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Eliminar', style: context.textStyles.bodyMedium.withColor(context.colors.error)),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         onTap: () => _navigateToUserDetail(user),
       ),
@@ -4926,6 +4461,17 @@ class _UsersListScreenState extends State<UsersListScreen> {
               ),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
+          );
+          await _loadUsers();
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                provider.errorMessage ?? 'Error al cambiar estado del usuario',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
           );
         }
         break;
@@ -4970,6 +4516,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     final success = await provider.deleteUser(
       authProvider.accessToken!,
       user.id,
+      authProvider.user?['rol'] as String? ?? '',
+      user.rol,
     );
 
     if (success && mounted) {
@@ -4981,94 +4529,202 @@ class _UsersListScreenState extends State<UsersListScreen> {
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
+      );
+      await _loadUsers();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.errorMessage ?? 'Error al eliminar usuario',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
       );
     }
   }
 
   void _navigateToCreateProfessor() {
-    context.go('/users/professor/create');
+    context.push('/users/professor/create');
   }
 
   void _navigateToCreateStudent() {
-    context.go('/users/student/create');
+    context.push('/users/student/create');
   }
 
   void _navigateToUserEdit(User user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidad de editar usuario próximamente')),
-    );
+    context.push('/users/${user.rol}/create?edit=true&userId=${user.id}');
   }
 
-  void _navigateToUserDetail(User user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidad de detalle de usuario próximamente')),
-    );
-  }
-
-  Widget _buildShimmerLoading(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
-    return Shimmer.fromColors(
-      baseColor: colors.surface,
-      highlightColor: colors.borderLight,
-      child: ListView.builder(
-        shrinkWrap: true,
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.sm),
-        itemCount: 5, // Mostrar 5 tarjetas fantasma
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.only(bottom: spacing.xs),
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(spacing.borderRadius),
-            ),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: colors.surface,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  color: colors.surface,
-                ),
-              ),
-              title: Container(
-                height: 16,
-                color: colors.surface,
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: spacing.xs),
-                  Container(
-                    height: 14,
-                    width: 150,
-                    color: colors.surface,
-                  ),
-                  SizedBox(height: spacing.xs),
-                  Container(
-                    height: 14,
-                    width: 120,
-                    color: colors.surface,
-                  ),
-                  SizedBox(height: spacing.xs),
-                  Container(
-                    height: 20,
-                    width: 80,
-                    color: colors.surface,
-                  ),
-                ],
-              ),
-              trailing: Container(
-                width: 24,
-                height: 24,
-                color: colors.surface,
-              ),
-            ),
-          );
-        },
-      ),
-    );
+  void _navigateToUserDetail(User user) {
+    context.push('/users/detail/${user.id}', extra: user);
   }
 }
 /* Fin lib\screens\users\users_list_screen.dart */
+
+/* Inicio lib\screens\users\user_detail_screen.dart */
+import 'package:flutter/material.dart';
+import '../../models/user.dart';
+import '../../theme/theme_extensions.dart';
+
+class UserDetailScreen extends StatelessWidget {
+  final User user;
+
+  const UserDetailScreen({
+    super.key,
+    required this.user,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '${user.nombreCompleto}',
+          style: textStyles.titleLarge,
+        ),
+        backgroundColor: colors.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoSection(
+              context,
+              'Información Básica',
+              [
+                _buildInfoItem('Nombres', user.nombres),
+                _buildInfoItem('Apellidos', user.apellidos),
+                _buildInfoItem('Email', user.email),
+                _buildInfoItem('Teléfono', user.telefono ?? 'No especificado'),
+                _buildInfoItem('Rol', _getRoleDisplayName(user.rol)),
+                _buildInfoItem('Estado', user.activo ? 'Activo' : 'Inactivo',
+                    valueColor: user.activo ? colors.success : colors.error),
+              ],
+            ),
+
+            SizedBox(height: spacing.lg),
+            if (user.esEstudiante && user.estudiante != null) ...[
+              _buildInfoSection(
+                context,
+                'Información del Estudiante',
+                [
+                  _buildInfoItem('Identificación', user.estudiante!.identificacion),
+                  _buildInfoItem('Código QR', user.estudiante!.codigoQr),
+                  if (user.estudiante!.nombreResponsable != null)
+                    _buildInfoItem('Nombre del Responsable', user.estudiante!.nombreResponsable!),
+                  if (user.estudiante!.telefonoResponsable != null)
+                    _buildInfoItem('Teléfono del Responsable', user.estudiante!.telefonoResponsable!),
+                ],
+              ),
+              SizedBox(height: spacing.lg),
+            ],
+            if (user.instituciones.isNotEmpty) ...[
+              _buildInfoSection(
+                context,
+                'Instituciones',
+                user.instituciones.map((inst) => _buildInfoItem(
+                  inst.nombre,
+                  inst.rolEnInstitucion ?? 'Sin rol específico',
+                )).toList(),
+              ),
+              SizedBox(height: spacing.lg),
+            ],
+            _buildInfoSection(
+              context,
+              'Información del Sistema',
+              [
+                _buildInfoItem('ID de Usuario', user.id),
+                _buildInfoItem('Fecha de Creación', 'No disponible'), // TODO: Agregar campo de fecha si existe
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(BuildContext context, String title, List<Widget> items) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: textStyles.titleMedium.bold,
+            ),
+            SizedBox(height: spacing.md),
+            ...items,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: valueColor,
+                fontWeight: valueColor != null ? FontWeight.w500 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getRoleDisplayName(String role) {
+    switch (role) {
+      case 'super_admin':
+        return 'Super Administrador';
+      case 'admin_institucion':
+        return 'Administrador de Institución';
+      case 'profesor':
+        return 'Profesor';
+      case 'estudiante':
+        return 'Estudiante';
+      default:
+        return role;
+    }
+  }
+}
+/* Fin lib\screens\users\user_detail_screen.dart */
 
 /* Inicio lib\screens\users\user_form_screen.dart */
 import 'package:flutter/material.dart';
@@ -5078,17 +4734,15 @@ import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_text_styles.dart';
-import '../../utils/responsive_utils.dart';
-import '../../widgets/dashboard_widgets.dart';
 import '../../widgets/form_widgets.dart';
 
 class UserFormScreen extends StatefulWidget {
   final String userRole
 
-  const UserFormScreen({super.key, required this.userRole});
+  const UserFormScreen({
+    super.key,
+    required this.userRole,
+  });
 
   @override
   State<UserFormScreen> createState() => _UserFormScreenState();
@@ -5107,7 +4761,84 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _telefonoResponsableController = TextEditingController();
 
   bool _isLoading = false;
+  bool _isInitialLoading = false;
   bool _activo = true;
+  User? _user
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadUserIfEditing();
+  }
+
+  Future<void> _loadUserIfEditing() async {
+    if (_user != null || _isInitialLoading) return;
+
+    final uri = GoRouterState.of(context).uri;
+    final queryParams = uri.queryParameters;
+
+    final isEdit = queryParams['edit'] == 'true';
+    final userId = queryParams['userId'];
+
+    if (isEdit && userId != null) {
+      setState(() => _isInitialLoading = true);
+
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+        await userProvider.loadUserById(
+          authProvider.accessToken!,
+          userId,
+        );
+
+        final user = userProvider.selectedUser;
+        if (user != null && mounted) {
+          setState(() => _user = user);
+          _fillFormWithUserData();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Error al cargar usuario: ${e.toString()}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onError,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+          context.go('/users');
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isInitialLoading = false);
+        }
+      }
+    }
+  }
+
+  void _fillFormWithUserData() {
+    final user = _user!;
+    _nombresController.text = user.nombres;
+    _apellidosController.text = user.apellidos;
+    _emailController.text = user.email;
+    _telefonoController.text = user.telefono ?? '';
+    _activo = user.activo;
+
+    if (user.estudiante != null) {
+      _identificacionController.text = user.estudiante!.identificacion;
+      _nombreResponsableController.text = user.estudiante!.nombreResponsable ?? '';
+      _telefonoResponsableController.text = user.estudiante!.telefonoResponsable ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -5123,7 +4854,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     super.dispose();
   }
 
-  Future<void> _createUser() async {
+  Future<void> _saveUser() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -5132,46 +4863,80 @@ class _UserFormScreenState extends State<UserFormScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      final createRequest = CreateUserRequest(
-        email: _emailController.text.trim(),
-        password: 'TempPass123!', // TODO: Implementar generación de contraseña segura o pedir al usuario
-        nombres: _nombresController.text.trim(),
-        apellidos: _apellidosController.text.trim(),
-        telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-        identificacion: _identificacionController.text.trim(),
-        rol: widget.userRole,
-        titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
-        especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
-        nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
-        telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-        institucionId: authProvider.selectedInstitutionId,
-      );
-
-      final success = await userProvider.createUser(
-        authProvider.accessToken!,
-        createRequest,
-      );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
+      if (_user != null) {
+        final updateRequest = UpdateUserRequest(
+          email: _emailController.text.trim(),
+          nombres: _nombresController.text.trim(),
+          apellidos: _apellidosController.text.trim(),
+          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
+          identificacion: _identificacionController.text.trim(),
+          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
+          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
+          activo: _activo,
         );
-        context.go('/users');
+
+        final success = await userProvider.updateUser(
+          authProvider.accessToken!,
+          _user!.id,
+          updateRequest,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} actualizado exitosamente',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          context.go('/users');
+        }
+      } else {
+        final createRequest = CreateUserRequest(
+          email: _emailController.text.trim(),
+          password: 'TempPass123!', // TODO: Implementar generación de contraseña segura o pedir al usuario
+          nombres: _nombresController.text.trim(),
+          apellidos: _apellidosController.text.trim(),
+          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
+          identificacion: _identificacionController.text.trim(),
+          rol: widget.userRole,
+          titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
+          especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
+          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
+          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
+          institucionId: authProvider.selectedInstitutionId,
+        );
+
+        final success = await userProvider.createUser(
+          authProvider.accessToken!,
+          createRequest,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          context.go('/users');
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error al crear ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
+              'Error al ${_user != null ? 'actualizar' : 'crear'} ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onError,
               ),
@@ -5193,46 +4958,19 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: 'Crear ${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'}',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Admin Institución',
-            roleIcon: Icons.admin_panel_settings,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-          ),
-        ],
-      ),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-              return DashboardBody(
-                userGreeting: UserGreetingWidget(
-                  userName: authProvider.user?['nombres'] ?? 'Admin',
-                  responsive: responsive,
-                ),
-                dashboardOptions: _buildFormContent(colors, spacing, textStyles, constraints),
-                responsive: responsive,
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
+    if (_isInitialLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Cargando usuario...'),
+          ],
+        ),
+      );
+    }
 
-  Widget _buildFormContent(AppColors colors, AppSpacing spacing, AppTextStyles textStyles, BoxConstraints constraints) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(spacing.lg),
       child: Form(
@@ -5240,10 +4978,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Información Personal',
-              style: textStyles.headlineMedium.bold,
-            ),
             SizedBox(height: spacing.lg),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -5499,125 +5233,125 @@ class _UserFormScreenState extends State<UserFormScreen> {
                           ),
                         ],
                       );
-                },
-              ),
-              SizedBox(height: spacing.lg),
-            ],
-
-            if (widget.userRole == 'estudiante') ...[
-              Text(
-                'Información del Responsable',
-                style: textStyles.headlineMedium.bold,
-              ),
-              SizedBox(height: spacing.lg),
-              CustomTextFormField(
-                controller: _nombreResponsableController,
-                labelText: 'Nombre del Responsable',
-                hintText: 'Padre, madre o tutor',
-                validator: (value) {
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.md),
-              CustomTextFormField(
-                controller: _telefonoResponsableController,
-                labelText: 'Teléfono del Responsable',
-                hintText: '+57 300 123 4567',
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
-                    if (!phoneRegex.hasMatch(value.trim())) {
-                      return 'Ingrese un teléfono válido';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.lg),
-            ],
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(spacing.md),
-                child: Row(
-                  children: [
-                    Icon(
-                      _activo ? Icons.check_circle : Icons.cancel,
-                      color: _activo ? colors.success : colors.error,
-                    ),
-                    SizedBox(width: spacing.md),
-                    Expanded(
-                      child: Text(
-                        'Usuario Activo',
-                        style: textStyles.bodyLarge,
-                      ),
-                    ),
-                    Switch(
-                      value: _activo,
-                      onChanged: (value) {
-                        setState(() => _activo = value);
-                      },
-                      activeColor: colors.primary,
-                    ),
-                  ],
+                  },
                 ),
-              ),
-            ),
-            SizedBox(height: spacing.xl),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isLoading ? null : () => context.pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: spacing.md),
-                      side: BorderSide(color: colors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    child: Text(
-                      'Cancelar',
-                      style: textStyles.button.withColor(colors.primary),
-                    ),
-                  ),
-                ),
-                SizedBox(width: spacing.md),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _createUser,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: spacing.md),
-                      backgroundColor: colors.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          )
-                        : Text('Crear ${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'}', style: textStyles.button),
-                  ),
-                ),
+                SizedBox(height: spacing.lg),
               ],
-            ),
-          ],
+
+              if (widget.userRole == 'estudiante') ...[
+                Text(
+                  'Información del Responsable',
+                  style: textStyles.headlineMedium.bold,
+                ),
+                SizedBox(height: spacing.lg),
+                CustomTextFormField(
+                  controller: _nombreResponsableController,
+                  labelText: 'Nombre del Responsable',
+                  hintText: 'Padre, madre o tutor',
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+                CustomTextFormField(
+                  controller: _telefonoResponsableController,
+                  labelText: 'Teléfono del Responsable',
+                  hintText: '+57 300 123 4567',
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value != null && value.trim().isNotEmpty) {
+                      final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Ingrese un teléfono válido';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.lg),
+              ],
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.md),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _activo ? Icons.check_circle : Icons.cancel,
+                        color: _activo ? colors.success : colors.error,
+                      ),
+                      SizedBox(width: spacing.md),
+                      Expanded(
+                        child: Text(
+                          'Usuario Activo',
+                          style: textStyles.bodyLarge,
+                        ),
+                      ),
+                      Switch(
+                        value: _activo,
+                        onChanged: (value) {
+                          setState(() => _activo = value);
+                        },
+                        activeColor: colors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing.xl),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : () => context.pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        side: BorderSide(color: colors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: textStyles.button.withColor(colors.primary),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.md),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveUser,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        backgroundColor: colors.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text('${_user != null ? 'Actualizar' : 'Crear'}', style: textStyles.button),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 /* Fin lib\screens\users\user_form_screen.dart */
@@ -6128,7 +5862,6 @@ class InstitutionService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(
@@ -6371,7 +6104,6 @@ class ProfesorService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(
@@ -6672,7 +6404,6 @@ class UserService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(
@@ -7942,7 +7673,6 @@ class AppConstants {
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
-import '../providers/navigation_state_provider.dart';
 import '../screens/login_screen.dart';
 import '../screens/institution_selection_screen.dart';
 import '../screens/home_screen.dart';
@@ -7951,16 +7681,19 @@ import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
 import '../screens/student_dashboard.dart';
 import '../screens/users/users_list_screen.dart';
-import '../screens/users/create_professor_screen.dart';
-import '../screens/users/create_student_screen.dart';
-import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/users/user_form_screen.dart';
+import '../screens/users/user_detail_screen.dart';
+import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/app_shell.dart';
+import '../models/user.dart';
+final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
+final _institutionsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Institutions');
+final _usersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Users');
 class AppRouter {
   final AuthProvider authProvider;
-  final NavigationStateProvider navigationProvider;
 
   AppRouter({
     required this.authProvider,
-    required this.navigationProvider,
   });
 
   late final GoRouter router = GoRouter(
@@ -7972,16 +7705,9 @@ class AppRouter {
     errorBuilder: _errorPage,
   );
   String _getStartRoute() {
-    if (navigationProvider.hasValidState() &&
-        navigationProvider.currentRoute != null) {
-      return navigationProvider.currentRoute!;
-    }
-
     if (authProvider.isAuthenticated) {
-      final role = authProvider.user?['rol'] as String?;
-      return _getDashboardRouteForRole(role ?? '');
+      return '/dashboard';
     }
-
     return '/login';
   }
   String? _checkAuth(BuildContext context, GoRouterState state) {
@@ -7994,8 +7720,7 @@ class AppRouter {
         if (institutions != null && institutions.length > 1 && selected == null) {
           return '/institution-selection';
         }
-        final role = authProvider.user?['rol'] as String?;
-        return _getDashboardRouteForRole(role ?? '');
+        return '/dashboard';
       }
       return null
     }
@@ -8035,98 +7760,92 @@ class AppRouter {
           state,
           const InstitutionSelectionScreen(),
         ),
-      ),
-
-      GoRoute(
-        path: '/super-admin-dashboard',
-        name: 'super-admin',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const SuperAdminDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/admin-dashboard',
-        name: 'admin',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const AdminDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/teacher-dashboard',
-        name: 'teacher',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const TeacherDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/student-dashboard',
-        name: 'student',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const StudentDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const HomeScreen());
-        },
       ),
-      GoRoute(
-        path: '/users',
-        name: 'users-list',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const UsersListScreen());
-        },
-      ),
-
       GoRoute(
         path: '/users/professor/create',
         name: 'create-professor',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const CreateProfessorScreen());
-        },
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Profesor',
+          child: UserFormScreen(userRole: 'profesor'),
+        ),
       ),
-
       GoRoute(
         path: '/users/student/create',
         name: 'create-student',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const CreateStudentScreen());
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Estudiante',
+          child: UserFormScreen(userRole: 'estudiante'),
+        ),
+      ),
+      GoRoute(
+        path: '/users/detail/:id',
+        name: 'user-detail',
+        builder: (context, state) {
+          final user = state.extra as User;
+          return UserDetailScreen(user: user);
         },
       ),
-      GoRoute(
-        path: '/institutions',
-        name: 'institutions-list',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const InstitutionsListScreen());
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
         },
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _dashboardNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                name: 'dashboard',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _getDashboardForRole(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _institutionsNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/institutions',
+                name: 'institutions-list',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const InstitutionsListScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _usersNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/users',
+                name: 'users-list',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const UsersListScreen(),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     ];
   }
-  void _saveRoute(GoRouterState state) {
-    final route = state.matchedLocation;
-    final params = state.uri.queryParameters;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      navigationProvider.saveNavigationState(
-        route,
-        arguments: params.isNotEmpty ? params : null,
-      );
-    });
+  Widget _getDashboardForRole() {
+    final role = authProvider.user?['rol'] as String?;
+    switch (role) {
+      case 'super_admin':
+        return const SuperAdminDashboard();
+      case 'admin_institucion':
+        return const AdminDashboard();
+      case 'profesor':
+        return const TeacherDashboard();
+      case 'estudiante':
+        return const StudentDashboard();
+      default:
+        return const HomeScreen();
+    }
   }
   Page _fadePage(BuildContext context, GoRouterState state, Widget child) {
     return CustomTransitionPage(
@@ -8158,20 +7877,6 @@ class AppRouter {
         ),
       ),
     );
-  }
-  String _getDashboardRouteForRole(String role) {
-    switch (role) {
-      case 'super_admin':
-        return '/super-admin-dashboard';
-      case 'admin_institucion':
-        return '/admin-dashboard';
-      case 'profesor':
-        return '/teacher-dashboard';
-      case 'estudiante':
-        return '/student-dashboard';
-      default:
-        return '/home';
-    }
   }
   void dispose() {
     router.dispose();
@@ -8491,155 +8196,6 @@ class ProtectedRoute extends StatelessWidget {
 
 /* Fin lib\utils\route_guards.dart */
 
-/* Inicio lib\widgets\app_wrappers.dart */
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import '../providers/navigation_state_provider.dart';
-import '../screens/login_screen.dart';
-import '../screens/institution_selection_screen.dart';
-import '../screens/home_screen.dart';
-import '../screens/super_admin_dashboard.dart';
-import '../screens/admin_dashboard.dart';
-import '../screens/teacher_dashboard.dart';
-import '../screens/student_dashboard.dart';
-import '../utils/app_routes.dart';
-class LifecycleAwareWrapper extends StatefulWidget {
-  const LifecycleAwareWrapper({super.key});
-
-  @override
-  State<LifecycleAwareWrapper> createState() => _LifecycleAwareWrapperState();
-}
-
-class _LifecycleAwareWrapperState extends State<LifecycleAwareWrapper>
-    with WidgetsBindingObserver {
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final navigationProvider = Provider.of<NavigationStateProvider>(context, listen: false);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        debugPrint('App resumed - recovering full state');
-        authProvider.recoverFullState();
-        if (!navigationProvider.hasValidState()) {
-          navigationProvider.clearNavigationState();
-        }
-        break;
-      case AppLifecycleState.inactive:
-        debugPrint('App inactive - transitioning');
-        break;
-      case AppLifecycleState.paused:
-        debugPrint('App paused - saving current state');
-        navigationProvider.refreshStateTimestamp();
-        break;
-      case AppLifecycleState.hidden:
-        debugPrint('App hidden');
-        break;
-      case AppLifecycleState.detached:
-        debugPrint('App detached');
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const AuthWrapper();
-  }
-}
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, NavigationStateProvider>(
-      builder: (context, authProvider, navigationProvider, child) {
-        if (!authProvider.isAuthenticated) {
-          return const LoginScreen();
-        }
-        final institutions = authProvider.institutions;
-        final selectedInstitutionId = authProvider.selectedInstitutionId;
-
-        if (institutions != null && institutions.length > 1 && selectedInstitutionId == null) {
-          return const InstitutionSelectionScreen();
-        }
-        if (navigationProvider.hasValidState() && navigationProvider.currentRoute != null) {
-          final savedRoute = navigationProvider.currentRoute!;
-          debugPrint('Recuperando navegación guardada: $savedRoute');
-
-          return _getScreenForRoute(savedRoute, authProvider);
-        }
-        final user = authProvider.user;
-        final userRole = user?['rol'] as String?;
-        Widget dashboard;
-        String route;
-
-        switch (userRole) {
-          case 'super_admin':
-            dashboard = const SuperAdminDashboard();
-            route = AppRoutes.superAdminDashboard;
-            break;
-          case 'admin_institucion':
-            dashboard = const AdminDashboard();
-            route = AppRoutes.adminDashboard;
-            break;
-          case 'profesor':
-            dashboard = const TeacherDashboard();
-            route = AppRoutes.teacherDashboard;
-            break;
-          case 'estudiante':
-            dashboard = const StudentDashboard();
-            route = AppRoutes.studentDashboard;
-            break;
-          default:
-            dashboard = const HomeScreen();
-            route = AppRoutes.home;
-            break;
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          navigationProvider.saveNavigationState(route);
-        });
-
-        return dashboard;
-      },
-    );
-  }
-  Widget _getScreenForRoute(String route, AuthProvider authProvider) {
-    switch (route) {
-      case AppRoutes.superAdminDashboard:
-        return const SuperAdminDashboard();
-      case AppRoutes.adminDashboard:
-        return const AdminDashboard();
-      case AppRoutes.teacherDashboard:
-        return const TeacherDashboard();
-      case AppRoutes.studentDashboard:
-        return const StudentDashboard();
-      case AppRoutes.institutionSelection:
-        return const InstitutionSelectionScreen();
-      case AppRoutes.home:
-        return const HomeScreen();
-      default:
-        final userRole = authProvider.user?['rol'] as String?;
-        final defaultRoute = AppRoutes.getDashboardRouteForRole(userRole ?? '');
-        return _getScreenForRoute(defaultRoute, authProvider);
-    }
-  }
-}
-/* Fin lib\widgets\app_wrappers.dart */
-
 /* Inicio lib\widgets\common\empty_state_widget.dart */
 import 'package:flutter/material.dart';
 import '../../theme/theme_extensions.dart';
@@ -8689,6 +8245,224 @@ class EmptyStateWidget extends StatelessWidget {
   }
 }
 /* Fin lib\widgets\common\empty_state_widget.dart */
+
+/* Inicio lib\widgets\common\management_scaffold.dart */
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import '../../models/user.dart';
+import '../../theme/theme_extensions.dart';
+import '../../widgets/common/empty_state_widget.dart';
+import '../../widgets/common/shimmer_list_widget.dart';
+import '../../widgets/pagination_widget.dart';
+
+class ManagementScaffold extends StatelessWidget {
+  final String title;
+  final bool isLoading;
+  final bool hasError;
+  final String errorMessage;
+  final int itemCount;
+  final Widget Function(BuildContext, int) itemBuilder;
+  final bool hasMoreData;
+  final VoidCallback onRefresh;
+  final ScrollController scrollController;
+  final Widget? floatingActionButton;
+  final List<Widget>? filterWidgets;
+  final List<Widget>? statisticWidgets;
+  final PaginationInfo? paginationInfo;
+  final Future<void> Function(int) onPageChange;
+  final String? emptyStateTitle;
+  final String? emptyStateMessage;
+  final IconData emptyStateIcon;
+
+  const ManagementScaffold({
+    super.key,
+    required this.title,
+    required this.isLoading,
+    required this.hasError,
+    required this.errorMessage,
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.hasMoreData,
+    required this.onRefresh,
+    required this.scrollController,
+    this.floatingActionButton,
+    this.filterWidgets,
+    this.statisticWidgets,
+    this.paginationInfo,
+    required this.onPageChange,
+    this.emptyStateTitle,
+    this.emptyStateMessage,
+    this.emptyStateIcon = Icons.business,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        title: Text(title, style: textStyles.headlineMedium.copyWith(color: colors.surface)),
+        backgroundColor: colors.primary,
+        elevation: 2,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (filterWidgets != null && filterWidgets!.isNotEmpty)
+              Card(
+                margin: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                ),
+                child: ExpansionTile(
+                  title: Text('Filtros y Búsqueda', style: textStyles.titleMedium),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(spacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: filterWidgets!,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (statisticWidgets != null && statisticWidgets!.isNotEmpty)
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: spacing.lg),
+                padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                  border: Border.all(color: colors.borderLight),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: statisticWidgets!,
+                ),
+              ),
+            Expanded(
+              child: _buildListContent(context),
+            ),
+            if (paginationInfo != null)
+              PaginationWidget(
+                currentPage: paginationInfo!.page,
+                totalPages: paginationInfo!.totalPages,
+                totalItems: paginationInfo!.total,
+                onPageChange: onPageChange,
+                isLoading: isLoading,
+              ),
+          ],
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+
+  Widget _buildListContent(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+    if (isLoading && itemCount == 0) {
+      return ShimmerListWidget(
+        itemCount: 5,
+        cardBuilder: (context) => _buildShimmerCard(context),
+      );
+    }
+
+    if (hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: colors.error),
+            SizedBox(height: spacing.lg),
+            Text(
+              'Error al cargar datos',
+              style: textStyles.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing.md),
+            Text(
+              errorMessage,
+              style: textStyles.bodyMedium.withColor(colors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing.lg),
+            ElevatedButton(
+              onPressed: onRefresh,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.lg,
+                  vertical: spacing.md,
+                ),
+              ),
+              child: Text('Reintentar', style: textStyles.button),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (itemCount == 0) {
+      return EmptyStateWidget(
+        icon: emptyStateIcon,
+        title: emptyStateTitle ?? 'No hay elementos',
+        message: emptyStateMessage ?? 'Comienza creando tu primer elemento',
+      );
+    }
+
+    return AnimationLimiter(
+      child: ListView.builder(
+        controller: scrollController,
+        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          return AnimationConfiguration.staggeredList(
+            position: index,
+            duration: const Duration(milliseconds: 375),
+            child: SlideAnimation(
+              verticalOffset: 50.0,
+              child: FadeInAnimation(
+                child: itemBuilder(context, index),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard(BuildContext context) {
+    final spacing = context.spacing;
+    return Card(
+      margin: EdgeInsets.only(bottom: spacing.xs),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+      ),
+      child: const ListTile(
+        leading: CircleAvatar(),
+        title: SizedBox(height: 16),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 12),
+            SizedBox(height: 12),
+          ],
+        ),
+        trailing: SizedBox(width: 24, height: 24),
+      ),
+    );
+  }
+}
+/* Fin lib\widgets\common\management_scaffold.dart */
 
 /* Inicio lib\widgets\common\shimmer_list_widget.dart */
 import 'package:flutter/material.dart';
@@ -9300,81 +9074,6 @@ export 'app_wrappers.dart';
 export 'pagination_widget.dart';
 /* Fin lib\widgets\index.dart */
 
-/* Inicio lib\widgets\navigation_state_mixin.dart */
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/navigation_state_provider.dart';
-mixin NavigationStateMixin<T extends StatefulWidget> on State<T> {
-  String get currentRoute;
-  Map<String, dynamic>? get routeArguments => null;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _saveCurrentState();
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshStateTimestamp();
-    super.dispose();
-  }
-  void _saveCurrentState() {
-    final navigationProvider = Provider.of<NavigationStateProvider>(
-      context,
-      listen: false,
-    );
-    navigationProvider.saveNavigationState(currentRoute, arguments: routeArguments);
-  }
-  void _refreshStateTimestamp() {
-    final navigationProvider = Provider.of<NavigationStateProvider>(
-      context,
-      listen: false,
-    );
-    navigationProvider.refreshStateTimestamp();
-  }
-  void updateNavigationState({Map<String, dynamic>? arguments}) {
-    final navigationProvider = Provider.of<NavigationStateProvider>(
-      context,
-      listen: false,
-    );
-    navigationProvider.saveNavigationState(currentRoute, arguments: arguments);
-  }
-}
-class NavigationStateWrapper extends StatefulWidget {
-  final Widget child;
-  final String route;
-  final Map<String, dynamic>? arguments;
-
-  const NavigationStateWrapper({
-    super.key,
-    required this.child,
-    required this.route,
-    this.arguments,
-  });
-
-  @override
-  State<NavigationStateWrapper> createState() => _NavigationStateWrapperState();
-}
-
-class _NavigationStateWrapperState extends State<NavigationStateWrapper>
-    with NavigationStateMixin {
-  @override
-  String get currentRoute => widget.route;
-
-  @override
-  Map<String, dynamic>? get routeArguments => widget.arguments;
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
-/* Fin lib\widgets\navigation_state_mixin.dart */
-
 /* Inicio lib\widgets\pagination_widget.dart */
 import 'package:flutter/material.dart';
 import '../theme/theme_extensions.dart';
@@ -9830,129 +9529,6 @@ class RoleGuard extends StatelessWidget {
   }
 }
 /* Fin lib\widgets\role_guard.dart */
-
-/* Inicio lib\widgets\scroll_state_keeper.dart */
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/scroll_state_provider.dart';
-class ScrollStateKeeper extends StatefulWidget {
-  final String routeKey;
-  final Widget Function(BuildContext, ScrollController) builder;
-  final bool keepScrollPosition;
-
-  const ScrollStateKeeper({
-    super.key,
-    required this.routeKey,
-    required this.builder,
-    this.keepScrollPosition = true,
-  });
-
-  @override
-  State<ScrollStateKeeper> createState() => _ScrollStateKeeperState();
-}
-
-class _ScrollStateKeeperState extends State<ScrollStateKeeper> {
-  late final ScrollController _scrollController;
-  bool _isRestoringPosition = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-
-    if (widget.keepScrollPosition) {
-      _restoreScrollPosition();
-      _scrollController.addListener(_onScroll);
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-  void _restoreScrollPosition() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      final scrollProvider = Provider.of<ScrollStateProvider>(
-        context,
-        listen: false,
-      );
-
-      final savedPosition = scrollProvider.getScrollPosition(widget.routeKey);
-
-      if (savedPosition > 0 && _scrollController.hasClients) {
-        _isRestoringPosition = true;
-        _scrollController.jumpTo(savedPosition);
-        _isRestoringPosition = false;
-        debugPrint('Scroll restaurado para ${widget.routeKey}: $savedPosition');
-      }
-    });
-  }
-  void _onScroll() {
-    if (_isRestoringPosition || !_scrollController.hasClients) return;
-
-    final scrollProvider = Provider.of<ScrollStateProvider>(
-      context,
-      listen: false,
-    );
-
-    final currentPosition = _scrollController.offset;
-    scrollProvider.saveScrollPosition(widget.routeKey, currentPosition);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _scrollController);
-  }
-}
-mixin ScrollStateMixin<T extends StatefulWidget> on State<T> {
-  late final ScrollController scrollController;
-  String get scrollRouteKey;
-
-  @override
-  void initState() {
-    super.initState();
-    scrollController = ScrollController();
-    _restoreAndListenScroll();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
-  }
-
-  void _restoreAndListenScroll() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      final scrollProvider = Provider.of<ScrollStateProvider>(
-        context,
-        listen: false,
-      );
-
-      final savedPosition = scrollProvider.getScrollPosition(scrollRouteKey);
-
-      if (savedPosition > 0 && scrollController.hasClients) {
-        scrollController.jumpTo(savedPosition);
-      }
-
-      scrollController.addListener(() {
-        if (scrollController.hasClients) {
-          scrollProvider.saveScrollPosition(
-            scrollRouteKey,
-            scrollController.offset,
-          );
-        }
-      });
-    });
-  }
-}
-
-/* Fin lib\widgets\scroll_state_keeper.dart */
 
 /* Inicio lib\widgets\session_info_footer.dart */
 import 'package:flutter/material.dart';
@@ -10422,31 +9998,30 @@ exports.default = AuthController;
 
 /* Inicio backend\dist\controllers\institucion.controller.js */
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstitucionController = void 0;
-const database_1 = require("../config/database");
+const institucion_service_1 = __importDefault(require("../services/institucion.service"));
 const types_1 = require("../types");
 class InstitucionController {
-
     static async getAll(request, reply) {
         try {
-            const instituciones = await database_1.prisma.institucion.findMany({
-                orderBy: { createdAt: 'desc' },
-            });
-            const response = instituciones.map(inst => ({
-                id: inst.id,
-                nombre: inst.nombre,
-                codigo: inst.codigo,
-                direccion: inst.direccion,
-                telefono: inst.telefono,
-                email: inst.email,
-                activa: inst.activa,
-                createdAt: inst.createdAt.toISOString(),
-                updatedAt: inst.updatedAt.toISOString(),
-            }));
+            const { page, limit, activa, search } = request.query;
+            const pagination = {
+                page: page ? parseInt(page, 10) : 1,
+                limit: limit ? parseInt(limit, 10) : 10,
+            };
+            const filters = {
+                activa: activa !== undefined ? activa === 'true' : undefined,
+                search: search || undefined,
+            };
+            const result = await institucion_service_1.default.getAllInstitutions(pagination, filters);
             return reply.code(200).send({
                 success: true,
-                data: response,
+                data: result.data,
+                pagination: result.pagination,
             });
         }
         catch (error) {
@@ -10457,26 +10032,13 @@ class InstitucionController {
     static async getById(request, reply) {
         try {
             const { id } = request.params;
-            const institucion = await database_1.prisma.institucion.findUnique({
-                where: { id },
-            });
-            if (!institucion) {
+            const institution = await institucion_service_1.default.getInstitutionById(id);
+            if (!institution) {
                 throw new types_1.NotFoundError('Institución');
             }
-            const response = {
-                id: institucion.id,
-                nombre: institucion.nombre,
-                codigo: institucion.codigo,
-                direccion: institucion.direccion,
-                telefono: institucion.telefono,
-                email: institucion.email,
-                activa: institucion.activa,
-                createdAt: institucion.createdAt.toISOString(),
-                updatedAt: institucion.updatedAt.toISOString(),
-            };
             return reply.code(200).send({
                 success: true,
-                data: response,
+                data: institution,
             });
         }
         catch (error) {
@@ -10487,38 +10049,10 @@ class InstitucionController {
     static async create(request, reply) {
         try {
             const data = request.body;
-            if (!data.nombre || !data.codigo) {
-                throw new types_1.ValidationError('Nombre y código son requeridos');
-            }
-            const existingInstitucion = await database_1.prisma.institucion.findUnique({
-                where: { codigo: data.codigo },
-            });
-            if (existingInstitucion) {
-                throw new types_1.ConflictError('Ya existe una institución con este código');
-            }
-            const institucion = await database_1.prisma.institucion.create({
-                data: {
-                    nombre: data.nombre,
-                    codigo: data.codigo,
-                    direccion: data.direccion,
-                    telefono: data.telefono,
-                    email: data.email,
-                },
-            });
-            const response = {
-                id: institucion.id,
-                nombre: institucion.nombre,
-                codigo: institucion.codigo,
-                direccion: institucion.direccion,
-                telefono: institucion.telefono,
-                email: institucion.email,
-                activa: institucion.activa,
-                createdAt: institucion.createdAt.toISOString(),
-                updatedAt: institucion.updatedAt.toISOString(),
-            };
+            const institution = await institucion_service_1.default.createInstitution(data);
             return reply.code(201).send({
                 success: true,
-                data: response,
+                data: institution,
                 message: 'Institución creada exitosamente',
             });
         }
@@ -10531,45 +10065,13 @@ class InstitucionController {
         try {
             const { id } = request.params;
             const data = request.body;
-            const existingInstitucion = await database_1.prisma.institucion.findUnique({
-                where: { id },
-            });
-            if (!existingInstitucion) {
+            const institution = await institucion_service_1.default.updateInstitution(id, data);
+            if (!institution) {
                 throw new types_1.NotFoundError('Institución');
             }
-            if (data.codigo && data.codigo !== existingInstitucion.codigo) {
-                const codigoExists = await database_1.prisma.institucion.findUnique({
-                    where: { codigo: data.codigo },
-                });
-                if (codigoExists) {
-                    throw new types_1.ConflictError('Ya existe una institución con este código');
-                }
-            }
-            const institucion = await database_1.prisma.institucion.update({
-                where: { id },
-                data: {
-                    nombre: data.nombre,
-                    codigo: data.codigo,
-                    direccion: data.direccion,
-                    telefono: data.telefono,
-                    email: data.email,
-                    activa: data.activa,
-                },
-            });
-            const response = {
-                id: institucion.id,
-                nombre: institucion.nombre,
-                codigo: institucion.codigo,
-                direccion: institucion.direccion,
-                telefono: institucion.telefono,
-                email: institucion.email,
-                activa: institucion.activa,
-                createdAt: institucion.createdAt.toISOString(),
-                updatedAt: institucion.updatedAt.toISOString(),
-            };
             return reply.code(200).send({
                 success: true,
-                data: response,
+                data: institution,
                 message: 'Institución actualizada exitosamente',
             });
         }
@@ -10581,21 +10083,7 @@ class InstitucionController {
     static async delete(request, reply) {
         try {
             const { id } = request.params;
-            const existingInstitucion = await database_1.prisma.institucion.findUnique({
-                where: { id },
-            });
-            if (!existingInstitucion) {
-                throw new types_1.NotFoundError('Institución');
-            }
-            const usuariosCount = await database_1.prisma.usuarioInstitucion.count({
-                where: { institucionId: id, activo: true },
-            });
-            if (usuariosCount > 0) {
-                throw new types_1.ConflictError('No se puede eliminar la institución porque tiene usuarios activos asociados');
-            }
-            await database_1.prisma.institucion.delete({
-                where: { id },
-            });
+            const success = await institucion_service_1.default.deleteInstitution(id);
             return reply.code(200).send({
                 success: true,
                 message: 'Institución eliminada exitosamente',
@@ -10974,6 +10462,55 @@ class UserController {
                 success: true,
                 data: result.data,
                 pagination: result.pagination,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async createUser(request, reply) {
+        try {
+            const userData = request.body;
+            const result = await user_service_1.default.createUser(userData);
+            return reply.code(201).send({
+                success: true,
+                data: result,
+                message: 'Usuario creado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async updateUser(request, reply) {
+        try {
+            const { id } = request.params;
+            const userData = request.body;
+            const result = await user_service_1.default.updateUser(id, userData);
+            if (!result) {
+                throw new types_1.NotFoundError('Usuario');
+            }
+            return reply.code(200).send({
+                success: true,
+                data: result,
+                message: 'Usuario actualizado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async deleteUser(request, reply) {
+        try {
+            const { id } = request.params;
+            const result = await user_service_1.default.deleteUser(id);
+            return reply.code(200).send({
+                success: true,
+                data: { deleted: result },
+                message: 'Usuario eliminado exitosamente',
             });
         }
         catch (error) {
@@ -11476,6 +11013,21 @@ async function userRoutes(fastify) {
     fastify.get('/rol/:role', user_controller_1.default.getUsersByRole);
 
     fastify.get('/institucion/:institucionId', user_controller_1.default.getUsersByInstitution);
+
+    fastify.post('/', {
+        preHandler: (0, auth_1.authorize)(['super_admin', 'admin_institucion']),
+        handler: user_controller_1.default.createUser,
+    });
+
+    fastify.put('/:id', {
+        preHandler: (0, auth_1.authorize)(['super_admin', 'admin_institucion']),
+        handler: user_controller_1.default.updateUser,
+    });
+
+    fastify.delete('/:id', {
+        preHandler: (0, auth_1.authorize)(['super_admin', 'admin_institucion']),
+        handler: user_controller_1.default.deleteUser,
+    });
 
 }
 
@@ -12002,6 +11554,243 @@ exports.default = AuthService;
 
 /* Fin backend\dist\services\auth.service.js */
 
+/* Inicio backend\dist\services\institucion.service.js */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InstitucionService = void 0;
+const database_1 = require("../config/database");
+const types_1 = require("../types");
+class InstitucionService {
+
+    static async getAllInstitutions(pagination, filters) {
+        try {
+            const page = pagination?.page || 1;
+            const limit = pagination?.limit || 10;
+            const skip = (page - 1) * limit;
+
+            const where = {};
+            if (filters?.activa !== undefined) {
+                where.activa = filters.activa;
+            }
+            if (filters?.search) {
+                where.OR = [
+                    { nombre: { contains: filters.search, mode: 'insensitive' } },
+                    { codigo: { contains: filters.search, mode: 'insensitive' } },
+                    { email: { contains: filters.search, mode: 'insensitive' } },
+                ];
+            }
+
+            const total = await database_1.prisma.institucion.count({ where });
+
+            const institutions = await database_1.prisma.institucion.findMany({
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip,
+                take: limit,
+                where,
+            });
+            const totalPages = Math.ceil(total / limit);
+            const data = institutions.map(inst => ({
+                id: inst.id,
+                nombre: inst.nombre,
+                codigo: inst.codigo,
+                direccion: inst.direccion,
+                telefono: inst.telefono,
+                email: inst.email,
+                activa: inst.activa,
+                createdAt: inst.createdAt.toISOString(),
+                updatedAt: inst.updatedAt.toISOString(),
+            }));
+            const result = {
+                data,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages,
+                    hasNext: page < totalPages,
+                    hasPrev: page > 1,
+                },
+            };
+            return result;
+        }
+        catch (error) {
+            console.error('Error al obtener todas las instituciones:', error);
+            throw error;
+        }
+    }
+
+    static async getInstitutionById(id) {
+        try {
+            if (!id || typeof id !== 'string') {
+                throw new types_1.ValidationError('ID de institución inválido');
+            }
+            const institution = await database_1.prisma.institucion.findUnique({
+                where: { id },
+            });
+            if (!institution) {
+                return null;
+            }
+            return {
+                id: institution.id,
+                nombre: institution.nombre,
+                codigo: institution.codigo,
+                direccion: institution.direccion,
+                telefono: institution.telefono,
+                email: institution.email,
+                activa: institution.activa,
+                createdAt: institution.createdAt.toISOString(),
+                updatedAt: institution.updatedAt.toISOString(),
+            };
+        }
+        catch (error) {
+            console.error(`Error al obtener institución con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async createInstitution(data) {
+        try {
+
+            if (!data.nombre || !data.codigo) {
+                throw new types_1.ValidationError('Nombre y código son requeridos');
+            }
+
+            const existingInstitution = await database_1.prisma.institucion.findUnique({
+                where: { codigo: data.codigo },
+            });
+            if (existingInstitution) {
+                throw new types_1.ConflictError('Ya existe una institución con este código');
+            }
+            const institution = await database_1.prisma.institucion.create({
+                data: {
+                    nombre: data.nombre,
+                    codigo: data.codigo,
+                    direccion: data.direccion,
+                    telefono: data.telefono,
+                    email: data.email,
+                },
+            });
+            return {
+                id: institution.id,
+                nombre: institution.nombre,
+                codigo: institution.codigo,
+                direccion: institution.direccion,
+                telefono: institution.telefono,
+                email: institution.email,
+                activa: institution.activa,
+                createdAt: institution.createdAt.toISOString(),
+                updatedAt: institution.updatedAt.toISOString(),
+            };
+        }
+        catch (error) {
+            console.error('Error al crear institución:', error);
+            throw error;
+        }
+    }
+
+    static async updateInstitution(id, data) {
+        try {
+            if (!id || typeof id !== 'string') {
+                throw new types_1.ValidationError('ID de institución inválido');
+            }
+
+            const existingInstitution = await this.getInstitutionById(id);
+            if (!existingInstitution) {
+                throw new types_1.ValidationError('Institución no encontrada');
+            }
+
+            if (data.codigo && data.codigo !== existingInstitution.codigo) {
+                const codigoExists = await database_1.prisma.institucion.findUnique({
+                    where: { codigo: data.codigo },
+                });
+                if (codigoExists) {
+                    throw new types_1.ConflictError('Ya existe una institución con este código');
+                }
+            }
+            const institution = await database_1.prisma.institucion.update({
+                where: { id },
+                data: {
+                    nombre: data.nombre,
+                    codigo: data.codigo,
+                    direccion: data.direccion,
+                    telefono: data.telefono,
+                    email: data.email,
+                    activa: data.activa,
+                },
+            });
+            return {
+                id: institution.id,
+                nombre: institution.nombre,
+                codigo: institution.codigo,
+                direccion: institution.direccion,
+                telefono: institution.telefono,
+                email: institution.email,
+                activa: institution.activa,
+                createdAt: institution.createdAt.toISOString(),
+                updatedAt: institution.updatedAt.toISOString(),
+            };
+        }
+        catch (error) {
+            console.error(`Error al actualizar institución con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async deleteInstitution(id) {
+        try {
+            if (!id || typeof id !== 'string') {
+                throw new types_1.ValidationError('ID de institución inválido');
+            }
+
+            const existingInstitution = await this.getInstitutionById(id);
+            if (!existingInstitution) {
+                throw new types_1.ValidationError('Institución no encontrada');
+            }
+
+            const usuariosCount = await database_1.prisma.usuarioInstitucion.count({
+                where: { institucionId: id, activo: true },
+            });
+            if (usuariosCount > 0) {
+                throw new types_1.ConflictError('No se puede eliminar la institución porque tiene usuarios activos asociados');
+            }
+            await database_1.prisma.institucion.delete({
+                where: { id },
+            });
+            return true;
+        }
+        catch (error) {
+            console.error(`Error al eliminar institución con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async isCodeAvailable(codigo, excludeInstitutionId) {
+        try {
+            if (!codigo || typeof codigo !== 'string') {
+                return false;
+            }
+            const whereClause = { codigo };
+            if (excludeInstitutionId) {
+                whereClause.id = { not: excludeInstitutionId };
+            }
+            const count = await database_1.prisma.institucion.count({
+                where: whereClause,
+            });
+            return count === 0;
+        }
+        catch (error) {
+            console.error(`Error al verificar disponibilidad de código ${codigo}:`, error);
+            return false;
+        }
+    }
+}
+exports.InstitucionService = InstitucionService;
+exports.default = InstitucionService;
+
+/* Fin backend\dist\services\institucion.service.js */
+
 /* Inicio backend\dist\services\profesor.service.js */
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -12446,72 +12235,8 @@ class UserService {
     }
 
     static async getUsersByInstitution(institucionId, pagination, filters) {
-        try {
-            if (!institucionId || typeof institucionId !== 'string') {
-                throw new types_1.ValidationError('ID de institución inválido');
-            }
-            const page = pagination?.page || 1;
-            const limit = pagination?.limit || 50
-            const skip = (page - 1) * limit;
-
-            const where = {
-                usuarioInstituciones: {
-                    some: {
-                        institucionId: institucionId,
-                        activo: true,
-                    },
-                },
-            };
-            if (filters?.activo !== undefined) {
-                where.activo = filters.activo;
-            }
-            if (filters?.rol) {
-                where.rol = filters.rol;
-            }
-            if (filters?.search) {
-                where.OR = [
-                    { nombres: { contains: filters.search, mode: 'insensitive' } },
-                    { apellidos: { contains: filters.search, mode: 'insensitive' } },
-                    { email: { contains: filters.search, mode: 'insensitive' } },
-                ];
-            }
-
-            const total = await database_1.prisma.usuario.count({ where });
-
-            const users = await database_1.prisma.usuario.findMany({
-                where,
-                include: {
-                    usuarioInstituciones: {
-                        where: { activo: true },
-                        include: {
-                            institucion: true,
-                        },
-                    },
-                    estudiante: true,
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                skip,
-                take: limit,
-            });
-            const totalPages = Math.ceil(total / limit);
-            return {
-                data: users,
-                pagination: {
-                    page,
-                    limit,
-                    total,
-                    totalPages,
-                    hasNext: page < totalPages,
-                    hasPrev: page > 1,
-                },
-            };
-        }
-        catch (error) {
-            console.error(`Error al obtener usuarios de institución ${institucionId}:`, error);
-            throw error;
-        }
+        const combinedFilters = { ...filters, institucionId };
+        return this.getAllUsers(pagination, combinedFilters);
     }
 
     static async createUser(userData) {
@@ -13609,9 +13334,9 @@ export default AuthController;
 
 /* Inicio backend\src\controllers\institucion.controller.ts */
 import { FastifyReply, FastifyRequest } from 'fastify';
-import InstitucionService from '../services/institucion.service';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { ConflictError, InstitucionResponse, NotFoundError, ValidationError } from '../types';
+import InstitucionService from '../services/institucion.service';
+import { NotFoundError } from '../types';
 
 interface GetInstitucionParams {
   id: string;
@@ -14164,7 +13889,72 @@ export class UserController {
     } catch (error) {
       throw error;
     }
-  }
+  }
+
+  public static async createUser(
+    request: FastifyRequest<{ Body: any }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const userData = request.body as any;
+
+      const result = await UserService.createUser(userData);
+
+      return reply.code(201).send({
+        success: true,
+        data: result,
+        message: 'Usuario creado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async updateUser(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: any;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const userData = request.body as any;
+
+      const result = await UserService.updateUser(id, userData);
+
+      if (!result) {
+        throw new NotFoundError('Usuario');
+      }
+
+      return reply.code(200).send({
+        success: true,
+        data: result,
+        message: 'Usuario actualizado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async deleteUser(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+
+      const result = await UserService.deleteUser(id);
+
+      return reply.code(200).send({
+        success: true,
+        data: { deleted: result },
+        message: 'Usuario eliminado exitosamente',
+      } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default UserController;
@@ -14658,7 +14448,22 @@ export default async function userRoutes(fastify: FastifyInstance) {
 
   fastify.get('/rol/:role', UserController.getUsersByRole);
 
-  fastify.get('/institucion/:institucionId', UserController.getUsersByInstitution);
+  fastify.get('/institucion/:institucionId', UserController.getUsersByInstitution);
+
+  fastify.post('/', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.createUser,
+  });
+
+  fastify.put('/:id', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.updateUser,
+  });
+
+  fastify.delete('/:id', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.deleteUser,
+  });
 }
 /* Fin backend\src\routes\user.routes.ts */
 
@@ -15847,7 +15652,7 @@ export default ProfesorService;
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserRole, UsuarioExtendido, ValidationError, UserFilters } from '../types';
+import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
 
 export class UserService {
 

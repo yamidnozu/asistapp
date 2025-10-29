@@ -130,25 +130,34 @@ class _UsersListScreenState extends State<UsersListScreen> {
           hasMoreData: userProvider.hasMoreData,
           onRefresh: () => _loadUsers(),
           scrollController: _scrollController,
-          floatingActionButton: SpeedDial(
-            icon: Icons.add,
-            activeIcon: Icons.close,
-            backgroundColor: context.colors.primary,
-            foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
-            children: [
-              SpeedDialChild(
-                child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
+          floatingActionButton: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              final userRole = authProvider.user?['rol'] as String?;
+              final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+              
+              if (!canCreateUsers) return const SizedBox.shrink();
+              
+              return SpeedDial(
+                icon: Icons.add,
+                activeIcon: Icons.close,
                 backgroundColor: context.colors.primary,
-                label: 'Crear Profesor',
-                onTap: _navigateToCreateProfessor,
-              ),
-              SpeedDialChild(
-                child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                backgroundColor: context.colors.primary,
-                label: 'Crear Estudiante',
-                onTap: _navigateToCreateStudent,
-              ),
-            ],
+                foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                children: [
+                  SpeedDialChild(
+                    child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                    backgroundColor: context.colors.primary,
+                    label: 'Crear Profesor',
+                    onTap: _navigateToCreateProfessor,
+                  ),
+                  SpeedDialChild(
+                    child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                    backgroundColor: context.colors.primary,
+                    label: 'Crear Estudiante',
+                    onTap: _navigateToCreateStudent,
+                  ),
+                ],
+              );
+            },
           ),
           filterWidgets: _buildFilterWidgets(context, authProvider),
           statisticWidgets: _buildStatisticWidgets(context, userProvider),
@@ -419,40 +428,49 @@ class _UsersListScreenState extends State<UsersListScreen> {
             ),
           ],
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, user, provider),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Editar', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'toggle_status',
-              child: Row(
-                children: [
-                  Icon(Icons.toggle_on, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Cambiar Estado', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: colors.error),
-                  SizedBox(width: spacing.sm),
-                  Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
-                ],
-              ),
-            ),
-          ],
+        trailing: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            final userRole = authProvider.user?['rol'] as String?;
+            final canEditUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+            
+            if (!canEditUsers) return const SizedBox.shrink();
+            
+            return PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(value, user, provider),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: context.colors.textSecondary),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Editar', style: context.textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'toggle_status',
+                  child: Row(
+                    children: [
+                      Icon(Icons.toggle_on, color: context.colors.textSecondary),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Cambiar Estado', style: context.textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: context.colors.error),
+                      SizedBox(width: context.spacing.sm),
+                      Text('Eliminar', style: context.textStyles.bodyMedium.withColor(context.colors.error)),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         onTap: () => _navigateToUserDetail(user),
       ),
@@ -506,6 +524,19 @@ class _UsersListScreenState extends State<UsersListScreen> {
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
+          // Recargar la lista después de cambiar el estado
+          await _loadUsers();
+        } else if (mounted) {
+          // Mostrar error si la actualización falló
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                provider.errorMessage ?? 'Error al cambiar estado del usuario',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
         }
         break;
 
@@ -549,6 +580,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     final success = await provider.deleteUser(
       authProvider.accessToken!,
       user.id,
+      authProvider.user?['rol'] as String? ?? '',
+      user.rol,
     );
 
     if (success && mounted) {
@@ -561,28 +594,36 @@ class _UsersListScreenState extends State<UsersListScreen> {
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
+      // Recargar la lista después de eliminar
+      await _loadUsers();
+    } else if (mounted) {
+      // Mostrar error si la eliminación falló
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.errorMessage ?? 'Error al eliminar usuario',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
 
   void _navigateToCreateProfessor() {
-    context.go('/users/professor/create');
+    context.push('/users/professor/create');
   }
 
   void _navigateToCreateStudent() {
-    context.go('/users/student/create');
+    context.push('/users/student/create');
   }
 
   void _navigateToUserEdit(User user) {
-    // TODO: Implementar navegación a pantalla de editar usuario
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidad de editar usuario próximamente')),
-    );
+    // Para edición, usamos push() ya que las rutas están fuera del StatefulShellRoute
+    context.push('/users/${user.rol}/create?edit=true&userId=${user.id}');
   }
 
   void _navigateToUserDetail(User user) {
-    // TODO: Implementar navegación a pantalla de detalle de usuario
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidad de detalle de usuario próximamente')),
-    );
+    context.push('/users/detail/${user.id}', extra: user);
   }
 }

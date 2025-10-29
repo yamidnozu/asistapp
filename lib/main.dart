@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
-import 'providers/navigation_state_provider.dart';
-import 'providers/scroll_state_provider.dart';
 import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
@@ -35,8 +33,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   late final AppLifecycleManager _lifecycleManager;
   late final AuthProvider _authProvider;
-  late final NavigationStateProvider _navigationProvider;
-  late final ScrollStateProvider _scrollProvider;
   late final InstitutionProvider _institutionProvider;
   late AppRouter _appRouter;
 
@@ -46,8 +42,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     _lifecycleManager = AppLifecycleManager();
     _authProvider = AuthProvider();
-    _navigationProvider = NavigationStateProvider();
-    _scrollProvider = ScrollStateProvider();
     _institutionProvider = InstitutionProvider();
 
     WidgetsBinding.instance.addObserver(this);
@@ -61,27 +55,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-
-    if (state == AppLifecycleState.resumed) {
-      _authProvider.recoverFullState();
-      if (!_navigationProvider.hasValidState()) {
-        _navigationProvider.clearNavigationState();
-      }
-    }
-
-    if (state == AppLifecycleState.paused) {
-      _navigationProvider.refreshStateTimestamp();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
-        ChangeNotifierProvider.value(value: _navigationProvider),
-        ChangeNotifierProvider.value(value: _scrollProvider),
         ChangeNotifierProvider.value(value: _institutionProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
@@ -91,7 +68,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
           _appRouter = AppRouter(
             authProvider: _authProvider,
-            navigationProvider: _navigationProvider,
           );
 
           return MaterialApp.router(

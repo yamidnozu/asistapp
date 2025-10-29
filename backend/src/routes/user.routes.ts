@@ -37,5 +37,35 @@ export default async function userRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/institucion/:institucionId', UserController.getUsersByInstitution);
 
+  /**
+   * POST /usuarios
+   * Crea un nuevo usuario
+   * Solo para super_admin y admin_institucion
+   */
+  fastify.post('/', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.createUser,
+  });
+
+  /**
+   * PUT /usuarios/:id
+   * Actualiza un usuario existente
+   * Solo para super_admin y admin_institucion
+   */
+  fastify.put('/:id', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.updateUser,
+  });
+
+  /**
+   * DELETE /usuarios/:id
+   * Elimina un usuario (desactivación lógica)
+   * Solo para super_admin y admin_institucion
+   */
+  fastify.delete('/:id', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.deleteUser,
+  });
+
   // TODO: Agregar rutas para crear, actualizar, eliminar usuarios si es necesario
 }

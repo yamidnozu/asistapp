@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
-import '../providers/navigation_state_provider.dart';
 import '../screens/login_screen.dart';
 import '../screens/institution_selection_screen.dart';
 import '../screens/home_screen.dart';
@@ -10,19 +9,24 @@ import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
 import '../screens/student_dashboard.dart';
 import '../screens/users/users_list_screen.dart';
-import '../screens/users/create_professor_screen.dart';
-import '../screens/users/create_student_screen.dart';
+import '../screens/users/user_form_screen.dart';
+import '../screens/users/user_detail_screen.dart';
 import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/app_shell.dart';
+import '../models/user.dart';
+
+// Global keys for navigation branches
+final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
+final _institutionsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Institutions');
+final _usersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Users');
 
 /// Router principal de la aplicación
 /// Maneja rutas, autenticación y deep linking
 class AppRouter {
   final AuthProvider authProvider;
-  final NavigationStateProvider navigationProvider;
 
   AppRouter({
     required this.authProvider,
-    required this.navigationProvider,
   });
 
   late final GoRouter router = GoRouter(
@@ -36,16 +40,9 @@ class AppRouter {
 
   /// Decide dónde empezar cuando abre la app
   String _getStartRoute() {
-    if (navigationProvider.hasValidState() && 
-        navigationProvider.currentRoute != null) {
-      return navigationProvider.currentRoute!;
-    }
-
     if (authProvider.isAuthenticated) {
-      final role = authProvider.user?['rol'] as String?;
-      return _getDashboardRouteForRole(role ?? '');
+      return '/dashboard';
     }
-
     return '/login';
   }
 
@@ -65,9 +62,8 @@ class AppRouter {
           return '/institution-selection';
         }
         
-        // Si no, ir al dashboard correspondiente
-        final role = authProvider.user?['rol'] as String?;
-        return _getDashboardRouteForRole(role ?? '');
+        // Si no, ir al dashboard
+        return '/dashboard';
       }
       return null; // Dejar entrar al login
     }
@@ -115,102 +111,102 @@ class AppRouter {
         ),
       ),
 
-      GoRoute(
-        path: '/super-admin-dashboard',
-        name: 'super-admin',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const SuperAdminDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/admin-dashboard',
-        name: 'admin',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const AdminDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/teacher-dashboard',
-        name: 'teacher',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const TeacherDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/student-dashboard',
-        name: 'student',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const StudentDashboard());
-        },
-      ),
-
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const HomeScreen());
-        },
-      ),
-
-      // Rutas de usuarios (para admin_institucion y super_admin)
-      GoRoute(
-        path: '/users',
-        name: 'users-list',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const UsersListScreen());
-        },
-      ),
-
+      // --- RUTAS DE FORMULARIOS (NIVEL SUPERIOR) ---
       GoRoute(
         path: '/users/professor/create',
         name: 'create-professor',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const CreateProfessorScreen());
-        },
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Profesor',
+          child: UserFormScreen(userRole: 'profesor'),
+        ),
       ),
-
       GoRoute(
         path: '/users/student/create',
         name: 'create-student',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const CreateStudentScreen());
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Estudiante',
+          child: UserFormScreen(userRole: 'estudiante'),
+        ),
+      ),
+      GoRoute(
+        path: '/users/detail/:id',
+        name: 'user-detail',
+        builder: (context, state) {
+          final user = state.extra as User;
+          return UserDetailScreen(user: user);
         },
       ),
 
-      // Rutas de instituciones (solo para super_admin)
-      GoRoute(
-        path: '/institutions',
-        name: 'institutions-list',
-        pageBuilder: (context, state) {
-          _saveRoute(state);
-          return _fadePage(context, state, const InstitutionsListScreen());
+      // StatefulShellRoute para navegación persistente
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
         },
+        branches: [
+          // Branch 0: Dashboard
+          StatefulShellBranch(
+            navigatorKey: _dashboardNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                name: 'dashboard',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: _getDashboardForRole(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 1: Instituciones
+          StatefulShellBranch(
+            navigatorKey: _institutionsNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/institutions',
+                name: 'institutions-list',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const InstitutionsListScreen(),
+                ),
+              ),
+            ],
+          ),
+
+          // Branch 2: Usuarios
+          StatefulShellBranch(
+            navigatorKey: _usersNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/users',
+                name: 'users-list',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const UsersListScreen(),
+                ),
+                // Las rutas de formularios se movieron arriba
+              ),
+            ],
+          ),
+        ],
       ),
     ];
   }
 
-  /// Guarda la ruta actual
-  void _saveRoute(GoRouterState state) {
-    final route = state.matchedLocation;
-    final params = state.uri.queryParameters;
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      navigationProvider.saveNavigationState(
-        route,
-        arguments: params.isNotEmpty ? params : null,
-      );
-    });
+  /// Obtiene el dashboard correcto basado en el rol del usuario
+  Widget _getDashboardForRole() {
+    final role = authProvider.user?['rol'] as String?;
+    switch (role) {
+      case 'super_admin':
+        return const SuperAdminDashboard();
+      case 'admin_institucion':
+        return const AdminDashboard();
+      case 'profesor':
+        return const TeacherDashboard();
+      case 'estudiante':
+        return const StudentDashboard();
+      default:
+        return const HomeScreen();
+    }
   }
 
   /// Crea página con transición fade
@@ -246,22 +242,6 @@ class AppRouter {
         ),
       ),
     );
-  }
-
-  /// Qué dashboard le corresponde a cada rol
-  String _getDashboardRouteForRole(String role) {
-    switch (role) {
-      case 'super_admin':
-        return '/super-admin-dashboard';
-      case 'admin_institucion':
-        return '/admin-dashboard';
-      case 'profesor':
-        return '/teacher-dashboard';
-      case 'estudiante':
-        return '/student-dashboard';
-      default:
-        return '/home';
-    }
   }
 
   /// Limpiar al cerrar

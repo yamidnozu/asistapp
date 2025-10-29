@@ -257,7 +257,6 @@ class UserService {
       final response = await http.delete(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       ).timeout(

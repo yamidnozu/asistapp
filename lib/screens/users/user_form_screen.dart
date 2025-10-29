@@ -5,17 +5,15 @@ import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_text_styles.dart';
-import '../../utils/responsive_utils.dart';
-import '../../widgets/dashboard_widgets.dart';
 import '../../widgets/form_widgets.dart';
 
 class UserFormScreen extends StatefulWidget {
   final String userRole; // 'profesor' o 'estudiante'
 
-  const UserFormScreen({super.key, required this.userRole});
+  const UserFormScreen({
+    super.key, 
+    required this.userRole,
+  });
 
   @override
   State<UserFormScreen> createState() => _UserFormScreenState();
@@ -34,7 +32,90 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _telefonoResponsableController = TextEditingController();
 
   bool _isLoading = false;
+  bool _isInitialLoading = false;
   bool _activo = true;
+  User? _user; // Usuario cargado para edición
+
+  @override
+  void initState() {
+    super.initState();
+    // No cargar usuario aquí, se hace en didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadUserIfEditing();
+  }
+
+  Future<void> _loadUserIfEditing() async {
+    // Evitar cargar múltiples veces
+    if (_user != null || _isInitialLoading) return;
+
+    final uri = GoRouterState.of(context).uri;
+    final queryParams = uri.queryParameters;
+    
+    final isEdit = queryParams['edit'] == 'true';
+    final userId = queryParams['userId'];
+
+    if (isEdit && userId != null) {
+      setState(() => _isInitialLoading = true);
+      
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        
+        await userProvider.loadUserById(
+          authProvider.accessToken!,
+          userId,
+        );
+        
+        final user = userProvider.selectedUser;
+        if (user != null && mounted) {
+          setState(() => _user = user);
+          _fillFormWithUserData();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Error al cargar usuario: ${e.toString()}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onError,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+          // Volver a la lista si no se puede cargar el usuario
+          context.go('/users');
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isInitialLoading = false);
+        }
+      }
+    }
+  }
+
+  void _fillFormWithUserData() {
+    final user = _user!;
+    _nombresController.text = user.nombres;
+    _apellidosController.text = user.apellidos;
+    _emailController.text = user.email;
+    _telefonoController.text = user.telefono ?? '';
+    _activo = user.activo;
+
+    if (user.estudiante != null) {
+      _identificacionController.text = user.estudiante!.identificacion;
+      _nombreResponsableController.text = user.estudiante!.nombreResponsable ?? '';
+      _telefonoResponsableController.text = user.estudiante!.telefonoResponsable ?? '';
+    }
+
+    // Para profesores, los campos específicos no están disponibles en el modelo User actual
+    // Se podrían cargar desde una API adicional si es necesario
+  }
 
   @override
   void dispose() {
@@ -50,7 +131,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     super.dispose();
   }
 
-  Future<void> _createUser() async {
+  Future<void> _saveUser() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -59,46 +140,82 @@ class _UserFormScreenState extends State<UserFormScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      final createRequest = CreateUserRequest(
-        email: _emailController.text.trim(),
-        password: 'TempPass123!', // TODO: Implementar generación de contraseña segura o pedir al usuario
-        nombres: _nombresController.text.trim(),
-        apellidos: _apellidosController.text.trim(),
-        telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-        identificacion: _identificacionController.text.trim(),
-        rol: widget.userRole,
-        titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
-        especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
-        nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
-        telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-        institucionId: authProvider.selectedInstitutionId,
-      );
-
-      final success = await userProvider.createUser(
-        authProvider.accessToken!,
-        createRequest,
-      );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
+      if (_user != null) {
+        // Modo edición
+        final updateRequest = UpdateUserRequest(
+          email: _emailController.text.trim(),
+          nombres: _nombresController.text.trim(),
+          apellidos: _apellidosController.text.trim(),
+          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
+          identificacion: _identificacionController.text.trim(),
+          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
+          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
+          activo: _activo,
         );
-        context.go('/users');
+
+        final success = await userProvider.updateUser(
+          authProvider.accessToken!,
+          _user!.id,
+          updateRequest,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} actualizado exitosamente',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          context.go('/users');
+        }
+      } else {
+        // Modo creación
+        final createRequest = CreateUserRequest(
+          email: _emailController.text.trim(),
+          password: 'TempPass123!', // TODO: Implementar generación de contraseña segura o pedir al usuario
+          nombres: _nombresController.text.trim(),
+          apellidos: _apellidosController.text.trim(),
+          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
+          identificacion: _identificacionController.text.trim(),
+          rol: widget.userRole,
+          titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
+          especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
+          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
+          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
+          institucionId: authProvider.selectedInstitutionId,
+        );
+
+        final success = await userProvider.createUser(
+          authProvider.accessToken!,
+          createRequest,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          context.go('/users');
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error al crear ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
+              'Error al ${_user != null ? 'actualizar' : 'crear'} ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onError,
               ),
@@ -120,46 +237,19 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: DashboardAppBar(
-        title: 'Crear ${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'}',
-        backgroundColor: colors.primary,
-        actions: [
-          DashboardAppBarActions(
-            userRole: 'Admin Institución',
-            roleIcon: Icons.admin_panel_settings,
-            onLogout: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-          ),
-        ],
-      ),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-              return DashboardBody(
-                userGreeting: UserGreetingWidget(
-                  userName: authProvider.user?['nombres'] ?? 'Admin',
-                  responsive: responsive,
-                ),
-                dashboardOptions: _buildFormContent(colors, spacing, textStyles, constraints),
-                responsive: responsive,
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
+    if (_isInitialLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Cargando usuario...'),
+          ],
+        ),
+      );
+    }
 
-  Widget _buildFormContent(AppColors colors, AppSpacing spacing, AppTextStyles textStyles, BoxConstraints constraints) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(spacing.lg),
       child: Form(
@@ -167,10 +257,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Información Personal',
-              style: textStyles.headlineMedium.bold,
-            ),
             SizedBox(height: spacing.lg),
 
             // Nombres y Apellidos
@@ -434,133 +520,133 @@ class _UserFormScreenState extends State<UserFormScreen> {
                           ),
                         ],
                       );
-                },
-              ),
-              SizedBox(height: spacing.lg),
-            ],
-
-            if (widget.userRole == 'estudiante') ...[
-              Text(
-                'Información del Responsable',
-                style: textStyles.headlineMedium.bold,
-              ),
-              SizedBox(height: spacing.lg),
-
-              // Nombre del Responsable
-              CustomTextFormField(
-                controller: _nombreResponsableController,
-                labelText: 'Nombre del Responsable',
-                hintText: 'Padre, madre o tutor',
-                validator: (value) {
-                  // El responsable es opcional para estudiantes
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.md),
-
-              // Teléfono del Responsable
-              CustomTextFormField(
-                controller: _telefonoResponsableController,
-                labelText: 'Teléfono del Responsable',
-                hintText: '+57 300 123 4567',
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
-                    if (!phoneRegex.hasMatch(value.trim())) {
-                      return 'Ingrese un teléfono válido';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.lg),
-            ],
-
-            // Estado activo
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(spacing.md),
-                child: Row(
-                  children: [
-                    Icon(
-                      _activo ? Icons.check_circle : Icons.cancel,
-                      color: _activo ? colors.success : colors.error,
-                    ),
-                    SizedBox(width: spacing.md),
-                    Expanded(
-                      child: Text(
-                        'Usuario Activo',
-                        style: textStyles.bodyLarge,
-                      ),
-                    ),
-                    Switch(
-                      value: _activo,
-                      onChanged: (value) {
-                        setState(() => _activo = value);
-                      },
-                      activeColor: colors.primary,
-                    ),
-                  ],
+                  },
                 ),
-              ),
-            ),
-            SizedBox(height: spacing.xl),
-
-            // Botones de acción
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isLoading ? null : () => context.pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: spacing.md),
-                      side: BorderSide(color: colors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    child: Text(
-                      'Cancelar',
-                      style: textStyles.button.withColor(colors.primary),
-                    ),
-                  ),
-                ),
-                SizedBox(width: spacing.md),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _createUser,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: spacing.md),
-                      backgroundColor: colors.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          )
-                        : Text('Crear ${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'}', style: textStyles.button),
-                  ),
-                ),
+                SizedBox(height: spacing.lg),
               ],
-            ),
-          ],
+
+              if (widget.userRole == 'estudiante') ...[
+                Text(
+                  'Información del Responsable',
+                  style: textStyles.headlineMedium.bold,
+                ),
+                SizedBox(height: spacing.lg),
+
+                // Nombre del Responsable
+                CustomTextFormField(
+                  controller: _nombreResponsableController,
+                  labelText: 'Nombre del Responsable',
+                  hintText: 'Padre, madre o tutor',
+                  validator: (value) {
+                    // El responsable es opcional para estudiantes
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+
+                // Teléfono del Responsable
+                CustomTextFormField(
+                  controller: _telefonoResponsableController,
+                  labelText: 'Teléfono del Responsable',
+                  hintText: '+57 300 123 4567',
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value != null && value.trim().isNotEmpty) {
+                      final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Ingrese un teléfono válido';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.lg),
+              ],
+
+              // Estado activo
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.md),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _activo ? Icons.check_circle : Icons.cancel,
+                        color: _activo ? colors.success : colors.error,
+                      ),
+                      SizedBox(width: spacing.md),
+                      Expanded(
+                        child: Text(
+                          'Usuario Activo',
+                          style: textStyles.bodyLarge,
+                        ),
+                      ),
+                      Switch(
+                        value: _activo,
+                        onChanged: (value) {
+                          setState(() => _activo = value);
+                        },
+                        activeColor: colors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing.xl),
+
+              // Botones de acción
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : () => context.pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        side: BorderSide(color: colors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: textStyles.button.withColor(colors.primary),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.md),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveUser,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        backgroundColor: colors.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text('${_user != null ? 'Actualizar' : 'Crear'}', style: textStyles.button),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
