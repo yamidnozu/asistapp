@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../utils/app_routes.dart';
 import '../utils/responsive_utils.dart';
 import '../models/institution.dart';
 
@@ -170,26 +168,11 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       _isLoading = true;
     });
 
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.selectInstitution(_selectedInstitutionId!);
+    // Simplemente actualizamos el estado. GoRouter se encargará del resto.
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.selectInstitution(_selectedInstitutionId!);
 
-      if (mounted) {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final user = authProvider.user;
-        final userRole = user?['rol'] as String?;
-
-        final route = AppRoutes.getDashboardRouteForRole(userRole ?? '');
-        context.go(route);
-      }
-    } catch (e) {
-      // Error silenciado - El usuario selecciona institución manualmente si falla
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    // Ya no es necesario el context.go() ni manejar el estado de carga aquí,
+    // porque la pantalla será reemplazada automáticamente.
   }
 }

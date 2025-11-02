@@ -82,7 +82,7 @@ class AdminDashboard extends StatelessWidget {
           userRole: userRole,
           roleIcon: Icons.admin_panel_settings,
           onLogout: () async {
-            await authProvider.logout();
+            await authProvider.logoutAndClearAllData(context);
             if (context.mounted) {
               context.go('/login');
             }

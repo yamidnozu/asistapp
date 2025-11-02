@@ -25,7 +25,7 @@ class TeacherDashboardWithScroll extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await authProvider.logout();
+              await authProvider.logoutAndClearAllData(context);
             },
           ),
         ],

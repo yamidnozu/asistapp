@@ -1,13 +1,15 @@
 
 /* Directorio: \lib */
-├── main.dart [94]
+├── 📂 config
+│   └── app_config.dart [13]
+├── main.dart [100]
 ├── 📂 managers
 │   └── app_lifecycle_manager.dart [110]
 ├── 📂 models
 │   ├── institution.dart [97]
 │   └── user.dart [290]
 ├── 📂 providers
-│   ├── auth_provider.dart [194]
+│   ├── auth_provider.dart [193]
 │   ├── institution_provider.dart [229]
 │   └── user_provider.dart [403]
 ├── 📂 screens
@@ -20,7 +22,7 @@
 │   │   ├── institution_admins_screen.dart [242]
 │   │   └── institution_form_screen.dart [326]
 │   ├── institution_selection_screen.dart [194]
-│   ├── login_screen.dart [348]
+│   ├── login_screen.dart [402]
 │   ├── student_dashboard.dart [133]
 │   ├── super_admin_dashboard.dart [117]
 │   ├── teacher_dashboard.dart [133]
@@ -33,10 +35,10 @@
 │   │   └── user_form_screen.dart [745]
 │   └── welcome_screen.dart [91]
 ├── 📂 services
-│   ├── auth_service.dart [190]
-│   ├── institution_service.dart [239]
-│   ├── profesor_service.dart [272]
-│   └── user_service.dart [378]
+│   ├── auth_service.dart [178]
+│   ├── institution_service.dart [224]
+│   ├── profesor_service.dart [257]
+│   └── user_service.dart [363]
 ├── 📂 theme
 │   ├── app_colors.dart [95]
 │   ├── app_constants.dart [59]
@@ -80,8 +82,8 @@
 │   │   └── jwt.js [60]
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.js [103]
-│   │   ├── auth.controller.js [127]
-│   │   ├── institucion.controller.js [100]
+│   │   ├── auth.controller.js [128]
+│   │   ├── institucion.controller.js [143]
 │   │   ├── institution-admin.controller.js [247]
 │   │   └── user.controller.js [175]
 │   ├── index.js [84]
@@ -92,15 +94,15 @@
 │   │   ├── admin-institucion.routes.js [30]
 │   │   ├── auth.routes.js [40]
 │   │   ├── index.js [55]
-│   │   ├── institucion.routes.js [30]
+│   │   ├── institucion.routes.js [40]
 │   │   ├── institution-admin.routes.js [28]
 │   │   └── user.routes.js [41]
 │   ├── 📂 scripts
 │   │   └── cleanup-tokens.js [33]
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.js [247]
-│   │   ├── auth.service.js [232]
-│   │   ├── institucion.service.js [192]
+│   │   ├── auth.service.js [238]
+│   │   ├── institucion.service.js [301]
 │   │   ├── profesor.service.js [310]
 │   │   └── user.service.js [381]
 │   ├── 📂 types
@@ -109,7 +111,7 @@
 │       └── index.js [78]
 ├── jest.unit.config.js [13]
 ├── 📂 prisma
-│   ├── seed.ts [381]
+│   ├── seed.ts [331]
 ├── 📂 src
 │   ├── 📂 config
 │   │   ├── app.ts [12]
@@ -117,7 +119,7 @@
 │   │   └── jwt.ts [59]
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.ts [103]
-│   │   ├── auth.controller.ts [130]
+│   │   ├── auth.controller.ts [139]
 │   │   ├── institucion.controller.ts [175]
 │   │   ├── institution-admin.controller.ts [285]
 │   │   └── user.controller.ts [208]
@@ -136,7 +138,7 @@
 │   │   └── cleanup-tokens.ts [32]
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.ts [270]
-│   │   ├── auth.service.ts [259]
+│   │   ├── auth.service.ts [262]
 │   │   ├── institucion.service.ts [319]
 │   │   ├── profesor.service.ts [332]
 │   │   └── user.service.ts [377]
@@ -162,14 +164,31 @@
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 21199
-Total de archivos: 124
+Total de líneas resumidas: 21345
+Total de archivos: 125
 Promedio de líneas por archivo: 171
 Archivo más grande: user_form_screen.dart (745 líneas)
 
 
+/* Inicio lib\config\app_config.dart */
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class AppConfig {
+  static Future<String> get baseUrl async {
+    try {
+      final envUrl = dotenv.env['API_BASE_URL'];
+      if (envUrl != null && envUrl.isNotEmpty) return envUrl;
+    } catch (e) {
+    }
+    return 'http://localhost:3000';
+  }
+}
+
+/* Fin lib\config\app_config.dart */
+
 /* Inicio lib\main.dart */
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
@@ -181,7 +200,12 @@ import 'theme/app_colors.dart';
 import 'utils/app_router.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('No se pudo cargar archivo .env: $e');
+  }
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: AppColors.instance.transparent,
@@ -924,7 +948,6 @@ class AuthProvider with ChangeNotifier {
           _selectedInstitutionId = _institutions!.first.id;
           debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
         } else if (_institutions != null && _institutions!.length > 1) {
-
           _selectedInstitutionId = null;
           debugPrint('Múltiples instituciones encontradas, esperando selección manual');
         }
@@ -935,8 +958,8 @@ class AuthProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Login error: $e');
-      return false;
+      debugPrint('Login error: $e');
+      rethrow;
     }
   }
 
@@ -3773,6 +3796,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
 /* Fin lib\screens\institution_selection_screen.dart */
 
 /* Inicio lib\screens\login_screen.dart */
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -3891,54 +3915,93 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 16),
+            _buildUserCategory(
+              '👑 Super Administradores',
+              [
+                _buildTestUserButton('Super Admin (Activo)', 'superadmin@asistapp.com', 'Admin123!', 'super_admin', 'Sistema completo', responsive),
+                _buildTestUserButton('Super Admin (Inactivo)', 'inactive.super@asistapp.com', 'InactiveSuper123!', 'super_admin', 'Inactivo', responsive),
+              ],
+              responsive,
+            ),
+            _buildUserCategory(
+              '👨‍💼 Administradores de Institución',
+              [
+                _buildTestUserButton('Admin San José', 'admin@sanjose.edu', 'SanJose123!', 'admin_institucion', 'Colegio San José', responsive),
+                _buildTestUserButton('Admin Inactivo', 'inactive.admin@sanjose.edu', 'InactiveAdmin123!', 'admin_institucion', 'Usuario inactivo', responsive),
+                _buildTestUserButton('Admin Inst. Inactiva', 'admin@inactiva.edu', 'AdminInactiva123!', 'admin_institucion', 'Institución inactiva', responsive),
+                _buildTestUserButton('Admin Multi-Inst.', 'multi@asistapp.com', 'Multi123!', 'admin_institucion', '2 instituciones', responsive),
+                _buildTestUserButton('Admin Mixto', 'admin.mixto@asistapp.com', 'AdminMixto123!', 'admin_institucion', 'Mixto activo/inactivo', responsive),
+              ],
+              responsive,
+            ),
+            _buildUserCategory(
+              '👨‍🏫 Profesores',
+              [
+                _buildTestUserButton('Juan Pérez', 'juan.perez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('María García', 'maria.garcia@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('Carlos López', 'carlos.lopez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('Prof. Inactivo', 'profesor.inactivo@sanjose.edu', 'Prof123!', 'profesor', 'Inactivo', responsive),
+                _buildTestUserButton('Sofía Ramírez', 'sofia.ramirez@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
+                _buildTestUserButton('Diego Morales', 'diego.morales@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
+              ],
+              responsive,
+            ),
+            _buildUserCategory(
+              '👨‍🎓 Estudiantes',
+              [
+                _buildTestUserButton('Santiago Gómez', 'santiago.gomez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Valeria Fernández', 'valeria.fernandez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Mateo Silva', 'mateo.silva@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Isabella Ruiz', 'isabella.ruiz@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Lucas Moreno', 'lucas.moreno@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Mariana Jiménez', 'mariana.jimenez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Daniel Herrera', 'daniel.herrera@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Gabriela Medina', 'gabriela.medina@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Alejandro Castro', 'alejandro.castro@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Est. Inactivo', 'estudiante.inactivo@sanjose.edu', 'Est123!', 'estudiante', 'Inactivo', responsive),
+                _buildTestUserButton('Leonardo Ramos', 'leonardo.ramos@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Sara Torres', 'sara.torres@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Emiliano Flores', 'emiliano.flores@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Valentina Rivera', 'valentina.rivera@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Diego Gutiérrez', 'diego.gutierrez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Camila Sánchez', 'camila.sanchez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Sebastián Romero', 'sebastian.romero@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Lucía Díaz', 'lucia.diaz@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+              ],
+              responsive,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildUserCategory(String title, List<Widget> buttons, Map<String, dynamic> responsive) {
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: responsive['bodyFontSize'] as double,
+                  fontWeight: FontWeight.bold,
+                  color: colors.textPrimary,
+                ),
+              ),
+            ),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildTestUserButton(
-                  'Super Admin',
-                  'superadmin@asistapp.com',
-                  'Admin123!',
-                  'super_admin',
-                  'Todas',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Admin Multi',
-                  'multi@asistapp.com',
-                  'Multi123!',
-                  'admin_institucion',
-                  '2 instituciones',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Admin San José',
-                  'admin@sanjose.edu',
-                  'SanJose123!',
-                  'admin_institucion',
-                  '1 institución',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Profesor',
-                  'pedro.garcia@sanjose.edu',
-                  'Prof123!',
-                  'profesor',
-                  '1 institución',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Estudiante',
-                  'juan.perez@sanjose.edu',
-                  'Est123!',
-                  'estudiante',
-                  '1 institución',
-                  responsive,
-                ),
-              ],
+              alignment: WrapAlignment.start,
+              children: buttons,
             ),
+            const SizedBox(height: 8),
           ],
         );
       },
@@ -4101,16 +4164,30 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success) {
-
         debugPrint('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {
           _errorMessage = 'Credenciales incorrectas';
         });
       }
-    } catch (e) {
+    } catch (e) {
+      String raw = e.toString();
+      const exceptionPrefix = 'Exception: ';
+      if (raw.startsWith(exceptionPrefix)) {
+        raw = raw.substring(exceptionPrefix.length);
+      }
+
+      String messageToShow = raw;
+      try {
+        final parsed = jsonDecode(raw);
+        if (parsed is Map<String, dynamic>) {
+          messageToShow = parsed['message'] ?? parsed['error'] ?? (parsed['data'] is Map ? (parsed['data']['message'] ?? parsed['data']['error']) : null) ?? raw;
+        }
+      } catch (_) {
+      }
+
       setState(() {
-        _errorMessage = 'Error de conexión. Intente nuevamente.';
+        _errorMessage = messageToShow;
       });
     } finally {
       if (mounted) {
@@ -6334,6 +6411,7 @@ class WelcomeScreen extends StatelessWidget {
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 
 class LoginResponse {
   final String accessToken;
@@ -6380,30 +6458,11 @@ class RefreshResponse {
   }
 }
 
-class AuthService {
-
-  static Future<String> _getLocalIp() async {
-    try {
-
-      if (kIsWeb) {
-        return 'localhost';
-      }
-
-      return '192.168.20.22'
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost'
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+class AuthService {
 
   Future<LoginResponse?> login(String email, String password) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final url = '$baseUrlValue/auth/login';
 
       final requestBody = jsonEncode({
@@ -6440,20 +6499,26 @@ class AuthService {
 
         return LoginResponse.fromJson(responseData);
       } else {
-        debugPrint('   Response: ${response.body}');
-        return null;
+        debugPrint('   Response: ${response.body}');
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          final serverMessage = errorData['message'] ?? errorData['error'] ?? (errorData['data'] is Map ? errorData['data']['message'] : null) ?? response.body;
+          throw Exception(serverMessage);
+        } catch (parseError) {
+          throw Exception(response.body);
+        }
       }
     } catch (e, stackTrace) {
       debugPrint('Error: $e');
       debugPrint('StackTrace: $stackTrace');
-      debugPrint('====================================');
-      return null;
+      debugPrint('====================================');
+      rethrow;
     }
   }
 
   Future<RefreshResponse?> refreshToken(String refreshToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
@@ -6477,7 +6542,7 @@ class AuthService {
 
   Future<bool> logout(String refreshToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/auth/logout'),
         headers: {'Content-Type': 'application/json'},
@@ -6495,7 +6560,7 @@ class AuthService {
 
   Future<List<Map<String, dynamic>>?> getUserInstitutions(String accessToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/auth/instituciones'),
         headers: {
@@ -6529,6 +6594,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/institution.dart';
 import '../models/user.dart';
+import '../config/app_config.dart';
 
 class PaginatedInstitutionResponse {
   final List<Institution> institutions;
@@ -6540,26 +6606,10 @@ class PaginatedInstitutionResponse {
   });
 }
 
-class InstitutionService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+class InstitutionService {
   Future<PaginatedInstitutionResponse?> getAllInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -6605,7 +6655,7 @@ class InstitutionService {
   }
   Future<Institution?> getInstitutionById(String accessToken, String id) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -6645,7 +6695,7 @@ class InstitutionService {
     String? email,
   }) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/instituciones'),
         headers: {
@@ -6693,7 +6743,7 @@ class InstitutionService {
     bool? activa,
   }) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.put(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -6734,7 +6784,7 @@ class InstitutionService {
   }
   Future<bool> deleteInstitution(String accessToken, String id) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -6771,6 +6821,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../utils/app_constants.dart';
+import '../config/app_config.dart';
 
 class PaginatedUserResponse {
   final List<User> users;
@@ -6782,26 +6833,10 @@ class PaginatedUserResponse {
   });
 }
 
-class ProfesorService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+class ProfesorService {
   Future<PaginatedUserResponse?> getAllProfesores(String accessToken, {int? page, int? limit, String? search, bool? activo}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -6857,7 +6892,7 @@ class ProfesorService {
   }
   Future<User?> getProfesorById(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -6891,7 +6926,7 @@ class ProfesorService {
   }
   Future<User?> createProfesor(String accessToken, CreateUserRequest profesorData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/institution-admin/profesores'),
         headers: {
@@ -6933,7 +6968,7 @@ class ProfesorService {
   }
   Future<User?> updateProfesor(String accessToken, String profesorId, UpdateUserRequest profesorData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final Map<String, dynamic> updateData = {};
       if (profesorData.nombres != null) updateData['nombres'] = profesorData.nombres;
       if (profesorData.apellidos != null) updateData['apellidos'] = profesorData.apellidos;
@@ -6976,7 +7011,7 @@ class ProfesorService {
   }
   Future<bool> deleteProfesor(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -7006,7 +7041,7 @@ class ProfesorService {
   }
   Future<User?> toggleProfesorStatus(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.patch(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId/toggle-status'),
         headers: {
@@ -7044,6 +7079,7 @@ class ProfesorService {
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 import '../models/user.dart';
 
 class PaginatedUserResponse {
@@ -7056,26 +7092,10 @@ class PaginatedUserResponse {
   });
 }
 
-class UserService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+class UserService {
   Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -7122,7 +7142,7 @@ class UserService {
   }
   Future<User?> getUserById(String accessToken, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -7161,7 +7181,7 @@ class UserService {
   }
   Future<PaginatedUserResponse?> getUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5, String? role, bool? activo, String? search}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       queryParams['limit'] = limit.toString();
@@ -7208,7 +7228,7 @@ class UserService {
   }
   Future<List<User>?> getAdminsByInstitution(String accessToken, String institutionId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
       final response = await http.get(
@@ -7266,7 +7286,7 @@ class UserService {
   }
   Future<User?> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
       final response = await http.post(
@@ -7296,7 +7316,7 @@ class UserService {
   }
   Future<bool?> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins/$userId');
 
       final response = await http.delete(
@@ -7320,7 +7340,7 @@ class UserService {
   }
   Future<User?> createUser(String accessToken, CreateUserRequest userData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/usuarios'),
         headers: {
@@ -7355,7 +7375,7 @@ class UserService {
   }
   Future<User?> updateUser(String accessToken, String userId, UpdateUserRequest userData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.put(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -7390,7 +7410,7 @@ class UserService {
   }
   Future<bool> deleteUser(String accessToken, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+      final baseUrlValue = await AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -10977,7 +10997,6 @@ class AuthController {
                 where: { id: user.id },
                 include: {
                     usuarioInstituciones: {
-                        where: { activo: true },
                         include: {
                             institucion: true,
                         },
@@ -10987,7 +11006,9 @@ class AuthController {
             if (!usuario) {
                 throw new types_1.NotFoundError('Usuario');
             }
-            const instituciones = usuario.usuarioInstituciones.map((ui) => ({
+            const instituciones = (usuario.usuarioInstituciones || [])
+                .filter(ui => ui.activo && ui.institucion?.activa)
+                .map((ui) => ({
                 id: ui.institucion.id,
                 nombre: ui.institucion.nombre,
                 rolEnInstitucion: ui.rolEnInstitucion,
@@ -11154,6 +11175,49 @@ class InstitucionController {
             return reply.code(200).send({
                 success: true,
                 message: 'Institución eliminada exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async getAdminsByInstitution(request, reply) {
+        try {
+            const { id } = request.params;
+            const admins = await institucion_service_1.default.getAdminsByInstitution(id);
+            return reply.code(200).send({
+                success: true,
+                data: admins,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    static async assignAdminToInstitution(request, reply) {
+        try {
+            const { id } = request.params;
+            const { userId } = request.body;
+            const result = await institucion_service_1.default.assignAdminToInstitution(id, userId);
+            return reply.code(201).send({
+                success: true,
+                data: result,
+                message: 'Administrador asignado a la institución exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    static async removeAdminFromInstitution(request, reply) {
+        try {
+            const { id, userId } = request.params;
+            const result = await institucion_service_1.default.removeAdminFromInstitution(id, userId);
+            return reply.code(200).send({
+                success: true,
+                data: result,
+                message: 'Administrador removido de la institución exitosamente',
             });
         }
         catch (error) {
@@ -12026,6 +12090,16 @@ async function institucionRoutes(fastify) {
         institucionRoutes.get('/:id', {
             handler: institucion_controller_1.default.getById,
         });
+
+        institucionRoutes.get('/:id/admins', {
+            handler: institucion_controller_1.default.getAdminsByInstitution,
+        });
+        institucionRoutes.post('/:id/admins', {
+            handler: institucion_controller_1.default.assignAdminToInstitution,
+        });
+        institucionRoutes.delete('/:id/admins/:userId', {
+            handler: institucion_controller_1.default.removeAdminFromInstitution,
+        });
         institucionRoutes.post('/', {
             handler: institucion_controller_1.default.create,
         });
@@ -12421,7 +12495,6 @@ class AuthService {
             where: { email },
             include: {
                 usuarioInstituciones: {
-                    where: { activo: true },
                     include: {
                         institucion: true,
                     },
@@ -12432,11 +12505,17 @@ class AuthService {
             throw new types_1.AuthenticationError('Credenciales inválidas');
         }
         if (!usuario.activo) {
-            throw new types_1.AuthenticationError('Usuario inactivo');
+            throw new types_1.AuthenticationError('Tu cuenta de usuario está inactiva. Contacta al administrador.');
         }
         const passwordMatch = await bcryptjs_1.default.compare(password, usuario.passwordHash);
         if (!passwordMatch) {
             throw new types_1.AuthenticationError('Credenciales inválidas');
+        }
+
+        const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui) => ui.activo && ui.institucion?.activa);
+
+        if (usuario.rol !== 'super_admin' && institucionesActivas.length === 0) {
+            throw new types_1.AuthenticationError('No tienes acceso a ninguna institución activa. Contacta al administrador.');
         }
         const accessToken = jwt_1.default.signAccessToken({
             id: usuario.id,
@@ -12475,7 +12554,7 @@ class AuthService {
                 nombres: usuario.nombres,
                 apellidos: usuario.apellidos,
                 rol: usuario.rol,
-                instituciones: usuario.usuarioInstituciones.map((ui) => ({
+                instituciones: institucionesActivas.map((ui) => ({
                     id: ui.institucion.id,
                     nombre: ui.institucion.nombre,
                     rolEnInstitucion: ui.rolEnInstitucion,
@@ -12522,7 +12601,6 @@ class AuthService {
                 where: { id: decoded.id },
                 include: {
                     usuarioInstituciones: {
-                        where: { activo: true },
                         include: {
                             institucion: true,
                         },
@@ -12536,6 +12614,8 @@ class AuthService {
                 throw new types_1.AuthenticationError('Refresh token revocado por cambio de versión');
             }
             await database_1.prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+
+            const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui) => ui.activo && ui.institucion?.activa);
             const newAccessToken = jwt_1.default.signAccessToken({
                 id: usuario.id,
                 rol: usuario.rol,
@@ -12698,6 +12778,115 @@ class InstitucionService {
         }
         catch (error) {
             console.error('Error al obtener todas las instituciones:', error);
+            throw error;
+        }
+    }
+
+    static async getAdminsByInstitution(institutionId) {
+        try {
+            if (!institutionId)
+                throw new types_1.ValidationError('ID de institución inválido');
+            const relations = await database_1.prisma.usuarioInstitucion.findMany({
+                where: {
+                    institucionId: institutionId,
+                    rolEnInstitucion: 'admin',
+                    activo: true,
+                },
+                include: {
+                    usuario: true,
+                },
+            });
+
+            const admins = relations.map((rel) => ({
+                usuarioId: rel.usuario.id,
+                email: rel.usuario.email,
+                nombres: rel.usuario.nombres,
+                apellidos: rel.usuario.apellidos,
+                telefono: rel.usuario.telefono,
+                activo: rel.usuario.activo,
+                institucionId: rel.institucionId,
+                rolEnInstitucion: rel.rolEnInstitucion,
+            }));
+            return admins;
+        }
+        catch (error) {
+            console.error(`Error al obtener admins de la institución ${institutionId}:`, error);
+            throw error;
+        }
+    }
+
+    static async assignAdminToInstitution(institutionId, userId) {
+        try {
+            if (!institutionId || !userId)
+                throw new types_1.ValidationError('Parámetros inválidos');
+
+            const institucion = await database_1.prisma.institucion.findUnique({ where: { id: institutionId } });
+            if (!institucion)
+                throw new types_1.ValidationError('Institución no encontrada');
+
+            const usuario = await database_1.prisma.usuario.findUnique({ where: { id: userId } });
+            if (!usuario)
+                throw new types_1.ValidationError('Usuario no encontrado');
+
+            if (usuario.rol !== 'admin_institucion') {
+                await database_1.prisma.usuario.update({ where: { id: userId }, data: { rol: 'admin_institucion' } });
+            }
+
+            const existingRel = await database_1.prisma.usuarioInstitucion.findUnique({
+                where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+            });
+            if (existingRel) {
+
+                await database_1.prisma.usuarioInstitucion.update({
+                    where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+                    data: { rolEnInstitucion: 'admin', activo: true },
+                });
+            }
+            else {
+                await database_1.prisma.usuarioInstitucion.create({
+                    data: { usuarioId: userId, institucionId: institutionId, rolEnInstitucion: 'admin', activo: true },
+                });
+            }
+
+            const updatedUser = await database_1.prisma.usuario.findUnique({ where: { id: userId } });
+            return updatedUser;
+        }
+        catch (error) {
+            console.error(`Error al asignar admin ${userId} a institución ${institutionId}:`, error);
+            throw error;
+        }
+    }
+
+    static async removeAdminFromInstitution(institutionId, userId) {
+        try {
+            if (!institutionId || !userId)
+                throw new types_1.ValidationError('Parámetros inválidos');
+            const rel = await database_1.prisma.usuarioInstitucion.findUnique({
+                where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+            });
+            if (!rel) {
+                throw new types_1.ValidationError('Relación usuario-institución no encontrada');
+            }
+
+            await database_1.prisma.usuarioInstitucion.update({
+                where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+                data: { activo: false },
+            });
+
+            const otherActiveAdmin = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: userId, rolEnInstitucion: 'admin', activo: true },
+            });
+            if (!otherActiveAdmin) {
+
+                const usuario = await database_1.prisma.usuario.findUnique({ where: { id: userId } });
+                if (usuario && usuario.rol === 'admin_institucion') {
+                    await database_1.prisma.usuario.update({ where: { id: userId }, data: { rol: 'user' } });
+                }
+            }
+            return { usuarioId: userId, institutionId, removed: true };
+        }
+        catch (error) {
+            console.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
             throw error;
         }
     }
@@ -13679,371 +13868,320 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed de AsistApp V2...');
+  console.log('��� Iniciando seed maestro de AsistApp V2...');
 
-  console.log('🏫 Creando instituciones...');
-  const institucionesExistentes = await prisma.institucion.findMany({
-    where: {
-      OR: [
-        { nombre: 'Colegio San José' },
-        { nombre: 'IE Francisco de Paula Santander' }
-      ]
-    }
+  console.log('🏫 Creando instituciones de prueba...');
+
+  let colegioSanJose = await prisma.institucion.findFirst({
+    where: { nombre: 'Colegio San José (Activo)' }
   });
-
-  const instituciones = [];
-  if (institucionesExistentes.length === 0) {
-    const nuevasInstituciones = await Promise.all([
-      prisma.institucion.create({
-        data: {
-          nombre: 'Colegio San José',
-          direccion: 'Calle 123 #45-67',
-          email: 'admin@sanjose.edu',
-          telefono: '555-0101',
-          activa: true,
-        },
-      }),
-      prisma.institucion.create({
-        data: {
-          nombre: 'IE Francisco de Paula Santander',
-          direccion: 'Carrera 10 #20-30',
-          email: 'admin@fps.edu',
-          telefono: '555-0202',
-          activa: true,
-        },
-      }),
-    ]);
-    instituciones.push(...nuevasInstituciones);
-  } else {
-    instituciones.push(...institucionesExistentes);
+  if (!colegioSanJose) {
+    colegioSanJose = await prisma.institucion.create({
+      data: {
+        nombre: 'Colegio San José (Activo)',
+        direccion: 'Calle 123 #45-67, Bogotá',
+        email: 'admin@sanjose.edu',
+        telefono: '555-0101',
+        activa: true,
+      },
+    });
   }
 
-  console.log('✅ Instituciones creadas:', instituciones.length);
+  let ieSantander = await prisma.institucion.findFirst({
+    where: { nombre: 'IE Santander (Activa)' }
+  });
+  if (!ieSantander) {
+    ieSantander = await prisma.institucion.create({
+      data: {
+        nombre: 'IE Santander (Activa)',
+        direccion: 'Carrera 10 #20-30, Bucaramanga',
+        email: 'admin@santander.edu',
+        telefono: '555-0202',
+        activa: true,
+      },
+    });
+  }
 
-  console.log('👑 Creando super admin...');
+  let liceoInactivo = await prisma.institucion.findFirst({
+    where: { nombre: 'Liceo del Pasado (Inactivo)' }
+  });
+  if (!liceoInactivo) {
+    liceoInactivo = await prisma.institucion.create({
+      data: {
+        nombre: 'Liceo del Pasado (Inactivo)',
+        direccion: 'Avenida Siempre Viva 742, Ciudad Antigua',
+        email: 'admin@inactivo.edu',
+        telefono: '555-0303',
+        activa: false,
+      },
+    });
+  }
 
-  const superAdminPassword = await bcrypt.hash('Admin123!', 10);
+  console.log('✅ Instituciones creadas/verificados.');
+
+  console.log('��� Creando usuarios administrativos...');
 
   const superAdmin = await prisma.usuario.upsert({
     where: { email: 'superadmin@asistapp.com' },
     update: {},
     create: {
       email: 'superadmin@asistapp.com',
-      passwordHash: superAdminPassword,
+      passwordHash: await bcrypt.hash('Admin123!', 10),
       nombres: 'Super',
-      apellidos: 'Admin',
+      apellidos: 'Admin (Activo)',
       rol: 'super_admin',
       activo: true,
     },
   });
 
-  console.log('✅ Super admin creado:', superAdmin.email);
+  const superAdminInactivo = await prisma.usuario.upsert({
+    where: { email: 'inactive.super@asistapp.com' },
+    update: {},
+    create: {
+      email: 'inactive.super@asistapp.com',
+      passwordHash: await bcrypt.hash('InactiveSuper123!', 10),
+      nombres: 'Super',
+      apellidos: 'Admin (Inactivo)',
+      rol: 'super_admin',
+      activo: false,
+    },
+  });
 
-  console.log('👥 Creando usuario multi-institución...');
+  const adminSanJose = await prisma.usuario.upsert({
+    where: { email: 'admin@sanjose.edu' },
+    update: {},
+    create: {
+      email: 'admin@sanjose.edu',
+      passwordHash: await bcrypt.hash('SanJose123!', 10),
+      nombres: 'María',
+      apellidos: 'González (Admin Activo)',
+      rol: 'admin_institucion',
+      telefono: '555-0103',
+      activo: true,
+    },
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminSanJose.id, institucionId: colegioSanJose.id } },
+    update: {},
+    create: { usuarioId: adminSanJose.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' }
+  });
 
-  const multiUserPassword = await bcrypt.hash('Multi123!', 10);
+  const adminInstitucionInactivo = await prisma.usuario.upsert({
+    where: { email: 'inactive.admin@sanjose.edu' },
+    update: {},
+    create: {
+      email: 'inactive.admin@sanjose.edu',
+      passwordHash: await bcrypt.hash('InactiveAdmin123!', 10),
+      nombres: 'Carlos',
+      apellidos: 'Rodríguez (Admin Inactivo)',
+      rol: 'admin_institucion',
+      telefono: '555-0104',
+      activo: false,
+    },
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminInstitucionInactivo.id, institucionId: colegioSanJose.id } },
+    update: {},
+    create: { usuarioId: adminInstitucionInactivo.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' }
+  });
 
-  const multiUser = await prisma.usuario.upsert({
+  const adminDeInstitucionInactiva = await prisma.usuario.upsert({
+    where: { email: 'admin@inactiva.edu' },
+    update: {},
+    create: {
+      email: 'admin@inactiva.edu',
+      passwordHash: await bcrypt.hash('AdminInactiva123!', 10),
+      nombres: 'Ana',
+      apellidos: 'López (Institución Inactiva)',
+      rol: 'admin_institucion',
+      telefono: '555-0304',
+      activo: true,
+    },
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminDeInstitucionInactiva.id, institucionId: liceoInactivo.id } },
+    update: {},
+    create: { usuarioId: adminDeInstitucionInactiva.id, institucionId: liceoInactivo.id, rolEnInstitucion: 'admin' }
+  });
+
+  const adminMulti = await prisma.usuario.upsert({
     where: { email: 'multi@asistapp.com' },
     update: {},
     create: {
       email: 'multi@asistapp.com',
-      passwordHash: multiUserPassword,
-      nombres: 'Usuario',
-      apellidos: 'Multi',
+      passwordHash: await bcrypt.hash('Multi123!', 10),
+      nombres: 'Pedro',
+      apellidos: 'Martínez (Multi-Institución)',
       rol: 'admin_institucion',
+      telefono: '555-0505',
       activo: true,
     },
   });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminMulti.id, institucionId: colegioSanJose.id } },
+    update: {},
+    create: { usuarioId: adminMulti.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' }
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminMulti.id, institucionId: ieSantander.id } },
+    update: {},
+    create: { usuarioId: adminMulti.id, institucionId: ieSantander.id, rolEnInstitucion: 'admin' }
+  });
 
-  await Promise.all([
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: multiUser.id,
-          institucionId: instituciones[0].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: multiUser.id,
-        institucionId: instituciones[0].id,
-        rolEnInstitucion: 'admin',
-        activo: true,
-      },
-    }),
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: multiUser.id,
-          institucionId: instituciones[1].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: multiUser.id,
-        institucionId: instituciones[1].id,
-        rolEnInstitucion: 'admin',
-        activo: true,
-      },
-    }),
-  ]);
+  const adminMixto = await prisma.usuario.upsert({
+    where: { email: 'admin.mixto@asistapp.com' },
+    update: {},
+    create: {
+      email: 'admin.mixto@asistapp.com',
+      passwordHash: await bcrypt.hash('AdminMixto123!', 10),
+      nombres: 'Laura',
+      apellidos: 'Sánchez (Admin Mixto)',
+      rol: 'admin_institucion',
+      telefono: '555-0606',
+      activo: true,
+    },
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminMixto.id, institucionId: colegioSanJose.id } },
+    update: {},
+    create: { usuarioId: adminMixto.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' }
+  });
+  await prisma.usuarioInstitucion.upsert({
+    where: { usuarioId_institucionId: { usuarioId: adminMixto.id, institucionId: liceoInactivo.id } },
+    update: {},
+    create: { usuarioId: adminMixto.id, institucionId: liceoInactivo.id, rolEnInstitucion: 'admin' }
+  });
 
-  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+  console.log('✅ Usuarios administrativos creados/verificados.');
 
-  console.log('👨‍💼 Creando admins de institución...');
+  console.log('���‍��� Creando profesores...');
 
-  const adminSanJosePassword = await bcrypt.hash('SanJose123!', 10);
-  const adminFpsPassword = await bcrypt.hash('Fps123!', 10);
-
-  const adminsInstitucion = await Promise.all([
-    prisma.usuario.upsert({
-      where: { email: 'admin@sanjose.edu' },
-      update: {},
-      create: {
-        email: 'admin@sanjose.edu',
-        passwordHash: adminSanJosePassword,
-        nombres: 'María',
-        apellidos: 'González',
-        rol: 'admin_institucion',
-        telefono: '555-0103',
-        activo: true,
-      },
-    }),
-    prisma.usuario.upsert({
-      where: { email: 'admin@fps.edu' },
-      update: {},
-      create: {
-        email: 'admin@fps.edu',
-        passwordHash: adminFpsPassword,
-        nombres: 'Carlos',
-        apellidos: 'Rodríguez',
-        rol: 'admin_institucion',
-        telefono: '555-0203',
-        activo: true,
-      },
-    }),
-  ]);
-
-  await Promise.all([
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: adminsInstitucion[0].id,
-          institucionId: instituciones[0].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: adminsInstitucion[0].id,
-        institucionId: instituciones[0].id,
-        rolEnInstitucion: 'admin',
-        activo: true,
-      },
-    }),
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: adminsInstitucion[1].id,
-          institucionId: instituciones[1].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: adminsInstitucion[1].id,
-        institucionId: instituciones[1].id,
-        rolEnInstitucion: 'admin',
-        activo: true,
-      },
-    }),
-  ]);
-
-  console.log('✅ Admins de institución creados:', adminsInstitucion.length);
-
-  console.log('👨‍🏫 Creando profesores...');
-
-  const profesor1Password = await bcrypt.hash('Prof123!', 10);
-  const profesor2Password = await bcrypt.hash('Prof456!', 10);
-
-  const profesores = await Promise.all([
-    prisma.usuario.upsert({
-      where: { email: 'pedro.garcia@sanjose.edu' },
-      update: {},
-      create: {
-        email: 'pedro.garcia@sanjose.edu',
-        passwordHash: profesor1Password,
-        nombres: 'Pedro',
-        apellidos: 'García',
-        rol: 'profesor',
-        telefono: '555-0104',
-        activo: true,
-      },
-    }),
-    prisma.usuario.upsert({
-      where: { email: 'ana.lopez@sanjose.edu' },
-      update: {},
-      create: {
-        email: 'ana.lopez@sanjose.edu',
-        passwordHash: profesor2Password,
-        nombres: 'Ana',
-        apellidos: 'López',
-        rol: 'profesor',
-        telefono: '555-0105',
-        activo: true,
-      },
-    }),
-  ]);
-
-  await Promise.all([
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: profesores[0].id,
-          institucionId: instituciones[0].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: profesores[0].id,
-        institucionId: instituciones[0].id,
-        rolEnInstitucion: 'profesor',
-        activo: true,
-      },
-    }),
-    prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: profesores[1].id,
-          institucionId: instituciones[0].id,
-        },
-      },
-      update: {},
-      create: {
-        usuarioId: profesores[1].id,
-        institucionId: instituciones[0].id,
-        rolEnInstitucion: 'profesor',
-        activo: true,
-      },
-    }),
-  ]);
-
-  console.log('✅ Profesores creados:', profesores.length);
-
-  console.log('👨‍🎓 Creando estudiantes...');
-
-  const estudiantesData = [
-    { nombres: 'Juan', apellidos: 'Pérez', identificacion: '12345678', responsable: 'María Pérez', telResponsable: '300-111-0001' },
-    { nombres: 'María', apellidos: 'García', identificacion: '12345679', responsable: 'Carlos García', telResponsable: '300-111-0002' },
-    { nombres: 'Carlos', apellidos: 'López', identificacion: '12345680', responsable: 'Ana López', telResponsable: '300-111-0003' },
-    { nombres: 'Laura', apellidos: 'Martínez', identificacion: '12345681', responsable: 'Pedro Martínez', telResponsable: '300-111-0004' },
-    { nombres: 'Miguel', apellidos: 'Rodríguez', identificacion: '12345682', responsable: 'Sofia Rodríguez', telResponsable: '300-111-0005' },
+  const profesoresData = [
+    { email: 'juan.perez@sanjose.edu', nombres: 'Juan', apellidos: 'Pérez', activo: true, institucion: colegioSanJose },
+    { email: 'maria.garcia@sanjose.edu', nombres: 'María', apellidos: 'García', activo: true, institucion: colegioSanJose },
+    { email: 'carlos.lopez@sanjose.edu', nombres: 'Carlos', apellidos: 'López', activo: true, institucion: colegioSanJose },
+    { email: 'profesor.inactivo@sanjose.edu', nombres: 'Miguel', apellidos: 'Torres (Inactivo)', activo: false, institucion: colegioSanJose },
+    { email: 'sofia.ramirez@santander.edu', nombres: 'Sofía', apellidos: 'Ramírez', activo: true, institucion: ieSantander },
+    { email: 'diego.morales@santander.edu', nombres: 'Diego', apellidos: 'Morales', activo: true, institucion: ieSantander },
   ];
 
-  const estudiantes = [];
-  for (const estudianteData of estudiantesData) {
-    const estudiantePassword = await bcrypt.hash('Est123!', 10);
-
-    const usuario = await prisma.usuario.upsert({
-      where: { email: `${estudianteData.nombres.toLowerCase()}.${estudianteData.apellidos.toLowerCase()}@sanjose.edu` },
+  const profesores = [];
+  for (const profData of profesoresData) {
+    const profesor = await prisma.usuario.upsert({
+      where: { email: profData.email },
       update: {},
       create: {
-        email: `${estudianteData.nombres.toLowerCase()}.${estudianteData.apellidos.toLowerCase()}@sanjose.edu`,
-        passwordHash: estudiantePassword,
-        nombres: estudianteData.nombres,
-        apellidos: estudianteData.apellidos,
-        rol: 'estudiante',
-        activo: true,
+        email: profData.email,
+        passwordHash: await bcrypt.hash('Prof123!', 10),
+        nombres: profData.nombres,
+        apellidos: profData.apellidos,
+        rol: 'profesor',
+        activo: profData.activo,
       },
     });
 
     await prisma.usuarioInstitucion.upsert({
-      where: {
-        usuarioId_institucionId: {
-          usuarioId: usuario.id,
-          institucionId: instituciones[0].id,
-        },
-      },
+      where: { usuarioId_institucionId: { usuarioId: profesor.id, institucionId: profData.institucion.id } },
+      update: {},
+      create: { usuarioId: profesor.id, institucionId: profData.institucion.id, rolEnInstitucion: 'profesor' }
+    });
+
+    profesores.push(profesor);
+  }
+
+  console.log('✅ Profesores creados:', profesores.length);
+
+  console.log('���‍��� Creando estudiantes...');
+
+  const estudiantesData = [
+
+    { email: 'santiago.gomez@sanjose.edu', nombres: 'Santiago', apellidos: 'Gómez', activo: true, institucion: colegioSanJose },
+    { email: 'valeria.fernandez@sanjose.edu', nombres: 'Valeria', apellidos: 'Fernández', activo: true, institucion: colegioSanJose },
+    { email: 'mateo.silva@sanjose.edu', nombres: 'Mateo', apellidos: 'Silva', activo: true, institucion: colegioSanJose },
+    { email: 'isabella.ruiz@sanjose.edu', nombres: 'Isabella', apellidos: 'Ruiz', activo: true, institucion: colegioSanJose },
+    { email: 'lucas.moreno@sanjose.edu', nombres: 'Lucas', apellidos: 'Moreno', activo: true, institucion: colegioSanJose },
+    { email: 'mariana.jimenez@sanjose.edu', nombres: 'Mariana', apellidos: 'Jiménez', activo: true, institucion: colegioSanJose },
+    { email: 'daniel.herrera@sanjose.edu', nombres: 'Daniel', apellidos: 'Herrera', activo: true, institucion: colegioSanJose },
+    { email: 'gabriela.medina@sanjose.edu', nombres: 'Gabriela', apellidos: 'Medina', activo: true, institucion: colegioSanJose },
+    { email: 'alejandro.castro@sanjose.edu', nombres: 'Alejandro', apellidos: 'Castro', activo: true, institucion: colegioSanJose },
+    { email: 'estudiante.inactivo@sanjose.edu', nombres: 'Miguel', apellidos: 'Torres (Inactivo)', activo: false, institucion: colegioSanJose },
+
+    { email: 'leonardo.ramos@santander.edu', nombres: 'Leonardo', apellidos: 'Ramos', activo: true, institucion: ieSantander },
+    { email: 'sara.torres@santander.edu', nombres: 'Sara', apellidos: 'Torres', activo: true, institucion: ieSantander },
+    { email: 'emiliano.flores@santander.edu', nombres: 'Emiliano', apellidos: 'Flores', activo: true, institucion: ieSantander },
+    { email: 'valentina.rivera@santander.edu', nombres: 'Valentina', apellidos: 'Rivera', activo: true, institucion: ieSantander },
+    { email: 'diego.gutierrez@santander.edu', nombres: 'Diego', apellidos: 'Gutiérrez', activo: true, institucion: ieSantander },
+    { email: 'camila.sanchez@santander.edu', nombres: 'Camila', apellidos: 'Sánchez', activo: true, institucion: ieSantander },
+    { email: 'sebastian.romero@santander.edu', nombres: 'Sebastián', apellidos: 'Romero', activo: true, institucion: ieSantander },
+    { email: 'lucia.diaz@santander.edu', nombres: 'Lucía', apellidos: 'Díaz', activo: true, institucion: ieSantander },
+  ];
+
+  const estudiantes = [];
+  for (let i = 0; i < estudiantesData.length; i++) {
+    const estData = estudiantesData[i];
+    const estudianteUsuario = await prisma.usuario.upsert({
+      where: { email: estData.email },
       update: {},
       create: {
-        usuarioId: usuario.id,
-        institucionId: instituciones[0].id,
-        rolEnInstitucion: 'estudiante',
-        activo: true,
+        email: estData.email,
+        passwordHash: await bcrypt.hash('Est123!', 10),
+        nombres: estData.nombres,
+        apellidos: estData.apellidos,
+        rol: 'estudiante',
+        activo: estData.activo,
       },
+    });
+
+    await prisma.usuarioInstitucion.upsert({
+      where: { usuarioId_institucionId: { usuarioId: estudianteUsuario.id, institucionId: estData.institucion.id } },
+      update: {},
+      create: { usuarioId: estudianteUsuario.id, institucionId: estData.institucion.id, rolEnInstitucion: 'estudiante' }
     });
 
     const estudiante = await prisma.estudiante.upsert({
-      where: { identificacion: estudianteData.identificacion },
+      where: { usuarioId: estudianteUsuario.id },
       update: {},
       create: {
-        usuarioId: usuario.id,
-        identificacion: estudianteData.identificacion,
-        codigoQr: `QR-${estudianteData.identificacion}`,
-        nombreResponsable: estudianteData.responsable,
-        telefonoResponsable: estudianteData.telResponsable,
+        usuarioId: estudianteUsuario.id,
+        identificacion: `ID${String(i + 1).padStart(3, '0')}`,
+        codigoQr: `QR${String(i + 1).padStart(3, '0')}`,
+        nombreResponsable: `Responsable ${estData.apellidos.split(' ')[0]}`,
+        telefonoResponsable: `300-111-${String(i + 1).padStart(4, '0')}`,
       },
     });
 
-    estudiantes.push({ usuario, estudiante });
+    estudiantes.push({ usuario: estudianteUsuario, estudiante });
   }
 
   console.log('✅ Estudiantes creados:', estudiantes.length);
 
-  console.log('📅 Creando periodos académicos...');
+  console.log('\n��� Seed maestro completado exitosamente!');
+  console.log('\n��� Resumen del universo de pruebas creado:');
+  console.log('��� Instituciones:', 3, '(2 activas, 1 inactiva)');
+  console.log('��� Super Admins:', 2, '(1 activo, 1 inactivo)');
+  console.log('���‍��� Admins de Institución:', 5, '(casos diversos de actividad y multi-institución)');
+  console.log('���‍��� Profesores:', profesores.length, '(distribuidos en instituciones activas)');
+  console.log('���‍��� Estudiantes:', estudiantes.length, '(18 estudiantes en instituciones activas)');
 
-  console.log('📅 Periodos académicos saltados temporalmente');
+  console.log('\n��� Credenciales de acceso de prueba:');
+  console.log('\n��� SUPER ADMINS:');
+  console.log('Super Admin (Activo): superadmin@asistapp.com / Admin123!');
+  console.log('Super Admin (Inactivo): inactive.super@asistapp.com / InactiveSuper123!');
 
-  const periodos = [{ id: 'temp-id' }]
+  console.log('\n���‍��� ADMINS DE INSTITUCIÓN:');
+  console.log('Admin Simple (Activo): admin@sanjose.edu / SanJose123!');
+  console.log('Admin Usuario Inactivo: inactive.admin@sanjose.edu / InactiveAdmin123!');
+  console.log('Admin Institución Inactiva: admin@inactiva.edu / AdminInactiva123!');
+  console.log('Admin Multi-Institución: multi@asistapp.com / Multi123!');
+  console.log('Admin Mixto: admin.mixto@asistapp.com / AdminMixto123!');
 
-  console.log('👥 Creando grupos...');
+  console.log('\n���‍��� PROFESORES:');
+  console.log('Profesores Activos: [nombre].[apellido]@sanjose.edu / Prof123!');
+  console.log('Profesor Inactivo: profesor.inactivo@sanjose.edu / Prof123!');
 
-  console.log('👥 Grupos saltados temporalmente');
-
-  const grupos = [{ id: 'temp-id' }]
-
-  console.log('📚 Creando materias...');
-
-  console.log('📚 Materias saltadas temporalmente');
-
-  const materias = [{ id: 'temp-id' }]
-
-  console.log('⏰ Creando horarios...');
-
-  console.log('⏰ Horarios saltados temporalmente');
-
-  console.log('🔗 Asignando estudiantes a grupos...');
-
-  console.log('🔗 Estudiantes asignados a grupos (saltado)');
-
-  console.log('📝 Creando asistencias de ejemplo...');
-
-  console.log('📝 Asistencias de ejemplo creadas (saltado)');
-
-  console.log('⚙️ Creando configuraciones...');
-
-  console.log('⚙️ Configuraciones creadas (saltado)');
-
-  console.log('\n🎉 Seed completado exitosamente!');
-  console.log('\n📊 Resumen de datos creados:');
-  console.log('🏫 Instituciones:', instituciones.length);
-  console.log('👑 Super Admin:', 1);
-  console.log('👨‍💼 Admins de institución:', adminsInstitucion.length);
-  console.log('👨‍🏫 Profesores:', profesores.length);
-  console.log('👨‍🎓 Estudiantes:', estudiantes.length);
-  console.log('📅 Periodos académicos:', 0)
-  console.log('👥 Grupos:', 0)
-  console.log('📚 Materias:', 0)
-  console.log('⏰ Horarios:', 0)
-  console.log('📝 Asistencias:', 0)
-  console.log('⚙️ Configuraciones:', 0)
-
-  console.log('\n🔐 Credenciales de acceso:');
-  console.log('Super Admin: superadmin@asistapp.com / Admin123!');
-  console.log('Admin San José: admin@sanjose.edu / SanJose123!');
-  console.log('Admin FPS: admin@fps.edu / Fps123!');
-  console.log('Usuario Multi-institución: multi@asistapp.com / Multi123!');
-  console.log('Profesor Pedro: pedro.garcia@sanjose.edu / Prof123!');
-  console.log('Estudiantes: [nombre].[apellido]@sanjose.edu / Est123!');
+  console.log('\n���‍��� ESTUDIANTES:');
+  console.log('Estudiantes Activos: [nombre].[apellido]@sanjose.edu / Est123!');
+  console.log('Estudiante Inactivo: estudiante.inactivo@sanjose.edu / Est123!');
 }
 
 main()
@@ -14054,6 +14192,7 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
 /* Fin backend\prisma\seed.ts */
 
 /* Inicio backend\src\config\app.ts */
@@ -14296,11 +14435,14 @@ export class AuthController {
 
   public static async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
-      const credentials = request.body;
+      const credentials = request.body;
+
       if (!credentials.email || !credentials.password) {
         throw new ValidationError('Email y contraseña son requeridos');
-      }
-      const result = await AuthService.login(credentials);
+      }
+
+      const result = await AuthService.login(credentials);
+
       return reply.code(200).send({
         success: true,
         data: {
@@ -14328,7 +14470,6 @@ export class AuthController {
         where: { id: user.id },
         include: {
           usuarioInstituciones: {
-            where: { activo: true },
             include: {
               institucion: true,
             },
@@ -14340,11 +14481,13 @@ export class AuthController {
         throw new NotFoundError('Usuario');
       }
 
-      const instituciones = usuario.usuarioInstituciones.map((ui) => ({
-        id: ui.institucion.id,
-        nombre: ui.institucion.nombre,
-        rolEnInstitucion: ui.rolEnInstitucion,
-      }));
+      const instituciones = (usuario.usuarioInstituciones || [])
+        .filter(ui => ui.activo && ui.institucion?.activa)
+        .map((ui) => ({
+          id: ui.institucion.id,
+          nombre: ui.institucion.nombre,
+          rolEnInstitucion: ui.rolEnInstitucion,
+        }));
 
       return reply.code(200).send({
         success: true,
@@ -14356,8 +14499,10 @@ export class AuthController {
   }
 
   public static async logout(request: FastifyRequest<{ Body: { refreshToken?: string } }>, reply: FastifyReply) {
-    try {
-      const refreshToken = request.body.refreshToken;
+    try {
+
+      const refreshToken = request.body.refreshToken;
+
       const authReq = request as unknown as AuthenticatedRequest;
       const user = authReq.user;
 
@@ -14377,11 +14522,14 @@ export class AuthController {
   }
 
   public static async refreshToken(request: FastifyRequest<{ Body: { refreshToken: string } }>, reply: FastifyReply) {
-    try {
-      const refreshToken = request.body.refreshToken;
+    try {
+
+      const refreshToken = request.body.refreshToken;
+
       if (!refreshToken) {
         throw new ValidationError('Refresh token es requerido');
-      }
+      }
+
       const result = await AuthService.refreshToken(refreshToken);
 
       return reply.code(200).send({
@@ -15956,7 +16104,6 @@ export class AuthService {
       where: { email },
       include: {
         usuarioInstituciones: {
-          where: { activo: true },
           include: {
             institucion: true,
           },
@@ -15969,12 +16116,16 @@ export class AuthService {
     }
 
     if (!usuario.activo) {
-      throw new AuthenticationError('Usuario inactivo');
+      throw new AuthenticationError('Tu cuenta de usuario está inactiva. Contacta al administrador.');
     }
 
     const passwordMatch = await bcrypt.compare(password, usuario.passwordHash);
     if (!passwordMatch) {
       throw new AuthenticationError('Credenciales inválidas');
+    }
+    const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
+    if (usuario.rol !== 'super_admin' && institucionesActivas.length === 0) {
+      throw new AuthenticationError('No tienes acceso a ninguna institución activa. Contacta al administrador.');
     }
 
     const accessToken = JWTService.signAccessToken({
@@ -16020,7 +16171,7 @@ export class AuthService {
         nombres: usuario.nombres,
         apellidos: usuario.apellidos,
         rol: usuario.rol as UserRole,
-        instituciones: usuario.usuarioInstituciones.map((ui: any) => ({
+        instituciones: institucionesActivas.map((ui: any) => ({
           id: ui.institucion.id,
           nombre: ui.institucion.nombre,
           rolEnInstitucion: ui.rolEnInstitucion,
@@ -16078,7 +16229,6 @@ export class AuthService {
         where: { id: decoded.id },
         include: {
           usuarioInstituciones: {
-            where: { activo: true },
             include: {
               institucion: true,
             },
@@ -16094,7 +16244,8 @@ export class AuthService {
         throw new AuthenticationError('Refresh token revocado por cambio de versión');
       }
 
-      await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+      await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+      const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
 
       const newAccessToken = JWTService.signAccessToken({
         id: usuario.id,

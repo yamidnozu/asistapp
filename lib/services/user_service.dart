@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 import '../models/user.dart';
 
 class PaginatedUserResponse {
@@ -14,27 +15,12 @@ class PaginatedUserResponse {
 }
 
 class UserService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+  // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   /// Obtiene todos los usuarios con paginación y filtros (activo, búsqueda, roles)
   Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -83,7 +69,7 @@ class UserService {
   /// Obtiene un usuario por ID
   Future<User?> getUserById(String accessToken, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -132,7 +118,7 @@ class UserService {
   /// Obtiene usuarios por institución con paginación
   Future<PaginatedUserResponse?> getUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5, String? role, bool? activo, String? search}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       queryParams['limit'] = limit.toString();
@@ -181,7 +167,7 @@ class UserService {
   /// Obtiene administradores de una institución (sin paginación)
   Future<List<User>?> getAdminsByInstitution(String accessToken, String institutionId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
       final response = await http.get(
@@ -243,7 +229,7 @@ class UserService {
   /// Asigna un usuario existente como admin de institución
   Future<User?> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
       final response = await http.post(
@@ -276,7 +262,7 @@ class UserService {
   /// Remueve un admin de institución
   Future<bool?> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins/$userId');
 
       final response = await http.delete(
@@ -302,7 +288,7 @@ class UserService {
   /// Crea un nuevo usuario
   Future<User?> createUser(String accessToken, CreateUserRequest userData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/usuarios'),
         headers: {
@@ -339,7 +325,7 @@ class UserService {
   /// Actualiza un usuario
   Future<User?> updateUser(String accessToken, String userId, UpdateUserRequest userData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.put(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -376,7 +362,7 @@ class UserService {
   /// Elimina un usuario (desactivación lógica)
   Future<bool> deleteUser(String accessToken, String userId) async {
     try {
-      final baseUrlValue = await baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {

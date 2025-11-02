@@ -1,190 +1,169 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "flutter: get packages",
-            "type": "flutter",
-            "command": "flutter",
-            "args": [
-                "pub",
-                "get"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "flutter: analyze",
-            "type": "flutter",
-            "command": "flutter",
-            "args": [
-                "analyze"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "flutter: run",
-            "type": "flutter",
-            "command": "flutter",
-            "args": [
-                "run"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "flutter: build runner",
-            "type": "shell",
-            "command": "flutter",
-            "args": [
-                "pub",
-                "run",
-                "build_runner",
-                "build",
-                "--delete-conflicting-outputs"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "firebase: deploy functions",
-            "type": "shell",
-            "command": "cd functions && npm run build && cd .. && firebase deploy --only functions",
-            "group": "none",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "firebase: deploy indexes",
-            "type": "shell",
-            "command": "firebase deploy --only firestore:indexes",
-            "group": "none",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "firebase: deploy all",
-            "type": "shell",
-            "command": "firebase deploy",
-            "group": "none",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "flutter: clean & pub get",
-            "type": "shell",
-            "command": "flutter",
-            "args": [
-                "clean",
-                "&&",
-                "flutter",
-                "pub",
-                "get"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "android: restart adb",
-            "type": "shell",
-            "command": "adb",
-            "args": [
-                "kill-server",
-                "&&",
-                "adb",
-                "start-server"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "android: check device",
-            "type": "shell",
-            "command": "adb",
-            "args": [
-                "devices"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "android: diagnostic",
-            "type": "shell",
-            "command": "${workspaceFolder}/android_debug_diagnostic.bat",
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "android: force install",
-            "type": "shell",
-            "command": "${workspaceFolder}/force_install_apk.bat",
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker: down (remove volumes)",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml down -v",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
+    },
+    {
+      "label": "docker: up db",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml up -d db",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
+      "group": "build"
+    },
+    {
+      "label": "docker: prisma db push",
+      "type": "shell",
+      "command": "docker compose run --rm app npx prisma db push --accept-data-loss",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
+    },
+    {
+      "label": "docker: seed (container)",
+      "type": "shell",
+      "command": "docker compose run --rm app npm run prisma:seed",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
+    },
+    {
+      "label": "docker: up backend (build)",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml up -d --build app",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
+      "group": "build"
+    },
+    {
+      "label": "docker: logs backend",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml logs --tail 200 app",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
+    },
+    {
+      "label": "docker: seed (host)",
+      "type": "shell",
+      "command": "cd backend && npm run prisma:seed:host",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
+    },
+    {
+      "label": "docker: rebuild all",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml up -d --build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
+      "group": "build"
+    },
+
+    {
+      "label": "flutter: get packages",
+      "type": "flutter",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "silent", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "flutter: analyze",
+      "type": "flutter",
+      "command": "flutter",
+      "args": ["analyze"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "silent", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "flutter: run",
+      "type": "flutter",
+      "command": "flutter",
+      "args": ["run"],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "flutter: build runner",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "run", "build_runner", "build", "--delete-conflicting-outputs"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "firebase: deploy functions",
+      "type": "shell",
+      "command": "cd functions && npm run build && cd .. && firebase deploy --only functions",
+      "group": "none",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "firebase: deploy indexes",
+      "type": "shell",
+      "command": "firebase deploy --only firestore:indexes",
+      "group": "none",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "firebase: deploy all",
+      "type": "shell",
+      "command": "firebase deploy",
+      "group": "none",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "flutter: clean & pub get",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["clean", "&&", "flutter", "pub", "get"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "android: restart adb",
+      "type": "shell",
+      "command": "adb",
+      "args": ["kill-server", "&&", "adb", "start-server"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "android: check device",
+      "type": "shell",
+      "command": "adb",
+      "args": ["devices"],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "android: diagnostic",
+      "type": "shell",
+      "command": "${workspaceFolder}/android_debug_diagnostic.bat",
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
+    },
+    {
+      "label": "android: force install",
+      "type": "shell",
+      "command": "${workspaceFolder}/force_install_apk.bat",
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
+    }
+  ]
 }

@@ -92,7 +92,7 @@ class StudentDashboard extends StatelessWidget {
           userRole: userRole,
           roleIcon: Icons.person,
           onLogout: () async {
-            await authProvider.logout();
+            await authProvider.logoutAndClearAllData(context);
             if (context.mounted) {
               context.go(AppRoutes.login);
             }

@@ -73,7 +73,7 @@ class SuperAdminDashboard extends StatelessWidget {
           userRole: userRole,
           roleIcon: Icons.verified_user,
           onLogout: () async {
-            await authProvider.logout();
+            await authProvider.logoutAndClearAllData(context);
             if (context.mounted) {
               context.go(AppRoutes.login);
             }

@@ -1,0 +1,3 @@
+e0ac6d19c662 asistapp_db postgres:15
+3f85a81a72ca backend-app-1 backend-app
+98273374b70e backend-db-1 postgres:15

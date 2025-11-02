@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/institution.dart';
 import '../models/user.dart';
+import '../config/app_config.dart';
 
 class PaginatedInstitutionResponse {
   final List<Institution> institutions;
@@ -15,27 +16,12 @@ class PaginatedInstitutionResponse {
 }
 
 class InstitutionService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+  // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   /// Obtiene todas las instituciones con paginación y filtros
   Future<PaginatedInstitutionResponse?> getAllInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -83,7 +69,7 @@ class InstitutionService {
   /// Obtiene una institución por ID
   Future<Institution?> getInstitutionById(String accessToken, String id) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -127,7 +113,7 @@ class InstitutionService {
     String? email,
   }) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/instituciones'),
         headers: {
@@ -177,7 +163,7 @@ class InstitutionService {
     bool? activa,
   }) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.put(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -220,7 +206,7 @@ class InstitutionService {
   /// Elimina una institución (desactivación lógica)
   Future<bool> deleteInstitution(String accessToken, String id) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {

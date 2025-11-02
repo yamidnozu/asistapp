@@ -1,5 +1,4 @@
 # docker-compose.yml
-version: '3.8'
 
 services:
   # Servicio de la Base de Datos (PostgreSQL)
@@ -20,7 +19,9 @@ services:
 
   # Servicio del Backend (Node.js)
   backend:
-    # build removed — use a prebuilt image instead. Update the image name/tag to match your registry or local image.
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     image: asistapp_backend:latest
     container_name: asistapp_backend
     restart: always

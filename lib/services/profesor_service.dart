@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../utils/app_constants.dart';
+import '../config/app_config.dart';
 
 class PaginatedUserResponse {
   final List<User> users;
@@ -15,27 +16,12 @@ class PaginatedUserResponse {
 }
 
 class ProfesorService {
-  static Future<String> _getLocalIp() async {
-    try {
-      if (kIsWeb) {
-        return 'localhost';
-      }
-      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost';
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+  // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   /// Obtiene todos los profesores de la institución del admin con paginación
   Future<PaginatedUserResponse?> getAllProfesores(String accessToken, {int? page, int? limit, String? search, bool? activo}) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
@@ -95,7 +81,7 @@ class ProfesorService {
   /// Obtiene un profesor específico por ID
   Future<User?> getProfesorById(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -131,7 +117,7 @@ class ProfesorService {
   /// Crea un nuevo profesor
   Future<User?> createProfesor(String accessToken, CreateUserRequest profesorData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/institution-admin/profesores'),
         headers: {
@@ -175,7 +161,7 @@ class ProfesorService {
   /// Actualiza un profesor existente
   Future<User?> updateProfesor(String accessToken, String profesorId, UpdateUserRequest profesorData) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       
       // Solo incluir campos que no son null
       final Map<String, dynamic> updateData = {};
@@ -222,7 +208,7 @@ class ProfesorService {
   /// Elimina un profesor (desactivación lógica)
   Future<bool> deleteProfesor(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -254,7 +240,7 @@ class ProfesorService {
   /// Activa/desactiva un profesor
   Future<User?> toggleProfesorStatus(String accessToken, String profesorId) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.patch(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId/toggle-status'),
         headers: {

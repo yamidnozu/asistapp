@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 
 class LoginResponse {
   final String accessToken;
@@ -49,29 +50,11 @@ class RefreshResponse {
 
 class AuthService {
 
-  static Future<String> _getLocalIp() async {
-    try {
-
-      if (kIsWeb) {
-        return 'localhost';
-      }
-
-
-      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
-    } catch (e) {
-      debugPrint('Error obteniendo IP local: $e');
-      return 'localhost'; // fallback
-    }
-  }
-
-  static Future<String> get baseUrl async {
-    final ip = await _getLocalIp();
-    return 'http://$ip:3000';
-  }
+  // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   Future<LoginResponse?> login(String email, String password) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final url = '$baseUrlValue/auth/login';
 
       
@@ -114,7 +97,7 @@ class AuthService {
         // Intentar extraer mensaje claro del servidor y lanzarlo para que la UI lo muestre
         try {
           final Map<String, dynamic> errorData = jsonDecode(response.body);
-          final serverMessage = errorData['message'] ?? errorData['error'] ?? (errorData['data'] is Map ? (errorData['data']['message'] ?? null) : null) ?? response.body;
+          final serverMessage = errorData['message'] ?? errorData['error'] ?? (errorData['data'] is Map ? errorData['data']['message'] : null) ?? response.body;
           throw Exception(serverMessage);
         } catch (parseError) {
           // Si no es JSON válido, lanzar el body crudo
@@ -132,7 +115,7 @@ class AuthService {
 
   Future<RefreshResponse?> refreshToken(String refreshToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
@@ -156,7 +139,7 @@ class AuthService {
 
   Future<bool> logout(String refreshToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrlValue/auth/logout'),
         headers: {'Content-Type': 'application/json'},
@@ -174,7 +157,7 @@ class AuthService {
 
   Future<List<Map<String, dynamic>>?> getUserInstitutions(String accessToken) async {
     try {
-      final baseUrlValue = await baseUrl;
+  final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/auth/instituciones'),
         headers: {

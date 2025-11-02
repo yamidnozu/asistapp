@@ -92,7 +92,7 @@ class TeacherDashboard extends StatelessWidget {
           userRole: userRole,
           roleIcon: Icons.school,
           onLogout: () async {
-            await authProvider.logout();
+            await authProvider.logoutAndClearAllData(context);
             if (context.mounted) {
               context.go(AppRoutes.login);
             }

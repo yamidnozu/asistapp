@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../models/institution.dart';
+import 'user_provider.dart';
+import 'institution_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -190,5 +194,23 @@ class AuthProvider with ChangeNotifier {
       await _authService.logout(_refreshToken!);
     }
     await _clearTokens();
+  }
+
+  Future<void> logoutAndClearAllData(BuildContext context) async {
+    if (_refreshToken != null) {
+      await _authService.logout(_refreshToken!);
+    }
+    await _clearTokens();
+
+    // Limpiar datos de otros providers
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.clearData();
+
+      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      institutionProvider.clearData();
+    } catch (e) {
+      debugPrint('Error clearing provider data: $e');
+    }
   }
 }

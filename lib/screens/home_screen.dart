@@ -255,10 +255,10 @@ class HomeScreen extends StatelessWidget {
   }
 
 
-  Widget _buildSignOutButton(AuthProvider authProvider) {
+  Widget _buildSignOutButton(BuildContext context, AuthProvider authProvider) {
     return ElevatedButton(
       onPressed: () async {
-        await authProvider.logout();
+        await authProvider.logoutAndClearAllData(context);
       },
       child: const Text('Cerrar Sesión'),
     );
@@ -283,7 +283,7 @@ class HomeScreen extends StatelessWidget {
     ];
   }
 
-  Widget _buildBody(AuthProvider authProvider, dynamic textStyles, dynamic colors, Map<String, dynamic> responsive) {
+  Widget _buildBody(BuildContext context, AuthProvider authProvider, dynamic textStyles, dynamic colors, Map<String, dynamic> responsive) {
     return SafeArea(
       child: SingleChildScrollView(
         child: ConstrainedBox(
@@ -308,7 +308,7 @@ class HomeScreen extends StatelessWidget {
 
                     SizedBox(height: responsive['elementSpacing'] * 2),
 
-                    _buildSignOutButton(authProvider),
+                    _buildSignOutButton(context, authProvider),
 
                     SizedBox(height: responsive['verticalPadding']),
                   ],
@@ -333,7 +333,7 @@ class HomeScreen extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(authProvider, textStyles, colors, responsive);
+          return _buildBody(context, authProvider, textStyles, colors, responsive);
         },
       ),
     );

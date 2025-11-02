@@ -52,41 +52,37 @@ class AppRouter {
     final isLoggedIn = authProvider.isAuthenticated;
     final currentRoute = state.matchedLocation;
 
-    // Si estamos en login y estamos logueados
-    if (currentRoute == '/login') {
-      if (isLoggedIn) {
-        final institutions = authProvider.institutions;
-        final selected = authProvider.selectedInstitutionId;
-        
-        // Si tenemos múltiples instituciones y no hay selección, ir a selección
-        if (institutions != null && institutions.length > 1 && selected == null) {
-          return '/institution-selection';
-        }
-        
-        // Si no, ir al dashboard
-        return '/dashboard';
-      }
-      return null; // Dejar entrar al login
-    }
-
-    // Si no estamos logueados, ir al login
+    // 1. Si el usuario NO está logueado, se va para el login.
     if (!isLoggedIn) {
       return '/login';
     }
 
-    // Si estamos en una ruta protegida y necesitamos selección de institución
+    // A partir de aquí, el usuario SÍ está logueado.
     final institutions = authProvider.institutions;
-    final selected = authProvider.selectedInstitutionId;
-    final needsSelection = institutions != null && 
-                          institutions.length > 1 && 
-                          selected == null &&
-                          currentRoute != '/institution-selection';
-    
-    if (needsSelection) {
+    final selectedInstitutionId = authProvider.selectedInstitutionId;
+    final needsSelection = institutions != null &&
+                          institutions.length > 1 &&
+                          selectedInstitutionId == null;
+
+    // 2. Si el usuario está en la pantalla de login pero ya está logueado, se va para el dashboard.
+    if (currentRoute == '/login') {
+      return '/dashboard';
+    }
+
+    // 3. Si necesita seleccionar institución y NO está en la pantalla de selección, se le redirige allí.
+    if (needsSelection && currentRoute != '/institution-selection') {
       return '/institution-selection';
     }
 
-    return null; // Todo bien, dejar pasar
+    // 4. [LA CLAVE DE LA SOLUCIÓN]
+    // Si el usuario ya seleccionó (needsSelection es false) pero sigue en la pantalla de selección,
+    // lo redirigimos al dashboard para que no se quede atascado.
+    if (!needsSelection && currentRoute == '/institution-selection') {
+      return '/dashboard';
+    }
+
+    // 5. Si no se cumple ninguna de las condiciones anteriores, no se redirige a ningún lado.
+    return null;
   }
 
   /// Todas las rutas de la app

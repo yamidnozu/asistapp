@@ -28,13 +28,10 @@ class AppRoutes {
   static String getDashboardRouteForRole(String role) {
     switch (role) {
       case 'super_admin':
-        return superAdminDashboard;
       case 'admin_institucion':
-        return adminDashboard;
       case 'profesor':
-        return teacherDashboard;
       case 'estudiante':
-        return studentDashboard;
+        return '/dashboard'; // Todas las rutas de dashboard están anidadas bajo /dashboard
       default:
         return home;
     }

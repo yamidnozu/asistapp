@@ -21,10 +21,10 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSignOutButton(AuthProvider authProvider) {
+  Widget _buildSignOutButton(BuildContext context, AuthProvider authProvider) {
     return ElevatedButton(
       onPressed: () async {
-        await authProvider.logout();
+        await authProvider.logoutAndClearAllData(context);
       },
       child: const Text('Cerrar Sesión'),
     );
@@ -58,7 +58,7 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                           SizedBox(height: responsive['elementSpacing']),
 
-                          _buildSignOutButton(authProvider),
+                          _buildSignOutButton(context, authProvider),
                         ],
                       ),
                     ),

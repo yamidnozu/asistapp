@@ -120,53 +120,99 @@ class _LoginScreenState extends State<LoginScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+            // Super Admins
+            _buildUserCategory(
+              '👑 Super Administradores',
+              [
+                _buildTestUserButton('Super Admin (Activo)', 'superadmin@asistapp.com', 'Admin123!', 'super_admin', 'Sistema completo', responsive),
+                _buildTestUserButton('Super Admin (Inactivo)', 'inactive.super@asistapp.com', 'InactiveSuper123!', 'super_admin', 'Inactivo', responsive),
+              ],
+              responsive,
+            ),
+
+            // Admins de Institución
+            _buildUserCategory(
+              '👨‍💼 Administradores de Institución',
+              [
+                _buildTestUserButton('Admin San José', 'admin@sanjose.edu', 'SanJose123!', 'admin_institucion', 'Colegio San José', responsive),
+                _buildTestUserButton('Admin Inactivo', 'inactive.admin@sanjose.edu', 'InactiveAdmin123!', 'admin_institucion', 'Usuario inactivo', responsive),
+                _buildTestUserButton('Admin Inst. Inactiva', 'admin@inactiva.edu', 'AdminInactiva123!', 'admin_institucion', 'Institución inactiva', responsive),
+                _buildTestUserButton('Admin Multi-Inst.', 'multi@asistapp.com', 'Multi123!', 'admin_institucion', '2 instituciones', responsive),
+                _buildTestUserButton('Admin Mixto', 'admin.mixto@asistapp.com', 'AdminMixto123!', 'admin_institucion', 'Mixto activo/inactivo', responsive),
+              ],
+              responsive,
+            ),
+
+            // Profesores
+            _buildUserCategory(
+              '👨‍🏫 Profesores',
+              [
+                _buildTestUserButton('Juan Pérez', 'juan.perez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('María García', 'maria.garcia@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('Carlos López', 'carlos.lopez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
+                _buildTestUserButton('Prof. Inactivo', 'profesor.inactivo@sanjose.edu', 'Prof123!', 'profesor', 'Inactivo', responsive),
+                _buildTestUserButton('Sofía Ramírez', 'sofia.ramirez@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
+                _buildTestUserButton('Diego Morales', 'diego.morales@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
+              ],
+              responsive,
+            ),
+
+            // Estudiantes
+            _buildUserCategory(
+              '👨‍🎓 Estudiantes',
+              [
+                _buildTestUserButton('Santiago Gómez', 'santiago.gomez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Valeria Fernández', 'valeria.fernandez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Mateo Silva', 'mateo.silva@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Isabella Ruiz', 'isabella.ruiz@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Lucas Moreno', 'lucas.moreno@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Mariana Jiménez', 'mariana.jimenez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Daniel Herrera', 'daniel.herrera@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Gabriela Medina', 'gabriela.medina@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Alejandro Castro', 'alejandro.castro@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
+                _buildTestUserButton('Est. Inactivo', 'estudiante.inactivo@sanjose.edu', 'Est123!', 'estudiante', 'Inactivo', responsive),
+                _buildTestUserButton('Leonardo Ramos', 'leonardo.ramos@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Sara Torres', 'sara.torres@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Emiliano Flores', 'emiliano.flores@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Valentina Rivera', 'valentina.rivera@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Diego Gutiérrez', 'diego.gutierrez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Camila Sánchez', 'camila.sanchez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Sebastián Romero', 'sebastian.romero@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Lucía Díaz', 'lucia.diaz@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+              ],
+              responsive,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildUserCategory(String title, List<Widget> buttons, Map<String, dynamic> responsive) {
+    return Builder(
+      builder: (context) {
+        final colors = context.colors;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: responsive['bodyFontSize'] as double,
+                  fontWeight: FontWeight.bold,
+                  color: colors.textPrimary,
+                ),
+              ),
+            ),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildTestUserButton(
-                  'Super Admin',
-                  'superadmin@asistapp.com',
-                  'Admin123!',
-                  'super_admin',
-                  'Todas',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Admin Multi',
-                  'multi@asistapp.com',
-                  'Multi123!',
-                  'admin_institucion',
-                  '2 instituciones',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Admin San José',
-                  'admin@sanjose.edu',
-                  'SanJose123!',
-                  'admin_institucion',
-                  '1 institución',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Profesor',
-                  'pedro.garcia@sanjose.edu',
-                  'Prof123!',
-                  'profesor',
-                  '1 institución',
-                  responsive,
-                ),
-                _buildTestUserButton(
-                  'Estudiante',
-                  'juan.perez@sanjose.edu',
-                  'Est123!',
-                  'estudiante',
-                  '1 institución',
-                  responsive,
-                ),
-              ],
+              alignment: WrapAlignment.start,
+              children: buttons,
             ),
+            const SizedBox(height: 8),
           ],
         );
       },
