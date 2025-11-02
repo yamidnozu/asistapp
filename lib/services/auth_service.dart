@@ -111,13 +111,22 @@ class AuthService {
         return LoginResponse.fromJson(responseData);
       } else {
         debugPrint('   Response: ${response.body}');
-        return null;
+        // Intentar extraer mensaje claro del servidor y lanzarlo para que la UI lo muestre
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          final serverMessage = errorData['message'] ?? errorData['error'] ?? (errorData['data'] is Map ? (errorData['data']['message'] ?? null) : null) ?? response.body;
+          throw Exception(serverMessage);
+        } catch (parseError) {
+          // Si no es JSON válido, lanzar el body crudo
+          throw Exception(response.body);
+        }
       }
     } catch (e, stackTrace) {
       debugPrint('Error: $e');
       debugPrint('StackTrace: $stackTrace');
       debugPrint('====================================');
-      return null;
+      // Propagar la excepción para que el caller (AuthProvider / UI) pueda mostrarla
+      rethrow;
     }
   }
 

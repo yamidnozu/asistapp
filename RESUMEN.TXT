@@ -9,14 +9,15 @@
 ├── 📂 providers
 │   ├── auth_provider.dart [194]
 │   ├── institution_provider.dart [229]
-│   └── user_provider.dart [342]
+│   └── user_provider.dart [403]
 ├── 📂 screens
 │   ├── admin_dashboard.dart [123]
 │   ├── app_shell.dart [62]
 │   ├── home_screen.dart [339]
 │   ├── 📂 institutions
 │   │   ├── create_institution_admin_screen.dart [354]
-│   │   ├── institutions_list_screen.dart [487]
+│   │   ├── institutions_list_screen.dart [502]
+│   │   ├── institution_admins_screen.dart [242]
 │   │   └── institution_form_screen.dart [326]
 │   ├── institution_selection_screen.dart [194]
 │   ├── login_screen.dart [348]
@@ -29,13 +30,13 @@
 │   │   ├── create_student_screen.dart [11]
 │   │   ├── users_list_screen.dart [687]
 │   │   ├── user_detail_screen.dart [160]
-│   │   └── user_form_screen.dart [733]
+│   │   └── user_form_screen.dart [745]
 │   └── welcome_screen.dart [91]
 ├── 📂 services
 │   ├── auth_service.dart [190]
 │   ├── institution_service.dart [239]
 │   ├── profesor_service.dart [272]
-│   └── user_service.dart [266]
+│   └── user_service.dart [378]
 ├── 📂 theme
 │   ├── app_colors.dart [95]
 │   ├── app_constants.dart [59]
@@ -52,7 +53,7 @@
 │       └── index.dart [4]
 ├── 📂 utils
 │   ├── app_constants.dart [6]
-│   ├── app_router.dart [231]
+│   ├── app_router.dart [245]
 │   ├── app_routes.dart [48]
 │   ├── responsive_utils.dart [166]
 │   ├── role_enum.dart [53]
@@ -117,7 +118,7 @@
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.ts [103]
 │   │   ├── auth.controller.ts [130]
-│   │   ├── institucion.controller.ts [129]
+│   │   ├── institucion.controller.ts [175]
 │   │   ├── institution-admin.controller.ts [285]
 │   │   └── user.controller.ts [208]
 │   ├── index.ts [98]
@@ -128,7 +129,7 @@
 │   │   ├── admin-institucion.routes.ts [32]
 │   │   ├── auth.routes.ts [37]
 │   │   ├── index.ts [54]
-│   │   ├── institucion.routes.ts [25]
+│   │   ├── institucion.routes.ts [43]
 │   │   ├── institution-admin.routes.ts [20]
 │   │   └── user.routes.ts [33]
 │   ├── 📂 scripts
@@ -136,7 +137,7 @@
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.ts [270]
 │   │   ├── auth.service.ts [259]
-│   │   ├── institucion.service.ts [222]
+│   │   ├── institucion.service.ts [319]
 │   │   ├── profesor.service.ts [332]
 │   │   └── user.service.ts [377]
 │   ├── 📂 types
@@ -161,10 +162,10 @@
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 20582
-Total de archivos: 123
-Promedio de líneas por archivo: 167
-Archivo más grande: user_form_screen.dart (733 líneas)
+Total de líneas resumidas: 21199
+Total de archivos: 124
+Promedio de líneas por archivo: 171
+Archivo más grande: user_form_screen.dart (745 líneas)
 
 
 /* Inicio lib\main.dart */
@@ -1312,6 +1313,53 @@ class UserProvider with ChangeNotifier {
       _setState(UserState.error, e.toString());
     }
   }
+  Future<void> loadAdminsByInstitution(String accessToken, String institutionId) async {
+    if (_state == UserState.loading) return;
+
+    _setState(UserState.loading);
+    _selectedInstitutionId = institutionId;
+
+    try {
+      debugPrint('UserProvider: Cargando admins de la institución $institutionId...');
+      final admins = await _userService.getAdminsByInstitution(accessToken, institutionId);
+      if (admins != null) {
+        _users = admins;
+        _hasMoreData = false;
+        _setState(UserState.loaded);
+      } else {
+        _setState(UserState.error, 'Error al cargar administradores de la institución');
+      }
+    } catch (e) {
+      debugPrint('UserProvider: Error loading admins by institution: $e');
+      _setState(UserState.error, e.toString());
+    }
+  }
+  Future<bool> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final updated = await _userService.assignAdminToInstitution(accessToken, institutionId, userId);
+      if (updated != null) {
+        await loadAdminsByInstitution(accessToken, institutionId);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error assignAdminToInstitution: $e');
+      return false;
+    }
+  }
+  Future<bool> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final result = await _userService.removeAdminFromInstitution(accessToken, institutionId, userId);
+      if (result != null) {
+        await loadAdminsByInstitution(accessToken, institutionId);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error removeAdminFromInstitution: $e');
+      return false;
+    }
+  }
   Future<void> loadUsersByRole(String accessToken, String role, {int? page, int? limit}) async {
     if (_state == UserState.loading) return;
 
@@ -1535,6 +1583,20 @@ class UserProvider with ChangeNotifier {
     } finally {
       _isLoadingMore = false;
       notifyListeners();
+    }
+  }
+  Future<List<User>?> searchUsersRemote(String accessToken, {String? search, int limit = 10}) async {
+    try {
+      final response = await _userService.getAllUsers(
+        accessToken,
+        page: 1,
+        limit: limit,
+        search: search,
+      );
+      return response?.users;
+    } catch (e) {
+      debugPrint('Error searchUsersRemote: $e');
+      return null;
     }
   }
   void resetPagination() {
@@ -2438,6 +2500,7 @@ class _CreateInstitutionAdminScreenState extends State<CreateInstitutionAdminScr
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
@@ -2777,6 +2840,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                     ],
                   ),
                 ),
+                if (isSuperAdmin) PopupMenuItem(
+                  value: 'manage_admins',
+                  child: Row(
+                    children: [
+                      Icon(Icons.group, color: colors.primary),
+                      SizedBox(width: spacing.sm),
+                      Text('Gestionar Administradores', style: textStyles.bodyMedium.withColor(colors.primary)),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'edit',
                   child: Row(
@@ -2852,6 +2925,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       case 'delete':
         _showDeleteConfirmationDialog(institution, provider);
         break;
+      case 'manage_admins':
+
+        context.push('/institutions/${institution.id}/admins');
+        break;
     }
   }
 
@@ -2923,6 +3000,251 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 }
 /* Fin lib\screens\institutions\institutions_list_screen.dart */
+
+/* Inicio lib\screens\institutions\institution_admins_screen.dart */
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/user_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/institution_provider.dart';
+import '../../widgets/common/management_scaffold.dart';
+import '../../theme/theme_extensions.dart';
+import '../../models/user.dart';
+import 'create_institution_admin_screen.dart';
+
+class InstitutionAdminsScreen extends StatefulWidget {
+  final String institutionId;
+
+  const InstitutionAdminsScreen({super.key, required this.institutionId});
+
+  @override
+  State<InstitutionAdminsScreen> createState() => _InstitutionAdminsScreenState();
+}
+
+class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAdmins();
+    });
+  }
+
+  Future<void> _loadAdmins() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (authProvider.accessToken != null) {
+      await userProvider.loadAdminsByInstitution(authProvider.accessToken!, widget.institutionId);
+    }
+  }
+
+  Future<void> _removeAdmin(User user) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remover Administrador'),
+        content: Text('¿Deseas remover el rol de administrador a ${user.nombreCompleto}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Remover')),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    if (authProvider.accessToken != null) {
+      final success = await userProvider.removeAdminFromInstitution(authProvider.accessToken!, widget.institutionId, user.id);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administrador removido correctamente')));
+        await _loadAdmins();
+      }
+    }
+  }
+
+  void _openAddAdminSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final colors = context.colors;
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.person_add, color: colors.primary),
+                title: const Text('Crear Nuevo Administrador'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+                  final institution = institutionProvider.institutions.firstWhere((i) => i.id == widget.institutionId);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => CreateInstitutionAdminScreen(institution: institution)),
+                  ).then((_) => _loadAdmins());
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.person_search, color: colors.primary),
+                title: const Text('Asignar Usuario Existente'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showAssignExistingUserDialog();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAssignExistingUserDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
+        await _loadAdmins();
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return ManagementScaffold(
+      title: 'Administradores',
+      isLoading: userProvider.isLoading && userProvider.users.isEmpty,
+      hasError: userProvider.hasError,
+      errorMessage: userProvider.errorMessage ?? 'Error desconocido',
+      itemCount: userProvider.users.length,
+      itemBuilder: (context, index) {
+        final user = userProvider.users[index];
+        return Card(
+          margin: EdgeInsets.only(bottom: context.spacing.xs),
+          child: ListTile(
+            leading: CircleAvatar(child: Text(user.nombres.isNotEmpty ? user.nombres[0] : '?')),
+            title: Text(user.nombreCompleto),
+            subtitle: Text(user.email),
+            trailing: IconButton(
+              icon: Icon(Icons.remove_circle, color: context.colors.error),
+              onPressed: () => _removeAdmin(user),
+            ),
+          ),
+        );
+      },
+      hasMoreData: userProvider.hasMoreData,
+      onRefresh: _loadAdmins,
+      scrollController: _scrollController,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddAdminSheet,
+        backgroundColor: context.colors.primary,
+        child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
+      ),
+      onPageChange: (page) async {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        if (authProvider.accessToken != null) {
+          await userProvider.loadUsersByInstitution(authProvider.accessToken!, widget.institutionId, page: page);
+        }
+      },
+      emptyStateTitle: 'No hay administradores',
+      emptyStateMessage: 'Agrega administradores a esta institución',
+      emptyStateIcon: Icons.group_off,
+    );
+  }
+}
+
+class AssignExistingUserDialog extends StatefulWidget {
+  final String institutionId;
+  final VoidCallback? onAssigned;
+
+  const AssignExistingUserDialog({super.key, required this.institutionId, this.onAssigned});
+
+  @override
+  State<AssignExistingUserDialog> createState() => _AssignExistingUserDialogState();
+}
+
+class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
+  final _searchController = TextEditingController();
+  List<User> _results = [];
+  bool _isSearching = false;
+
+  Future<void> _search(String query) async {
+    setState(() => _isSearching = true);
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final users = await userProvider.searchUsersRemote(authProvider.accessToken!, search: query, limit: 10);
+      final response = users;
+      if (response != null) {
+        final candidates = response.where((u) => u.instituciones.every((inst) => !inst.activo || inst.rolEnInstitucion != 'admin')).toList();
+        setState(() => _results = candidates);
+      }
+    } catch (e) {
+      debugPrint('Error buscando usuarios: $e');
+    } finally {
+      setState(() => _isSearching = false);
+    }
+  }
+
+  Future<void> _assign(User user) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (authProvider.accessToken != null) {
+      final success = await userProvider.assignAdminToInstitution(authProvider.accessToken!, widget.institutionId, user.id);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administrador asignado correctamente')));
+        widget.onAssigned?.call();
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Asignar Usuario Existente'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(hintText: 'Buscar por nombre o email'),
+            onSubmitted: _search,
+          ),
+          const SizedBox(height: 12),
+          if (_isSearching) const CircularProgressIndicator(),
+          if (!_isSearching && _results.isNotEmpty)
+            SizedBox(
+              height: 200,
+              child: ListView.builder(
+                itemCount: _results.length,
+                itemBuilder: (context, index) {
+                  final user = _results[index];
+                  return ListTile(
+                    title: Text(user.nombreCompleto),
+                    subtitle: Text(user.email),
+                    trailing: TextButton(onPressed: () => _assign(user), child: const Text('Asignar')),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cerrar')),
+      ],
+    );
+  }
+}
+
+/* Fin lib\screens\institutions\institution_admins_screen.dart */
 
 /* Inicio lib\screens\institutions\institution_form_screen.dart */
 import 'package:flutter/material.dart';
@@ -5171,7 +5493,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
-import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/institution_provider.dart';
@@ -5449,23 +5770,35 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
+    final title = _user != null ? 'Editar Usuario' : 'Crear ${_getRoleDisplayName(widget.userRole)}';
 
     if (_isInitialLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Cargando usuario...'),
-          ],
+      return Scaffold(
+        backgroundColor: colors.background,
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Cargando usuario...'),
+            ],
+          ),
         ),
       );
     }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(spacing.lg),
-      child: Form(
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -5897,7 +6230,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
 /* Fin lib\screens\users\user_form_screen.dart */
@@ -6871,6 +7205,118 @@ class UserService {
       return null;
     }
     return null;
+  }
+  Future<List<User>?> getAdminsByInstitution(String accessToken, String institutionId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final list = (responseData['data'] as List)
+              .map((item) {
+                if (item is Map && item.containsKey('usuario')) {
+                  return User.fromJson(item['usuario']);
+                }
+                if (item is Map && item.containsKey('email')) {
+                  final usuarioJson = {
+                    'id': item['usuarioId'] ?? item['id'],
+                    'email': item['email'],
+                    'nombres': item['nombres'],
+                    'apellidos': item['apellidos'],
+                    'rol': 'admin_institucion',
+                    'telefono': item['telefono'],
+                    'activo': item['activo'] ?? true,
+                    'usuarioInstituciones': [
+                      {
+                        'institucion': {
+                          'id': item['institucionId'],
+                          'nombre': '',
+                        },
+                        'rolEnInstitucion': item['rolEnInstitucion'],
+                        'activo': item['activo'] ?? true,
+                      }
+                    ],
+                  };
+                  return User.fromJson(usuarioJson);
+                }
+                return null;
+              })
+              .whereType<User>()
+              .toList();
+
+          return list;
+        }
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error getting admins by institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
+  }
+  Future<User?> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'userId': userId}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          if (data is Map && data['id'] != null) {
+            return User.fromJson(data as Map<String, dynamic>);
+          }
+        }
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error assigning admin to institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
+  }
+  Future<bool?> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins/$userId');
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['success'] == true;
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error removing admin from institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
   }
   Future<User?> createUser(String accessToken, CreateUserRequest userData) async {
     try {
@@ -8228,6 +8674,7 @@ import '../screens/users/users_list_screen.dart';
 import '../screens/users/user_form_screen.dart';
 import '../screens/users/user_detail_screen.dart';
 import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/institutions/institution_admins_screen.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -8375,6 +8822,19 @@ class AppRouter {
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const InstitutionsListScreen(),
                 ),
+              ),
+              GoRoute(
+                path: '/institutions/:id/admins',
+                name: 'institution-admins',
+                pageBuilder: (context, state) {
+                  final segments = state.uri.pathSegments;
+                  final id = segments.length >= 2 ? segments[1] : '';
+                  return MaterialPage(
+                    fullscreenDialog: false,
+                    name: 'Institution Admins',
+                    child: InstitutionAdminsScreen(institutionId: id),
+                  );
+                },
               ),
             ],
           ),
@@ -14084,6 +14544,52 @@ export class InstitucionController {
     } catch (error) {
       throw error;
     }
+  }
+  public static async getAdminsByInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const admins = await InstitucionService.getAdminsByInstitution(id);
+
+      return reply.code(200).send({
+        success: true,
+        data: admins,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async assignAdminToInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams; Body: { userId: string } }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { userId } = request.body as { userId: string };
+
+      const result = await InstitucionService.assignAdminToInstitution(id, userId);
+
+      return reply.code(201).send({
+        success: true,
+        data: result,
+        message: 'Administrador asignado a la institución exitosamente',
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async removeAdminFromInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: { id: string; userId: string } }>, reply: FastifyReply) {
+    try {
+      const { id, userId } = request.params;
+
+      const result = await InstitucionService.removeAdminFromInstitution(id, userId);
+
+      return reply.code(200).send({
+        success: true,
+        data: result,
+        message: 'Administrador removido de la institución exitosamente',
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
@@ -15026,22 +15532,40 @@ import { FastifyInstance } from 'fastify';
 import InstitucionController from '../controllers/institucion.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
-export default async function institucionRoutes(fastify: FastifyInstance) {
-  fastify.register(async function (institucionRoutes) {
+export default async function institucionRoutes(fastify: FastifyInstance) {
+
+  fastify.register(async function (institucionRoutes) {
+
     institucionRoutes.addHook('preHandler', authenticate);
-    institucionRoutes.addHook('preHandler', authorize(['super_admin']));
+    institucionRoutes.addHook('preHandler', authorize(['super_admin']));
+
     institucionRoutes.get('/', {
       handler: InstitucionController.getAll,
-    });
+    });
+
     institucionRoutes.get('/:id', {
       handler: InstitucionController.getById as any,
     });
+    institucionRoutes.get('/:id/admins', {
+      handler: InstitucionController.getAdminsByInstitution as any,
+    });
+
+    institucionRoutes.post('/:id/admins', {
+      handler: InstitucionController.assignAdminToInstitution as any,
+    });
+
+    institucionRoutes.delete('/:id/admins/:userId', {
+      handler: InstitucionController.removeAdminFromInstitution as any,
+    });
+
     institucionRoutes.post('/', {
       handler: InstitucionController.create as any,
-    });
+    });
+
     institucionRoutes.put('/:id', {
       handler: InstitucionController.update as any,
-    });
+    });
+
     institucionRoutes.delete('/:id', {
       handler: InstitucionController.delete as any,
     });
@@ -15769,6 +16293,103 @@ export class InstitucionService {
       return result;
     } catch (error) {
       console.error('Error al obtener todas las instituciones:', error);
+      throw error;
+    }
+  }
+
+  public static async getAdminsByInstitution(institutionId: string) {
+    try {
+      if (!institutionId) throw new ValidationError('ID de institución inválido');
+
+      const relations = await prisma.usuarioInstitucion.findMany({
+        where: {
+          institucionId: institutionId,
+          rolEnInstitucion: 'admin',
+          activo: true,
+        },
+        include: {
+          usuario: true,
+        },
+      });
+      const admins = relations.map((rel: any) => ({
+        usuarioId: rel.usuario.id,
+        email: rel.usuario.email,
+        nombres: rel.usuario.nombres,
+        apellidos: rel.usuario.apellidos,
+        telefono: rel.usuario.telefono,
+        activo: rel.usuario.activo,
+        institucionId: rel.institucionId,
+        rolEnInstitucion: rel.rolEnInstitucion,
+      }));
+
+      return admins;
+    } catch (error) {
+      console.error(`Error al obtener admins de la institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  public static async assignAdminToInstitution(institutionId: string, userId: string) {
+    try {
+      if (!institutionId || !userId) throw new ValidationError('Parámetros inválidos');
+      const institucion = await prisma.institucion.findUnique({ where: { id: institutionId } });
+      if (!institucion) throw new ValidationError('Institución no encontrada');
+      const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+      if (!usuario) throw new ValidationError('Usuario no encontrado');
+      if (usuario.rol !== 'admin_institucion') {
+        await prisma.usuario.update({ where: { id: userId }, data: { rol: 'admin_institucion' } });
+      }
+      const existingRel = await prisma.usuarioInstitucion.findUnique({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+      });
+
+      if (existingRel) {
+        await prisma.usuarioInstitucion.update({
+          where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+          data: { rolEnInstitucion: 'admin', activo: true },
+        });
+      } else {
+        await prisma.usuarioInstitucion.create({
+          data: { usuarioId: userId, institucionId: institutionId, rolEnInstitucion: 'admin', activo: true },
+        });
+      }
+      const updatedUser = await prisma.usuario.findUnique({ where: { id: userId } });
+      return updatedUser;
+    } catch (error) {
+      console.error(`Error al asignar admin ${userId} a institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  public static async removeAdminFromInstitution(institutionId: string, userId: string) {
+    try {
+      if (!institutionId || !userId) throw new ValidationError('Parámetros inválidos');
+
+      const rel = await prisma.usuarioInstitucion.findUnique({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+      });
+
+      if (!rel) {
+        throw new ValidationError('Relación usuario-institución no encontrada');
+      }
+      await prisma.usuarioInstitucion.update({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+        data: { activo: false },
+      });
+      const otherActiveAdmin = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: userId, rolEnInstitucion: 'admin', activo: true },
+      });
+
+      if (!otherActiveAdmin) {
+        const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+        if (usuario && usuario.rol === 'admin_institucion') {
+          await prisma.usuario.update({ where: { id: userId }, data: { rol: 'user' } });
+        }
+      }
+
+  return { usuarioId: userId, institutionId, removed: true };
+    } catch (error) {
+      console.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
       throw error;
     }
   }

@@ -15,7 +15,6 @@ export class AuthService {
       where: { email },
       include: {
         usuarioInstituciones: {
-          where: { activo: true },
           include: {
             institucion: true,
           },
@@ -28,12 +27,20 @@ export class AuthService {
     }
 
     if (!usuario.activo) {
-      throw new AuthenticationError('Usuario inactivo');
+      throw new AuthenticationError('Tu cuenta de usuario está inactiva. Contacta al administrador.');
     }
 
     const passwordMatch = await bcrypt.compare(password, usuario.passwordHash);
     if (!passwordMatch) {
       throw new AuthenticationError('Credenciales inválidas');
+    }
+
+    // Filtrar instituciones activas (relación activa y la institución también activa)
+    const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
+
+    // Si el usuario no es super_admin y no tiene instituciones activas, denegar acceso
+    if (usuario.rol !== 'super_admin' && institucionesActivas.length === 0) {
+      throw new AuthenticationError('No tienes acceso a ninguna institución activa. Contacta al administrador.');
     }
 
     const accessToken = JWTService.signAccessToken({
@@ -79,7 +86,7 @@ export class AuthService {
         nombres: usuario.nombres,
         apellidos: usuario.apellidos,
         rol: usuario.rol as UserRole,
-        instituciones: usuario.usuarioInstituciones.map((ui: any) => ({
+        instituciones: institucionesActivas.map((ui: any) => ({
           id: ui.institucion.id,
           nombre: ui.institucion.nombre,
           rolEnInstitucion: ui.rolEnInstitucion,
@@ -143,7 +150,6 @@ export class AuthService {
         where: { id: decoded.id },
         include: {
           usuarioInstituciones: {
-            where: { activo: true },
             include: {
               institucion: true,
             },
@@ -160,6 +166,10 @@ export class AuthService {
       }
 
       await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+
+      // Filtrar instituciones activas para que el token payload / usuario devuelto sea consistente
+      // (no es estrictamente necesario aquí si no devolvemos usuario, pero mantenemos la semántica)
+      const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
 
       const newAccessToken = JWTService.signAccessToken({
         id: usuario.id,

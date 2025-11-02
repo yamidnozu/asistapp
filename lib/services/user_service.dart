@@ -178,6 +178,127 @@ class UserService {
     return null;
   }
 
+  /// Obtiene administradores de una institución (sin paginación)
+  Future<List<User>?> getAdminsByInstitution(String accessToken, String institutionId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final list = (responseData['data'] as List)
+              .map((item) {
+                // El backend puede devolver la relación con campo 'usuario' o un objeto plano
+                if (item is Map && item.containsKey('usuario')) {
+                  return User.fromJson(item['usuario']);
+                }
+                if (item is Map && item.containsKey('email')) {
+                  // Construir estructura mínima compatible con User.fromJson
+                  final usuarioJson = {
+                    'id': item['usuarioId'] ?? item['id'],
+                    'email': item['email'],
+                    'nombres': item['nombres'],
+                    'apellidos': item['apellidos'],
+                    'rol': 'admin_institucion',
+                    'telefono': item['telefono'],
+                    'activo': item['activo'] ?? true,
+                    'usuarioInstituciones': [
+                      {
+                        'institucion': {
+                          'id': item['institucionId'],
+                          'nombre': '',
+                        },
+                        'rolEnInstitucion': item['rolEnInstitucion'],
+                        'activo': item['activo'] ?? true,
+                      }
+                    ],
+                  };
+                  return User.fromJson(usuarioJson);
+                }
+                return null;
+              })
+              .whereType<User>()
+              .toList();
+
+          return list;
+        }
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error getting admins by institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
+  }
+
+  /// Asigna un usuario existente como admin de institución
+  Future<User?> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'userId': userId}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          // Intentar parsear usuario
+          if (data is Map && data['id'] != null) {
+            return User.fromJson(data as Map<String, dynamic>);
+          }
+        }
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error assigning admin to institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
+  }
+
+  /// Remueve un admin de institución
+  Future<bool?> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final baseUrlValue = await baseUrl;
+      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins/$userId');
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['success'] == true;
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Error removing admin from institution: $e');
+      debugPrint('StackTrace: $st');
+      return null;
+    }
+  }
+
   /// Crea un nuevo usuario
   Future<User?> createUser(String accessToken, CreateUserRequest userData) async {
     try {

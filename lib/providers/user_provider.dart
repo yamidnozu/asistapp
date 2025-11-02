@@ -121,6 +121,60 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  /// Carga administradores de una institución específica (sin paginación)
+  Future<void> loadAdminsByInstitution(String accessToken, String institutionId) async {
+    if (_state == UserState.loading) return;
+
+    _setState(UserState.loading);
+    _selectedInstitutionId = institutionId;
+
+    try {
+      debugPrint('UserProvider: Cargando admins de la institución $institutionId...');
+      final admins = await _userService.getAdminsByInstitution(accessToken, institutionId);
+      if (admins != null) {
+        _users = admins;
+        _hasMoreData = false;
+        _setState(UserState.loaded);
+      } else {
+        _setState(UserState.error, 'Error al cargar administradores de la institución');
+      }
+    } catch (e) {
+      debugPrint('UserProvider: Error loading admins by institution: $e');
+      _setState(UserState.error, e.toString());
+    }
+  }
+
+  /// Asigna un usuario existente como admin de institución
+  Future<bool> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final updated = await _userService.assignAdminToInstitution(accessToken, institutionId, userId);
+      if (updated != null) {
+        // Refrescar lista local
+        await loadAdminsByInstitution(accessToken, institutionId);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error assignAdminToInstitution: $e');
+      return false;
+    }
+  }
+
+  /// Remueve el rol de admin de institución para un usuario
+  Future<bool> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+    try {
+      final result = await _userService.removeAdminFromInstitution(accessToken, institutionId, userId);
+      if (result != null) {
+        await loadAdminsByInstitution(accessToken, institutionId);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error removeAdminFromInstitution: $e');
+      return false;
+    }
+  }
+
   /// Carga usuarios por rol con paginación
   Future<void> loadUsersByRole(String accessToken, String role, {int? page, int? limit}) async {
     if (_state == UserState.loading) return;
@@ -390,6 +444,22 @@ class UserProvider with ChangeNotifier {
     } finally {
       _isLoadingMore = false;
       notifyListeners();
+    }
+  }
+
+  /// Busca usuarios en el backend (búsqueda remota) — usado por diálogos que requieren búsqueda puntual
+  Future<List<User>?> searchUsersRemote(String accessToken, {String? search, int limit = 10}) async {
+    try {
+      final response = await _userService.getAllUsers(
+        accessToken,
+        page: 1,
+        limit: limit,
+        search: search,
+      );
+      return response?.users;
+    } catch (e) {
+      debugPrint('Error searchUsersRemote: $e');
+      return null;
     }
   }
 

@@ -12,6 +12,7 @@ import '../screens/users/users_list_screen.dart';
 import '../screens/users/user_form_screen.dart';
 import '../screens/users/user_detail_screen.dart';
 import '../screens/institutions/institutions_list_screen.dart';
+import '../screens/institutions/institution_admins_screen.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
 
@@ -187,6 +188,20 @@ class AppRouter {
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const InstitutionsListScreen(),
                 ),
+              ),
+              GoRoute(
+                path: '/institutions/:id/admins',
+                name: 'institution-admins',
+                pageBuilder: (context, state) {
+                  // Extraer id desde los segmentos de la URI (compatible con distintas versiones de go_router)
+                  final segments = state.uri.pathSegments;
+                  final id = segments.length >= 2 ? segments[1] : '';
+                  return MaterialPage(
+                    fullscreenDialog: false,
+                    name: 'Institution Admins',
+                    child: InstitutionAdminsScreen(institutionId: id),
+                  );
+                },
               ),
             ],
           ),

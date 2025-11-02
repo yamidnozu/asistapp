@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -328,8 +329,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success) {
-
-
         debugPrint('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {
@@ -337,8 +336,26 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (e) {
+      // Procesar la excepción para mostrar un mensaje humano legible
+      String raw = e.toString();
+      // Quitar el prefijo estándar "Exception: " si existe
+      const exceptionPrefix = 'Exception: ';
+      if (raw.startsWith(exceptionPrefix)) {
+        raw = raw.substring(exceptionPrefix.length);
+      }
+
+      String messageToShow = raw;
+      try {
+        final parsed = jsonDecode(raw);
+        if (parsed is Map<String, dynamic>) {
+          messageToShow = parsed['message'] ?? parsed['error'] ?? (parsed['data'] is Map ? (parsed['data']['message'] ?? parsed['data']['error']) : null) ?? raw;
+        }
+      } catch (_) {
+        // No JSON, mantener el texto crudo
+      }
+
       setState(() {
-        _errorMessage = 'Error de conexión. Intente nuevamente.';
+        _errorMessage = messageToShow;
       });
     } finally {
       if (mounted) {

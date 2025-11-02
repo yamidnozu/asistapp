@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
-import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/institution_provider.dart';
@@ -296,23 +295,35 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
+    final title = _user != null ? 'Editar Usuario' : 'Crear ${_getRoleDisplayName(widget.userRole)}';
 
     if (_isInitialLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Cargando usuario...'),
-          ],
+      return Scaffold(
+        backgroundColor: colors.background,
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Cargando usuario...'),
+            ],
+          ),
         ),
       );
     }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(spacing.lg),
-      child: Form(
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,6 +776,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }

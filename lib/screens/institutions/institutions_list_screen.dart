@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
@@ -341,6 +342,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                     ],
                   ),
                 ),
+                if (isSuperAdmin) PopupMenuItem(
+                  value: 'manage_admins',
+                  child: Row(
+                    children: [
+                      Icon(Icons.group, color: colors.primary),
+                      SizedBox(width: spacing.sm),
+                      Text('Gestionar Administradores', style: textStyles.bodyMedium.withColor(colors.primary)),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'edit',
                   child: Row(
@@ -415,6 +426,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
       case 'delete':
         _showDeleteConfirmationDialog(institution, provider);
+        break;
+      case 'manage_admins':
+        // Navegar a la pantalla de gestión de administradores
+        context.push('/institutions/${institution.id}/admins');
         break;
     }
   }

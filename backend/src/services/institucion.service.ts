@@ -102,6 +102,130 @@ export class InstitucionService {
   }
 
   /**
+   * Obtiene todos los administradores asociados a una institución
+   */
+  public static async getAdminsByInstitution(institutionId: string) {
+    try {
+      if (!institutionId) throw new ValidationError('ID de institución inválido');
+
+      const relations = await prisma.usuarioInstitucion.findMany({
+        where: {
+          institucionId: institutionId,
+          rolEnInstitucion: 'admin',
+          activo: true,
+        },
+        include: {
+          usuario: true,
+        },
+      });
+
+      // Mapear a una estructura usable
+      const admins = relations.map((rel: any) => ({
+        usuarioId: rel.usuario.id,
+        email: rel.usuario.email,
+        nombres: rel.usuario.nombres,
+        apellidos: rel.usuario.apellidos,
+        telefono: rel.usuario.telefono,
+        activo: rel.usuario.activo,
+        institucionId: rel.institucionId,
+        rolEnInstitucion: rel.rolEnInstitucion,
+      }));
+
+      return admins;
+    } catch (error) {
+      console.error(`Error al obtener admins de la institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Asigna un usuario existente como admin a una institución
+   */
+  public static async assignAdminToInstitution(institutionId: string, userId: string) {
+    try {
+      if (!institutionId || !userId) throw new ValidationError('Parámetros inválidos');
+
+      // Verificar existencia de institución
+      const institucion = await prisma.institucion.findUnique({ where: { id: institutionId } });
+      if (!institucion) throw new ValidationError('Institución no encontrada');
+
+      // Verificar existencia de usuario
+      const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+      if (!usuario) throw new ValidationError('Usuario no encontrado');
+
+      // Actualizar rol principal del usuario a admin_institucion si no lo es
+      if (usuario.rol !== 'admin_institucion') {
+        await prisma.usuario.update({ where: { id: userId }, data: { rol: 'admin_institucion' } });
+      }
+
+      // Crear o Reactivar la relación usuarioInstitucion
+      const existingRel = await prisma.usuarioInstitucion.findUnique({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+      });
+
+      if (existingRel) {
+        // Reactivar y establecer rol
+        await prisma.usuarioInstitucion.update({
+          where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+          data: { rolEnInstitucion: 'admin', activo: true },
+        });
+      } else {
+        await prisma.usuarioInstitucion.create({
+          data: { usuarioId: userId, institucionId: institutionId, rolEnInstitucion: 'admin', activo: true },
+        });
+      }
+
+      // Devolver el usuario actualizado
+      const updatedUser = await prisma.usuario.findUnique({ where: { id: userId } });
+      return updatedUser;
+    } catch (error) {
+      console.error(`Error al asignar admin ${userId} a institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remueve el rol de administrador de un usuario en una institución (desactiva la relación)
+   */
+  public static async removeAdminFromInstitution(institutionId: string, userId: string) {
+    try {
+      if (!institutionId || !userId) throw new ValidationError('Parámetros inválidos');
+
+      const rel = await prisma.usuarioInstitucion.findUnique({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+      });
+
+      if (!rel) {
+        throw new ValidationError('Relación usuario-institución no encontrada');
+      }
+
+      // Desactivar la relación
+      await prisma.usuarioInstitucion.update({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+        data: { activo: false },
+      });
+
+      // Si el usuario no tiene otras relaciones activas como admin, degradarlo a 'user'
+      const otherActiveAdmin = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: userId, rolEnInstitucion: 'admin', activo: true },
+      });
+
+      if (!otherActiveAdmin) {
+        // Solo cambiar rol si actualmente es admin_institucion
+        const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+        if (usuario && usuario.rol === 'admin_institucion') {
+          await prisma.usuario.update({ where: { id: userId }, data: { rol: 'user' } });
+        }
+      }
+
+  return { usuarioId: userId, institutionId, removed: true };
+    } catch (error) {
+      console.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene una institución por ID
    */
   public static async getInstitutionById(id: string): Promise<InstitutionResponse | null> {

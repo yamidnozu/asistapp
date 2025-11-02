@@ -10,11 +10,14 @@ export class AuthController {
    */
   public static async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
-      const credentials = request.body;
+      const credentials = request.body;
+
       if (!credentials.email || !credentials.password) {
         throw new ValidationError('Email y contraseña son requeridos');
-      }
-      const result = await AuthService.login(credentials);
+      }
+
+      const result = await AuthService.login(credentials);
+
       return reply.code(200).send({
         success: true,
         data: {
@@ -45,7 +48,6 @@ export class AuthController {
         where: { id: user.id },
         include: {
           usuarioInstituciones: {
-            where: { activo: true },
             include: {
               institucion: true,
             },
@@ -57,11 +59,13 @@ export class AuthController {
         throw new NotFoundError('Usuario');
       }
 
-      const instituciones = usuario.usuarioInstituciones.map((ui) => ({
-        id: ui.institucion.id,
-        nombre: ui.institucion.nombre,
-        rolEnInstitucion: ui.rolEnInstitucion,
-      }));
+      const instituciones = (usuario.usuarioInstituciones || [])
+        .filter(ui => ui.activo && ui.institucion?.activa)
+        .map((ui) => ({
+          id: ui.institucion.id,
+          nombre: ui.institucion.nombre,
+          rolEnInstitucion: ui.rolEnInstitucion,
+        }));
 
       return reply.code(200).send({
         success: true,
@@ -76,8 +80,10 @@ export class AuthController {
    * Cierra la sesión (cliente debe eliminar el token)
    */
   public static async logout(request: FastifyRequest<{ Body: { refreshToken?: string } }>, reply: FastifyReply) {
-    try {
-      const refreshToken = request.body.refreshToken;
+    try {
+
+      const refreshToken = request.body.refreshToken;
+
       const authReq = request as unknown as AuthenticatedRequest;
       const user = authReq.user;
 
@@ -100,11 +106,14 @@ export class AuthController {
    * Refresca el access token usando un refresh token válido
    */
   public static async refreshToken(request: FastifyRequest<{ Body: { refreshToken: string } }>, reply: FastifyReply) {
-    try {
-      const refreshToken = request.body.refreshToken;
+    try {
+
+      const refreshToken = request.body.refreshToken;
+
       if (!refreshToken) {
         throw new ValidationError('Refresh token es requerido');
-      }
+      }
+
       const result = await AuthService.refreshToken(refreshToken);
 
       return reply.code(200).send({

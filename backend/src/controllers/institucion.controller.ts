@@ -136,6 +136,54 @@ export class InstitucionController {
       throw error;
     }
   }
+
+  // ================ Admins por institución (Super Admin) ================
+  public static async getAdminsByInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const admins = await InstitucionService.getAdminsByInstitution(id);
+
+      return reply.code(200).send({
+        success: true,
+        data: admins,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async assignAdminToInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams; Body: { userId: string } }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { userId } = request.body as { userId: string };
+
+      const result = await InstitucionService.assignAdminToInstitution(id, userId);
+
+      return reply.code(201).send({
+        success: true,
+        data: result,
+        message: 'Administrador asignado a la institución exitosamente',
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public static async removeAdminFromInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: { id: string; userId: string } }>, reply: FastifyReply) {
+    try {
+      const { id, userId } = request.params;
+
+      const result = await InstitucionService.removeAdminFromInstitution(id, userId);
+
+      return reply.code(200).send({
+        success: true,
+        data: result,
+        message: 'Administrador removido de la institución exitosamente',
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default InstitucionController;

@@ -150,7 +150,6 @@ class AuthProvider with ChangeNotifier {
           _selectedInstitutionId = _institutions!.first.id;
           debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
         } else if (_institutions != null && _institutions!.length > 1) {
-
           _selectedInstitutionId = null;
           debugPrint('Múltiples instituciones encontradas, esperando selección manual');
         }
@@ -162,7 +161,8 @@ class AuthProvider with ChangeNotifier {
       return false;
     } catch (e) {
       debugPrint('Login error: $e');
-      return false;
+      // Propagar la excepción para que la UI la pueda mostrar de forma explícita
+      rethrow;
     }
   }
 
