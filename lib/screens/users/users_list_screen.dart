@@ -71,17 +71,44 @@ class _UsersListScreenState extends State<UsersListScreen> {
   Future<void> _loadUsers() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userRole = authProvider.user?['rol'] as String?;
 
-    if (authProvider.accessToken != null && authProvider.selectedInstitutionId != null) {
-      await userProvider.loadUsersByInstitution(
+    if (authProvider.accessToken == null) {
+      debugPrint('Error: No hay token de acceso para cargar usuarios.');
+      return;
+    }
+
+    // Lógica diferenciada por rol
+    if (userRole == 'super_admin') {
+      // El super_admin solo ve admin_institucion y super_admin
+      debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      await userProvider.loadUsers(
         authProvider.accessToken!,
-        authProvider.selectedInstitutionId!,
         page: 1,
-        limit: 5,
-        role: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
-        activo: _statusFilter,
-        search: _searchQuery.isEmpty ? null : _searchQuery,
+        limit: 15,
       );
+      
+      // Filtrar en el cliente para mostrar solo admin_institucion y super_admin
+      // Nota: Esto se puede mover al backend en el futuro para mejor performance
+      userProvider.filterUsersLocally(['admin_institucion', 'super_admin']);
+    } else if (userRole == 'admin_institucion') {
+      // El admin_institucion carga solo usuarios de su institución seleccionada
+      if (authProvider.selectedInstitutionId != null) {
+        debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
+        await userProvider.loadUsersByInstitution(
+          authProvider.accessToken!,
+          authProvider.selectedInstitutionId!,
+          page: 1,
+          limit: 5,
+          role: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
+          activo: _statusFilter,
+          search: _searchQuery.isEmpty ? null : _searchQuery,
+        );
+      } else {
+        // Caso de resguardo: si un admin no tiene institución, no se cargan datos.
+        debugPrint('Admin de institución sin institución seleccionada. No se cargarán usuarios.');
+        userProvider.clearData(); // Limpia la lista para mostrar el estado vacío.
+      }
     }
   }
 
@@ -137,26 +164,51 @@ class _UsersListScreenState extends State<UsersListScreen> {
               
               if (!canCreateUsers) return const SizedBox.shrink();
               
-              return SpeedDial(
-                icon: Icons.add,
-                activeIcon: Icons.close,
-                backgroundColor: context.colors.primary,
-                foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
-                children: [
-                  SpeedDialChild(
-                    child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                    backgroundColor: context.colors.primary,
-                    label: 'Crear Profesor',
-                    onTap: _navigateToCreateProfessor,
-                  ),
-                  SpeedDialChild(
-                    child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                    backgroundColor: context.colors.primary,
-                    label: 'Crear Estudiante',
-                    onTap: _navigateToCreateStudent,
-                  ),
-                ],
-              );
+              // Configuración diferente según el rol
+              if (userRole == 'super_admin') {
+                return SpeedDial(
+                  icon: Icons.add,
+                  activeIcon: Icons.close,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                  children: [
+                    SpeedDialChild(
+                      child: Icon(Icons.admin_panel_settings, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Admin Institución',
+                      onTap: _navigateToCreateAdminInstitution,
+                    ),
+                    SpeedDialChild(
+                      child: Icon(Icons.shield, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Super Admin',
+                      onTap: _navigateToCreateSuperAdmin,
+                    ),
+                  ],
+                );
+              } else {
+                // admin_institucion
+                return SpeedDial(
+                  icon: Icons.add,
+                  activeIcon: Icons.close,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                  children: [
+                    SpeedDialChild(
+                      child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Profesor',
+                      onTap: _navigateToCreateProfessor,
+                    ),
+                    SpeedDialChild(
+                      child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Estudiante',
+                      onTap: _navigateToCreateStudent,
+                    ),
+                  ],
+                );
+              }
             },
           ),
           filterWidgets: _buildFilterWidgets(context, authProvider),
@@ -248,11 +300,16 @@ class _UsersListScreenState extends State<UsersListScreen> {
               builder: (context, authProvider, child) {
                 final userRole = authProvider.user?['rol'] as String?;
                 final isAdminInstitucion = userRole == 'admin_institucion';
+                final isSuperAdmin = userRole == 'super_admin';
                 
                 return DropdownButtonFormField<String>(
                   value: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
                   hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
-                  items: isAdminInstitucion ? [
+                  items: isSuperAdmin ? [
+                    DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'super_admin', child: Text('Super Admins', style: textStyles.bodyMedium)),
+                  ] : isAdminInstitucion ? [
                     DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
                     DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
                     DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
@@ -616,6 +673,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   void _navigateToCreateStudent() {
     context.push('/users/student/create');
+  }
+
+  void _navigateToCreateAdminInstitution() {
+    context.push('/users/admin_institucion/create');
+  }
+
+  void _navigateToCreateSuperAdmin() {
+    context.push('/users/super_admin/create');
   }
 
   void _navigateToUserEdit(User user) {

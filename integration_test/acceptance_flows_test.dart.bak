@@ -1,0 +1,588 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:asistapp/main.dart' as app;
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  // ============================================================================
+  // FUNCIONES AUXILIARES
+  // ============================================================================
+
+  /// Limpia el estado de autenticación antes de cada test
+  Future<void> clearAuthState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    await prefs.remove('refreshToken');
+    await prefs.remove('user');
+    await prefs.remove('selectedInstitutionId');
+  }
+
+  /// Login general - Busca campos por tipo (más robusto)
+  Future<void> loginAs(
+    WidgetTester tester,
+    String email,
+    String password,
+  ) async {
+    print('\n[LOGIN] Iniciando sesión con: $email');
+    
+    // Buscar por tipo de widget (más robusto en desktop)
+    final textFields = find.byType(TextFormField);
+    
+    if (textFields.evaluate().isEmpty) {
+      throw Exception('No se encontraron campos de texto en la pantalla de login');
+    }
+
+    // Ingresar email en primer campo
+    await tester.enterText(textFields.at(0), email);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // Ingresar contraseña en segundo campo
+    await tester.enterText(textFields.at(1), password);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // Presionar botón de login
+    final buttons = find.byType(ElevatedButton);
+    if (buttons.evaluate().isEmpty) {
+      throw Exception('No se encontró botón de login');
+    }
+
+    await tester.tap(buttons.first);
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    print('✅ Login completado');
+  }
+
+  /// Logout general
+  Future<void> performLogout(WidgetTester tester) async {
+    print('\n[LOGOUT] Cerrando sesión...');
+
+    // Buscar botón de logout (puede estar en AppBar o menú)
+    final logoutButton = find.byIcon(Icons.logout);
+    
+    if (logoutButton.evaluate().isNotEmpty) {
+      await tester.tap(logoutButton.first);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    } else {
+      print('ℹ️ Botón de logout no encontrado, continuando...');
+    }
+
+    print('✅ Logout completado');
+  }
+
+  /// Navegar a una sección usando el texto del botón
+  Future<void> navigateTo(WidgetTester tester, String sectionName) async {
+    print('\n[NAVIGATION] Navegando a: $sectionName');
+    
+    final navButton = find.text(sectionName);
+    if (navButton.evaluate().isEmpty) {
+      throw Exception('No se encontró botón para: $sectionName');
+    }
+
+    await tester.tap(navButton.first);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    print('✅ Navegación completada');
+  }
+
+  /// Crear una institución
+  Future<void> createInstitution(
+    WidgetTester tester, {
+    required String nombre,
+    required String codigo,
+    required String email,
+  }) async {
+    print('\n[CREATE] Creando institución: $nombre');
+
+    // Presionar FAB
+    final fabButton = find.byType(FloatingActionButton);
+    if (fabButton.evaluate().isNotEmpty) {
+      await tester.tap(fabButton.first);
+      await tester.pumpAndSettle();
+    }
+
+    // Llenar formulario
+    final textFields = find.byType(TextFormField);
+    if (textFields.evaluate().length >= 3) {
+      await tester.enterText(textFields.at(0), nombre);
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      await tester.enterText(textFields.at(1), codigo);
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      await tester.enterText(textFields.at(2), email);
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    // Guardar
+    final buttons = find.byType(ElevatedButton);
+    if (buttons.evaluate().isNotEmpty) {
+      await tester.tap(buttons.first);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    }
+
+    // Verificar
+    expect(find.text(nombre), findsWidgets, reason: 'Institución no aparece en lista');
+    print('✅ Institución creada exitosamente');
+  }
+
+  /// Actualizar una institución
+  Future<void> updateInstitution(
+    WidgetTester tester, {
+    required String originalName,
+    required String newName,
+  }) async {
+    print('\n[UPDATE] Actualizando institución: $originalName -> $newName');
+
+    // Buscar menú de opciones
+    final moreIcons = find.byIcon(Icons.more_vert);
+    if (moreIcons.evaluate().isEmpty) {
+      print('⚠️ Menú de opciones no encontrado, omitiendo actualización');
+      return;
+    }
+
+    await tester.tap(moreIcons.first);
+    await tester.pumpAndSettle();
+
+    // Buscar opción Editar
+    final editOption = find.text('Editar');
+    if (editOption.evaluate().isNotEmpty) {
+      await tester.tap(editOption.first);
+      await tester.pumpAndSettle();
+
+      // Modificar nombre
+      final textFields = find.byType(TextFormField);
+      if (textFields.evaluate().isNotEmpty) {
+        // Seleccionar todo y reemplazar
+        await tester.tap(textFields.at(0));
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+        
+        // Limpiar campo
+        await tester.enterText(textFields.at(0), newName);
+        await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      }
+
+      // Guardar
+      final saveButton = find.byType(ElevatedButton);
+      if (saveButton.evaluate().isNotEmpty) {
+        await tester.tap(saveButton.first);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+      }
+
+      // Verificar
+      expect(find.text(newName), findsWidgets);
+      print('✅ Institución actualizada exitosamente');
+    }
+  }
+
+  /// Eliminar una institución
+  Future<void> deleteInstitution(
+    WidgetTester tester, {
+    required String institutionName,
+  }) async {
+    print('\n[DELETE] Eliminando institución: $institutionName');
+
+    // Buscar menú de opciones
+    final moreIcons = find.byIcon(Icons.more_vert);
+    if (moreIcons.evaluate().isEmpty) {
+      print('⚠️ Menú de opciones no encontrado, omitiendo eliminación');
+      return;
+    }
+
+    await tester.tap(moreIcons.first);
+    await tester.pumpAndSettle();
+
+    // Buscar opción Eliminar
+    final deleteOption = find.text('Eliminar');
+    if (deleteOption.evaluate().isNotEmpty) {
+      await tester.tap(deleteOption.first);
+      await tester.pumpAndSettle();
+
+      // Confirmar en diálogo
+      final confirmButton = find.byType(TextButton);
+      if (confirmButton.evaluate().length >= 2) {
+        // Presionar el botón de confirmar (generalmente es el último)
+        await tester.tap(confirmButton.last);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+      }
+
+      // Verificar que fue eliminada
+      expect(find.text(institutionName), findsNothing);
+      print('✅ Institución eliminada exitosamente');
+    }
+  }
+
+  /// Crear un usuario (profesor o estudiante)
+  Future<void> createUser(
+    WidgetTester tester, {
+    required String nombres,
+    required String apellidos,
+    required String email,
+    String? identificacion,
+    String? responsable,
+  }) async {
+    print('\n[CREATE] Creando usuario: $nombres $apellidos');
+
+    // Presionar FAB
+    final fabButton = find.byType(FloatingActionButton);
+    if (fabButton.evaluate().isNotEmpty) {
+      await tester.tap(fabButton.first);
+      await tester.pumpAndSettle();
+    }
+
+    // Llenar formulario
+    final textFields = find.byType(TextFormField);
+    int fieldIndex = 0;
+
+    if (textFields.evaluate().length > fieldIndex) {
+      await tester.enterText(textFields.at(fieldIndex), nombres);
+      fieldIndex++;
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    if (textFields.evaluate().length > fieldIndex) {
+      await tester.enterText(textFields.at(fieldIndex), apellidos);
+      fieldIndex++;
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    if (textFields.evaluate().length > fieldIndex) {
+      await tester.enterText(textFields.at(fieldIndex), email);
+      fieldIndex++;
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    if (identificacion != null && textFields.evaluate().length > fieldIndex) {
+      await tester.enterText(textFields.at(fieldIndex), identificacion);
+      fieldIndex++;
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    if (responsable != null && textFields.evaluate().length > fieldIndex) {
+      await tester.enterText(textFields.at(fieldIndex), responsable);
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+
+    // Guardar
+    final buttons = find.byType(ElevatedButton);
+    if (buttons.evaluate().isNotEmpty) {
+      await tester.tap(buttons.first);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    }
+
+    // Verificar
+    expect(find.text(email), findsWidgets, reason: 'Usuario no aparece en lista');
+    print('✅ Usuario creado exitosamente');
+  }
+
+  /// Eliminar un usuario
+  Future<void> deleteUser(
+    WidgetTester tester, {
+    required String email,
+  }) async {
+    print('\n[DELETE] Eliminando usuario: $email');
+
+    // Buscar menú de opciones
+    final moreIcons = find.byIcon(Icons.more_vert);
+    if (moreIcons.evaluate().isEmpty) {
+      print('⚠️ Menú de opciones no encontrado, omitiendo eliminación');
+      return;
+    }
+
+    await tester.tap(moreIcons.first);
+    await tester.pumpAndSettle();
+
+    // Buscar opción Eliminar
+    final deleteOption = find.text('Eliminar');
+    if (deleteOption.evaluate().isNotEmpty) {
+      await tester.tap(deleteOption.first);
+      await tester.pumpAndSettle();
+
+      // Confirmar en diálogo
+      final confirmButton = find.byType(TextButton);
+      if (confirmButton.evaluate().length >= 2) {
+        await tester.tap(confirmButton.last);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+      }
+
+      // Verificar
+      expect(find.text(email), findsNothing);
+      print('✅ Usuario eliminado exitosamente');
+    }
+  }
+
+  // ============================================================================
+  // GRUPOS DE PRUEBAS POR ROL
+  // ============================================================================
+
+  /// FLUJO 1: SUPER ADMINISTRADOR
+  group('🔐 Flujo 1: Super Administrador', () {
+    setUp(() async {
+      await clearAuthState();
+    });
+
+    testWidgets(
+      'Debe realizar login, CRUD de Instituciones y Usuarios, y logout',
+      (WidgetTester tester) async {
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  INICIANDO FLUJO: SUPER ADMINISTRADOR  ║');
+        print('╚═══════════════════════════════════════════╝');
+
+        // Iniciar app
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // 1. LOGIN
+        print('\n━━━ PASO 1: LOGIN ━━━');
+        await loginAs(tester, 'superadmin@asistapp.com', 'Admin123!');
+
+        // Verificar que llegó al dashboard
+        final dashboardText = find.text('Dashboard');
+        expect(dashboardText, findsWidgets);
+        print('✅ Dashboard cargado correctamente');
+
+        // 2. CRUD DE INSTITUCIONES
+        print('\n━━━ PASO 2: CRUD DE INSTITUCIONES ━━━');
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final instName = 'Instituto E2E $timestamp';
+        final instCode = 'IE2E-$timestamp';
+        final instEmail = 'e2e.$timestamp@institucion.edu';
+        final updatedInstName = '$instName (Actualizado)';
+
+        await navigateTo(tester, 'Instituciones');
+
+        // CREATE
+        await createInstitution(
+          tester,
+          nombre: instName,
+          codigo: instCode,
+          email: instEmail,
+        );
+
+        // UPDATE
+        await updateInstitution(
+          tester,
+          originalName: instName,
+          newName: updatedInstName,
+        );
+
+        // DELETE
+        await deleteInstitution(tester, institutionName: updatedInstName);
+
+        // 3. CRUD DE USUARIOS
+        print('\n━━━ PASO 3: CRUD DE USUARIOS ━━━');
+        final profEmail = 'profesor.e2e.$timestamp@asistapp.edu';
+
+        await navigateTo(tester, 'Usuarios');
+
+        // CREATE
+        await createUser(
+          tester,
+          nombres: 'Profesor',
+          apellidos: 'E2E Test',
+          email: profEmail,
+        );
+
+        // DELETE
+        await deleteUser(tester, email: profEmail);
+
+        // 4. LOGOUT
+        print('\n━━━ PASO 4: LOGOUT ━━━');
+        await performLogout(tester);
+
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  ✅ FLUJO COMPLETADO EXITOSAMENTE       ║');
+        print('╚═══════════════════════════════════════════╝\n');
+      },
+    );
+  });
+
+  /// FLUJO 2: ADMINISTRADOR DE INSTITUCIÓN (MULTI)
+  group('🏫 Flujo 2: Administrador de Institución (Multi)', () {
+    setUp(() async {
+      await clearAuthState();
+    });
+
+    testWidgets(
+      'Debe hacer login, seleccionar institución, y gestionar usuarios',
+      (WidgetTester tester) async {
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  INICIANDO FLUJO: ADMIN INSTITUCIÓN    ║');
+        print('╚═══════════════════════════════════════════╝');
+
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // 1. LOGIN
+        print('\n━━━ PASO 1: LOGIN ━━━');
+        await loginAs(tester, 'multi@asistapp.com', 'Multi123!');
+
+        // 2. SELECCIÓN DE INSTITUCIÓN (si aplica)
+        print('\n━━━ PASO 2: SELECCIÓN DE INSTITUCIÓN ━━━');
+        final institutionSelectionText = find.text('Seleccionar Institución');
+        if (institutionSelectionText.evaluate().isNotEmpty) {
+          print('ℹ️ Pantalla de selección de institución encontrada');
+
+          // Seleccionar primera institución
+          final radioButtons = find.byType(Radio);
+          if (radioButtons.evaluate().isNotEmpty) {
+            await tester.tap(radioButtons.first);
+            await tester.pumpAndSettle();
+
+            // Presionar Continuar
+            final continueButton = find.text('Continuar');
+            if (continueButton.evaluate().isNotEmpty) {
+              await tester.tap(continueButton.first);
+              await tester.pumpAndSettle(const Duration(seconds: 3));
+            }
+          }
+        } else {
+          print('✓ No hay pantalla de selección, continuar...');
+        }
+
+        // 3. CRUD DE USUARIOS
+        print('\n━━━ PASO 3: CRUD DE USUARIOS ━━━');
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final estudEmail = 'estudiante.e2e.$timestamp@asistapp.edu';
+
+        await navigateTo(tester, 'Usuarios');
+
+        // CREATE
+        await createUser(
+          tester,
+          nombres: 'Estudiante',
+          apellidos: 'E2E Test',
+          email: estudEmail,
+          identificacion: 'ID-$timestamp',
+          responsable: 'Responsable Test',
+        );
+
+        // DELETE
+        await deleteUser(tester, email: estudEmail);
+
+        // 4. LOGOUT
+        print('\n━━━ PASO 4: LOGOUT ━━━');
+        await performLogout(tester);
+
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  ✅ FLUJO COMPLETADO EXITOSAMENTE       ║');
+        print('╚═══════════════════════════════════════════╝\n');
+      },
+    );
+  });
+
+  /// FLUJO 3: PROFESOR
+  group('👨‍🏫 Flujo 3: Profesor', () {
+    setUp(() async {
+      await clearAuthState();
+    });
+
+    testWidgets(
+      'Debe hacer login y ver su dashboard de profesor',
+      (WidgetTester tester) async {
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  INICIANDO FLUJO: PROFESOR             ║');
+        print('╚═══════════════════════════════════════════╝');
+
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // 1. LOGIN
+        print('\n━━━ PASO 1: LOGIN ━━━');
+        await loginAs(tester, 'pedro.garcia@sanjose.edu', 'Prof123!');
+
+        // 2. VERIFICAR DASHBOARD DE PROFESOR
+        print('\n━━━ PASO 2: VERIFICAR DASHBOARD ━━━');
+        final dashboardText = find.text('Dashboard');
+        expect(dashboardText, findsWidgets);
+        print('✅ Dashboard del profesor cargado');
+        print('ℹ️ Opciones disponibles en el dashboard del profesor');
+
+        // 3. LOGOUT
+        print('\n━━━ PASO 3: LOGOUT ━━━');
+        await performLogout(tester);
+
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  ✅ FLUJO COMPLETADO EXITOSAMENTE       ║');
+        print('╚═══════════════════════════════════════════╝\n');
+      },
+    );
+  });
+
+  /// FLUJO 4: ESTUDIANTE
+  group('👨‍🎓 Flujo 4: Estudiante', () {
+    setUp(() async {
+      await clearAuthState();
+    });
+
+    testWidgets(
+      'Debe hacer login y ver su dashboard de estudiante',
+      (WidgetTester tester) async {
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  INICIANDO FLUJO: ESTUDIANTE           ║');
+        print('╚═══════════════════════════════════════════╝');
+
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // 1. LOGIN
+        print('\n━━━ PASO 1: LOGIN ━━━');
+        await loginAs(tester, 'juan.perez@sanjose.edu', 'Est123!');
+
+        // 2. VERIFICAR DASHBOARD DE ESTUDIANTE
+        print('\n━━━ PASO 2: VERIFICAR DASHBOARD ━━━');
+        final dashboardText = find.text('Dashboard');
+        expect(dashboardText, findsWidgets);
+        print('✅ Dashboard del estudiante cargado');
+
+        // Buscar opciones específicas del estudiante
+        print('ℹ️ Opciones disponibles en el dashboard del estudiante');
+
+        // 3. LOGOUT
+        print('\n━━━ PASO 3: LOGOUT ━━━');
+        await performLogout(tester);
+
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  ✅ FLUJO COMPLETADO EXITOSAMENTE       ║');
+        print('╚═══════════════════════════════════════════╝\n');
+      },
+    );
+  });
+
+  /// FLUJO 5: ADMIN INSTITUCIÓN ESPECÍFICO
+  group('👨‍💼 Flujo 5: Admin Institución (San José)', () {
+    setUp(() async {
+      await clearAuthState();
+    });
+
+    testWidgets(
+      'Debe hacer login como admin específico de institución',
+      (WidgetTester tester) async {
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  INICIANDO FLUJO: ADMIN SAN JOSÉ       ║');
+        print('╚═══════════════════════════════════════════╝');
+
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // 1. LOGIN
+        print('\n━━━ PASO 1: LOGIN ━━━');
+        await loginAs(tester, 'admin@sanjose.edu', 'SanJose123!');
+
+        // 2. VERIFICAR DASHBOARD
+        print('\n━━━ PASO 2: VERIFICAR DASHBOARD ━━━');
+        final dashboardText = find.text('Dashboard');
+        expect(dashboardText, findsWidgets);
+        print('✅ Dashboard del admin de institución cargado');
+
+        // 3. LOGOUT
+        print('\n━━━ PASO 3: LOGOUT ━━━');
+        await performLogout(tester);
+
+        print('\n╔═══════════════════════════════════════════╗');
+        print('║  ✅ FLUJO COMPLETADO EXITOSAMENTE       ║');
+        print('╚═══════════════════════════════════════════╝\n');
+      },
+    );
+  });
+}

@@ -285,6 +285,12 @@ class UserProvider with ChangeNotifier {
     return _users.where((user) => user.rol == role).toList();
   }
 
+  /// Filtra usuarios localmente por múltiples roles (para super_admin)
+  void filterUsersLocally(List<String> roles) {
+    _users = _users.where((user) => roles.contains(user.rol)).toList();
+    notifyListeners();
+  }
+
   /// Filtra usuarios por estado activo/inactivo
   List<User> filterUsersByStatus({bool? active}) {
     if (active == null) return _users;

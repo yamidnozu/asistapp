@@ -11,16 +11,20 @@ describe('Institucion Integration Tests', () => {
   let fastify: any;
   let adminToken: string;
 
-  beforeAll(async () => {
-    fastify = Fastify({ logger: false });
+  beforeAll(async () => {
+
+    fastify = Fastify({ logger: false });
+
     setupErrorHandler(fastify);
-    fastify.register(routes);
+    fastify.register(routes);
+
     await databaseService.connect();
 
     await fastify.ready();
   });
 
-  beforeEach(async () => {
+  beforeEach(async () => {
+
     const client = databaseService.getClient();
     await client.asistencia.deleteMany();
     await client.logNotificacion.deleteMany();
@@ -40,19 +44,27 @@ describe('Institucion Integration Tests', () => {
     });
     await client.institucion.deleteMany({
       where: {
-        codigo: { not: 'DEFAULT' }
+        nombre: { not: 'Institución por Defecto' }
       }
-    });
-    await AuthService.ensureAdminUser();
-    await databaseService.getClient().institucion.upsert({
-      where: { codigo: 'DEFAULT' },
-      update: {},
-      create: {
-        nombre: 'Institución por Defecto',
-        codigo: 'DEFAULT',
-        activa: true,
-      },
-    });
+    });
+
+    await AuthService.ensureAdminUser();
+
+    // Crear institución por defecto si no existe
+    const existingDefault = await databaseService.getClient().institucion.findFirst({
+      where: { nombre: 'Institución por Defecto' }
+    });
+
+    if (!existingDefault) {
+      await databaseService.getClient().institucion.create({
+        data: {
+          nombre: 'Institución por Defecto',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
+          activa: true,
+        },
+      });
+    }
+
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -94,11 +106,12 @@ describe('Institucion Integration Tests', () => {
   });
 
   describe('GET /instituciones', () => {
-    it('should get all instituciones for super_admin', async () => {
+    it('should get all instituciones for super_admin', async () => {
+
       await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución 1',
-          codigo: 'INST001',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           activa: true,
         },
       });
@@ -106,7 +119,7 @@ describe('Institucion Integration Tests', () => {
       await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución 2',
-          codigo: 'INST002',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           activa: false,
         },
       });
@@ -125,11 +138,12 @@ describe('Institucion Integration Tests', () => {
       expect(body.data).toHaveLength(3); // 2 creadas + DEFAULT
       expect(body.data[0]).toHaveProperty('id');
       expect(body.data[0]).toHaveProperty('nombre');
-      expect(body.data[0]).toHaveProperty('codigo');
+      // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
       expect(body.data[0]).toHaveProperty('activa');
     });
 
-    it('should deny access to non-super-admin', async () => {
+    it('should deny access to non-super-admin', async () => {
+
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await databaseService.getClient().usuario.create({
         data: {
@@ -140,7 +154,8 @@ describe('Institucion Integration Tests', () => {
           rol: 'admin_institucion',
           activo: true,
         },
-      });
+      });
+
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -185,7 +200,7 @@ describe('Institucion Integration Tests', () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución Test',
-          codigo: 'TEST001',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           direccion: 'Dirección Test',
           telefono: '123456789',
           email: 'test@institucion.com',
@@ -206,7 +221,7 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(true);
       expect(body.data.id).toBe(institucion.id);
       expect(body.data.nombre).toBe('Institución Test');
-      expect(body.data.codigo).toBe('TEST001');
+      // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
       expect(body.data.direccion).toBe('Dirección Test');
       expect(body.data.telefono).toBe('123456789');
       expect(body.data.email).toBe('test@institucion.com');
@@ -233,7 +248,7 @@ describe('Institucion Integration Tests', () => {
     it('should create new institucion for super_admin', async () => {
       const institucionData = {
         nombre: 'Nueva Institución',
-        codigo: 'NEW001',
+        // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
         direccion: 'Nueva Dirección',
         telefono: '987654321',
         email: 'nueva@institucion.com',
@@ -252,11 +267,12 @@ describe('Institucion Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
       expect(body.data.nombre).toBe('Nueva Institución');
-      expect(body.data.codigo).toBe('NEW001');
+      // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
       expect(body.data.activa).toBe(true); // Por defecto true
-      expect(body.message).toBe('Institución creada exitosamente');
+      expect(body.message).toBe('Institución creada exitosamente');
+
       const created = await databaseService.getClient().institucion.findUnique({
-        where: { codigo: 'NEW001' },
+        where: { id: body.data.id },
       });
       expect(created).toBeTruthy();
       expect(created?.nombre).toBe('Nueva Institución');
@@ -270,7 +286,7 @@ describe('Institucion Integration Tests', () => {
           authorization: `Bearer ${adminToken}`,
         },
         payload: {
-          nombre: 'Institución sin código',
+          // nombre faltante - campo requerido
         },
       });
 
@@ -279,33 +295,6 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(false);
       expect(body.code).toBe('VALIDATION_ERROR');
     });
-
-    it('should return 409 for duplicate codigo', async () => {
-      await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución Existente',
-          codigo: 'DUPLICATE',
-          activa: true,
-        },
-      });
-
-      const response = await fastify.inject({
-        method: 'POST',
-        url: '/instituciones',
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-        payload: {
-          nombre: 'Nueva Institución',
-          codigo: 'DUPLICATE', // Código duplicado
-        },
-      });
-
-      expect(response.statusCode).toBe(409);
-      const body = JSON.parse(response.body);
-      expect(body.success).toBe(false);
-      expect(body.code).toBe('CONFLICT_ERROR');
-    });
   });
 
   describe('PUT /instituciones/:id', () => {
@@ -313,14 +302,14 @@ describe('Institucion Integration Tests', () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución Original',
-          codigo: 'ORIGINAL',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           activa: true,
         },
       });
 
       const updateData = {
         nombre: 'Institución Actualizada',
-        codigo: 'UPDATED',
+        // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
         direccion: 'Dirección Actualizada',
         telefono: '111111111',
         email: 'updated@institucion.com',
@@ -340,14 +329,15 @@ describe('Institucion Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
       expect(body.data.nombre).toBe('Institución Actualizada');
-      expect(body.data.codigo).toBe('UPDATED');
+      // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
       expect(body.data.activa).toBe(false);
-      expect(body.message).toBe('Institución actualizada exitosamente');
+      expect(body.message).toBe('Institución actualizada exitosamente');
+
       const updated = await databaseService.getClient().institucion.findUnique({
         where: { id: institucion.id },
       });
       expect(updated?.nombre).toBe('Institución Actualizada');
-      expect(updated?.codigo).toBe('UPDATED');
+      // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
     });
 
     it('should return 404 for non-existent institucion', async () => {
@@ -367,39 +357,6 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(false);
       expect(body.code).toBe('NOT_FOUND_ERROR');
     });
-
-    it('should return 409 for duplicate codigo on update', async () => {
-      const inst1 = await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución 1',
-          codigo: 'CODE1',
-          activa: true,
-        },
-      });
-
-      await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución 2',
-          codigo: 'CODE2',
-          activa: true,
-        },
-      });
-      const response = await fastify.inject({
-        method: 'PUT',
-        url: `/instituciones/${inst1.id}`,
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-        payload: {
-          codigo: 'CODE2', // Código que ya existe
-        },
-      });
-
-      expect(response.statusCode).toBe(409);
-      const body = JSON.parse(response.body);
-      expect(body.success).toBe(false);
-      expect(body.code).toBe('CONFLICT_ERROR');
-    });
   });
 
   describe('DELETE /instituciones/:id', () => {
@@ -407,7 +364,7 @@ describe('Institucion Integration Tests', () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución a Eliminar',
-          codigo: 'DELETE001',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           activa: true,
         },
       });
@@ -423,7 +380,8 @@ describe('Institucion Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.message).toBe('Institución eliminada exitosamente');
+      expect(body.message).toBe('Institución eliminada exitosamente');
+
       const deleted = await databaseService.getClient().institucion.findUnique({
         where: { id: institucion.id },
       });
@@ -449,10 +407,11 @@ describe('Institucion Integration Tests', () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución con Usuarios',
-          codigo: 'WITHUSERS',
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           activa: true,
         },
-      });
+      });
+
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await databaseService.getClient().usuario.create({
         data: {

@@ -73,11 +73,14 @@ class ManagementScaffold extends StatelessWidget {
                 child: ExpansionTile(
                   title: Text('Filtros y Búsqueda', style: textStyles.titleMedium),
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(spacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: filterWidgets!,
+                    Material(
+                      color: colors.surface,
+                      child: Padding(
+                        padding: EdgeInsets.all(spacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: filterWidgets!,
+                        ),
                       ),
                     ),
                   ],

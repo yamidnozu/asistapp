@@ -18,7 +18,6 @@ class InstitutionFormScreen extends StatefulWidget {
 class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
-  final _codigoController = TextEditingController();
   final _direccionController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _emailController = TextEditingController();
@@ -39,7 +38,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   @override
   void dispose() {
     _nombreController.dispose();
-    _codigoController.dispose();
     _direccionController.dispose();
     _telefonoController.dispose();
     _emailController.dispose();
@@ -49,7 +47,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   void _loadInstitutionData() {
     final institution = widget.institution!;
     _nombreController.text = institution.nombre;
-    _codigoController.text = institution.codigo;
     _direccionController.text = institution.direccion ?? '';
     _telefonoController.text = institution.telefono ?? '';
     _emailController.text = institution.email ?? '';
@@ -67,7 +64,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
       final institutionData = {
         'nombre': _nombreController.text.trim(),
-        'codigo': _codigoController.text.trim(),
         'direccion': _direccionController.text.trim(),
         'telefono': _telefonoController.text.trim(),
         'email': _emailController.text.trim(),
@@ -87,7 +83,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
           authProvider.accessToken!,
           widget.institution!.id,
           nombre: institutionData['nombre'] as String?,
-          codigo: institutionData['codigo'] as String?,
           direccion: institutionData['direccion'] as String?,
           telefono: institutionData['telefono'] as String?,
           email: institutionData['email'] as String?,
@@ -130,7 +125,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
@@ -177,6 +171,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
+              key: const Key('nombreInstitucionField'),
               controller: _nombreController,
               label: 'Nombre de la Institución',
               hint: 'Ingrese el nombre completo',
@@ -190,22 +185,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.business,
-            ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              controller: _codigoController,
-              label: 'Código',
-              hint: 'Código único de la institución',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'El código es obligatorio';
-                }
-                if (value.trim().length < 2) {
-                  return 'El código debe tener al menos 2 caracteres';
-                }
-                return null;
-              },
-              prefixIcon: Icons.tag,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -225,6 +204,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
+              key: const Key('emailInstitucionField'),
               controller: _emailController,
               label: 'Email',
               hint: 'contacto@institucion.cl',
@@ -255,6 +235,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   }
 
   Widget _buildTextField({
+    Key? key,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -267,6 +248,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
     return TextFormField(
+      key: key,
       controller: controller,
       style: textStyles.bodyLarge,
       decoration: InputDecoration(
@@ -312,6 +294,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
       children: [
         Expanded(
           child: OutlinedButton(
+            key: const Key('cancelButton'),
             onPressed: _isLoading ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),
@@ -326,6 +309,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
         SizedBox(width: spacing.lg),
         Expanded(
           child: ElevatedButton(
+            key: const Key('formSaveButton'),
             onPressed: _isLoading ? null : _saveInstitution,
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),

@@ -17,7 +17,8 @@ services:
       retries: 5
 
   app:
-    build: .
+    # build removed — use a prebuilt image instead. Update the image name/tag to match your registry or local image.
+    image: asistapp_backend:latest
     ports:
       - "3000:3000"
     depends_on:

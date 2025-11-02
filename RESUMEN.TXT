@@ -4,21 +4,22 @@
 ├── 📂 managers
 │   └── app_lifecycle_manager.dart [110]
 ├── 📂 models
-│   ├── institution.dart [103]
+│   ├── institution.dart [97]
 │   └── user.dart [290]
 ├── 📂 providers
 │   ├── auth_provider.dart [194]
-│   ├── institution_provider.dart [233]
-│   └── user_provider.dart [332]
+│   ├── institution_provider.dart [229]
+│   └── user_provider.dart [336]
 ├── 📂 screens
 │   ├── admin_dashboard.dart [123]
 │   ├── app_shell.dart [62]
 │   ├── home_screen.dart [339]
 │   ├── 📂 institutions
-│   │   ├── institutions_list_screen.dart [466]
-│   │   └── institution_form_screen.dart [342]
+│   │   ├── create_institution_admin_screen.dart [354]
+│   │   ├── institutions_list_screen.dart [487]
+│   │   └── institution_form_screen.dart [326]
 │   ├── institution_selection_screen.dart [194]
-│   ├── login_screen.dart [344]
+│   ├── login_screen.dart [348]
 │   ├── student_dashboard.dart [133]
 │   ├── super_admin_dashboard.dart [117]
 │   ├── teacher_dashboard.dart [133]
@@ -26,13 +27,13 @@
 │   ├── 📂 users
 │   │   ├── create_professor_screen.dart [11]
 │   │   ├── create_student_screen.dart [11]
-│   │   ├── users_list_screen.dart [614]
-│   │   ├── user_detail_screen.dart [161]
-│   │   └── user_form_screen.dart [627]
+│   │   ├── users_list_screen.dart [668]
+│   │   ├── user_detail_screen.dart [160]
+│   │   └── user_form_screen.dart [733]
 │   └── welcome_screen.dart [91]
 ├── 📂 services
 │   ├── auth_service.dart [190]
-│   ├── institution_service.dart [243]
+│   ├── institution_service.dart [239]
 │   ├── profesor_service.dart [272]
 │   └── user_service.dart [264]
 ├── 📂 theme
@@ -51,7 +52,7 @@
 │       └── index.dart [4]
 ├── 📂 utils
 │   ├── app_constants.dart [6]
-│   ├── app_router.dart [213]
+│   ├── app_router.dart [231]
 │   ├── app_routes.dart [48]
 │   ├── responsive_utils.dart [166]
 │   ├── role_enum.dart [53]
@@ -59,13 +60,14 @@
 └── 📂 widgets
     ├── 📂 common
     │   ├── empty_state_widget.dart [47]
-    │   ├── management_scaffold.dart [215]
+    │   ├── management_scaffold.dart [218]
     │   └── shimmer_list_widget.dart [32]
     ├── dashboard_widgets.dart [268]
-    ├── form_widgets.dart [296]
-    ├── index.dart [2]
+    ├── form_widgets.dart [305]
+    ├── index.dart [1]
     ├── pagination_widget.dart [411]
     ├── role_guard.dart [39]
+    ├── scroll_state_keeper.dart [31]
     └── session_info_footer.dart [105]
 
 
@@ -80,7 +82,7 @@
 │   │   ├── auth.controller.js [127]
 │   │   ├── institucion.controller.js [100]
 │   │   ├── institution-admin.controller.js [247]
-│   │   └── user.controller.js [171]
+│   │   └── user.controller.js [175]
 │   ├── index.js [84]
 │   ├── 📂 middleware
 │   │   ├── auth.js [88]
@@ -97,16 +99,16 @@
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.js [247]
 │   │   ├── auth.service.js [232]
-│   │   ├── institucion.service.js [234]
+│   │   ├── institucion.service.js [198]
 │   │   ├── profesor.service.js [310]
-│   │   └── user.service.js [361]
+│   │   └── user.service.js [371]
 │   ├── 📂 types
 │   │   └── index.js [44]
 │   └── 📂 utils
 │       └── index.js [78]
 ├── jest.unit.config.js [13]
 ├── 📂 prisma
-│   ├── seed.ts [355]
+│   ├── seed.ts [381]
 ├── 📂 src
 │   ├── 📂 config
 │   │   ├── app.ts [12]
@@ -115,9 +117,9 @@
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.ts [103]
 │   │   ├── auth.controller.ts [130]
-│   │   ├── institucion.controller.ts [131]
+│   │   ├── institucion.controller.ts [129]
 │   │   ├── institution-admin.controller.ts [285]
-│   │   └── user.controller.ts [203]
+│   │   └── user.controller.ts [208]
 │   ├── index.ts [98]
 │   ├── 📂 middleware
 │   │   ├── auth.ts [87]
@@ -134,35 +136,35 @@
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.ts [270]
 │   │   ├── auth.service.ts [259]
-│   │   ├── institucion.service.ts [273]
+│   │   ├── institucion.service.ts [222]
 │   │   ├── profesor.service.ts [332]
-│   │   └── user.service.ts [361]
+│   │   └── user.service.ts [370]
 │   ├── 📂 types
-│   │   └── index.ts [249]
+│   │   └── index.ts [248]
 │   └── 📂 utils
 │       └── index.ts [87]
 ├── test-server.ts [25]
 ├── 📂 tests
 │   ├── auth.integration.test.js [160]
-│   ├── auth.integration.test.ts [384]
+│   ├── auth.integration.test.ts [402]
 │   ├── auth.service.test.js [213]
 │   ├── auth.service.test.ts [514]
-│   ├── institucion.integration.test.ts [490]
+│   ├── institucion.integration.test.ts [432]
 │   ├── setup.js [15]
 │   ├── setup.ts [16]
 │   ├── simple-validation.test.js [277]
 │   ├── test-database.ts [56]
 │   ├── user.controller.test.ts [411]
-│   ├── user.integration.test.ts [691]
+│   ├── user.integration.test.ts [683]
 │   ├── user.logic.test.ts [230]
 │   ├── user.service.test.ts [463]
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 20033
-Total de archivos: 121
-Promedio de líneas por archivo: 166
-Archivo más grande: user.integration.test.ts (691 líneas)
+Total de líneas resumidas: 20521
+Total de archivos: 123
+Promedio de líneas por archivo: 167
+Archivo más grande: user_form_screen.dart (733 líneas)
 
 
 /* Inicio lib\main.dart */
@@ -379,7 +381,6 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
 class Institution {
   final String id;
   final String nombre;
-  final String codigo;
   final String? direccion;
   final String? telefono;
   final String? email;
@@ -392,7 +393,6 @@ class Institution {
   Institution({
     required this.id,
     required this.nombre,
-    required this.codigo,
     this.direccion,
     this.telefono,
     this.email,
@@ -407,7 +407,6 @@ class Institution {
     return Institution(
       id: json['id'] as String,
       nombre: json['nombre'] as String? ?? json['name'] as String? ?? 'Institución sin nombre',
-      codigo: json['codigo'] as String? ?? '',
       direccion: json['direccion'] as String?,
       telefono: json['telefono'] as String?,
       email: json['email'] as String?,
@@ -423,7 +422,6 @@ class Institution {
     return {
       'id': id,
       'nombre': nombre,
-      'codigo': codigo,
       if (direccion != null) 'direccion': direccion,
       if (telefono != null) 'telefono': telefono,
       if (email != null) 'email': email,
@@ -440,7 +438,6 @@ class Institution {
   Institution copyWith({
     String? id,
     String? nombre,
-    String? codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -453,7 +450,6 @@ class Institution {
     return Institution(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
-      codigo: codigo ?? this.codigo,
       direccion: direccion ?? this.direccion,
       telefono: telefono ?? this.telefono,
       email: email ?? this.email,
@@ -467,7 +463,7 @@ class Institution {
 
   @override
   String toString() {
-    return 'Institution(id: $id, nombre: $nombre, codigo: $codigo, activa: $activa)';
+    return 'Institution(id: $id, nombre: $nombre, activa: $activa)';
   }
 
   @override
@@ -1071,7 +1067,6 @@ class InstitutionProvider with ChangeNotifier {
       final newInstitution = await _institutionService.createInstitution(
         accessToken,
         nombre: institutionData['nombre'],
-        codigo: institutionData['codigo'],
         direccion: institutionData['direccion'],
         telefono: institutionData['telefono'],
         email: institutionData['email'],
@@ -1091,7 +1086,6 @@ class InstitutionProvider with ChangeNotifier {
     String accessToken,
     String id, {
     String? nombre,
-    String? codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -1104,7 +1098,6 @@ class InstitutionProvider with ChangeNotifier {
         accessToken,
         id,
         nombre: nombre,
-        codigo: codigo,
         direccion: direccion,
         telefono: telefono,
         email: email,
@@ -1166,7 +1159,6 @@ class InstitutionProvider with ChangeNotifier {
     final lowercaseQuery = query.toLowerCase();
     return _institutions.where((inst) {
       return inst.nombre.toLowerCase().contains(lowercaseQuery) ||
-             inst.codigo.toLowerCase().contains(lowercaseQuery) ||
              (inst.email?.toLowerCase().contains(lowercaseQuery) ?? false);
     }).toList();
   }
@@ -1451,6 +1443,10 @@ class UserProvider with ChangeNotifier {
   List<User> filterUsersByRole(String role) {
     if (role.isEmpty) return _users;
     return _users.where((user) => user.rol == role).toList();
+  }
+  void filterUsersLocally(List<String> roles) {
+    _users = _users.where((user) => roles.contains(user.rol)).toList();
+    notifyListeners();
   }
   List<User> filterUsersByStatus({bool? active}) {
     if (active == null) return _users;
@@ -2075,24 +2071,375 @@ class HomeScreen extends StatelessWidget {
 }
 /* Fin lib\screens\home_screen.dart */
 
-/* Inicio lib\screens\institutions\institutions_list_screen.dart */
-import 'dart:async';
+/* Inicio lib\screens\institutions\create_institution_admin_screen.dart */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
+import '../../models/user.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../theme/theme_extensions.dart';
+import '../../widgets/form_widgets.dart';
+
+class CreateInstitutionAdminScreen extends StatefulWidget {
+  final Institution institution;
+
+  const CreateInstitutionAdminScreen({
+    super.key,
+    required this.institution,
+  });
+
+  @override
+  State<CreateInstitutionAdminScreen> createState() => _CreateInstitutionAdminScreenState();
+}
+
+class _CreateInstitutionAdminScreenState extends State<CreateInstitutionAdminScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nombresController = TextEditingController();
+  final _apellidosController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _telefonoController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _activo = true;
+
+  @override
+  void dispose() {
+    _nombresController.dispose();
+    _apellidosController.dispose();
+    _emailController.dispose();
+    _telefonoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveAdmin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      final createRequest = CreateUserRequest(
+        email: _emailController.text.trim(),
+        password: 'TempPass123!', // Contraseña temporal que debe ser cambiada por el usuario
+        nombres: _nombresController.text.trim(),
+        apellidos: _apellidosController.text.trim(),
+        telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
+        rol: 'admin_institucion',
+        institucionId: widget.institution.id,
+        rolEnInstitucion: 'admin', // Rol específico dentro de la institución
+      );
+
+      final success = await userProvider.createUser(
+        authProvider.accessToken!,
+        createRequest,
+      );
+
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Administrador de institución creado exitosamente',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+        context.go('/institutions');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error al crear administrador: ${e.toString()}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onError,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Crear Administrador - ${widget.institution.nombre}'),
+        backgroundColor: colors.primary,
+        foregroundColor: colors.getTextColorForBackground(colors.primary),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: spacing.lg),
+
+              Text(
+                'Información Personal',
+                style: textStyles.headlineMedium.bold,
+              ),
+              SizedBox(height: spacing.lg),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 600;
+                  return isWide
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextFormField(
+                              controller: _nombresController,
+                              labelText: 'Nombres',
+                              hintText: 'Ingrese los nombres',
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Los nombres son requeridos';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Los nombres deben tener al menos 2 caracteres';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          SizedBox(width: spacing.md),
+                          Expanded(
+                            child: CustomTextFormField(
+                              controller: _apellidosController,
+                              labelText: 'Apellidos',
+                              hintText: 'Ingrese los apellidos',
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Los apellidos son requeridos';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Los apellidos deben tener al menos 2 caracteres';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          CustomTextFormField(
+                            controller: _nombresController,
+                            labelText: 'Nombres',
+                            hintText: 'Ingrese los nombres',
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Los nombres son requeridos';
+                              }
+                              if (value.trim().length < 2) {
+                                return 'Los nombres deben tener al menos 2 caracteres';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: spacing.md),
+                          CustomTextFormField(
+                            controller: _apellidosController,
+                            labelText: 'Apellidos',
+                            hintText: 'Ingrese los apellidos',
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Los apellidos son requeridos';
+                              }
+                              if (value.trim().length < 2) {
+                                return 'Los apellidos deben tener al menos 2 caracteres';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      );
+                },
+              ),
+              SizedBox(height: spacing.md),
+              CustomTextFormField(
+                controller: _emailController,
+                labelText: 'Email',
+                hintText: 'admin@ejemplo.com',
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El email es requerido';
+                  }
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(value.trim())) {
+                    return 'Ingrese un email válido';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: spacing.md),
+              CustomTextFormField(
+                controller: _telefonoController,
+                labelText: 'Teléfono',
+                hintText: '+57 300 123 4567',
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
+                    if (!phoneRegex.hasMatch(value.trim())) {
+                      return 'Ingrese un teléfono válido';
+                    }
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: spacing.lg),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Institución Asignada',
+                        style: textStyles.titleMedium.bold,
+                      ),
+                      SizedBox(height: spacing.sm),
+                      Row(
+                        children: [
+                          Icon(Icons.business, color: colors.primary),
+                          SizedBox(width: spacing.sm),
+                          Expanded(
+                            child: Text(
+                              widget.institution.nombre,
+                              style: textStyles.bodyLarge,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing.lg),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.md),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _activo ? Icons.check_circle : Icons.cancel,
+                        color: _activo ? colors.success : colors.error,
+                      ),
+                      SizedBox(width: spacing.md),
+                      Expanded(
+                        child: Text(
+                          'Usuario Activo',
+                          style: textStyles.bodyLarge,
+                        ),
+                      ),
+                      Switch(
+                        value: _activo,
+                        onChanged: (value) {
+                          setState(() => _activo = value);
+                        },
+                        activeColor: colors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing.xl),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : () => context.pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        side: BorderSide(color: colors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: textStyles.button.withColor(colors.primary),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.md),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveAdmin,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        backgroundColor: colors.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: _isLoading
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          )
+                        : Text('Crear Administrador', style: textStyles.button),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+/* Fin lib\screens\institutions\create_institution_admin_screen.dart */
+
+/* Inicio lib\screens\institutions\institutions_list_screen.dart */
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
-import '../../utils/responsive_utils.dart';
-import '../../utils/app_routes.dart';
-import '../../widgets/dashboard_widgets.dart';
-import '../../widgets/common/empty_state_widget.dart';
 import '../../widgets/common/management_scaffold.dart';
 import 'institution_form_screen.dart';
+import 'create_institution_admin_screen.dart';
 
 class InstitutionsListScreen extends StatefulWidget {
   const InstitutionsListScreen({super.key});
@@ -2213,6 +2560,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           onRefresh: () => _loadInstitutions(),
           scrollController: _scrollController,
           floatingActionButton: FloatingActionButton(
+            key: const Key('addInstitutionButton'),
             onPressed: () => _navigateToForm(context),
             backgroundColor: context.colors.primary,
             child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
@@ -2236,6 +2584,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
     return [
       TextField(
+        key: const Key('searchInstitutionField'),
         controller: _searchController,
         style: textStyles.bodyLarge,
         decoration: InputDecoration(
@@ -2392,11 +2741,6 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(Icons.tag, size: 14, color: colors.textSecondary),
-              SizedBox(width: 4),
-              Text(institution.codigo, style: textStyles.bodySmall),
-            ]),
             if (institution.email != null) Row(children: [
               Icon(Icons.email_outlined, size: 14, color: colors.textSecondary),
               SizedBox(width: 4),
@@ -2409,40 +2753,57 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             ]),
           ],
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, institution, provider),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Editar', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'toggle_status',
-              child: Row(
-                children: [
-                  Icon(Icons.toggle_on, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Cambiar Estado', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: colors.error),
-                  SizedBox(width: spacing.sm),
-                  Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
-                ],
-              ),
-            ),
-          ],
+        trailing: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            final userRole = authProvider.user?['rol'] as String?;
+            final isSuperAdmin = userRole == 'super_admin';
+
+            return PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(value, institution, provider),
+              itemBuilder: (context) => [
+                if (isSuperAdmin) PopupMenuItem(
+                  value: 'create_admin',
+                  child: Row(
+                    children: [
+                      Icon(Icons.admin_panel_settings, color: colors.primary),
+                      SizedBox(width: spacing.sm),
+                      Text('Crear Administrador', style: textStyles.bodyMedium.withColor(colors.primary)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: colors.textSecondary),
+                      SizedBox(width: spacing.sm),
+                      Text('Editar', style: textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'toggle_status',
+                  child: Row(
+                    children: [
+                      Icon(Icons.toggle_on, color: colors.textSecondary),
+                      SizedBox(width: spacing.sm),
+                      Text('Cambiar Estado', style: textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: colors.error),
+                      SizedBox(width: spacing.sm),
+                      Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         onTap: () => _navigateToForm(context, institution: institution),
       ),
@@ -2453,6 +2814,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     switch (action) {
+      case 'create_admin':
+        _navigateToCreateInstitutionAdmin(institution);
+        break;
+
       case 'edit':
         _navigateToForm(context, institution: institution);
         break;
@@ -2541,6 +2906,15 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       ),
     );
   }
+
+  void _navigateToCreateInstitutionAdmin(Institution institution) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateInstitutionAdminScreen(institution: institution),
+      ),
+    );
+  }
 }
 /* Fin lib\screens\institutions\institutions_list_screen.dart */
 
@@ -2565,7 +2939,6 @@ class InstitutionFormScreen extends StatefulWidget {
 class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
-  final _codigoController = TextEditingController();
   final _direccionController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _emailController = TextEditingController();
@@ -2586,7 +2959,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   @override
   void dispose() {
     _nombreController.dispose();
-    _codigoController.dispose();
     _direccionController.dispose();
     _telefonoController.dispose();
     _emailController.dispose();
@@ -2596,7 +2968,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   void _loadInstitutionData() {
     final institution = widget.institution!;
     _nombreController.text = institution.nombre;
-    _codigoController.text = institution.codigo;
     _direccionController.text = institution.direccion ?? '';
     _telefonoController.text = institution.telefono ?? '';
     _emailController.text = institution.email ?? '';
@@ -2614,7 +2985,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
       final institutionData = {
         'nombre': _nombreController.text.trim(),
-        'codigo': _codigoController.text.trim(),
         'direccion': _direccionController.text.trim(),
         'telefono': _telefonoController.text.trim(),
         'email': _emailController.text.trim(),
@@ -2632,7 +3002,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
           authProvider.accessToken!,
           widget.institution!.id,
           nombre: institutionData['nombre'] as String?,
-          codigo: institutionData['codigo'] as String?,
           direccion: institutionData['direccion'] as String?,
           telefono: institutionData['telefono'] as String?,
           email: institutionData['email'] as String?,
@@ -2675,7 +3044,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
@@ -2722,6 +3090,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
+              key: const Key('nombreInstitucionField'),
               controller: _nombreController,
               label: 'Nombre de la Institución',
               hint: 'Ingrese el nombre completo',
@@ -2735,22 +3104,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 return null;
               },
               prefixIcon: Icons.business,
-            ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              controller: _codigoController,
-              label: 'Código',
-              hint: 'Código único de la institución',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'El código es obligatorio';
-                }
-                if (value.trim().length < 2) {
-                  return 'El código debe tener al menos 2 caracteres';
-                }
-                return null;
-              },
-              prefixIcon: Icons.tag,
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
@@ -2770,6 +3123,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             ),
             SizedBox(height: spacing.lg),
             _buildTextField(
+              key: const Key('emailInstitucionField'),
               controller: _emailController,
               label: 'Email',
               hint: 'contacto@institucion.cl',
@@ -2800,6 +3154,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   }
 
   Widget _buildTextField({
+    Key? key,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -2812,6 +3167,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
     return TextFormField(
+      key: key,
       controller: controller,
       style: textStyles.bodyLarge,
       decoration: InputDecoration(
@@ -2857,6 +3213,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
       children: [
         Expanded(
           child: OutlinedButton(
+            key: const Key('cancelButton'),
             onPressed: _isLoading ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),
@@ -2871,6 +3228,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
         SizedBox(width: spacing.lg),
         Expanded(
           child: ElevatedButton(
+            key: const Key('formSaveButton'),
             onPressed: _isLoading ? null : _saveInstitution,
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.lg),
@@ -3127,6 +3485,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final colors = context.colors;
         return Text(
           'AsistApp',
+          key: const Key('appTitle'),
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
@@ -3153,6 +3512,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildEmailField() {
     return TextFormField(
+      key: const Key('emailField'),
       controller: _emailController,
       decoration: const InputDecoration(
         labelText: 'Correo electrónico',
@@ -3163,6 +3523,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildPasswordField() {
     return TextFormField(
+      key: const Key('passwordField'),
       controller: _passwordController,
       decoration: const InputDecoration(
         labelText: 'Contraseña',
@@ -3177,6 +3538,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
       width: buttonWidth,
       child: ElevatedButton(
+        key: const Key('loginButton'),
         onPressed: _isLoading ? null : _login,
         child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
       ),
@@ -4013,17 +4375,36 @@ class _UsersListScreenState extends State<UsersListScreen> {
   Future<void> _loadUsers() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userRole = authProvider.user?['rol'] as String?;
 
-    if (authProvider.accessToken != null && authProvider.selectedInstitutionId != null) {
-      await userProvider.loadUsersByInstitution(
+    if (authProvider.accessToken == null) {
+      debugPrint('Error: No hay token de acceso para cargar usuarios.');
+      return;
+    }
+    if (userRole == 'super_admin') {
+      debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      await userProvider.loadUsers(
         authProvider.accessToken!,
-        authProvider.selectedInstitutionId!,
         page: 1,
-        limit: 5,
-        role: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
-        activo: _statusFilter,
-        search: _searchQuery.isEmpty ? null : _searchQuery,
-      );
+        limit: 15,
+      );
+      userProvider.filterUsersLocally(['admin_institucion', 'super_admin']);
+    } else if (userRole == 'admin_institucion') {
+      if (authProvider.selectedInstitutionId != null) {
+        debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
+        await userProvider.loadUsersByInstitution(
+          authProvider.accessToken!,
+          authProvider.selectedInstitutionId!,
+          page: 1,
+          limit: 5,
+          role: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
+          activo: _statusFilter,
+          search: _searchQuery.isEmpty ? null : _searchQuery,
+        );
+      } else {
+        debugPrint('Admin de institución sin institución seleccionada. No se cargarán usuarios.');
+        userProvider.clearData()
+      }
     }
   }
 
@@ -4074,28 +4455,50 @@ class _UsersListScreenState extends State<UsersListScreen> {
               final userRole = authProvider.user?['rol'] as String?;
               final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
 
-              if (!canCreateUsers) return const SizedBox.shrink();
-
-              return SpeedDial(
-                icon: Icons.add,
-                activeIcon: Icons.close,
-                backgroundColor: context.colors.primary,
-                foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
-                children: [
-                  SpeedDialChild(
-                    child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                    backgroundColor: context.colors.primary,
-                    label: 'Crear Profesor',
-                    onTap: _navigateToCreateProfessor,
-                  ),
-                  SpeedDialChild(
-                    child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                    backgroundColor: context.colors.primary,
-                    label: 'Crear Estudiante',
-                    onTap: _navigateToCreateStudent,
-                  ),
-                ],
-              );
+              if (!canCreateUsers) return const SizedBox.shrink();
+              if (userRole == 'super_admin') {
+                return SpeedDial(
+                  icon: Icons.add,
+                  activeIcon: Icons.close,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                  children: [
+                    SpeedDialChild(
+                      child: Icon(Icons.admin_panel_settings, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Admin Institución',
+                      onTap: _navigateToCreateAdminInstitution,
+                    ),
+                    SpeedDialChild(
+                      child: Icon(Icons.shield, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Super Admin',
+                      onTap: _navigateToCreateSuperAdmin,
+                    ),
+                  ],
+                );
+              } else {
+                return SpeedDial(
+                  icon: Icons.add,
+                  activeIcon: Icons.close,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
+                  children: [
+                    SpeedDialChild(
+                      child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Profesor',
+                      onTap: _navigateToCreateProfessor,
+                    ),
+                    SpeedDialChild(
+                      child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
+                      backgroundColor: context.colors.primary,
+                      label: 'Crear Estudiante',
+                      onTap: _navigateToCreateStudent,
+                    ),
+                  ],
+                );
+              }
             },
           ),
           filterWidgets: _buildFilterWidgets(context, authProvider),
@@ -4187,11 +4590,16 @@ class _UsersListScreenState extends State<UsersListScreen> {
               builder: (context, authProvider, child) {
                 final userRole = authProvider.user?['rol'] as String?;
                 final isAdminInstitucion = userRole == 'admin_institucion';
+                final isSuperAdmin = userRole == 'super_admin';
 
                 return DropdownButtonFormField<String>(
                   value: _selectedRoleFilter.isEmpty ? null : _selectedRoleFilter,
                   hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
-                  items: isAdminInstitucion ? [
+                  items: isSuperAdmin ? [
+                    DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
+                    DropdownMenuItem(value: 'super_admin', child: Text('Super Admins', style: textStyles.bodyMedium)),
+                  ] : isAdminInstitucion ? [
                     DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
                     DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
                     DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
@@ -4552,6 +4960,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
     context.push('/users/student/create');
   }
 
+  void _navigateToCreateAdminInstitution() {
+    context.push('/users/admin_institucion/create');
+  }
+
+  void _navigateToCreateSuperAdmin() {
+    context.push('/users/super_admin/create');
+  }
+
   void _navigateToUserEdit(User user) {
     context.push('/users/${user.rol}/create?edit=true&userId=${user.id}');
   }
@@ -4584,7 +5000,7 @@ class UserDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${user.nombreCompleto}',
+          user.nombreCompleto,
           style: textStyles.titleLarge,
         ),
         backgroundColor: colors.primary,
@@ -4652,7 +5068,6 @@ class UserDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoSection(BuildContext context, String title, List<Widget> items) {
-    final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
@@ -4731,8 +5146,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
+import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/form_widgets.dart';
 
@@ -4764,6 +5181,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   bool _isInitialLoading = false;
   bool _activo = true;
   User? _user
+  String? _selectedInstitutionId
 
   @override
   void initState() {
@@ -4774,6 +5192,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadUserIfEditing();
+    _loadInstitutionsIfNeeded();
   }
 
   Future<void> _loadUserIfEditing() async {
@@ -4825,13 +5244,31 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
+  Future<void> _loadInstitutionsIfNeeded() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userRole = authProvider.user?['rol'] as String?;
+    if (userRole == 'super_admin' && widget.userRole == 'admin_institucion') {
+      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      if (institutionProvider.institutions.isEmpty) {
+        await institutionProvider.loadInstitutions(
+          authProvider.accessToken!,
+          page: 1,
+          limit: 100, // Cargar todas para el dropdown
+        );
+      }
+    }
+  }
+
   void _fillFormWithUserData() {
     final user = _user!;
     _nombresController.text = user.nombres;
     _apellidosController.text = user.apellidos;
     _emailController.text = user.email;
     _telefonoController.text = user.telefono ?? '';
-    _activo = user.activo;
+    _activo = user.activo;
+    if (user.instituciones.isNotEmpty) {
+      _selectedInstitutionId = user.instituciones.first.id;
+    }
 
     if (user.estudiante != null) {
       _identificacionController.text = user.estudiante!.identificacion;
@@ -4855,7 +5292,21 @@ class _UserFormScreenState extends State<UserFormScreen> {
   }
 
   Future<void> _saveUser() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
+    if (widget.userRole == 'admin_institucion' && _selectedInstitutionId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Debe seleccionar una institución',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -4869,7 +5320,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: _identificacionController.text.trim(),
+          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
           nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
           telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
           activo: _activo,
@@ -4885,7 +5336,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} actualizado exitosamente',
+                '${_getRoleDisplayName(widget.userRole)} actualizado exitosamente',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -4902,13 +5353,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: _identificacionController.text.trim(),
+          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
           rol: widget.userRole,
           titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
           especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
           nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
           telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-          institucionId: authProvider.selectedInstitutionId,
+          institucionId: widget.userRole == 'admin_institucion' ? _selectedInstitutionId : authProvider.selectedInstitutionId,
+          rolEnInstitucion: widget.userRole == 'admin_institucion' ? 'admin' : null,
         );
 
         final success = await userProvider.createUser(
@@ -4920,7 +5372,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
+                '${_getRoleDisplayName(widget.userRole)} creado exitosamente',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -4936,7 +5388,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error al ${_user != null ? 'actualizar' : 'crear'} ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
+              'Error al ${_user != null ? 'actualizar' : 'crear'} ${_getRoleDisplayName(widget.userRole)}: ${e.toString()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onError,
               ),
@@ -4949,6 +5401,21 @@ class _UserFormScreenState extends State<UserFormScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  String _getRoleDisplayName(String role) {
+    switch (role) {
+      case 'profesor':
+        return 'Profesor';
+      case 'estudiante':
+        return 'Estudiante';
+      case 'admin_institucion':
+        return 'Administrador de Institución';
+      case 'super_admin':
+        return 'Super Administrador';
+      default:
+        return 'Usuario';
     }
   }
 
@@ -4987,6 +5454,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       children: [
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_nombres'),
                             controller: _nombresController,
                             labelText: 'Nombres',
                             hintText: 'Ingrese los nombres',
@@ -5004,6 +5472,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         SizedBox(width: spacing.md),
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_apellidos'),
                             controller: _apellidosController,
                             labelText: 'Apellidos',
                             hintText: 'Ingrese los apellidos',
@@ -5023,6 +5492,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   : Column(
                       children: [
                         CustomTextFormField(
+                          key: const Key('nombresUsuarioField'),
                           controller: _nombresController,
                           labelText: 'Nombres',
                           hintText: 'Ingrese los nombres',
@@ -5038,6 +5508,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         ),
                         SizedBox(height: spacing.md),
                         CustomTextFormField(
+                          key: const Key('apellidosUsuarioField'),
                           controller: _apellidosController,
                           labelText: 'Apellidos',
                           hintText: 'Ingrese los apellidos',
@@ -5057,6 +5528,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ),
             SizedBox(height: spacing.md),
             CustomTextFormField(
+              key: const Key('emailUsuarioField'),
               controller: _emailController,
               labelText: 'Email',
               hintText: '${widget.userRole}@ejemplo.com',
@@ -5073,6 +5545,41 @@ class _UserFormScreenState extends State<UserFormScreen> {
               },
             ),
             SizedBox(height: spacing.md),
+            if (widget.userRole == 'admin_institucion') ...[
+              Consumer2<AuthProvider, InstitutionProvider>(
+                builder: (context, authProvider, institutionProvider, child) {
+                  final userRole = authProvider.user?['rol'] as String?;
+                  final isSuperAdmin = userRole == 'super_admin';
+
+                  if (!isSuperAdmin) return const SizedBox.shrink();
+
+                  return CustomDropdownFormField<String>(
+                    key: const Key('institucionDropdown'),
+                    value: _selectedInstitutionId,
+                    labelText: 'Institución',
+                    hintText: 'Seleccione una institución',
+                    items: institutionProvider.institutions.map((institution) {
+                      return DropdownMenuItem<String>(
+                        value: institution.id,
+                        child: Text(institution.nombre),
+                      );
+                    }).toList(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Debe seleccionar una institución';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedInstitutionId = value;
+                      });
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: spacing.md),
+            ],
             LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 600;
@@ -5081,6 +5588,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       children: [
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_telefono'),
                             controller: _telefonoController,
                             labelText: 'Teléfono',
                             hintText: '+57 300 123 4567',
@@ -5099,10 +5607,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         SizedBox(width: spacing.md),
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_identificacion'),
                             controller: _identificacionController,
                             labelText: 'Identificación',
                             hintText: 'Cédula o documento',
-                            validator: (value) {
+                            validator: (value) {
+                              if (widget.userRole == 'admin_institucion' || widget.userRole == 'super_admin') {
+                                return null;
+                              }
+
                               if (value == null || value.trim().isEmpty) {
                                 return 'La identificación es requerida';
                               }
@@ -5118,6 +5631,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   : Column(
                       children: [
                         CustomTextFormField(
+                          key: const Key('user_form_telefono'),
                           controller: _telefonoController,
                           labelText: 'Teléfono',
                           hintText: '+57 300 123 4567',
@@ -5134,10 +5648,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         ),
                         SizedBox(height: spacing.md),
                         CustomTextFormField(
+                          key: const Key('user_form_identificacion'),
                           controller: _identificacionController,
                           labelText: 'Identificación',
                           hintText: 'Cédula o documento',
-                          validator: (value) {
+                          validator: (value) {
+                            if (widget.userRole == 'admin_institucion' || widget.userRole == 'super_admin') {
+                              return null;
+                            }
+
                             if (value == null || value.trim().isEmpty) {
                               return 'La identificación es requerida';
                             }
@@ -5306,6 +5825,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
+                      key: const Key('cancelButton'),
                       onPressed: _isLoading ? null : () => context.pop(),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -5323,6 +5843,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   SizedBox(width: spacing.md),
                   Expanded(
                     child: ElevatedButton(
+                      key: const Key('formSaveButton'),
                       onPressed: _isLoading ? null : _saveUser,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -5343,7 +5864,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                                 ),
                               ),
                             )
-                          : Text('${_user != null ? 'Actualizar' : 'Crear'}', style: textStyles.button),
+                          : Text(_user != null ? 'Actualizar' : 'Crear', style: textStyles.button),
                     ),
                   ),
                 ],
@@ -5509,7 +6030,7 @@ class AuthService {
         return 'localhost';
       }
 
-      return '192.168.20.22';
+      return '192.168.20.22'
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost'
@@ -5666,7 +6187,7 @@ class InstitutionService {
       if (kIsWeb) {
         return 'localhost';
       }
-      return '192.168.20.22';
+      return '192.168.20.22'
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost';
@@ -5760,7 +6281,6 @@ class InstitutionService {
   Future<Institution?> createInstitution(
     String accessToken, {
     required String nombre,
-    required String codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -5775,7 +6295,6 @@ class InstitutionService {
         },
         body: jsonEncode({
           'nombre': nombre,
-          'codigo': codigo,
           if (direccion != null) 'direccion': direccion,
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,
@@ -5809,7 +6328,6 @@ class InstitutionService {
     String accessToken,
     String id, {
     String? nombre,
-    String? codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -5825,7 +6343,6 @@ class InstitutionService {
         },
         body: jsonEncode({
           if (nombre != null) 'nombre': nombre,
-          if (codigo != null) 'codigo': codigo,
           if (direccion != null) 'direccion': direccion,
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,
@@ -5912,7 +6429,7 @@ class ProfesorService {
       if (kIsWeb) {
         return 'localhost';
       }
-      return '192.168.20.22';
+      return '192.168.20.22'
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost';
@@ -6186,7 +6703,7 @@ class UserService {
       if (kIsWeb) {
         return 'localhost';
       }
-      return '192.168.20.22';
+      return '192.168.20.22'
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost';
@@ -7780,6 +8297,24 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/users/admin_institucion/create',
+        name: 'create-admin-institucion',
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Admin Institución',
+          child: UserFormScreen(userRole: 'admin_institucion'),
+        ),
+      ),
+      GoRoute(
+        path: '/users/super_admin/create',
+        name: 'create-super-admin',
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Super Admin',
+          child: UserFormScreen(userRole: 'super_admin'),
+        ),
+      ),
+      GoRoute(
         path: '/users/detail/:id',
         name: 'user-detail',
         builder: (context, state) {
@@ -8321,11 +8856,14 @@ class ManagementScaffold extends StatelessWidget {
                 child: ExpansionTile(
                   title: Text('Filtros y Búsqueda', style: textStyles.titleMedium),
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(spacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: filterWidgets!,
+                    Material(
+                      color: colors.surface,
+                      child: Padding(
+                        padding: EdgeInsets.all(spacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: filterWidgets!,
+                        ),
                       ),
                     ),
                   ],
@@ -8814,51 +9352,54 @@ class CustomTextFormField extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return TextFormField(
-      controller: controller,
-      initialValue: initialValue,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      maxLines: maxLines,
-      minLines: minLines,
-      enabled: enabled,
-      onChanged: onChanged,
-      onTap: onTap,
-      validator: validator,
-      style: textStyles.bodyLarge,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.border),
+    return Material(
+      color: Colors.transparent,
+      child: TextFormField(
+        controller: controller,
+        initialValue: initialValue,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        maxLines: maxLines,
+        minLines: minLines,
+        enabled: enabled,
+        onChanged: onChanged,
+        onTap: onTap,
+        validator: validator,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error, width: 2),
+          ),
+          filled: true,
+          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.sm,
+          ),
+          labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-        filled: true,
-        fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: spacing.md,
-          vertical: spacing.sm,
-        ),
-        labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
       ),
     );
   }
@@ -8890,45 +9431,48 @@ class CustomDropdownFormField<T> extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return DropdownButtonFormField<T>(
-      value: value,
-      items: items,
-      onChanged: enabled ? onChanged : null,
-      validator: validator,
-      style: textStyles.bodyLarge,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.border),
+    return Material(
+      color: Colors.transparent,
+      child: DropdownButtonFormField<T>(
+        value: value,
+        items: items,
+        onChanged: enabled ? onChanged : null,
+        validator: validator,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error, width: 2),
+          ),
+          filled: true,
+          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.sm,
+          ),
+          labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-        filled: true,
-        fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: spacing.md,
-          vertical: spacing.sm,
-        ),
-        labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
+        dropdownColor: colors.surface,
       ),
-      dropdownColor: colors.surface,
     );
   }
 }
@@ -9026,42 +9570,45 @@ class CustomSwitchFormField extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md),
-        child: Row(
-          children: [
-            Icon(
-              value ? Icons.check_circle : Icons.cancel,
-              color: value ? colors.success : colors.error,
-            ),
-            SizedBox(width: spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textStyles.bodyLarge,
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle!,
-                      style: textStyles.bodySmall.withColor(colors.textSecondary),
-                    ),
-                ],
+    return Material(
+      color: Colors.transparent,
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(spacing.borderRadius),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.md),
+          child: Row(
+            children: [
+              Icon(
+                value ? Icons.check_circle : Icons.cancel,
+                color: value ? colors.success : colors.error,
               ),
-            ),
-            Switch(
-              value: value,
-              onChanged: enabled ? onChanged : null,
-              activeColor: colors.primary,
-            ),
-          ],
+              SizedBox(width: spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textStyles.bodyLarge,
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: textStyles.bodySmall.withColor(colors.textSecondary),
+                      ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: value,
+                onChanged: enabled ? onChanged : null,
+                activeColor: colors.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -9070,7 +9617,6 @@ class CustomSwitchFormField extends StatelessWidget {
 /* Fin lib\widgets\form_widgets.dart */
 
 /* Inicio lib\widgets\index.dart */
-export 'app_wrappers.dart';
 export 'pagination_widget.dart';
 /* Fin lib\widgets\index.dart */
 
@@ -9529,6 +10075,40 @@ class RoleGuard extends StatelessWidget {
   }
 }
 /* Fin lib\widgets\role_guard.dart */
+
+/* Inicio lib\widgets\scroll_state_keeper.dart */
+import 'package:flutter/material.dart';
+class ScrollStateKeeper extends StatefulWidget {
+  final String routeKey;
+  final bool keepScrollPosition;
+  final Widget Function(BuildContext, ScrollController) builder;
+
+  const ScrollStateKeeper({
+    super.key,
+    required this.routeKey,
+    this.keepScrollPosition = true,
+    required this.builder,
+  });
+
+  @override
+  State<ScrollStateKeeper> createState() => _ScrollStateKeeperState();
+}
+
+class _ScrollStateKeeperState extends State<ScrollStateKeeper> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _scrollController);
+  }
+}
+/* Fin lib\widgets\scroll_state_keeper.dart */
 
 /* Inicio lib\widgets\session_info_footer.dart */
 import 'package:flutter/material.dart';
@@ -10472,7 +11052,11 @@ class UserController {
     static async createUser(request, reply) {
         try {
             const userData = request.body;
-            const result = await user_service_1.default.createUser(userData);
+            const invokerRole = request.user?.rol;
+            if (!invokerRole) {
+                throw new Error('Usuario no autenticado');
+            }
+            const result = await user_service_1.default.createUser(userData, invokerRole);
             return reply.code(201).send({
                 success: true,
                 data: result,
@@ -11108,7 +11692,7 @@ class AdminInstitucionService {
                 take: limit,
             });
             const totalPages = Math.ceil(total / limit);
-            const data = admins.map(admin => ({
+            const data = admins.map((admin) => ({
                 id: admin.id,
                 email: admin.email,
                 nombres: admin.nombres,
@@ -11393,7 +11977,7 @@ class AuthService {
                 nombres: usuario.nombres,
                 apellidos: usuario.apellidos,
                 rol: usuario.rol,
-                instituciones: usuario.usuarioInstituciones.map(ui => ({
+                instituciones: usuario.usuarioInstituciones.map((ui) => ({
                     id: ui.institucion.id,
                     nombre: ui.institucion.nombre,
                     rolEnInstitucion: ui.rolEnInstitucion,
@@ -11575,7 +12159,7 @@ class InstitucionService {
             if (filters?.search) {
                 where.OR = [
                     { nombre: { contains: filters.search, mode: 'insensitive' } },
-                    { codigo: { contains: filters.search, mode: 'insensitive' } },
+
                     { email: { contains: filters.search, mode: 'insensitive' } },
                 ];
             }
@@ -11591,7 +12175,7 @@ class InstitucionService {
                 where,
             });
             const totalPages = Math.ceil(total / limit);
-            const data = institutions.map(inst => ({
+            const data = institutions.map((inst) => ({
                 id: inst.id,
                 nombre: inst.nombre,
                 codigo: inst.codigo,
@@ -11653,15 +12237,8 @@ class InstitucionService {
     static async createInstitution(data) {
         try {
 
-            if (!data.nombre || !data.codigo) {
-                throw new types_1.ValidationError('Nombre y código son requeridos');
-            }
-
-            const existingInstitution = await database_1.prisma.institucion.findUnique({
-                where: { codigo: data.codigo },
-            });
-            if (existingInstitution) {
-                throw new types_1.ConflictError('Ya existe una institución con este código');
+            if (!data.nombre) {
+                throw new types_1.ValidationError('Nombre es requerido');
             }
             const institution = await database_1.prisma.institucion.create({
                 data: {
@@ -11699,15 +12276,6 @@ class InstitucionService {
             const existingInstitution = await this.getInstitutionById(id);
             if (!existingInstitution) {
                 throw new types_1.ValidationError('Institución no encontrada');
-            }
-
-            if (data.codigo && data.codigo !== existingInstitution.codigo) {
-                const codigoExists = await database_1.prisma.institucion.findUnique({
-                    where: { codigo: data.codigo },
-                });
-                if (codigoExists) {
-                    throw new types_1.ConflictError('Ya existe una institución con este código');
-                }
             }
             const institution = await database_1.prisma.institucion.update({
                 where: { id },
@@ -11763,26 +12331,6 @@ class InstitucionService {
         catch (error) {
             console.error(`Error al eliminar institución con ID ${id}:`, error);
             throw error;
-        }
-    }
-
-    static async isCodeAvailable(codigo, excludeInstitutionId) {
-        try {
-            if (!codigo || typeof codigo !== 'string') {
-                return false;
-            }
-            const whereClause = { codigo };
-            if (excludeInstitutionId) {
-                whereClause.id = { not: excludeInstitutionId };
-            }
-            const count = await database_1.prisma.institucion.count({
-                where: whereClause,
-            });
-            return count === 0;
-        }
-        catch (error) {
-            console.error(`Error al verificar disponibilidad de código ${codigo}:`, error);
-            return false;
         }
     }
 }
@@ -11857,7 +12405,7 @@ class ProfesorService {
             },
         });
 
-        const formattedProfesores = profesores.map(profesor => ({
+        const formattedProfesores = profesores.map((profesor) => ({
             id: profesor.id,
             nombres: profesor.nombres,
             apellidos: profesor.apellidos,
@@ -12239,8 +12787,18 @@ class UserService {
         return this.getAllUsers(pagination, combinedFilters);
     }
 
-    static async createUser(userData) {
+    static async createUser(userData, invokerRole) {
         try {
+
+            if (invokerRole === 'super_admin' && userData.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Un Super Admin solo puede crear usuarios de tipo Administrador de Institución.');
+            }
+            if (invokerRole === 'super_admin' && !userData.institucionId) {
+                throw new types_1.ValidationError('Se requiere un institucionId para crear un Administrador de Institución.');
+            }
+            if (invokerRole === 'admin_institucion' && (userData.rol !== 'profesor' && userData.rol !== 'estudiante')) {
+                throw new types_1.AuthorizationError('Un Administrador de Institución solo puede crear profesores o estudiantes.');
+            }
 
             if (!userData.email || !userData.password || !userData.nombres || !userData.apellidos || !userData.rol) {
                 throw new types_1.ValidationError('Campos requeridos faltantes');
@@ -12619,37 +13177,47 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed de AsistApp V2...');
-  console.log('🏫 Creando instituciones...');
+  console.log('🌱 Iniciando seed de AsistApp V2...');
 
-  const instituciones = await Promise.all([
-    prisma.institucion.upsert({
-      where: { codigo: 'sanjose' },
-      update: {},
-      create: {
-        nombre: 'Colegio San José',
-        codigo: 'sanjose',
-        direccion: 'Calle 123 #45-67',
-        email: 'admin@sanjose.edu',
-        telefono: '555-0101',
-        activa: true,
-      },
-    }),
-    prisma.institucion.upsert({
-      where: { codigo: 'fps' },
-      update: {},
-      create: {
-        nombre: 'IE Francisco de Paula Santander',
-        codigo: 'fps',
-        direccion: 'Carrera 10 #20-30',
-        email: 'admin@fps.edu',
-        telefono: '555-0202',
-        activa: true,
-      },
-    }),
-  ]);
+  console.log('🏫 Creando instituciones...');
+  const institucionesExistentes = await prisma.institucion.findMany({
+    where: {
+      OR: [
+        { nombre: 'Colegio San José' },
+        { nombre: 'IE Francisco de Paula Santander' }
+      ]
+    }
+  });
 
-  console.log('✅ Instituciones creadas:', instituciones.length);
+  const instituciones = [];
+  if (institucionesExistentes.length === 0) {
+    const nuevasInstituciones = await Promise.all([
+      prisma.institucion.create({
+        data: {
+          nombre: 'Colegio San José',
+          direccion: 'Calle 123 #45-67',
+          email: 'admin@sanjose.edu',
+          telefono: '555-0101',
+          activa: true,
+        },
+      }),
+      prisma.institucion.create({
+        data: {
+          nombre: 'IE Francisco de Paula Santander',
+          direccion: 'Carrera 10 #20-30',
+          email: 'admin@fps.edu',
+          telefono: '555-0202',
+          activa: true,
+        },
+      }),
+    ]);
+    instituciones.push(...nuevasInstituciones);
+  } else {
+    instituciones.push(...institucionesExistentes);
+  }
+
+  console.log('✅ Instituciones creadas:', instituciones.length);
+
   console.log('👑 Creando super admin...');
 
   const superAdminPassword = await bcrypt.hash('Admin123!', 10);
@@ -12667,7 +13235,8 @@ async function main() {
     },
   });
 
-  console.log('✅ Super admin creado:', superAdmin.email);
+  console.log('✅ Super admin creado:', superAdmin.email);
+
   console.log('👥 Creando usuario multi-institución...');
 
   const multiUserPassword = await bcrypt.hash('Multi123!', 10);
@@ -12683,7 +13252,8 @@ async function main() {
       rol: 'admin_institucion',
       activo: true,
     },
-  });
+  });
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -12717,7 +13287,8 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+
   console.log('👨‍💼 Creando admins de institución...');
 
   const adminSanJosePassword = await bcrypt.hash('SanJose123!', 10);
@@ -12750,7 +13321,8 @@ async function main() {
         activo: true,
       },
     }),
-  ]);
+  ]);
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -12784,7 +13356,8 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Admins de institución creados:', adminsInstitucion.length);
+  console.log('✅ Admins de institución creados:', adminsInstitucion.length);
+
   console.log('👨‍🏫 Creando profesores...');
 
   const profesor1Password = await bcrypt.hash('Prof123!', 10);
@@ -12817,7 +13390,8 @@ async function main() {
         activo: true,
       },
     }),
-  ]);
+  ]);
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -12851,7 +13425,8 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Profesores creados:', profesores.length);
+  console.log('✅ Profesores creados:', profesores.length);
+
   console.log('👨‍🎓 Creando estudiantes...');
 
   const estudiantesData = [
@@ -12877,7 +13452,8 @@ async function main() {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await prisma.usuarioInstitucion.upsert({
       where: {
         usuarioId_institucionId: {
@@ -12909,34 +13485,42 @@ async function main() {
     estudiantes.push({ usuario, estudiante });
   }
 
-  console.log('✅ Estudiantes creados:', estudiantes.length);
-  console.log('📅 Creando periodos académicos...');
+  console.log('✅ Estudiantes creados:', estudiantes.length);
+
+  console.log('📅 Creando periodos académicos...');
 
   console.log('📅 Periodos académicos saltados temporalmente');
 
-  const periodos = [{ id: 'temp-id' }]
-  console.log('👥 Creando grupos...');
+  const periodos = [{ id: 'temp-id' }]
+
+  console.log('👥 Creando grupos...');
 
   console.log('👥 Grupos saltados temporalmente');
 
-  const grupos = [{ id: 'temp-id' }]
-  console.log('📚 Creando materias...');
+  const grupos = [{ id: 'temp-id' }]
+
+  console.log('📚 Creando materias...');
 
   console.log('📚 Materias saltadas temporalmente');
 
-  const materias = [{ id: 'temp-id' }]
-  console.log('⏰ Creando horarios...');
+  const materias = [{ id: 'temp-id' }]
 
-  console.log('⏰ Horarios saltados temporalmente');
-  console.log('🔗 Asignando estudiantes a grupos...');
+  console.log('⏰ Creando horarios...');
 
-  console.log('🔗 Estudiantes asignados a grupos (saltado)');
-  console.log('📝 Creando asistencias de ejemplo...');
+  console.log('⏰ Horarios saltados temporalmente');
 
-  console.log('📝 Asistencias de ejemplo creadas (saltado)');
-  console.log('⚙️ Creando configuraciones...');
+  console.log('🔗 Asignando estudiantes a grupos...');
 
-  console.log('⚙️ Configuraciones creadas (saltado)');
+  console.log('🔗 Estudiantes asignados a grupos (saltado)');
+
+  console.log('📝 Creando asistencias de ejemplo...');
+
+  console.log('📝 Asistencias de ejemplo creadas (saltado)');
+
+  console.log('⚙️ Creando configuraciones...');
+
+  console.log('⚙️ Configuraciones creadas (saltado)');
+
   console.log('\n🎉 Seed completado exitosamente!');
   console.log('\n📊 Resumen de datos creados:');
   console.log('🏫 Instituciones:', instituciones.length);
@@ -13344,7 +13928,6 @@ interface GetInstitucionParams {
 
 interface CreateInstitucionBody {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -13352,7 +13935,6 @@ interface CreateInstitucionBody {
 
 interface UpdateInstitucionBody {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -13897,8 +14479,13 @@ export class UserController {
   ) {
     try {
       const userData = request.body as any;
+      const invokerRole = (request as any).user?.rol;
 
-      const result = await UserService.createUser(userData);
+      if (!invokerRole) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const result = await UserService.createUser(userData, invokerRole);
 
       return reply.code(201).send({
         success: true,
@@ -14568,7 +15155,7 @@ export class AdminInstitucionService {
 
       const totalPages = Math.ceil(total / limit);
 
-      const data: AdminInstitucionResponse[] = admins.map(admin => ({
+      const data: AdminInstitucionResponse[] = admins.map((admin: any) => ({
         id: admin.id,
         email: admin.email,
         nombres: admin.nombres,
@@ -14672,7 +15259,7 @@ export class AdminInstitucionService {
         throw new ConflictError('El email ya está registrado');
       }
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const admin = await tx.usuario.create({
           data: {
             email: data.email.toLowerCase(),
@@ -14855,7 +15442,7 @@ export class AuthService {
         nombres: usuario.nombres,
         apellidos: usuario.apellidos,
         rol: usuario.rol as UserRole,
-        instituciones: usuario.usuarioInstituciones.map(ui => ({
+        instituciones: usuario.usuarioInstituciones.map((ui: any) => ({
           id: ui.institucion.id,
           nombre: ui.institucion.nombre,
           rolEnInstitucion: ui.rolEnInstitucion,
@@ -15048,7 +15635,6 @@ export interface InstitutionFilters {
 
 export interface CreateInstitutionRequest {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -15056,7 +15642,6 @@ export interface CreateInstitutionRequest {
 
 export interface UpdateInstitutionRequest {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -15066,7 +15651,6 @@ export interface UpdateInstitutionRequest {
 export interface InstitutionResponse {
   id: string;
   nombre: string;
-  codigo: string;
   direccion: string | null;
   telefono: string | null;
   email: string | null;
@@ -15089,8 +15673,7 @@ export class InstitucionService {
       }
       if (filters?.search) {
         where.OR = [
-          { nombre: { contains: filters.search, mode: 'insensitive' } },
-          { codigo: { contains: filters.search, mode: 'insensitive' } },
+          { nombre: { contains: filters.search, mode: 'insensitive' } },
           { email: { contains: filters.search, mode: 'insensitive' } },
         ];
       }
@@ -15106,10 +15689,9 @@ export class InstitucionService {
 
       const totalPages = Math.ceil(total / limit);
 
-      const data: InstitutionResponse[] = institutions.map(inst => ({
+      const data: InstitutionResponse[] = institutions.map((inst: any) => ({
         id: inst.id,
         nombre: inst.nombre,
-        codigo: inst.codigo,
         direccion: inst.direccion,
         telefono: inst.telefono,
         email: inst.email,
@@ -15154,7 +15736,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -15170,21 +15751,13 @@ export class InstitucionService {
 
   public static async createInstitution(data: CreateInstitutionRequest): Promise<InstitutionResponse> {
     try {
-      if (!data.nombre || !data.codigo) {
-        throw new ValidationError('Nombre y código son requeridos');
-      }
-      const existingInstitution = await prisma.institucion.findUnique({
-        where: { codigo: data.codigo },
-      });
-
-      if (existingInstitution) {
-        throw new ConflictError('Ya existe una institución con este código');
+      if (!data.nombre) {
+        throw new ValidationError('Nombre es requerido');
       }
 
       const institution = await prisma.institucion.create({
         data: {
           nombre: data.nombre,
-          codigo: data.codigo,
           direccion: data.direccion,
           telefono: data.telefono,
           email: data.email,
@@ -15194,7 +15767,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -15216,22 +15788,12 @@ export class InstitucionService {
       const existingInstitution = await this.getInstitutionById(id);
       if (!existingInstitution) {
         throw new ValidationError('Institución no encontrada');
-      }
-      if (data.codigo && data.codigo !== existingInstitution.codigo) {
-        const codigoExists = await prisma.institucion.findUnique({
-          where: { codigo: data.codigo },
-        });
-
-        if (codigoExists) {
-          throw new ConflictError('Ya existe una institución con este código');
-        }
       }
 
       const institution = await prisma.institucion.update({
         where: { id },
         data: {
           nombre: data.nombre,
-          codigo: data.codigo,
           direccion: data.direccion,
           telefono: data.telefono,
           email: data.email,
@@ -15242,7 +15804,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -15281,31 +15842,6 @@ export class InstitucionService {
     } catch (error) {
       console.error(`Error al eliminar institución con ID ${id}:`, error);
       throw error;
-    }
-  }
-
-  public static async isCodeAvailable(codigo: string, excludeInstitutionId?: string): Promise<boolean> {
-    try {
-      if (!codigo || typeof codigo !== 'string') {
-        return false;
-      }
-
-      const whereClause: {
-        codigo: string;
-        id?: { not: string };
-      } = { codigo };
-      if (excludeInstitutionId) {
-        whereClause.id = { not: excludeInstitutionId };
-      }
-
-      const count = await prisma.institucion.count({
-        where: whereClause,
-      });
-
-      return count === 0;
-    } catch (error) {
-      console.error(`Error al verificar disponibilidad de código ${codigo}:`, error);
-      return false;
     }
   }
 }
@@ -15399,7 +15935,7 @@ export class ProfesorService {
         apellidos: 'asc',
       },
     });
-    const formattedProfesores = profesores.map(profesor => ({
+    const formattedProfesores = profesores.map((profesor: any) => ({
       id: profesor.id,
       nombres: profesor.nombres,
       apellidos: profesor.apellidos,
@@ -15652,7 +16188,7 @@ export default ProfesorService;
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
+import { AuthorizationError, ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
 
 export class UserService {
 
@@ -15779,8 +16315,17 @@ export class UserService {
     return this.getAllUsers(pagination, combinedFilters);
   }
 
-  public static async createUser(userData: CreateUserRequest): Promise<CreateUserResponse> {
+  public static async createUser(userData: CreateUserRequest, invokerRole: UserRole): Promise<CreateUserResponse> {
     try {
+      if (invokerRole === 'super_admin' && userData.rol !== 'admin_institucion' && userData.rol !== 'super_admin') {
+        throw new AuthorizationError('Un Super Admin solo puede crear usuarios de tipo Administrador de Institución o Super Admin.');
+      }
+      if (invokerRole === 'super_admin' && userData.rol === 'admin_institucion' && !userData.institucionId) {
+        throw new ValidationError('Se requiere un institucionId para crear un Administrador de Institución.');
+      }
+      if (invokerRole === 'admin_institucion' && (userData.rol !== 'profesor' && userData.rol !== 'estudiante')) {
+        throw new AuthorizationError('Un Administrador de Institución solo puede crear profesores o estudiantes.');
+      }
       if (!userData.email || !userData.password || !userData.nombres || !userData.apellidos || !userData.rol) {
         throw new ValidationError('Campos requeridos faltantes');
       }
@@ -15801,7 +16346,7 @@ export class UserService {
         }
         codigoQr = this.generateUniqueQRCode();
       }
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const newUser = await tx.usuario.create({
           data: {
             email: userData.email.toLowerCase(),
@@ -15896,7 +16441,7 @@ export class UserService {
           throw new ConflictError('El email ya está registrado');
         }
       }
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const updateData: {
           email?: string;
           nombres?: string;
@@ -16013,8 +16558,10 @@ export default UserService;
 /* Fin backend\src\services\user.service.ts */
 
 /* Inicio backend\src\types\index.ts */
-import { Institucion, Usuario } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+export type Institucion = any;
+export type Usuario = any;
 
 export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
 
@@ -16178,7 +16725,6 @@ export interface AppConfig {
 
 export interface CreateInstitucionRequest {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -16186,7 +16732,6 @@ export interface CreateInstitucionRequest {
 
 export interface UpdateInstitucionRequest {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -16196,7 +16741,6 @@ export interface UpdateInstitucionRequest {
 export interface InstitucionResponse {
   id: string;
   nombre: string;
-  codigo: string;
   direccion?: string | null;
   telefono?: string | null;
   email?: string | null;
@@ -16558,10 +17102,13 @@ import AuthService from '../src/services/auth.service';
 describe('Auth Integration Tests', () => {
   let fastify: any;
 
-  beforeAll(async () => {
-    fastify = Fastify({ logger: false });
+  beforeAll(async () => {
+
+    fastify = Fastify({ logger: false });
+
     setupErrorHandler(fastify);
-    fastify.register(routes);
+    fastify.register(routes);
+
     await databaseService.connect();
     await AuthService.ensureAdminUser();
 
@@ -16573,7 +17120,8 @@ describe('Auth Integration Tests', () => {
     await databaseService.disconnect();
   });
 
-  beforeEach(async () => {
+  beforeEach(async () => {
+
     const client = databaseService.getClient();
     await client.refreshToken.deleteMany();
     await client.usuarioInstitucion.deleteMany();
@@ -16582,22 +17130,18 @@ describe('Auth Integration Tests', () => {
         email: { not: 'admin@asistapp.com' }
       }
     });
-    await client.institucion.deleteMany({
-      where: {
-        codigo: { not: 'DEFAULT' }
-      }
-    });
+    await client.institucion.deleteMany();
   });
 
-  it('should complete full auth flow: login -> get institutions -> refresh -> logout', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should complete full auth flow: login -> get institutions -> refresh -> logout', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -16608,7 +17152,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -16616,7 +17161,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -16635,7 +17181,8 @@ describe('Auth Integration Tests', () => {
     expect(loginBody.data.usuario.instituciones).toHaveLength(1);
 
     const accessToken = loginBody.data.accessToken;
-    const refreshToken = loginBody.data.refreshToken;
+    const refreshToken = loginBody.data.refreshToken;
+
     const institutionsResponse = await fastify.inject({
       method: 'GET',
       url: '/auth/instituciones',
@@ -16648,7 +17195,8 @@ describe('Auth Integration Tests', () => {
     const institutionsBody = JSON.parse(institutionsResponse.body);
     expect(institutionsBody.success).toBe(true);
     expect(institutionsBody.data).toHaveLength(1);
-    expect(institutionsBody.data[0].id).toBe(institucion.id);
+    expect(institutionsBody.data[0].id).toBe(institucion.id);
+
     const verifyResponse = await fastify.inject({
       method: 'GET',
       url: '/auth/verify',
@@ -16660,7 +17208,8 @@ describe('Auth Integration Tests', () => {
     expect(verifyResponse.statusCode).toBe(200);
     const verifyBody = JSON.parse(verifyResponse.body);
     expect(verifyBody.success).toBe(true);
-    expect(verifyBody.data.valid).toBe(true);
+    expect(verifyBody.data.valid).toBe(true);
+
     const refreshResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -16673,11 +17222,13 @@ describe('Auth Integration Tests', () => {
     const refreshBody = JSON.parse(refreshResponse.body);
     expect(refreshBody.success).toBe(true);
     expect(refreshBody.data).toHaveProperty('accessToken');
-    expect(refreshBody.data).toHaveProperty('refreshToken');
+    expect(refreshBody.data).toHaveProperty('refreshToken');
+
     expect(refreshBody.data.refreshToken).not.toBe(refreshToken);
 
     const newAccessToken = refreshBody.data.accessToken;
-    const newRefreshToken = refreshBody.data.refreshToken;
+    const newRefreshToken = refreshBody.data.refreshToken;
+
     const logoutResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/logout',
@@ -16691,7 +17242,8 @@ describe('Auth Integration Tests', () => {
 
     expect(logoutResponse.statusCode).toBe(200);
     const logoutBody = JSON.parse(logoutResponse.body);
-    expect(logoutBody.success).toBe(true);
+    expect(logoutBody.success).toBe(true);
+
     const refreshAfterLogoutResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -16746,15 +17298,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle expired refresh token', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle expired refresh token', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -16765,7 +17317,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -16773,7 +17326,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const expiredToken = await databaseService.getClient().refreshToken.create({
       data: {
         usuarioId: user.id,
@@ -16781,7 +17335,8 @@ describe('Auth Integration Tests', () => {
         expiresAt: new Date(Date.now() - 1000), // Expirado
         revoked: false,
       },
-    });
+    });
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -16796,15 +17351,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle revoked refresh token', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle revoked refresh token', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -16815,7 +17370,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -16823,7 +17379,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const revokedToken = await databaseService.getClient().refreshToken.create({
       data: {
         usuarioId: user.id,
@@ -16831,7 +17388,8 @@ describe('Auth Integration Tests', () => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Válido
         revoked: true,
       },
-    });
+    });
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -16846,15 +17404,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle login with inactive user', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle login with inactive user', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('inactivepass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -16865,7 +17423,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: false, // Usuario inactivo
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -16890,7 +17449,8 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle missing required fields in login', async () => {
+  it('should handle missing required fields in login', async () => {
+
     const response1 = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -16902,7 +17462,8 @@ describe('Auth Integration Tests', () => {
     expect(response1.statusCode).toBe(400);
     const body1 = JSON.parse(response1.body);
     expect(body1.success).toBe(false);
-    expect(body1.code).toBe('VALIDATION_ERROR');
+    expect(body1.code).toBe('VALIDATION_ERROR');
+
     const response2 = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -16917,7 +17478,8 @@ describe('Auth Integration Tests', () => {
     expect(body2.code).toBe('VALIDATION_ERROR');
   });
 
-  it('should handle malformed refresh token request', async () => {
+  it('should handle malformed refresh token request', async () => {
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -17679,16 +18241,20 @@ describe('Institucion Integration Tests', () => {
   let fastify: any;
   let adminToken: string;
 
-  beforeAll(async () => {
-    fastify = Fastify({ logger: false });
+  beforeAll(async () => {
+
+    fastify = Fastify({ logger: false });
+
     setupErrorHandler(fastify);
-    fastify.register(routes);
+    fastify.register(routes);
+
     await databaseService.connect();
 
     await fastify.ready();
   });
 
-  beforeEach(async () => {
+  beforeEach(async () => {
+
     const client = databaseService.getClient();
     await client.asistencia.deleteMany();
     await client.logNotificacion.deleteMany();
@@ -17708,19 +18274,24 @@ describe('Institucion Integration Tests', () => {
     });
     await client.institucion.deleteMany({
       where: {
-        codigo: { not: 'DEFAULT' }
+        nombre: { not: 'Institución por Defecto' }
       }
-    });
+    });
+
     await AuthService.ensureAdminUser();
-    await databaseService.getClient().institucion.upsert({
-      where: { codigo: 'DEFAULT' },
-      update: {},
-      create: {
-        nombre: 'Institución por Defecto',
-        codigo: 'DEFAULT',
-        activa: true,
-      },
-    });
+    const existingDefault = await databaseService.getClient().institucion.findFirst({
+      where: { nombre: 'Institución por Defecto' }
+    });
+
+    if (!existingDefault) {
+      await databaseService.getClient().institucion.create({
+        data: {
+          nombre: 'Institución por Defecto',
+          activa: true,
+        },
+      });
+    }
+
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -17762,19 +18333,18 @@ describe('Institucion Integration Tests', () => {
   });
 
   describe('GET /instituciones', () => {
-    it('should get all instituciones for super_admin', async () => {
+    it('should get all instituciones for super_admin', async () => {
+
       await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución 1',
-          codigo: 'INST001',
+          nombre: 'Institución 1',
           activa: true,
         },
       });
 
       await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución 2',
-          codigo: 'INST002',
+          nombre: 'Institución 2',
           activa: false,
         },
       });
@@ -17792,12 +18362,12 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(true);
       expect(body.data).toHaveLength(3)
       expect(body.data[0]).toHaveProperty('id');
-      expect(body.data[0]).toHaveProperty('nombre');
-      expect(body.data[0]).toHaveProperty('codigo');
+      expect(body.data[0]).toHaveProperty('nombre');
       expect(body.data[0]).toHaveProperty('activa');
     });
 
-    it('should deny access to non-super-admin', async () => {
+    it('should deny access to non-super-admin', async () => {
+
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await databaseService.getClient().usuario.create({
         data: {
@@ -17808,7 +18378,8 @@ describe('Institucion Integration Tests', () => {
           rol: 'admin_institucion',
           activo: true,
         },
-      });
+      });
+
       const loginResponse = await fastify.inject({
         method: 'POST',
         url: '/auth/login',
@@ -17852,8 +18423,7 @@ describe('Institucion Integration Tests', () => {
     it('should get institucion by id for super_admin', async () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución Test',
-          codigo: 'TEST001',
+          nombre: 'Institución Test',
           direccion: 'Dirección Test',
           telefono: '123456789',
           email: 'test@institucion.com',
@@ -17873,8 +18443,7 @@ describe('Institucion Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
       expect(body.data.id).toBe(institucion.id);
-      expect(body.data.nombre).toBe('Institución Test');
-      expect(body.data.codigo).toBe('TEST001');
+      expect(body.data.nombre).toBe('Institución Test');
       expect(body.data.direccion).toBe('Dirección Test');
       expect(body.data.telefono).toBe('123456789');
       expect(body.data.email).toBe('test@institucion.com');
@@ -17900,8 +18469,7 @@ describe('Institucion Integration Tests', () => {
   describe('POST /instituciones', () => {
     it('should create new institucion for super_admin', async () => {
       const institucionData = {
-        nombre: 'Nueva Institución',
-        codigo: 'NEW001',
+        nombre: 'Nueva Institución',
         direccion: 'Nueva Dirección',
         telefono: '987654321',
         email: 'nueva@institucion.com',
@@ -17919,12 +18487,12 @@ describe('Institucion Integration Tests', () => {
       expect(response.statusCode).toBe(201);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.data.nombre).toBe('Nueva Institución');
-      expect(body.data.codigo).toBe('NEW001');
+      expect(body.data.nombre).toBe('Nueva Institución');
       expect(body.data.activa).toBe(true)
-      expect(body.message).toBe('Institución creada exitosamente');
+      expect(body.message).toBe('Institución creada exitosamente');
+
       const created = await databaseService.getClient().institucion.findUnique({
-        where: { codigo: 'NEW001' },
+        where: { id: body.data.id },
       });
       expect(created).toBeTruthy();
       expect(created?.nombre).toBe('Nueva Institución');
@@ -17937,8 +18505,7 @@ describe('Institucion Integration Tests', () => {
         headers: {
           authorization: `Bearer ${adminToken}`,
         },
-        payload: {
-          nombre: 'Institución sin código',
+        payload: {
         },
       });
 
@@ -17947,48 +18514,19 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(false);
       expect(body.code).toBe('VALIDATION_ERROR');
     });
-
-    it('should return 409 for duplicate codigo', async () => {
-      await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución Existente',
-          codigo: 'DUPLICATE',
-          activa: true,
-        },
-      });
-
-      const response = await fastify.inject({
-        method: 'POST',
-        url: '/instituciones',
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-        payload: {
-          nombre: 'Nueva Institución',
-          codigo: 'DUPLICATE', // Código duplicado
-        },
-      });
-
-      expect(response.statusCode).toBe(409);
-      const body = JSON.parse(response.body);
-      expect(body.success).toBe(false);
-      expect(body.code).toBe('CONFLICT_ERROR');
-    });
   });
 
   describe('PUT /instituciones/:id', () => {
     it('should update institucion for super_admin', async () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución Original',
-          codigo: 'ORIGINAL',
+          nombre: 'Institución Original',
           activa: true,
         },
       });
 
       const updateData = {
-        nombre: 'Institución Actualizada',
-        codigo: 'UPDATED',
+        nombre: 'Institución Actualizada',
         direccion: 'Dirección Actualizada',
         telefono: '111111111',
         email: 'updated@institucion.com',
@@ -18007,15 +18545,14 @@ describe('Institucion Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.data.nombre).toBe('Institución Actualizada');
-      expect(body.data.codigo).toBe('UPDATED');
+      expect(body.data.nombre).toBe('Institución Actualizada');
       expect(body.data.activa).toBe(false);
-      expect(body.message).toBe('Institución actualizada exitosamente');
+      expect(body.message).toBe('Institución actualizada exitosamente');
+
       const updated = await databaseService.getClient().institucion.findUnique({
         where: { id: institucion.id },
       });
-      expect(updated?.nombre).toBe('Institución Actualizada');
-      expect(updated?.codigo).toBe('UPDATED');
+      expect(updated?.nombre).toBe('Institución Actualizada');
     });
 
     it('should return 404 for non-existent institucion', async () => {
@@ -18035,47 +18572,13 @@ describe('Institucion Integration Tests', () => {
       expect(body.success).toBe(false);
       expect(body.code).toBe('NOT_FOUND_ERROR');
     });
-
-    it('should return 409 for duplicate codigo on update', async () => {
-      const inst1 = await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución 1',
-          codigo: 'CODE1',
-          activa: true,
-        },
-      });
-
-      await databaseService.getClient().institucion.create({
-        data: {
-          nombre: 'Institución 2',
-          codigo: 'CODE2',
-          activa: true,
-        },
-      });
-      const response = await fastify.inject({
-        method: 'PUT',
-        url: `/instituciones/${inst1.id}`,
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-        payload: {
-          codigo: 'CODE2', // Código que ya existe
-        },
-      });
-
-      expect(response.statusCode).toBe(409);
-      const body = JSON.parse(response.body);
-      expect(body.success).toBe(false);
-      expect(body.code).toBe('CONFLICT_ERROR');
-    });
   });
 
   describe('DELETE /instituciones/:id', () => {
     it('should delete institucion for super_admin', async () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución a Eliminar',
-          codigo: 'DELETE001',
+          nombre: 'Institución a Eliminar',
           activa: true,
         },
       });
@@ -18091,7 +18594,8 @@ describe('Institucion Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.message).toBe('Institución eliminada exitosamente');
+      expect(body.message).toBe('Institución eliminada exitosamente');
+
       const deleted = await databaseService.getClient().institucion.findUnique({
         where: { id: institucion.id },
       });
@@ -18116,11 +18620,11 @@ describe('Institucion Integration Tests', () => {
     it('should return 409 when trying to delete institucion with active users', async () => {
       const institucion = await databaseService.getClient().institucion.create({
         data: {
-          nombre: 'Institución con Usuarios',
-          codigo: 'WITHUSERS',
+          nombre: 'Institución con Usuarios',
           activa: true,
         },
-      });
+      });
+
       const hashedPassword = await AuthService.hashPassword('testpass');
       const user = await databaseService.getClient().usuario.create({
         data: {
@@ -18183,7 +18687,7 @@ import { testDatabaseService } from './test-database';
 beforeAll(async () => {
 
   process.env.NODE_ENV = 'test';
-  process.env.DATABASE_URL = 'file:./test.db';
+  process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5433/asistapp_test?schema=public';
 
   await testDatabaseService.connect();
 });
@@ -18992,17 +19496,11 @@ describe('User Integration Tests', () => {
         email: { not: 'admin@asistapp.com' }
       }
     });
-    await client.institucion.deleteMany({
-      where: {
-        codigo: { not: 'DEFAULT' }
-      }
-    });
+    await client.institucion.deleteMany();
 
-    const uniqueCode = `INT${Date.now()}`;
     const institucion = await client.institucion.create({
       data: {
         nombre: 'Institución Test',
-        codigo: uniqueCode,
         activa: true,
       },
     });
@@ -19240,11 +19738,9 @@ describe('User Integration Tests', () => {
 
     it('should return empty array for institution with no users', async () => {
 
-      const uniqueCode = `INT${Date.now()}`;
       const emptyInstitution = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución Vacía',
-          codigo: uniqueCode,
           activa: true,
         },
       });

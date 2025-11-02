@@ -111,7 +111,6 @@ class InstitutionProvider with ChangeNotifier {
       final newInstitution = await _institutionService.createInstitution(
         accessToken,
         nombre: institutionData['nombre'],
-        codigo: institutionData['codigo'],
         direccion: institutionData['direccion'],
         telefono: institutionData['telefono'],
         email: institutionData['email'],
@@ -135,7 +134,6 @@ class InstitutionProvider with ChangeNotifier {
     String accessToken,
     String id, {
     String? nombre,
-    String? codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -148,7 +146,6 @@ class InstitutionProvider with ChangeNotifier {
         accessToken,
         id,
         nombre: nombre,
-        codigo: codigo,
         direccion: direccion,
         telefono: telefono,
         email: email,
@@ -230,7 +227,6 @@ class InstitutionProvider with ChangeNotifier {
     final lowercaseQuery = query.toLowerCase();
     return _institutions.where((inst) {
       return inst.nombre.toLowerCase().contains(lowercaseQuery) ||
-             inst.codigo.toLowerCase().contains(lowercaseQuery) ||
              (inst.email?.toLowerCase().contains(lowercaseQuery) ?? false);
     }).toList();
   }

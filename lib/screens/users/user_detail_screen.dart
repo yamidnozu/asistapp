@@ -19,7 +19,7 @@ class UserDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${user.nombreCompleto}',
+          user.nombreCompleto,
           style: textStyles.titleLarge,
         ),
         backgroundColor: colors.primary,
@@ -94,7 +94,6 @@ class UserDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoSection(BuildContext context, String title, List<Widget> items) {
-    final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 

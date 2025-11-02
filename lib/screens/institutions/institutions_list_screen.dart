@@ -1,20 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
-import '../../utils/responsive_utils.dart';
-import '../../utils/app_routes.dart';
-import '../../widgets/dashboard_widgets.dart';
-import '../../widgets/common/empty_state_widget.dart';
 import '../../widgets/common/management_scaffold.dart';
 import 'institution_form_screen.dart';
+import 'create_institution_admin_screen.dart';
 
 class InstitutionsListScreen extends StatefulWidget {
   const InstitutionsListScreen({super.key});
@@ -136,6 +130,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           onRefresh: () => _loadInstitutions(),
           scrollController: _scrollController,
           floatingActionButton: FloatingActionButton(
+            key: const Key('addInstitutionButton'),
             onPressed: () => _navigateToForm(context),
             backgroundColor: context.colors.primary,
             child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
@@ -159,6 +154,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
     return [
       TextField(
+        key: const Key('searchInstitutionField'),
         controller: _searchController,
         style: textStyles.bodyLarge,
         decoration: InputDecoration(
@@ -315,11 +311,6 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(Icons.tag, size: 14, color: colors.textSecondary),
-              SizedBox(width: 4),
-              Text(institution.codigo, style: textStyles.bodySmall),
-            ]),
             if (institution.email != null) Row(children: [
               Icon(Icons.email_outlined, size: 14, color: colors.textSecondary),
               SizedBox(width: 4),
@@ -332,40 +323,57 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             ]),
           ],
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, institution, provider),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Editar', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'toggle_status',
-              child: Row(
-                children: [
-                  Icon(Icons.toggle_on, color: colors.textSecondary),
-                  SizedBox(width: spacing.sm),
-                  Text('Cambiar Estado', style: textStyles.bodyMedium),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: colors.error),
-                  SizedBox(width: spacing.sm),
-                  Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
-                ],
-              ),
-            ),
-          ],
+        trailing: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            final userRole = authProvider.user?['rol'] as String?;
+            final isSuperAdmin = userRole == 'super_admin';
+            
+            return PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(value, institution, provider),
+              itemBuilder: (context) => [
+                if (isSuperAdmin) PopupMenuItem(
+                  value: 'create_admin',
+                  child: Row(
+                    children: [
+                      Icon(Icons.admin_panel_settings, color: colors.primary),
+                      SizedBox(width: spacing.sm),
+                      Text('Crear Administrador', style: textStyles.bodyMedium.withColor(colors.primary)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: colors.textSecondary),
+                      SizedBox(width: spacing.sm),
+                      Text('Editar', style: textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'toggle_status',
+                  child: Row(
+                    children: [
+                      Icon(Icons.toggle_on, color: colors.textSecondary),
+                      SizedBox(width: spacing.sm),
+                      Text('Cambiar Estado', style: textStyles.bodyMedium),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: colors.error),
+                      SizedBox(width: spacing.sm),
+                      Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         onTap: () => _navigateToForm(context, institution: institution),
       ),
@@ -376,6 +384,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     switch (action) {
+      case 'create_admin':
+        _navigateToCreateInstitutionAdmin(institution);
+        break;
+        
       case 'edit':
         _navigateToForm(context, institution: institution);
         break;
@@ -461,6 +473,15 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => InstitutionFormScreen(institution: institution),
+      ),
+    );
+  }
+
+  void _navigateToCreateInstitutionAdmin(Institution institution) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateInstitutionAdminScreen(institution: institution),
       ),
     );
   }

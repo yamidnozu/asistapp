@@ -131,6 +131,24 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/users/admin_institucion/create',
+        name: 'create-admin-institucion',
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Admin Institución',
+          child: UserFormScreen(userRole: 'admin_institucion'),
+        ),
+      ),
+      GoRoute(
+        path: '/users/super_admin/create',
+        name: 'create-super-admin',
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          name: 'Crear Super Admin',
+          child: UserFormScreen(userRole: 'super_admin'),
+        ),
+      ),
+      GoRoute(
         path: '/users/detail/:id',
         name: 'user-detail',
         builder: (context, state) {

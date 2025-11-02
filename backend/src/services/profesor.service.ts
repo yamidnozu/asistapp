@@ -99,7 +99,7 @@ export class ProfesorService {
     });
 
     // Formatear respuesta
-    const formattedProfesores = profesores.map(profesor => ({
+    const formattedProfesores = profesores.map((profesor: any) => ({
       id: profesor.id,
       nombres: profesor.nombres,
       apellidos: profesor.apellidos,

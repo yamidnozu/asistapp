@@ -15,6 +15,18 @@ export default async function routes(fastify: FastifyInstance) {
     };
   });
 
+  fastify.get('/health', async (request, reply) => {
+    return reply.code(200).send({
+      success: true,
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: {
+        server: 'running'
+      },
+      uptime: process.uptime()
+    });
+  });
+
   fastify.get('/test', async (request, reply) => {
     return reply.code(200).send({
       success: true,

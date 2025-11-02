@@ -41,17 +41,11 @@ describe('User Integration Tests', () => {
         email: { not: 'admin@asistapp.com' }
       }
     });
-    await client.institucion.deleteMany({
-      where: {
-        codigo: { not: 'DEFAULT' }
-      }
-    });
+    await client.institucion.deleteMany();
 
-    const uniqueCode = `INT${Date.now()}`;
     const institucion = await client.institucion.create({
       data: {
         nombre: 'Institución Test',
-        codigo: uniqueCode,
         activa: true,
       },
     });
@@ -289,11 +283,9 @@ describe('User Integration Tests', () => {
 
     it('should return empty array for institution with no users', async () => {
 
-      const uniqueCode = `INT${Date.now()}`;
       const emptyInstitution = await databaseService.getClient().institucion.create({
         data: {
           nombre: 'Institución Vacía',
-          codigo: uniqueCode,
           activa: true,
         },
       });

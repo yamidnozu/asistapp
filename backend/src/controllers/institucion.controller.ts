@@ -9,7 +9,6 @@ interface GetInstitucionParams {
 
 interface CreateInstitucionBody {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -17,7 +16,6 @@ interface CreateInstitucionBody {
 
 interface UpdateInstitucionBody {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;

@@ -79,7 +79,7 @@ export class AuthService {
         nombres: usuario.nombres,
         apellidos: usuario.apellidos,
         rol: usuario.rol as UserRole,
-        instituciones: usuario.usuarioInstituciones.map(ui => ({
+        instituciones: usuario.usuarioInstituciones.map((ui: any) => ({
           id: ui.institucion.id,
           nombre: ui.institucion.nombre,
           rolEnInstitucion: ui.rolEnInstitucion,

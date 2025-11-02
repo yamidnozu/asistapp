@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
+import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/form_widgets.dart';
 
@@ -35,6 +37,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   bool _isInitialLoading = false;
   bool _activo = true;
   User? _user; // Usuario cargado para edición
+  String? _selectedInstitutionId; // Institución seleccionada para admin_institucion
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadUserIfEditing();
+    _loadInstitutionsIfNeeded();
   }
 
   Future<void> _loadUserIfEditing() async {
@@ -99,6 +103,25 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
+  Future<void> _loadInstitutionsIfNeeded() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userRole = authProvider.user?['rol'] as String?;
+    
+    // Solo cargar instituciones si el usuario actual es super_admin y está creando/editando admin_institucion
+    if (userRole == 'super_admin' && widget.userRole == 'admin_institucion') {
+      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      
+      // Solo cargar si no hay instituciones ya cargadas
+      if (institutionProvider.institutions.isEmpty) {
+        await institutionProvider.loadInstitutions(
+          authProvider.accessToken!,
+          page: 1,
+          limit: 100, // Cargar todas para el dropdown
+        );
+      }
+    }
+  }
+
   void _fillFormWithUserData() {
     final user = _user!;
     _nombresController.text = user.nombres;
@@ -106,6 +129,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
     _emailController.text = user.email;
     _telefonoController.text = user.telefono ?? '';
     _activo = user.activo;
+
+    // Preseleccionar institución si existe
+    if (user.instituciones.isNotEmpty) {
+      _selectedInstitutionId = user.instituciones.first.id;
+    }
 
     if (user.estudiante != null) {
       _identificacionController.text = user.estudiante!.identificacion;
@@ -134,6 +162,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
   Future<void> _saveUser() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Validación adicional para admin_institucion
+    if (widget.userRole == 'admin_institucion' && _selectedInstitutionId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Debe seleccionar una institución',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -147,7 +191,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: _identificacionController.text.trim(),
+          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
           nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
           telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
           activo: _activo,
@@ -163,7 +207,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} actualizado exitosamente',
+                '${_getRoleDisplayName(widget.userRole)} actualizado exitosamente',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -181,13 +225,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: _identificacionController.text.trim(),
+          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
           rol: widget.userRole,
           titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
           especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
           nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
           telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-          institucionId: authProvider.selectedInstitutionId,
+          institucionId: widget.userRole == 'admin_institucion' ? _selectedInstitutionId : authProvider.selectedInstitutionId,
+          rolEnInstitucion: widget.userRole == 'admin_institucion' ? 'admin' : null,
         );
 
         final success = await userProvider.createUser(
@@ -199,7 +244,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${widget.userRole == 'profesor' ? 'Profesor' : 'Estudiante'} creado exitosamente',
+                '${_getRoleDisplayName(widget.userRole)} creado exitosamente',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -215,7 +260,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error al ${_user != null ? 'actualizar' : 'crear'} ${widget.userRole == 'profesor' ? 'profesor' : 'estudiante'}: ${e.toString()}',
+              'Error al ${_user != null ? 'actualizar' : 'crear'} ${_getRoleDisplayName(widget.userRole)}: ${e.toString()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onError,
               ),
@@ -228,6 +273,21 @@ class _UserFormScreenState extends State<UserFormScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  String _getRoleDisplayName(String role) {
+    switch (role) {
+      case 'profesor':
+        return 'Profesor';
+      case 'estudiante':
+        return 'Estudiante';
+      case 'admin_institucion':
+        return 'Administrador de Institución';
+      case 'super_admin':
+        return 'Super Administrador';
+      default:
+        return 'Usuario';
     }
   }
 
@@ -268,6 +328,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       children: [
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_nombres'),
                             controller: _nombresController,
                             labelText: 'Nombres',
                             hintText: 'Ingrese los nombres',
@@ -285,6 +346,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         SizedBox(width: spacing.md),
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_apellidos'),
                             controller: _apellidosController,
                             labelText: 'Apellidos',
                             hintText: 'Ingrese los apellidos',
@@ -304,6 +366,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   : Column(
                       children: [
                         CustomTextFormField(
+                          key: const Key('nombresUsuarioField'),
                           controller: _nombresController,
                           labelText: 'Nombres',
                           hintText: 'Ingrese los nombres',
@@ -319,6 +382,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         ),
                         SizedBox(height: spacing.md),
                         CustomTextFormField(
+                          key: const Key('apellidosUsuarioField'),
                           controller: _apellidosController,
                           labelText: 'Apellidos',
                           hintText: 'Ingrese los apellidos',
@@ -340,6 +404,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
             // Email
             CustomTextFormField(
+              key: const Key('emailUsuarioField'),
               controller: _emailController,
               labelText: 'Email',
               hintText: '${widget.userRole}@ejemplo.com',
@@ -357,6 +422,43 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ),
             SizedBox(height: spacing.md),
 
+            // Dropdown de Institución (solo para admin_institucion creado por super_admin)
+            if (widget.userRole == 'admin_institucion') ...[
+              Consumer2<AuthProvider, InstitutionProvider>(
+                builder: (context, authProvider, institutionProvider, child) {
+                  final userRole = authProvider.user?['rol'] as String?;
+                  final isSuperAdmin = userRole == 'super_admin';
+                  
+                  if (!isSuperAdmin) return const SizedBox.shrink();
+                  
+                  return CustomDropdownFormField<String>(
+                    key: const Key('institucionDropdown'),
+                    value: _selectedInstitutionId,
+                    labelText: 'Institución',
+                    hintText: 'Seleccione una institución',
+                    items: institutionProvider.institutions.map((institution) {
+                      return DropdownMenuItem<String>(
+                        value: institution.id,
+                        child: Text(institution.nombre),
+                      );
+                    }).toList(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Debe seleccionar una institución';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedInstitutionId = value;
+                      });
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: spacing.md),
+            ],
+
             // Teléfono e Identificación
             LayoutBuilder(
               builder: (context, constraints) {
@@ -366,6 +468,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       children: [
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_telefono'),
                             controller: _telefonoController,
                             labelText: 'Teléfono',
                             hintText: '+57 300 123 4567',
@@ -384,10 +487,16 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         SizedBox(width: spacing.md),
                         Expanded(
                           child: CustomTextFormField(
+                            key: const Key('user_form_identificacion'),
                             controller: _identificacionController,
                             labelText: 'Identificación',
                             hintText: 'Cédula o documento',
                             validator: (value) {
+                              // Identificación es opcional para admin_institucion y super_admin
+                              if (widget.userRole == 'admin_institucion' || widget.userRole == 'super_admin') {
+                                return null;
+                              }
+                              
                               if (value == null || value.trim().isEmpty) {
                                 return 'La identificación es requerida';
                               }
@@ -403,6 +512,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   : Column(
                       children: [
                         CustomTextFormField(
+                          key: const Key('user_form_telefono'),
                           controller: _telefonoController,
                           labelText: 'Teléfono',
                           hintText: '+57 300 123 4567',
@@ -419,10 +529,16 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         ),
                         SizedBox(height: spacing.md),
                         CustomTextFormField(
+                          key: const Key('user_form_identificacion'),
                           controller: _identificacionController,
                           labelText: 'Identificación',
                           hintText: 'Cédula o documento',
                           validator: (value) {
+                            // Identificación es opcional para admin_institucion y super_admin
+                            if (widget.userRole == 'admin_institucion' || widget.userRole == 'super_admin') {
+                              return null;
+                            }
+                            
                             if (value == null || value.trim().isEmpty) {
                               return 'La identificación es requerida';
                             }
@@ -602,6 +718,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
+                      key: const Key('cancelButton'),
                       onPressed: _isLoading ? null : () => context.pop(),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -619,6 +736,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   SizedBox(width: spacing.md),
                   Expanded(
                     child: ElevatedButton(
+                      key: const Key('formSaveButton'),
                       onPressed: _isLoading ? null : _saveUser,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -639,7 +757,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                                 ),
                               ),
                             )
-                          : Text('${_user != null ? 'Actualizar' : 'Crear'}', style: textStyles.button),
+                          : Text(_user != null ? 'Actualizar' : 'Crear', style: textStyles.button),
                     ),
                   ),
                 ],

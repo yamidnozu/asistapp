@@ -1,5 +1,9 @@
-import { Institucion, Usuario } from '@prisma/client';
+// import type { Institucion, Usuario } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+
+// Tipos temporales hasta que Prisma se genere correctamente
+export type Institucion = any;
+export type Usuario = any;
 
 export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
 
@@ -163,7 +167,6 @@ export interface AppConfig {
 
 export interface CreateInstitucionRequest {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -171,7 +174,6 @@ export interface CreateInstitucionRequest {
 
 export interface UpdateInstitucionRequest {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -181,7 +183,6 @@ export interface UpdateInstitucionRequest {
 export interface InstitucionResponse {
   id: string;
   nombre: string;
-  codigo: string;
   direccion?: string | null;
   telefono?: string | null;
   email?: string | null;

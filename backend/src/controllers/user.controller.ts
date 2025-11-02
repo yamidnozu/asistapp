@@ -175,8 +175,13 @@ export class UserController {
   ) {
     try {
       const userData = request.body as any;
+      const invokerRole = (request as any).user?.rol;
 
-      const result = await UserService.createUser(userData);
+      if (!invokerRole) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const result = await UserService.createUser(userData, invokerRole);
 
       return reply.code(201).send({
         success: true,

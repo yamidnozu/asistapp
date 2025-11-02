@@ -41,51 +41,54 @@ class CustomTextFormField extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return TextFormField(
-      controller: controller,
-      initialValue: initialValue,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      maxLines: maxLines,
-      minLines: minLines,
-      enabled: enabled,
-      onChanged: onChanged,
-      onTap: onTap,
-      validator: validator,
-      style: textStyles.bodyLarge,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.border),
+    return Material(
+      color: Colors.transparent,
+      child: TextFormField(
+        controller: controller,
+        initialValue: initialValue,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        maxLines: maxLines,
+        minLines: minLines,
+        enabled: enabled,
+        onChanged: onChanged,
+        onTap: onTap,
+        validator: validator,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error, width: 2),
+          ),
+          filled: true,
+          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.sm,
+          ),
+          labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-        filled: true,
-        fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: spacing.md,
-          vertical: spacing.sm,
-        ),
-        labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
       ),
     );
   }
@@ -117,45 +120,48 @@ class CustomDropdownFormField<T> extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return DropdownButtonFormField<T>(
-      value: value,
-      items: items,
-      onChanged: enabled ? onChanged : null,
-      validator: validator,
-      style: textStyles.bodyLarge,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.border),
+    return Material(
+      color: Colors.transparent,
+      child: DropdownButtonFormField<T>(
+        value: value,
+        items: items,
+        onChanged: enabled ? onChanged : null,
+        validator: validator,
+        style: textStyles.bodyLarge,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            borderSide: BorderSide(color: colors.error, width: 2),
+          ),
+          filled: true,
+          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.sm,
+          ),
+          labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-        filled: true,
-        fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: spacing.md,
-          vertical: spacing.sm,
-        ),
-        labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
+        dropdownColor: colors.surface,
       ),
-      dropdownColor: colors.surface,
     );
   }
 }
@@ -253,42 +259,45 @@ class CustomSwitchFormField extends StatelessWidget {
     final spacing = context.spacing;
     final textStyles = context.textStyles;
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md),
-        child: Row(
-          children: [
-            Icon(
-              value ? Icons.check_circle : Icons.cancel,
-              color: value ? colors.success : colors.error,
-            ),
-            SizedBox(width: spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textStyles.bodyLarge,
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle!,
-                      style: textStyles.bodySmall.withColor(colors.textSecondary),
-                    ),
-                ],
+    return Material(
+      color: Colors.transparent,
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(spacing.borderRadius),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.md),
+          child: Row(
+            children: [
+              Icon(
+                value ? Icons.check_circle : Icons.cancel,
+                color: value ? colors.success : colors.error,
               ),
-            ),
-            Switch(
-              value: value,
-              onChanged: enabled ? onChanged : null,
-              activeColor: colors.primary,
-            ),
-          ],
+              SizedBox(width: spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textStyles.bodyLarge,
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: textStyles.bodySmall.withColor(colors.textSecondary),
+                      ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: value,
+                onChanged: enabled ? onChanged : null,
+                activeColor: colors.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );

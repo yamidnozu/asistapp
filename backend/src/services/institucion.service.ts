@@ -8,7 +8,6 @@ export interface InstitutionFilters {
 
 export interface CreateInstitutionRequest {
   nombre: string;
-  codigo: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -16,7 +15,6 @@ export interface CreateInstitutionRequest {
 
 export interface UpdateInstitutionRequest {
   nombre?: string;
-  codigo?: string;
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -26,7 +24,6 @@ export interface UpdateInstitutionRequest {
 export interface InstitutionResponse {
   id: string;
   nombre: string;
-  codigo: string;
   direccion: string | null;
   telefono: string | null;
   email: string | null;
@@ -54,7 +51,7 @@ export class InstitucionService {
       if (filters?.search) {
         where.OR = [
           { nombre: { contains: filters.search, mode: 'insensitive' } },
-          { codigo: { contains: filters.search, mode: 'insensitive' } },
+          // codigo eliminado - ahora usamos solo el id (UUID) como identificador único
           { email: { contains: filters.search, mode: 'insensitive' } },
         ];
       }
@@ -74,10 +71,9 @@ export class InstitucionService {
 
       const totalPages = Math.ceil(total / limit);
 
-      const data: InstitutionResponse[] = institutions.map(inst => ({
+      const data: InstitutionResponse[] = institutions.map((inst: any) => ({
         id: inst.id,
         nombre: inst.nombre,
-        codigo: inst.codigo,
         direccion: inst.direccion,
         telefono: inst.telefono,
         email: inst.email,
@@ -125,7 +121,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -145,23 +140,13 @@ export class InstitucionService {
   public static async createInstitution(data: CreateInstitutionRequest): Promise<InstitutionResponse> {
     try {
       // Validaciones
-      if (!data.nombre || !data.codigo) {
-        throw new ValidationError('Nombre y código son requeridos');
-      }
-
-      // Verificar código único
-      const existingInstitution = await prisma.institucion.findUnique({
-        where: { codigo: data.codigo },
-      });
-
-      if (existingInstitution) {
-        throw new ConflictError('Ya existe una institución con este código');
+      if (!data.nombre) {
+        throw new ValidationError('Nombre es requerido');
       }
 
       const institution = await prisma.institucion.create({
         data: {
           nombre: data.nombre,
-          codigo: data.codigo,
           direccion: data.direccion,
           telefono: data.telefono,
           email: data.email,
@@ -171,7 +156,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -200,22 +184,10 @@ export class InstitucionService {
         throw new ValidationError('Institución no encontrada');
       }
 
-      // Verificar código único si se cambia
-      if (data.codigo && data.codigo !== existingInstitution.codigo) {
-        const codigoExists = await prisma.institucion.findUnique({
-          where: { codigo: data.codigo },
-        });
-
-        if (codigoExists) {
-          throw new ConflictError('Ya existe una institución con este código');
-        }
-      }
-
       const institution = await prisma.institucion.update({
         where: { id },
         data: {
           nombre: data.nombre,
-          codigo: data.codigo,
           direccion: data.direccion,
           telefono: data.telefono,
           email: data.email,
@@ -226,7 +198,6 @@ export class InstitucionService {
       return {
         id: institution.id,
         nombre: institution.nombre,
-        codigo: institution.codigo,
         direccion: institution.direccion,
         telefono: institution.telefono,
         email: institution.email,
@@ -272,34 +243,6 @@ export class InstitucionService {
     } catch (error) {
       console.error(`Error al eliminar institución con ID ${id}:`, error);
       throw error;
-    }
-  }
-
-  /**
-   * Verifica si un código está disponible
-   */
-  public static async isCodeAvailable(codigo: string, excludeInstitutionId?: string): Promise<boolean> {
-    try {
-      if (!codigo || typeof codigo !== 'string') {
-        return false;
-      }
-
-      const whereClause: {
-        codigo: string;
-        id?: { not: string };
-      } = { codigo };
-      if (excludeInstitutionId) {
-        whereClause.id = { not: excludeInstitutionId };
-      }
-
-      const count = await prisma.institucion.count({
-        where: whereClause,
-      });
-
-      return count === 0;
-    } catch (error) {
-      console.error(`Error al verificar disponibilidad de código ${codigo}:`, error);
-      return false;
     }
   }
 }

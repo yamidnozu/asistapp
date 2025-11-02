@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
+import { AuthorizationError, ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
 
 export class UserService {
   /**
@@ -151,8 +151,19 @@ export class UserService {
   /**
    * Crea un nuevo usuario
    */
-  public static async createUser(userData: CreateUserRequest): Promise<CreateUserResponse> {
+  public static async createUser(userData: CreateUserRequest, invokerRole: UserRole): Promise<CreateUserResponse> {
     try {
+      // Validaciones de permisos por rol
+      if (invokerRole === 'super_admin' && userData.rol !== 'admin_institucion' && userData.rol !== 'super_admin') {
+        throw new AuthorizationError('Un Super Admin solo puede crear usuarios de tipo Administrador de Institución o Super Admin.');
+      }
+      if (invokerRole === 'super_admin' && userData.rol === 'admin_institucion' && !userData.institucionId) {
+        throw new ValidationError('Se requiere un institucionId para crear un Administrador de Institución.');
+      }
+      if (invokerRole === 'admin_institucion' && (userData.rol !== 'profesor' && userData.rol !== 'estudiante')) {
+        throw new AuthorizationError('Un Administrador de Institución solo puede crear profesores o estudiantes.');
+      }
+
       // Validaciones
       if (!userData.email || !userData.password || !userData.nombres || !userData.apellidos || !userData.rol) {
         throw new ValidationError('Campos requeridos faltantes');
@@ -182,7 +193,7 @@ export class UserService {
       }
 
       // Crear usuario en una transacción
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         // Crear usuario base
         const newUser = await tx.usuario.create({
           data: {
@@ -295,7 +306,7 @@ export class UserService {
       }
 
       // Actualizar usuario en transacción
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         // Actualizar usuario base
         const updateData: {
           email?: string;

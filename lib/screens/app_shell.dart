@@ -27,42 +27,44 @@ class AppShell extends StatelessWidget {
     final accessibleBranches = allBranches.where((branch) => branch.roles.contains(userRole)).toList();
 
     // 3. Encuentra el índice actual en la lista filtrada
-    int selectedIndex = 0; // Default to first (dashboard)
-
-    // Buscar el índice basado en la rama actual
-    for (int i = 0; i < accessibleBranches.length; i++) {
-      if (accessibleBranches[i].branchIndex == navigationShell.currentIndex) {
-        selectedIndex = i;
-        break;
+    // Puede ocurrir que `accessibleBranches` esté vacío (usuario sin rutas en el shell).
+    // NavigationRail acepta `selectedIndex` nulo, así que usamos `int?` y manejamos el caso vacío.
+    int? selectedIndex;
+    if (accessibleBranches.isNotEmpty) {
+      selectedIndex = accessibleBranches.indexWhere((b) => b.branchIndex == navigationShell.currentIndex);
+      if (selectedIndex == -1) {
+        // No se encontró la rama actual dentro de las accesibles -> fallback al primero
+        selectedIndex = 0;
       }
-    }
-
-    // Asegurar que selectedIndex esté dentro del rango válido
-    if (selectedIndex >= accessibleBranches.length) {
-      selectedIndex = 0; // Fallback to first accessible branch
     }
 
     return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (index) {
-              // Navega usando el branchIndex de la rama seleccionada
-              final branchIndex = accessibleBranches[index].branchIndex;
-              navigationShell.goBranch(branchIndex);
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: [
-              // 4. Construye los destinos a partir de la lista filtrada
-              for (final branch in accessibleBranches)
-                NavigationRailDestination(
-                  icon: Icon(branch.icon),
-                  selectedIcon: Icon(branch.icon), // Puedes cambiar a outlined si tienes íconos diferentes
-                  label: Text(branch.label),
-                ),
-            ],
-          ),
+          // Si no hay ramas accesibles mostramos un placeholder (sin NavigationRail) para evitar
+          // pasar un `selectedIndex` fuera de rango.
+          if (accessibleBranches.isNotEmpty)
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) {
+                // Navega usando el branchIndex de la rama seleccionada
+                final branchIndex = accessibleBranches[index].branchIndex;
+                navigationShell.goBranch(branchIndex);
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: [
+                // 4. Construye los destinos a partir de la lista filtrada
+                for (final branch in accessibleBranches)
+                  NavigationRailDestination(
+                    icon: Icon(branch.icon),
+                    selectedIcon: Icon(branch.icon), // Puedes cambiar a outlined si tienes íconos diferentes
+                    label: Text(branch.label),
+                  ),
+              ],
+            )
+          else
+            // Mantener el layout pero sin rail: un ancho fijo vacío para que la UI no salte
+            const SizedBox(width: 0),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
             child: navigationShell,

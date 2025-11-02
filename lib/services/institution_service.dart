@@ -20,7 +20,7 @@ class InstitutionService {
       if (kIsWeb) {
         return 'localhost';
       }
-      return '192.168.20.22';
+      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost';
@@ -122,7 +122,6 @@ class InstitutionService {
   Future<Institution?> createInstitution(
     String accessToken, {
     required String nombre,
-    required String codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -137,7 +136,6 @@ class InstitutionService {
         },
         body: jsonEncode({
           'nombre': nombre,
-          'codigo': codigo,
           if (direccion != null) 'direccion': direccion,
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,
@@ -173,7 +171,6 @@ class InstitutionService {
     String accessToken,
     String id, {
     String? nombre,
-    String? codigo,
     String? direccion,
     String? telefono,
     String? email,
@@ -189,7 +186,6 @@ class InstitutionService {
         },
         body: jsonEncode({
           if (nombre != null) 'nombre': nombre,
-          if (codigo != null) 'codigo': codigo,
           if (direccion != null) 'direccion': direccion,
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,

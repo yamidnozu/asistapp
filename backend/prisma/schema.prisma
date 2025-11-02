@@ -7,7 +7,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -23,7 +23,6 @@ datasource db {
 model Institucion {
   id        String   @id @default(uuid()) @db.Uuid
   nombre    String   @db.VarChar(255)
-  codigo    String   @unique @db.VarChar(50) // Código corto único (ej: "sanjose")
   direccion String?  @db.Text
   telefono  String?  @db.VarChar(20)
   email     String?  @db.VarChar(255)

@@ -1,23 +1,29 @@
-FROM node:18
+# backend/Dockerfile
 
+# 1. Etapa de construcción
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
-
-# Copiar archivos de dependencias
 COPY package*.json ./
-RUN npm ci
-
-# Copiar todos los archivos
+RUN npm install --include=dev
 COPY . .
-
-# Generar cliente Prisma
-RUN npx prisma generate
-
-# Compilar TypeScript
+# Compila el código de TypeScript a JavaScript
 RUN npm run build
 
+# 2. Etapa de producción
+FROM node:18-alpine
+WORKDIR /app
+# Copia solo los archivos necesarios de la etapa anterior
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+# Copia el schema de Prisma para que esté disponible en producción
+COPY --from=builder /app/prisma ./prisma
+
+# Generar cliente Prisma en producción
+RUN npx prisma generate
+
+# Expone el puerto que usará el servidor
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+# Comando para iniciar el servidor
+CMD [ "node", "dist/index.js" ]

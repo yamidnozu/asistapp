@@ -19,7 +19,7 @@ class UserService {
       if (kIsWeb) {
         return 'localhost';
       }
-      return '192.168.20.22';
+      return '192.168.20.22'; // IP de la máquina anfitriona para dispositivo físico
     } catch (e) {
       debugPrint('Error obteniendo IP local: $e');
       return 'localhost';

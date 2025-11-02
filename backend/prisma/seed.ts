@@ -4,37 +4,54 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed de AsistApp V2...');
+  console.log('🌱 Iniciando seed de AsistApp V2...');
+
+
+
   console.log('🏫 Creando instituciones...');
 
-  const instituciones = await Promise.all([
-    prisma.institucion.upsert({
-      where: { codigo: 'sanjose' },
-      update: {},
-      create: {
-        nombre: 'Colegio San José',
-        codigo: 'sanjose',
-        direccion: 'Calle 123 #45-67',
-        email: 'admin@sanjose.edu',
-        telefono: '555-0101',
-        activa: true,
-      },
-    }),
-    prisma.institucion.upsert({
-      where: { codigo: 'fps' },
-      update: {},
-      create: {
-        nombre: 'IE Francisco de Paula Santander',
-        codigo: 'fps',
-        direccion: 'Carrera 10 #20-30',
-        email: 'admin@fps.edu',
-        telefono: '555-0202',
-        activa: true,
-      },
-    }),
-  ]);
+  // Crear instituciones (sin upsert ya que eliminamos el campo codigo único)
+  const institucionesExistentes = await prisma.institucion.findMany({
+    where: {
+      OR: [
+        { nombre: 'Colegio San José' },
+        { nombre: 'IE Francisco de Paula Santander' }
+      ]
+    }
+  });
 
-  console.log('✅ Instituciones creadas:', instituciones.length);
+  const instituciones = [];
+  if (institucionesExistentes.length === 0) {
+    // Crear instituciones si no existen
+    const nuevasInstituciones = await Promise.all([
+      prisma.institucion.create({
+        data: {
+          nombre: 'Colegio San José',
+          direccion: 'Calle 123 #45-67',
+          email: 'admin@sanjose.edu',
+          telefono: '555-0101',
+          activa: true,
+        },
+      }),
+      prisma.institucion.create({
+        data: {
+          nombre: 'IE Francisco de Paula Santander',
+          direccion: 'Carrera 10 #20-30',
+          email: 'admin@fps.edu',
+          telefono: '555-0202',
+          activa: true,
+        },
+      }),
+    ]);
+    instituciones.push(...nuevasInstituciones);
+  } else {
+    instituciones.push(...institucionesExistentes);
+  }
+
+  console.log('✅ Instituciones creadas:', instituciones.length);
+
+
+
   console.log('👑 Creando super admin...');
 
   const superAdminPassword = await bcrypt.hash('Admin123!', 10);
@@ -52,7 +69,10 @@ async function main() {
     },
   });
 
-  console.log('✅ Super admin creado:', superAdmin.email);
+  console.log('✅ Super admin creado:', superAdmin.email);
+
+
+
   console.log('👥 Creando usuario multi-institución...');
 
   const multiUserPassword = await bcrypt.hash('Multi123!', 10);
@@ -68,7 +88,8 @@ async function main() {
       rol: 'admin_institucion',
       activo: true,
     },
-  });
+  });
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -102,7 +123,10 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+  console.log('✅ Usuario multi-institución creado:', multiUser.email);
+
+
+
   console.log('👨‍💼 Creando admins de institución...');
 
   const adminSanJosePassword = await bcrypt.hash('SanJose123!', 10);
@@ -135,7 +159,8 @@ async function main() {
         activo: true,
       },
     }),
-  ]);
+  ]);
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -169,7 +194,10 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Admins de institución creados:', adminsInstitucion.length);
+  console.log('✅ Admins de institución creados:', adminsInstitucion.length);
+
+
+
   console.log('👨‍🏫 Creando profesores...');
 
   const profesor1Password = await bcrypt.hash('Prof123!', 10);
@@ -202,7 +230,8 @@ async function main() {
         activo: true,
       },
     }),
-  ]);
+  ]);
+
   await Promise.all([
     prisma.usuarioInstitucion.upsert({
       where: {
@@ -236,7 +265,10 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Profesores creados:', profesores.length);
+  console.log('✅ Profesores creados:', profesores.length);
+
+
+
   console.log('👨‍🎓 Creando estudiantes...');
 
   const estudiantesData = [
@@ -262,7 +294,8 @@ async function main() {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await prisma.usuarioInstitucion.upsert({
       where: {
         usuarioId_institucionId: {
@@ -294,34 +327,264 @@ async function main() {
     estudiantes.push({ usuario, estudiante });
   }
 
-  console.log('✅ Estudiantes creados:', estudiantes.length);
-  console.log('📅 Creando periodos académicos...');
+  console.log('✅ Estudiantes creados:', estudiantes.length);
+
+
+
+  console.log('📅 Creando periodos académicos...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   console.log('📅 Periodos académicos saltados temporalmente');
 
-  const periodos = [{ id: 'temp-id' }]; // Temporal
-  console.log('👥 Creando grupos...');
+  const periodos = [{ id: 'temp-id' }]; // Temporal
+
+
+
+  console.log('👥 Creando grupos...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   console.log('👥 Grupos saltados temporalmente');
 
-  const grupos = [{ id: 'temp-id' }]; // Temporal
-  console.log('📚 Creando materias...');
+  const grupos = [{ id: 'temp-id' }]; // Temporal
+
+
+
+  console.log('📚 Creando materias...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   console.log('📚 Materias saltadas temporalmente');
 
-  const materias = [{ id: 'temp-id' }]; // Temporal
-  console.log('⏰ Creando horarios...');
+  const materias = [{ id: 'temp-id' }]; // Temporal
 
-  console.log('⏰ Horarios saltados temporalmente');
-  console.log('🔗 Asignando estudiantes a grupos...');
 
-  console.log('🔗 Estudiantes asignados a grupos (saltado)');
-  console.log('📝 Creando asistencias de ejemplo...');
 
-  console.log('📝 Asistencias de ejemplo creadas (saltado)');
-  console.log('⚙️ Creando configuraciones...');
+  console.log('⏰ Creando horarios...');
 
-  console.log('⚙️ Configuraciones creadas (saltado)');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  console.log('⏰ Horarios saltados temporalmente');
+
+
+
+  console.log('🔗 Asignando estudiantes a grupos...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  console.log('🔗 Estudiantes asignados a grupos (saltado)');
+
+
+
+  console.log('📝 Creando asistencias de ejemplo...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  console.log('📝 Asistencias de ejemplo creadas (saltado)');
+
+
+
+  console.log('⚙️ Creando configuraciones...');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  console.log('⚙️ Configuraciones creadas (saltado)');
+
+
+
   console.log('\n🎉 Seed completado exitosamente!');
   console.log('\n📊 Resumen de datos creados:');
   console.log('🏫 Instituciones:', instituciones.length);

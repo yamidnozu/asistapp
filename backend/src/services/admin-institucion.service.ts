@@ -69,7 +69,7 @@ export class AdminInstitucionService {
 
       const totalPages = Math.ceil(total / limit);
 
-      const data: AdminInstitucionResponse[] = admins.map(admin => ({
+      const data: AdminInstitucionResponse[] = admins.map((admin: any) => ({
         id: admin.id,
         email: admin.email,
         nombres: admin.nombres,
@@ -190,7 +190,7 @@ export class AdminInstitucionService {
       const hashedPassword = await bcrypt.hash(data.password, 10);
 
       // Crear admin en transacción
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const admin = await tx.usuario.create({
           data: {
             email: data.email.toLowerCase(),

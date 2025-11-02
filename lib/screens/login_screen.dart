@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final colors = context.colors;
         return Text(
           'AsistApp',
+          key: const Key('appTitle'),
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
@@ -64,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildEmailField() {
     return TextFormField(
+      key: const Key('emailField'),
       controller: _emailController,
       decoration: const InputDecoration(
         labelText: 'Correo electrónico',
@@ -75,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildPasswordField() {
     return TextFormField(
+      key: const Key('passwordField'),
       controller: _passwordController,
       decoration: const InputDecoration(
         labelText: 'Contraseña',
@@ -90,6 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
       width: buttonWidth,
       child: ElevatedButton(
+        key: const Key('loginButton'),
         onPressed: _isLoading ? null : _login,
         child: Text(_isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'),
       ),

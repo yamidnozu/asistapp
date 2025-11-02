@@ -10,10 +10,13 @@ import AuthService from '../src/services/auth.service';
 describe('Auth Integration Tests', () => {
   let fastify: any;
 
-  beforeAll(async () => {
-    fastify = Fastify({ logger: false });
+  beforeAll(async () => {
+
+    fastify = Fastify({ logger: false });
+
     setupErrorHandler(fastify);
-    fastify.register(routes);
+    fastify.register(routes);
+
     await databaseService.connect();
     await AuthService.ensureAdminUser();
 
@@ -25,7 +28,8 @@ describe('Auth Integration Tests', () => {
     await databaseService.disconnect();
   });
 
-  beforeEach(async () => {
+  beforeEach(async () => {
+
     const client = databaseService.getClient();
     await client.refreshToken.deleteMany();
     await client.usuarioInstitucion.deleteMany();
@@ -34,22 +38,18 @@ describe('Auth Integration Tests', () => {
         email: { not: 'admin@asistapp.com' }
       }
     });
-    await client.institucion.deleteMany({
-      where: {
-        codigo: { not: 'DEFAULT' }
-      }
-    });
+    await client.institucion.deleteMany();
   });
 
-  it('should complete full auth flow: login -> get institutions -> refresh -> logout', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should complete full auth flow: login -> get institutions -> refresh -> logout', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -60,7 +60,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -68,7 +69,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const loginResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -87,7 +89,8 @@ describe('Auth Integration Tests', () => {
     expect(loginBody.data.usuario.instituciones).toHaveLength(1);
 
     const accessToken = loginBody.data.accessToken;
-    const refreshToken = loginBody.data.refreshToken;
+    const refreshToken = loginBody.data.refreshToken;
+
     const institutionsResponse = await fastify.inject({
       method: 'GET',
       url: '/auth/instituciones',
@@ -100,7 +103,8 @@ describe('Auth Integration Tests', () => {
     const institutionsBody = JSON.parse(institutionsResponse.body);
     expect(institutionsBody.success).toBe(true);
     expect(institutionsBody.data).toHaveLength(1);
-    expect(institutionsBody.data[0].id).toBe(institucion.id);
+    expect(institutionsBody.data[0].id).toBe(institucion.id);
+
     const verifyResponse = await fastify.inject({
       method: 'GET',
       url: '/auth/verify',
@@ -112,7 +116,8 @@ describe('Auth Integration Tests', () => {
     expect(verifyResponse.statusCode).toBe(200);
     const verifyBody = JSON.parse(verifyResponse.body);
     expect(verifyBody.success).toBe(true);
-    expect(verifyBody.data.valid).toBe(true);
+    expect(verifyBody.data.valid).toBe(true);
+
     const refreshResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -125,11 +130,13 @@ describe('Auth Integration Tests', () => {
     const refreshBody = JSON.parse(refreshResponse.body);
     expect(refreshBody.success).toBe(true);
     expect(refreshBody.data).toHaveProperty('accessToken');
-    expect(refreshBody.data).toHaveProperty('refreshToken');
+    expect(refreshBody.data).toHaveProperty('refreshToken');
+
     expect(refreshBody.data.refreshToken).not.toBe(refreshToken);
 
     const newAccessToken = refreshBody.data.accessToken;
-    const newRefreshToken = refreshBody.data.refreshToken;
+    const newRefreshToken = refreshBody.data.refreshToken;
+
     const logoutResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/logout',
@@ -143,7 +150,8 @@ describe('Auth Integration Tests', () => {
 
     expect(logoutResponse.statusCode).toBe(200);
     const logoutBody = JSON.parse(logoutResponse.body);
-    expect(logoutBody.success).toBe(true);
+    expect(logoutBody.success).toBe(true);
+
     const refreshAfterLogoutResponse = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -198,15 +206,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle expired refresh token', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle expired refresh token', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -217,7 +225,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -225,7 +234,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const expiredToken = await databaseService.getClient().refreshToken.create({
       data: {
         usuarioId: user.id,
@@ -233,7 +243,8 @@ describe('Auth Integration Tests', () => {
         expiresAt: new Date(Date.now() - 1000), // Expirado
         revoked: false,
       },
-    });
+    });
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -248,15 +259,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle revoked refresh token', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle revoked refresh token', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('integrationpass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -267,7 +278,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -275,7 +287,8 @@ describe('Auth Integration Tests', () => {
         rolEnInstitucion: 'estudiante',
         activo: true,
       },
-    });
+    });
+
     const revokedToken = await databaseService.getClient().refreshToken.create({
       data: {
         usuarioId: user.id,
@@ -283,7 +296,8 @@ describe('Auth Integration Tests', () => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Válido
         revoked: true,
       },
-    });
+    });
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
@@ -298,15 +312,15 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle login with inactive user', async () => {
-    const uniqueCode = `INT${Date.now()}`;
+  it('should handle login with inactive user', async () => {
+
     const institucion = await databaseService.getClient().institucion.create({
       data: {
         nombre: 'Institución Integration',
-        codigo: uniqueCode,
         activa: true,
       },
-    });
+    });
+
     const hashedPassword = await AuthService.hashPassword('inactivepass');
     const user = await databaseService.getClient().usuario.create({
       data: {
@@ -317,7 +331,8 @@ describe('Auth Integration Tests', () => {
         rol: 'estudiante',
         activo: false, // Usuario inactivo
       },
-    });
+    });
+
     await databaseService.getClient().usuarioInstitucion.create({
       data: {
         usuarioId: user.id,
@@ -342,7 +357,8 @@ describe('Auth Integration Tests', () => {
     expect(body.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('should handle missing required fields in login', async () => {
+  it('should handle missing required fields in login', async () => {
+
     const response1 = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -354,7 +370,8 @@ describe('Auth Integration Tests', () => {
     expect(response1.statusCode).toBe(400);
     const body1 = JSON.parse(response1.body);
     expect(body1.success).toBe(false);
-    expect(body1.code).toBe('VALIDATION_ERROR');
+    expect(body1.code).toBe('VALIDATION_ERROR');
+
     const response2 = await fastify.inject({
       method: 'POST',
       url: '/auth/login',
@@ -369,7 +386,8 @@ describe('Auth Integration Tests', () => {
     expect(body2.code).toBe('VALIDATION_ERROR');
   });
 
-  it('should handle malformed refresh token request', async () => {
+  it('should handle malformed refresh token request', async () => {
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/auth/refresh',
