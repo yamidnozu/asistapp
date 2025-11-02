@@ -20,7 +20,16 @@ export class UserService {
         where.activo = filters.activo;
       }
       if (filters?.rol) {
-        where.rol = filters.rol;
+        // Soportar múltiples roles pasados como string separado por comas ("super_admin,admin_institucion")
+        // o como un array.
+        const rolFilter: any = filters.rol as any;
+        if (Array.isArray(rolFilter)) {
+          where.rol = { in: rolFilter };
+        } else if (typeof rolFilter === 'string' && rolFilter.includes(',')) {
+          where.rol = { in: rolFilter.split(',').map(r => r.trim()) };
+        } else {
+          where.rol = rolFilter;
+        }
       }
       if (filters?.institucionId) {
         where.usuarioInstituciones = {

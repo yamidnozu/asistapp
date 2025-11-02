@@ -31,16 +31,18 @@ class UserService {
     return 'http://$ip:3000';
   }
 
-  /// Obtiene todos los usuarios con paginación
-  Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, String? role}) async {
+  /// Obtiene todos los usuarios con paginación y filtros (activo, búsqueda, roles)
+  Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     try {
       final baseUrlValue = await baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
-      if (role != null && role.isNotEmpty) queryParams['rol'] = role;
+      if (activo != null) queryParams['activo'] = activo.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      if (roles != null && roles.isNotEmpty) queryParams['rol'] = roles.join(',');
       
-      final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
+  final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
       
       final response = await http.get(
         uri,

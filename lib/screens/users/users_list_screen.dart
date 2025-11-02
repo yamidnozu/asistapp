@@ -82,15 +82,19 @@ class _UsersListScreenState extends State<UsersListScreen> {
     if (userRole == 'super_admin') {
       // El super_admin solo ve admin_institucion y super_admin
       debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      // Determinar roles según el filtro de UI: si no hay filtro, enviar ambos roles
+      final roles = (_selectedRoleFilter.isEmpty)
+          ? ['super_admin', 'admin_institucion']
+          : [_selectedRoleFilter];
+
       await userProvider.loadUsers(
         authProvider.accessToken!,
         page: 1,
         limit: 15,
+        search: _searchQuery.isEmpty ? null : _searchQuery,
+        activo: _statusFilter,
+        roles: roles,
       );
-      
-      // Filtrar en el cliente para mostrar solo admin_institucion y super_admin
-      // Nota: Esto se puede mover al backend en el futuro para mejor performance
-      userProvider.filterUsersLocally(['admin_institucion', 'super_admin']);
     } else if (userRole == 'admin_institucion') {
       // El admin_institucion carga solo usuarios de su institución seleccionada
       if (authProvider.selectedInstitutionId != null) {
@@ -114,7 +118,20 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   Future<void> _loadMoreUsers(UserProvider provider, String? accessToken, String? userRole) async {
     if (accessToken == null || provider.isLoadingMore || !provider.hasMoreData) return;
-    await provider.loadMoreUsers(accessToken);
+    if (userRole == 'super_admin') {
+      final roles = (_selectedRoleFilter.isEmpty)
+          ? ['super_admin', 'admin_institucion']
+          : [_selectedRoleFilter];
+
+      await provider.loadMoreUsers(
+        accessToken,
+        activo: _statusFilter,
+        search: _searchQuery.isEmpty ? null : _searchQuery,
+        roles: roles,
+      );
+    } else {
+      await provider.loadMoreUsers(accessToken);
+    }
   }
 
   void _onSearchChanged(String query) {

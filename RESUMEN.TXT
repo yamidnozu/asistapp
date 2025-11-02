@@ -9,7 +9,7 @@
 ├── 📂 providers
 │   ├── auth_provider.dart [194]
 │   ├── institution_provider.dart [229]
-│   └── user_provider.dart [336]
+│   └── user_provider.dart [342]
 ├── 📂 screens
 │   ├── admin_dashboard.dart [123]
 │   ├── app_shell.dart [62]
@@ -27,7 +27,7 @@
 │   ├── 📂 users
 │   │   ├── create_professor_screen.dart [11]
 │   │   ├── create_student_screen.dart [11]
-│   │   ├── users_list_screen.dart [668]
+│   │   ├── users_list_screen.dart [687]
 │   │   ├── user_detail_screen.dart [160]
 │   │   └── user_form_screen.dart [733]
 │   └── welcome_screen.dart [91]
@@ -35,7 +35,7 @@
 │   ├── auth_service.dart [190]
 │   ├── institution_service.dart [239]
 │   ├── profesor_service.dart [272]
-│   └── user_service.dart [264]
+│   └── user_service.dart [266]
 ├── 📂 theme
 │   ├── app_colors.dart [95]
 │   ├── app_constants.dart [59]
@@ -90,7 +90,7 @@
 │   ├── 📂 routes
 │   │   ├── admin-institucion.routes.js [30]
 │   │   ├── auth.routes.js [40]
-│   │   ├── index.js [44]
+│   │   ├── index.js [55]
 │   │   ├── institucion.routes.js [30]
 │   │   ├── institution-admin.routes.js [28]
 │   │   └── user.routes.js [41]
@@ -99,9 +99,9 @@
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.js [247]
 │   │   ├── auth.service.js [232]
-│   │   ├── institucion.service.js [198]
+│   │   ├── institucion.service.js [192]
 │   │   ├── profesor.service.js [310]
-│   │   └── user.service.js [371]
+│   │   └── user.service.js [381]
 │   ├── 📂 types
 │   │   └── index.js [44]
 │   └── 📂 utils
@@ -127,7 +127,7 @@
 │   ├── 📂 routes
 │   │   ├── admin-institucion.routes.ts [32]
 │   │   ├── auth.routes.ts [37]
-│   │   ├── index.ts [42]
+│   │   ├── index.ts [54]
 │   │   ├── institucion.routes.ts [25]
 │   │   ├── institution-admin.routes.ts [20]
 │   │   └── user.routes.ts [33]
@@ -138,7 +138,7 @@
 │   │   ├── auth.service.ts [259]
 │   │   ├── institucion.service.ts [222]
 │   │   ├── profesor.service.ts [332]
-│   │   └── user.service.ts [370]
+│   │   └── user.service.ts [377]
 │   ├── 📂 types
 │   │   └── index.ts [248]
 │   └── 📂 utils
@@ -161,7 +161,7 @@
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 20521
+Total de líneas resumidas: 20582
 Total de archivos: 123
 Promedio de líneas por archivo: 167
 Archivo más grande: user_form_screen.dart (733 líneas)
@@ -1257,7 +1257,7 @@ class UserProvider with ChangeNotifier {
     _errorMessage = error;
     notifyListeners();
   }
-  Future<void> loadUsers(String accessToken, {int? page, int? limit}) async {
+  Future<void> loadUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     if (_state == UserState.loading) return;
 
     _setState(UserState.loading);
@@ -1265,7 +1265,14 @@ class UserProvider with ChangeNotifier {
 
     try {
       debugPrint('UserProvider: Iniciando carga de usuarios...');
-      final response = await _userService.getAllUsers(accessToken, page: page ?? 1, limit: limit);
+      final response = await _userService.getAllUsers(
+        accessToken,
+        page: page ?? 1,
+        limit: limit,
+        activo: activo,
+        search: search,
+        roles: roles,
+      );
       if (response != null) {
         debugPrint('UserProvider: Recibidos ${response.users.length} usuarios');
         _users = response.users;
@@ -1443,11 +1450,7 @@ class UserProvider with ChangeNotifier {
   List<User> filterUsersByRole(String role) {
     if (role.isEmpty) return _users;
     return _users.where((user) => user.rol == role).toList();
-  }
-  void filterUsersLocally(List<String> roles) {
-    _users = _users.where((user) => roles.contains(user.rol)).toList();
-    notifyListeners();
-  }
+  }
   List<User> filterUsersByStatus({bool? active}) {
     if (active == null) return _users;
     return _users.where((user) => user.activo == active).toList();
@@ -1491,7 +1494,7 @@ class UserProvider with ChangeNotifier {
       'admins_institucion': adminInstitutionsCount,
     };
   }
-  Future<void> loadMoreUsers(String accessToken) async {
+  Future<void> loadMoreUsers(String accessToken, {bool? activo, String? search, List<String>? roles}) async {
     if (_isLoadingMore || !_hasMoreData || _paginationInfo == null) return;
 
     _isLoadingMore = true;
@@ -1508,11 +1511,14 @@ class UserProvider with ChangeNotifier {
           page: nextPage,
           limit: _paginationInfo!.limit,
         );
-      } else {
+      } else {
         response = await _userService.getAllUsers(
           accessToken,
           page: nextPage,
           limit: _paginationInfo!.limit,
+          activo: activo,
+          search: search,
+          roles: roles,
         );
       }
 
@@ -1687,37 +1693,37 @@ class AppShell extends StatelessWidget {
       (label: 'Instituciones', icon: Icons.business, branchIndex: 1, roles: ['super_admin']),
       (label: 'Usuarios', icon: Icons.people, branchIndex: 2, roles: ['super_admin', 'admin_institucion']),
     ];
-    final accessibleBranches = allBranches.where((branch) => branch.roles.contains(userRole)).toList();
-    int selectedIndex = 0
-    for (int i = 0; i < accessibleBranches.length; i++) {
-      if (accessibleBranches[i].branchIndex == navigationShell.currentIndex) {
-        selectedIndex = i;
-        break;
+    final accessibleBranches = allBranches.where((branch) => branch.roles.contains(userRole)).toList();
+    int? selectedIndex;
+    if (accessibleBranches.isNotEmpty) {
+      selectedIndex = accessibleBranches.indexWhere((b) => b.branchIndex == navigationShell.currentIndex);
+      if (selectedIndex == -1) {
+        selectedIndex = 0;
       }
-    }
-    if (selectedIndex >= accessibleBranches.length) {
-      selectedIndex = 0
     }
 
     return Scaffold(
       body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (index) {
-              final branchIndex = accessibleBranches[index].branchIndex;
-              navigationShell.goBranch(branchIndex);
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: [
-              for (final branch in accessibleBranches)
-                NavigationRailDestination(
-                  icon: Icon(branch.icon),
-                  selectedIcon: Icon(branch.icon), // Puedes cambiar a outlined si tienes íconos diferentes
-                  label: Text(branch.label),
-                ),
-            ],
-          ),
+        children: [
+          if (accessibleBranches.isNotEmpty)
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) {
+                final branchIndex = accessibleBranches[index].branchIndex;
+                navigationShell.goBranch(branchIndex);
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: [
+                for (final branch in accessibleBranches)
+                  NavigationRailDestination(
+                    icon: Icon(branch.icon),
+                    selectedIcon: Icon(branch.icon), // Puedes cambiar a outlined si tienes íconos diferentes
+                    label: Text(branch.label),
+                  ),
+              ],
+            )
+          else
+            const SizedBox(width: 0),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
             child: navigationShell,
@@ -4382,13 +4388,19 @@ class _UsersListScreenState extends State<UsersListScreen> {
       return;
     }
     if (userRole == 'super_admin') {
-      debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      final roles = (_selectedRoleFilter.isEmpty)
+          ? ['super_admin', 'admin_institucion']
+          : [_selectedRoleFilter];
+
       await userProvider.loadUsers(
         authProvider.accessToken!,
         page: 1,
         limit: 15,
-      );
-      userProvider.filterUsersLocally(['admin_institucion', 'super_admin']);
+        search: _searchQuery.isEmpty ? null : _searchQuery,
+        activo: _statusFilter,
+        roles: roles,
+      );
     } else if (userRole == 'admin_institucion') {
       if (authProvider.selectedInstitutionId != null) {
         debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
@@ -4410,7 +4422,20 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   Future<void> _loadMoreUsers(UserProvider provider, String? accessToken, String? userRole) async {
     if (accessToken == null || provider.isLoadingMore || !provider.hasMoreData) return;
-    await provider.loadMoreUsers(accessToken);
+    if (userRole == 'super_admin') {
+      final roles = (_selectedRoleFilter.isEmpty)
+          ? ['super_admin', 'admin_institucion']
+          : [_selectedRoleFilter];
+
+      await provider.loadMoreUsers(
+        accessToken,
+        activo: _statusFilter,
+        search: _searchQuery.isEmpty ? null : _searchQuery,
+        roles: roles,
+      );
+    } else {
+      await provider.loadMoreUsers(accessToken);
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -6714,15 +6739,17 @@ class UserService {
     final ip = await _getLocalIp();
     return 'http://$ip:3000';
   }
-  Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, String? role}) async {
+  Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     try {
       final baseUrlValue = await baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
-      if (role != null && role.isNotEmpty) queryParams['rol'] = role;
+      if (activo != null) queryParams['activo'] = activo.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      if (roles != null && roles.isNotEmpty) queryParams['rol'] = roles.join(',');
 
-      final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
+  final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -11482,6 +11509,17 @@ async function routes(fastify) {
             timestamp: new Date().toISOString(),
         };
     });
+    fastify.get('/health', async (request, reply) => {
+        return reply.code(200).send({
+            success: true,
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            services: {
+                server: 'running'
+            },
+            uptime: process.uptime()
+        });
+    });
     fastify.get('/test', async (request, reply) => {
         return reply.code(200).send({
             success: true,
@@ -12178,7 +12216,6 @@ class InstitucionService {
             const data = institutions.map((inst) => ({
                 id: inst.id,
                 nombre: inst.nombre,
-                codigo: inst.codigo,
                 direccion: inst.direccion,
                 telefono: inst.telefono,
                 email: inst.email,
@@ -12219,7 +12256,6 @@ class InstitucionService {
             return {
                 id: institution.id,
                 nombre: institution.nombre,
-                codigo: institution.codigo,
                 direccion: institution.direccion,
                 telefono: institution.telefono,
                 email: institution.email,
@@ -12243,7 +12279,6 @@ class InstitucionService {
             const institution = await database_1.prisma.institucion.create({
                 data: {
                     nombre: data.nombre,
-                    codigo: data.codigo,
                     direccion: data.direccion,
                     telefono: data.telefono,
                     email: data.email,
@@ -12252,7 +12287,6 @@ class InstitucionService {
             return {
                 id: institution.id,
                 nombre: institution.nombre,
-                codigo: institution.codigo,
                 direccion: institution.direccion,
                 telefono: institution.telefono,
                 email: institution.email,
@@ -12281,7 +12315,6 @@ class InstitucionService {
                 where: { id },
                 data: {
                     nombre: data.nombre,
-                    codigo: data.codigo,
                     direccion: data.direccion,
                     telefono: data.telefono,
                     email: data.email,
@@ -12291,7 +12324,6 @@ class InstitucionService {
             return {
                 id: institution.id,
                 nombre: institution.nombre,
-                codigo: institution.codigo,
                 direccion: institution.direccion,
                 telefono: institution.telefono,
                 email: institution.email,
@@ -12676,7 +12708,17 @@ class UserService {
                 where.activo = filters.activo;
             }
             if (filters?.rol) {
-                where.rol = filters.rol;
+
+                const rolFilter = filters.rol;
+                if (Array.isArray(rolFilter)) {
+                    where.rol = { in: rolFilter };
+                }
+                else if (typeof rolFilter === 'string' && rolFilter.includes(',')) {
+                    where.rol = { in: rolFilter.split(',').map(r => r.trim()) };
+                }
+                else {
+                    where.rol = rolFilter;
+                }
             }
             if (filters?.institucionId) {
                 where.usuarioInstituciones = {
@@ -12790,10 +12832,10 @@ class UserService {
     static async createUser(userData, invokerRole) {
         try {
 
-            if (invokerRole === 'super_admin' && userData.rol !== 'admin_institucion') {
-                throw new types_1.AuthorizationError('Un Super Admin solo puede crear usuarios de tipo Administrador de Institución.');
+            if (invokerRole === 'super_admin' && userData.rol !== 'admin_institucion' && userData.rol !== 'super_admin') {
+                throw new types_1.AuthorizationError('Un Super Admin solo puede crear usuarios de tipo Administrador de Institución o Super Admin.');
             }
-            if (invokerRole === 'super_admin' && !userData.institucionId) {
+            if (invokerRole === 'super_admin' && userData.rol === 'admin_institucion' && !userData.institucionId) {
                 throw new types_1.ValidationError('Se requiere un institucionId para crear un Administrador de Institución.');
             }
             if (invokerRole === 'admin_institucion' && (userData.rol !== 'profesor' && userData.rol !== 'estudiante')) {
@@ -14940,6 +14982,18 @@ export default async function routes(fastify: FastifyInstance) {
     };
   });
 
+  fastify.get('/health', async (request, reply) => {
+    return reply.code(200).send({
+      success: true,
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: {
+        server: 'running'
+      },
+      uptime: process.uptime()
+    });
+  });
+
   fastify.get('/test', async (request, reply) => {
     return reply.code(200).send({
       success: true,
@@ -16202,8 +16256,15 @@ export class UserService {
       if (filters?.activo !== undefined) {
         where.activo = filters.activo;
       }
-      if (filters?.rol) {
-        where.rol = filters.rol;
+      if (filters?.rol) {
+        const rolFilter: any = filters.rol as any;
+        if (Array.isArray(rolFilter)) {
+          where.rol = { in: rolFilter };
+        } else if (typeof rolFilter === 'string' && rolFilter.includes(',')) {
+          where.rol = { in: rolFilter.split(',').map(r => r.trim()) };
+        } else {
+          where.rol = rolFilter;
+        }
       }
       if (filters?.institucionId) {
         where.usuarioInstituciones = {

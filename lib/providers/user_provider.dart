@@ -62,8 +62,8 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Carga todos los usuarios con paginación
-  Future<void> loadUsers(String accessToken, {int? page, int? limit}) async {
+  /// Carga todos los usuarios con paginación y filtros (activo, búsqueda, roles)
+  Future<void> loadUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     if (_state == UserState.loading) return;
 
     _setState(UserState.loading);
@@ -71,7 +71,14 @@ class UserProvider with ChangeNotifier {
 
     try {
       debugPrint('UserProvider: Iniciando carga de usuarios...');
-      final response = await _userService.getAllUsers(accessToken, page: page ?? 1, limit: limit);
+      final response = await _userService.getAllUsers(
+        accessToken,
+        page: page ?? 1,
+        limit: limit,
+        activo: activo,
+        search: search,
+        roles: roles,
+      );
       if (response != null) {
         debugPrint('UserProvider: Recibidos ${response.users.length} usuarios');
         _users = response.users;
@@ -285,11 +292,7 @@ class UserProvider with ChangeNotifier {
     return _users.where((user) => user.rol == role).toList();
   }
 
-  /// Filtra usuarios localmente por múltiples roles (para super_admin)
-  void filterUsersLocally(List<String> roles) {
-    _users = _users.where((user) => roles.contains(user.rol)).toList();
-    notifyListeners();
-  }
+  // NOTE: filterUsersLocally removed. All role filtering should be done via backend queries.
 
   /// Filtra usuarios por estado activo/inactivo
   List<User> filterUsersByStatus({bool? active}) {
@@ -345,7 +348,7 @@ class UserProvider with ChangeNotifier {
   }
 
   /// Carga más usuarios para scroll infinito (append)
-  Future<void> loadMoreUsers(String accessToken) async {
+  Future<void> loadMoreUsers(String accessToken, {bool? activo, String? search, List<String>? roles}) async {
     if (_isLoadingMore || !_hasMoreData || _paginationInfo == null) return;
 
     _isLoadingMore = true;
@@ -363,10 +366,14 @@ class UserProvider with ChangeNotifier {
           limit: _paginationInfo!.limit,
         );
       } else {
+        // No tenemos filtros almacenados en el provider por defecto; la UI debe pasar los filtros
         response = await _userService.getAllUsers(
           accessToken,
           page: nextPage,
           limit: _paginationInfo!.limit,
+          activo: activo,
+          search: search,
+          roles: roles,
         );
       }
 
