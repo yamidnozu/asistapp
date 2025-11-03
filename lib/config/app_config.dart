@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
@@ -12,7 +13,7 @@ class AppConfig {
     } catch (e) {
       // Si falla la carga de dotenv, usar valor por defecto
       _baseUrl = 'http://localhost:3000';
-      print('Error cargando configuración: $e. Usando valor por defecto.');
+      debugPrint('Error cargando configuración: $e. Usando valor por defecto.');
     }
   }
 

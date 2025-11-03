@@ -103,15 +103,50 @@ class UserService {
   }
 
   /// Obtiene usuarios por rol con paginación
-  /// NOTA: Esta ruta no existe en el backend, usar getUsersByInstitution y filtrar localmente
-  Future<PaginatedUserResponse?> getUsersByRole(String accessToken, String role, {int? page, int? limit}) async {
-    // Temporal: usar la ruta de institución y filtrar por rol localmente
-    // TODO: Implementar la ruta /usuarios/rol/:role en el backend
-    debugPrint('WARNING: getUsersByRole using institution route as fallback');
-    
-    // Obtener el ID de institución del token o de alguna manera
-    // Por ahora, devolver null para forzar el uso de la ruta de institución
-    debugPrint('getUsersByRole: Route /usuarios/rol/$role not implemented, returning null');
+  Future<PaginatedUserResponse?> getUsersByRole(String accessToken, String role, {int? page, int? limit, bool? activo, String? search}) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+      final queryParams = <String, String>{};
+      if (page != null) queryParams['page'] = page.toString();
+      if (limit != null) queryParams['limit'] = limit.toString();
+      if (activo != null) queryParams['activo'] = activo.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      
+      final uri = Uri.parse('$baseUrlValue/usuarios/rol/$role').replace(queryParameters: queryParams);
+      
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('GET /usuarios/rol/$role - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          final users = (responseData['data'] as List)
+              .map((userJson) => User.fromJson(userJson))
+              .toList();
+          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedUserResponse(users: users, pagination: pagination);
+        }
+      } else {
+        debugPrint('Error getting users by role: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error getting users by role: $e');
+      debugPrint('StackTrace: $stackTrace');
+      return null;
+    }
     return null;
   }
 
@@ -282,6 +317,42 @@ class UserService {
       debugPrint('Error removing admin from institution: $e');
       debugPrint('StackTrace: $st');
       return null;
+    }
+  }
+
+  /// Cambia la contraseña de un usuario (solo para admins)
+  Future<bool> changePassword(String accessToken, String userId, String newPassword) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+      final uri = Uri.parse('$baseUrlValue/usuarios/$userId/change-password');
+
+      final response = await http.patch(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'newPassword': newPassword}),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('PATCH /usuarios/$userId/change-password - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['success'] == true;
+      } else {
+        debugPrint('Error changePassword: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e, st) {
+      debugPrint('Error changePassword: $e');
+      debugPrint('StackTrace: $st');
+      return false;
     }
   }
 

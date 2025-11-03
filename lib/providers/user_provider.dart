@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../services/user_service.dart' as user_service;
-import '../services/profesor_service.dart' as profesor_service;
 import '../models/user.dart';
 
 enum UserState {
@@ -13,7 +12,6 @@ enum UserState {
 
 class UserProvider with ChangeNotifier {
   final user_service.UserService _userService = user_service.UserService();
-  final profesor_service.ProfesorService _profesorService = profesor_service.ProfesorService();
 
   UserState _state = UserState.initial;
   String? _errorMessage;
@@ -48,13 +46,17 @@ class UserProvider with ChangeNotifier {
   List<User> get students => _users.where((user) => user.esEstudiante).toList();
   List<User> get adminInstitutions => _users.where((user) => user.esAdminInstitucion).toList();
 
-  int get totalUsers => _users.length;
+  // Número de usuarios actualmente cargados en memoria (página actual)
+  int get loadedUsersCount => _users.length;
   int get activeUsersCount => activeUsers.length;
   int get inactiveUsersCount => inactiveUsers.length;
 
   int get professorsCount => professors.length;
   int get studentsCount => students.length;
   int get adminInstitutionsCount => adminInstitutions.length;
+  
+  /// Número total de usuarios reportado por la paginación del backend
+  int get totalUsersFromPagination => _paginationInfo?.total ?? 0;
 
   void _setState(UserState newState, [String? error]) {
     _state = newState;
@@ -272,19 +274,12 @@ class UserProvider with ChangeNotifier {
   }
 
   /// Elimina un usuario (desactivación lógica)
-  Future<bool> deleteUser(String accessToken, String userId, String currentUserRole, String targetUserRole) async {
+  /// El backend maneja internamente las validaciones de permisos según el rol del usuario autenticado
+  Future<bool> deleteUser(String accessToken, String userId) async {
     // Este método ya no gestionará el estado de la lista.
     // La pantalla se encargará de solicitar la recarga, que sí gestiona el estado.
     try {
-      bool success = false;
-
-      // Para admin_institucion eliminando profesores, usar el servicio de profesores
-      if (currentUserRole == 'admin_institucion' && targetUserRole == 'profesor') {
-        success = await _profesorService.deleteProfesor(accessToken, userId);
-      } else {
-        // Para otros casos, usar el servicio general de usuarios
-        success = await _userService.deleteUser(accessToken, userId);
-      }
+      final success = await _userService.deleteUser(accessToken, userId);
 
       if (!success) {
         // Guardamos el mensaje de error para que la UI pueda mostrarlo.
@@ -293,6 +288,18 @@ class UserProvider with ChangeNotifier {
       return success;
     } catch (e) {
       debugPrint('Error deleting user: $e');
+      _errorMessage = e.toString();
+      return false;
+    }
+  }
+
+  /// Cambia la contraseña de un usuario (llama al servicio)
+  Future<bool> changeUserPassword(String accessToken, String userId, String newPassword) async {
+    try {
+      final result = await _userService.changePassword(accessToken, userId, newPassword);
+      return result == true;
+    } catch (e) {
+      debugPrint('Error changeUserPassword: $e');
       _errorMessage = e.toString();
       return false;
     }
@@ -392,7 +399,8 @@ class UserProvider with ChangeNotifier {
   /// Obtiene estadísticas de usuarios
   Map<String, int> getUserStatistics() {
     return {
-      'total': _paginationInfo?.total ?? totalUsers,
+      // 'total' debe reflejar el total informado por la paginación del backend.
+      'total': _paginationInfo?.total ?? 0,
       'activos': activeUsersCount,
       'inactivos': inactiveUsersCount,
       'profesores': professorsCount,

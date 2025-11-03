@@ -1,5 +1,6 @@
 // import type { Institucion, Usuario } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+import { FastifyRequest } from 'fastify';
 
 // Tipos temporales hasta que Prisma se genere correctamente
 export type Institucion = any;
@@ -154,6 +155,14 @@ export interface JWTPayload {
   jti?: string; // JWT ID único
   iat?: number;
   exp?: number;
+}
+
+/**
+ * Extiende FastifyRequest para incluir la información del usuario autenticado
+ * que es añadida por el middleware de autenticación
+ */
+export interface AuthenticatedRequest extends FastifyRequest {
+  user: JWTPayload;
 }
 
 export interface AppConfig {

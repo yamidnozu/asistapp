@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { prisma } from '../config/database';
 import UserService from '../services/user.service';
-import { ApiResponse, NotFoundError, PaginationParams, UserFilters } from '../types';
+import { ApiResponse, AuthenticatedRequest, AuthorizationError, NotFoundError, PaginationParams, UserFilters } from '../types';
 
 /**
  * Controlador para gestión de usuarios
@@ -46,6 +47,52 @@ export class UserController {
         data: result.data,
         pagination: result.pagination,
       } as ApiResponse<any>);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Cambiar contraseña de un usuario
+   * PATCH /usuarios/:id/change-password
+   */
+  public static async changePassword(
+    request: FastifyRequest<{ Params: { id: string }; Body: { newPassword: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const { newPassword } = request.body as { newPassword: string };
+
+      // Verificar permisos: si el invocador es admin_institucion, asegurarse que el usuario objetivo pertenezca
+      const authReq = request as AuthenticatedRequest;
+      const invoker = authReq.user;
+
+      if (invoker.rol === 'admin_institucion') {
+        // Obtener la institución del admin invocador
+        const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+          where: { usuarioId: invoker.id, activo: true },
+        });
+
+        if (!usuarioInstitucion) {
+          throw new AuthorizationError('No tienes una institución asignada');
+        }
+
+        const institucionId = usuarioInstitucion.institucionId;
+
+        // Verificar que el usuario objetivo pertenece a la misma institución activa
+        const targetRelation = await prisma.usuarioInstitucion.findFirst({
+          where: { usuarioId: id, institucionId, activo: true },
+        });
+
+        if (!targetRelation) {
+          throw new AuthorizationError('No tienes permiso para cambiar la contraseña de este usuario');
+        }
+      }
+
+      await UserService.changeUserPassword(id, newPassword);
+
+      return reply.code(200).send({ success: true, message: 'Contraseña actualizada exitosamente' });
     } catch (error) {
       throw error;
     }
@@ -175,11 +222,7 @@ export class UserController {
   ) {
     try {
       const userData = request.body as any;
-      const invokerRole = (request as any).user?.rol;
-
-      if (!invokerRole) {
-        throw new Error('Usuario no autenticado');
-      }
+      const invokerRole = (request as AuthenticatedRequest).user.rol;
 
       const result = await UserService.createUser(userData, invokerRole);
 

@@ -1,4 +1,4 @@
-import '../utils/app_constants.dart';
+import '../config/app_constants.dart';
 
 class User {
   final String id;

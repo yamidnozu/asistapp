@@ -3,7 +3,7 @@ import '../theme/theme_extensions.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
-import '../utils/app_constants.dart';
+import '../config/app_constants.dart';
 
 /// Callback cuando se solicita cambiar de página
 typedef OnPageChangeCallback = Future<void> Function(int page);

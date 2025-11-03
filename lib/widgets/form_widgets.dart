@@ -8,6 +8,8 @@ class CustomTextFormField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final FocusNode? focusNode;
+  final GlobalKey<FormFieldState>? fieldKey;
   final int? maxLines;
   final int? minLines;
   final Widget? prefixIcon;
@@ -22,6 +24,8 @@ class CustomTextFormField extends StatelessWidget {
     required this.controller,
     required this.labelText,
     required this.hintText,
+    this.focusNode,
+    this.fieldKey,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.validator,
@@ -44,6 +48,8 @@ class CustomTextFormField extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: TextFormField(
+        key: fieldKey,
+        focusNode: focusNode,
         controller: controller,
         initialValue: initialValue,
         keyboardType: keyboardType,
@@ -100,6 +106,8 @@ class CustomDropdownFormField<T> extends StatelessWidget {
   final String hintText;
   final List<DropdownMenuItem<T>> items;
   final String? Function(T?)? validator;
+  final FocusNode? focusNode;
+  final GlobalKey<FormFieldState>? fieldKey;
   final void Function(T?)? onChanged;
   final bool enabled;
 
@@ -112,6 +120,8 @@ class CustomDropdownFormField<T> extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.enabled = true,
+    this.focusNode,
+    this.fieldKey,
   });
 
   @override
@@ -123,7 +133,9 @@ class CustomDropdownFormField<T> extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: DropdownButtonFormField<T>(
+        key: fieldKey,
         value: value,
+        focusNode: focusNode,
         items: items,
         onChanged: enabled ? onChanged : null,
         validator: validator,

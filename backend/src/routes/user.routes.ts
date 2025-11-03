@@ -67,5 +67,14 @@ export default async function userRoutes(fastify: FastifyInstance) {
     handler: UserController.deleteUser,
   });
 
+  /**
+   * PATCH /usuarios/:id/change-password
+   * Permite a super_admin o admin_institucion cambiar la contraseña de un usuario
+   */
+  fastify.patch('/:id/change-password', {
+    preHandler: authorize(['super_admin', 'admin_institucion']),
+    handler: UserController.changePassword,
+  });
+
   // TODO: Agregar rutas para crear, actualizar, eliminar usuarios si es necesario
 }

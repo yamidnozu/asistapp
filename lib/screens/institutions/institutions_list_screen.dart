@@ -6,10 +6,8 @@ import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/management_scaffold.dart';
-import 'institution_form_screen.dart';
-import 'create_institution_admin_screen.dart';
+import '../../widgets/components/index.dart';
+// Routes now usan go_router y se definen en app_router.dart; los screens se instancian desde allí vía 'extra'
 
 class InstitutionsListScreen extends StatefulWidget {
   const InstitutionsListScreen({super.key});
@@ -98,51 +96,50 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     _loadInstitutions();
   }
 
-  Future<void> _loadPage(int page) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
 
-    if (authProvider.accessToken != null) {
-      await institutionProvider.loadInstitutions(
-        authProvider.accessToken!,
-        page: page,
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        activa: _statusFilter,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, InstitutionProvider>(
       builder: (context, authProvider, institutionProvider, child) {
-        return ManagementScaffold(
-          title: "Gestión de Instituciones",
-          isLoading: institutionProvider.isLoading && institutionProvider.institutions.isEmpty,
+        final userRole = authProvider.user?['rol'] as String?;
+        final canCreateInstitutions = userRole == 'super_admin';
+
+        return ClarityManagementPage(
+          title: 'Gestión de Instituciones',
+          isLoading: institutionProvider.isLoading,
           hasError: institutionProvider.hasError,
-          errorMessage: institutionProvider.errorMessage ?? 'Error desconocido',
+          errorMessage: institutionProvider.errorMessage,
           itemCount: institutionProvider.institutions.length,
-          itemBuilder: (context, index) => _buildInstitutionCard(
-            institutionProvider.institutions[index],
-            institutionProvider,
-            context,
-          ),
-          hasMoreData: institutionProvider.hasMoreData,
-          onRefresh: () => _loadInstitutions(),
-          scrollController: _scrollController,
-          floatingActionButton: FloatingActionButton(
-            key: const Key('addInstitutionButton'),
-            onPressed: () => _navigateToForm(context),
-            backgroundColor: context.colors.primary,
-            child: Icon(Icons.add, color: context.colors.getTextColorForBackground(context.colors.primary)),
-          ),
+          itemBuilder: (context, index) {
+            final institution = institutionProvider.institutions[index];
+            return _buildInstitutionCard(institution, institutionProvider, context);
+          },
           filterWidgets: _buildFilterWidgets(context),
           statisticWidgets: _buildStatisticWidgets(context, institutionProvider),
-          paginationInfo: institutionProvider.paginationInfo,
-          onPageChange: _loadPage,
-          emptyStateTitle: _searchQuery.isNotEmpty ? 'No se encontraron instituciones' : 'No hay instituciones',
-          emptyStateMessage: _searchQuery.isNotEmpty ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primera institución',
-          emptyStateIcon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
+          onRefresh: _loadInstitutions,
+          scrollController: _scrollController,
+          hasMoreData: institutionProvider.hasMoreData,
+          isLoadingMore: institutionProvider.isLoadingMore,
+          emptyStateWidget: ClarityEmptyState(
+            icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
+            title: _searchQuery.isNotEmpty
+                ? 'No se encontraron instituciones'
+                : 'No hay instituciones',
+            subtitle: _searchQuery.isNotEmpty
+                ? 'Intenta con otros términos de búsqueda'
+                : 'Comienza creando tu primera institución',
+          ),
+          floatingActionButton: canCreateInstitutions
+              ? FloatingActionButton(
+                  onPressed: () => _navigateToForm(context),
+                  backgroundColor: context.colors.primary,
+                  child: Icon(
+                    Icons.add,
+                    color: context.colors.getTextColorForBackground(context.colors.primary),
+                  ),
+                )
+              : null,
         );
       },
     );
@@ -190,10 +187,12 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         onChanged: _onSearchChanged,
       ),
       SizedBox(height: spacing.sm),
-      Row(
+      Wrap(
+        spacing: spacing.md,
+        runSpacing: spacing.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text('Mostrar:', style: textStyles.labelMedium),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Todas'),
             selected: _statusFilter == null,
@@ -201,7 +200,6 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               if (selected) _onStatusFilterChanged(null);
             },
           ),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Activas'),
             selected: _statusFilter == true,
@@ -209,7 +207,6 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               if (selected) _onStatusFilterChanged(true);
             },
           ),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Inactivas'),
             selected: _statusFilter == false,
@@ -223,171 +220,87 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 
   List<Widget> _buildStatisticWidgets(BuildContext context, InstitutionProvider provider) {
+    final colors = context.colors;
     return [
-      _buildCompactStat(
-        'Total',
-        provider.totalInstitutions.toString(),
-        Icons.business,
-        context.colors.primary,
-        context.textStyles,
+      ClarityCompactStat(
+        title: 'Total',
+        value: provider.totalInstitutions.toString(),
+        icon: Icons.business,
+        color: colors.primary,
       ),
-      Container(
-        height: 24,
-        width: 1,
-        color: context.colors.border,
+      ClarityCompactStat(
+        title: 'Activas',
+        value: provider.activeInstitutionsCount.toString(),
+        icon: Icons.check_circle,
+        color: colors.success,
       ),
-      _buildCompactStat(
-        'Activas',
-        provider.activeInstitutionsCount.toString(),
-        Icons.check_circle,
-        context.colors.success,
-        context.textStyles,
-      ),
-      Container(
-        height: 24,
-        width: 1,
-        color: context.colors.border,
-      ),
-      _buildCompactStat(
-        'Inactivas',
-        provider.inactiveInstitutionsCount.toString(),
-        Icons.cancel,
-        context.colors.error,
-        context.textStyles,
+      ClarityCompactStat(
+        title: 'Inactivas',
+        value: provider.inactiveInstitutionsCount.toString(),
+        icon: Icons.cancel,
+        color: colors.error,
       ),
     ];
   }
 
-  Widget _buildCompactStat(String title, String value, IconData icon, Color color, AppTextStyles textStyles) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 20, color: color),
-        const SizedBox(width: 6),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: textStyles.titleMedium.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              title,
-              style: textStyles.bodySmall.copyWith(
-                color: color.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, BuildContext context) {
     final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-    return Card(
-      margin: EdgeInsets.only(bottom: spacing.xs),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: institution.activa ? colors.success : colors.error,
-          child: Icon(
-            institution.activa ? Icons.check : Icons.close,
-            color: colors.surface,
-          ),
-        ),
-        title: Text(
-          institution.nombre,
-          style: textStyles.titleMedium.bold,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (institution.email != null) Row(children: [
-              Icon(Icons.email_outlined, size: 14, color: colors.textSecondary),
-              SizedBox(width: 4),
-              Text(institution.email!, style: textStyles.bodySmall),
-            ]),
-            if (institution.telefono != null) Row(children: [
-              Icon(Icons.phone_outlined, size: 14, color: colors.textSecondary),
-              SizedBox(width: 4),
-              Text(institution.telefono!, style: textStyles.bodySmall),
-            ]),
+
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final userRole = authProvider.user?['rol'] as String?;
+        final isSuperAdmin = userRole == 'super_admin';
+
+        // FASE 4: Acciones para el menú contextual
+        final List<ClarityContextMenuAction> contextActions = [
+          if (isSuperAdmin) ...[
+            ClarityContextMenuAction(
+              label: 'Crear Admin',
+              icon: Icons.admin_panel_settings,
+              color: colors.primary,
+              onPressed: () => _navigateToCreateInstitutionAdmin(institution),
+            ),
+            ClarityContextMenuAction(
+              label: 'Gestionar Admins',
+              icon: Icons.group,
+              color: colors.info,
+              onPressed: () => context.push('/institutions/${institution.id}/admins'),
+            ),
           ],
-        ),
-        trailing: Consumer<AuthProvider>(
-          builder: (context, authProvider, child) {
-            final userRole = authProvider.user?['rol'] as String?;
-            final isSuperAdmin = userRole == 'super_admin';
-            
-            return PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(value, institution, provider),
-              itemBuilder: (context) => [
-                if (isSuperAdmin) PopupMenuItem(
-                  value: 'create_admin',
-                  child: Row(
-                    children: [
-                      Icon(Icons.admin_panel_settings, color: colors.primary),
-                      SizedBox(width: spacing.sm),
-                      Text('Crear Administrador', style: textStyles.bodyMedium.withColor(colors.primary)),
-                    ],
-                  ),
-                ),
-                if (isSuperAdmin) PopupMenuItem(
-                  value: 'manage_admins',
-                  child: Row(
-                    children: [
-                      Icon(Icons.group, color: colors.primary),
-                      SizedBox(width: spacing.sm),
-                      Text('Gestionar Administradores', style: textStyles.bodyMedium.withColor(colors.primary)),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: colors.textSecondary),
-                      SizedBox(width: spacing.sm),
-                      Text('Editar', style: textStyles.bodyMedium),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'toggle_status',
-                  child: Row(
-                    children: [
-                      Icon(Icons.toggle_on, color: colors.textSecondary),
-                      SizedBox(width: spacing.sm),
-                      Text('Cambiar Estado', style: textStyles.bodyMedium),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: colors.error),
-                      SizedBox(width: spacing.sm),
-                      Text('Eliminar', style: textStyles.bodyMedium.withColor(colors.error)),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        onTap: () => _navigateToForm(context, institution: institution),
-      ),
+          ClarityContextMenuAction(
+            label: 'Editar',
+            icon: Icons.edit,
+            color: colors.primary,
+            onPressed: () => _navigateToForm(context, institution: institution),
+          ),
+          ClarityContextMenuAction(
+            label: institution.activa ? 'Desactivar' : 'Activar',
+            icon: institution.activa ? Icons.toggle_off : Icons.toggle_on,
+            color: institution.activa ? colors.warning : colors.success,
+            onPressed: () => _handleMenuAction('toggle_status', institution, provider),
+          ),
+          ClarityContextMenuAction(
+            label: 'Eliminar',
+            icon: Icons.delete,
+            color: colors.error,
+            onPressed: () => _handleMenuAction('delete', institution, provider),
+          ),
+        ];
+
+        return ClarityListItem(
+          leading: Icon(
+            Icons.business,
+            color: colors.primary,
+            size: 32,
+          ),
+          title: institution.nombre,
+          subtitle: institution.email ?? institution.telefono ?? 'Sin contacto',
+          badgeText: institution.activa ? 'Activa' : 'Inactiva',
+          badgeColor: institution.activa ? colors.success : colors.error,
+          contextActions: contextActions,
+          onTap: () => _navigateToForm(context, institution: institution),
+        );
+      },
     );
   }
 
@@ -484,20 +397,12 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 
   void _navigateToForm(BuildContext context, {Institution? institution}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InstitutionFormScreen(institution: institution),
-      ),
-    );
+    // Navegar con go_router pasando la institución como extra
+    context.push('/institutions/form', extra: institution);
   }
 
   void _navigateToCreateInstitutionAdmin(Institution institution) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateInstitutionAdminScreen(institution: institution),
-      ),
-    );
+    // Navegar con go_router pasando la institución como extra
+    context.push('/institutions/create-admin', extra: institution);
   }
 }

@@ -5,6 +5,7 @@ import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
+import 'form_steps/index.dart';
 
 class InstitutionFormScreen extends StatefulWidget {
   final Institution? institution;
@@ -17,6 +18,7 @@ class InstitutionFormScreen extends StatefulWidget {
 
 class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  int _currentStep = 0;
   final _nombreController = TextEditingController();
   final _direccionController = TextEditingController();
   final _telefonoController = TextEditingController();
@@ -126,107 +128,135 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
+    final colors = context.colors;
     final textStyles = context.textStyles;
+    final title = isEditing ? 'Editar Institución' : 'Nueva Institución';
 
-    return _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            padding: EdgeInsets.all(spacing.lg),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: colors.primary,
+        foregroundColor: colors.white,
+      ),
+      body: Form(
+        key: _formKey,
+        child: Stepper(
+          currentStep: _currentStep,
+          onStepContinue: _onStepContinue,
+          onStepCancel: _onStepCancel,
+          onStepTapped: (step) => setState(() => _currentStep = step),
+          controlsBuilder: (context, details) {
+            final isLastStep = details.currentStep == 2; // 3 steps total (0, 1, 2)
+            
+            return Padding(
+              padding: EdgeInsets.only(top: spacing.lg),
+              child: Row(
                 children: [
-                  Text(
-                    isEditing ? 'Editar Institución' : 'Nueva Institución',
-                    style: textStyles.headlineMedium.bold,
+                  if (details.currentStep > 0) ...[
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : details.onStepCancel,
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: spacing.md),
+                          side: BorderSide(color: colors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(spacing.borderRadius),
+                          ),
+                        ),
+                        child: Text(
+                          'Anterior',
+                          style: textStyles.button.withColor(colors.primary),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: spacing.md),
+                  ],
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : details.onStepContinue,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: spacing.md),
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              isLastStep ? (isEditing ? 'Actualizar' : 'Crear') : 'Siguiente',
+                              style: textStyles.button.withColor(colors.white),
+                            ),
+                    ),
                   ),
-                  SizedBox(height: spacing.lg),
-                  _buildFormCard(),
-                  SizedBox(height: spacing.xl),
-                  _buildActionButtons(),
+                  if (details.currentStep == 0) ...[
+                    SizedBox(width: spacing.md),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : () => context.pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: spacing.md),
+                          side: BorderSide(color: colors.error),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(spacing.borderRadius),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: textStyles.button.withColor(colors.error),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
+            );
+          },
+          steps: [
+            // Step 1: Información Básica
+            Step(
+              title: const Text('Información'),
+              subtitle: const Text('Datos básicos'),
+              content: InstitutionBasicInfoStep(
+                nombreController: _nombreController,
+                emailController: _emailController,
+              ),
+              isActive: _currentStep >= 0,
+              state: _currentStep > 0 ? StepState.complete : StepState.indexed,
             ),
-          );
-  }
 
-  Widget _buildFormCard() {
-    final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Información de la Institución',
-              style: textStyles.headlineMedium.withColor(colors.primary),
+            // Step 2: Contacto y Ubicación
+            Step(
+              title: const Text('Contacto'),
+              subtitle: const Text('Ubicación y teléfono'),
+              content: InstitutionContactStep(
+                direccionController: _direccionController,
+                telefonoController: _telefonoController,
+              ),
+              isActive: _currentStep >= 1,
+              state: _currentStep > 1 ? StepState.complete : (_currentStep == 1 ? StepState.indexed : StepState.disabled),
             ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              key: const Key('nombreInstitucionField'),
-              controller: _nombreController,
-              label: 'Nombre de la Institución',
-              hint: 'Ingrese el nombre completo',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'El nombre es obligatorio';
-                }
-                if (value.trim().length < 3) {
-                  return 'El nombre debe tener al menos 3 caracteres';
-                }
-                return null;
-              },
-              prefixIcon: Icons.business,
-            ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              controller: _direccionController,
-              label: 'Dirección',
-              hint: 'Dirección completa de la institución',
-              maxLines: 3,
-              prefixIcon: Icons.location_on,
-            ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              controller: _telefonoController,
-              label: 'Teléfono',
-              hint: '+56912345678',
-              keyboardType: TextInputType.phone,
-              prefixIcon: Icons.phone,
-            ),
-            SizedBox(height: spacing.lg),
-            _buildTextField(
-              key: const Key('emailInstitucionField'),
-              controller: _emailController,
-              label: 'Email',
-              hint: 'contacto@institucion.cl',
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value != null && value.isNotEmpty) {
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                  if (!emailRegex.hasMatch(value)) {
-                    return 'Ingrese un email válido';
-                  }
-                }
-                return null;
-              },
-              prefixIcon: Icons.email,
-            ),
-            SizedBox(height: spacing.lg),
-            SwitchListTile(
-              title: Text('Institución Activa', style: textStyles.titleMedium),
-              subtitle: Text('Determina si la institución está operativa', style: textStyles.bodySmall),
-              value: _activa,
-              onChanged: (value) => setState(() => _activa = value),
-              activeColor: colors.primary,
+
+            // Step 3: Configuración
+            Step(
+              title: const Text('Configuración'),
+              subtitle: const Text('Estado'),
+              content: InstitutionConfigStep(
+                activa: _activa,
+                onActivaChanged: (value) => setState(() => _activa = value),
+                isEditMode: isEditing,
+              ),
+              isActive: _currentStep >= 2,
+              state: _currentStep == 2 ? StepState.indexed : StepState.disabled,
             ),
           ],
         ),
@@ -234,95 +264,23 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     );
   }
 
-  Widget _buildTextField({
-    Key? key,
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    IconData? prefixIcon,
-  }) {
-    final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-    return TextFormField(
-      key: key,
-      controller: controller,
-      style: textStyles.bodyLarge,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        labelStyle: textStyles.bodyMedium.withColor(colors.textSecondary),
-        hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: colors.textSecondary) : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-        filled: true,
-        fillColor: colors.surface,
-      ),
-      validator: validator,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-    );
+  void _onStepContinue() {
+    // Validar el step actual antes de continuar
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_currentStep < 2) {
+      setState(() => _currentStep++);
+    } else {
+      // Último step: guardar
+      _saveInstitution();
+    }
   }
 
-  Widget _buildActionButtons() {
-    final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            key: const Key('cancelButton'),
-            onPressed: _isLoading ? null : () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: spacing.lg),
-              side: BorderSide(color: colors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-              ),
-            ),
-            child: Text('Cancelar', style: textStyles.labelLarge.withColor(colors.primary)),
-          ),
-        ),
-        SizedBox(width: spacing.lg),
-        Expanded(
-          child: ElevatedButton(
-            key: const Key('formSaveButton'),
-            onPressed: _isLoading ? null : _saveInstitution,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: spacing.lg),
-              backgroundColor: colors.primary,
-              
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-              ),
-            ),
-            child: Text(isEditing ? 'Actualizar' : 'Crear', style: textStyles.button),
-          ),
-        ),
-      ],
-    );
+  void _onStepCancel() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+    }
   }
 }

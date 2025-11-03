@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../config/database';
 import ProfesorService, { ProfesorFilters, UpdateProfesorRequest } from '../services/profesor.service';
-import { ApiResponse, NotFoundError, PaginationParams } from '../types';
+import { ApiResponse, AuthenticatedRequest, NotFoundError, PaginationParams } from '../types';
 
 interface CreateProfesorBody {
   nombres: string;
@@ -35,7 +35,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const { page, limit, activo, search } = request.query;
 
       // Obtener la institución del admin desde la base de datos
@@ -92,7 +92,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const { id } = request.params;
 
       // Obtener la institución del admin desde la base de datos
@@ -139,7 +139,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const profesorData = request.body;
 
       // Obtener la institución del admin desde la base de datos
@@ -195,7 +195,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const { id } = request.params;
       const profesorData = request.body;
 
@@ -244,7 +244,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const { id } = request.params;
 
       // Obtener la institución del admin desde la base de datos
@@ -292,7 +292,7 @@ export class InstitutionAdminController {
     reply: FastifyReply
   ) {
     try {
-      const user = (request as any).user;
+      const user = (request as AuthenticatedRequest).user;
       const { id } = request.params;
 
       // Obtener la institución del admin desde la base de datos

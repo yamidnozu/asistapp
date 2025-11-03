@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive_utils.dart';
-import '../theme/app_constants.dart';
+import '../config/app_constants.dart';
 import '../theme/theme_extensions.dart';
+import 'components/clarity_components.dart';
 
 /// Widget reutilizable para las tarjetas de características en los dashboards
 class DashboardFeatureCard extends StatelessWidget {
@@ -24,60 +25,48 @@ class DashboardFeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bodyFontSize = responsive['bodyFontSize'] as double;
     final isDesktop = responsive['isDesktop'] as bool;
     final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8),
-      child: InkWell(
-        onTap: onTap ?? () {
-          // TODO: Implementar navegación a la funcionalidad específica
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(isDesktop ? 24 : 16),
-          child: SizedBox(
-            height: isDesktop ? 140 : 120, // Altura fija para evitar overflow
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: isDesktop ? 48 : 32,
-                  color: color,
-                ),
-                SizedBox(height: isDesktop ? 12 : 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: bodyFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: colors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: isDesktop ? 6 : 4),
-                Expanded(
-                  child: Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: bodyFontSize * 0.9,
-                      color: colors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+    return ClarityCard(
+      onTap: onTap ?? () {
+        // TODO: Implementar navegación a la funcionalidad específica
+      },
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: isDesktop ? 48 : 32,
+            color: color,
+          ),
+          SizedBox(width: spacing.sm),
+          Expanded(
+            child: Text(
+              title,
+              style: textStyles.titleLarge.copyWith(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ),
+        ],
       ),
+      subtitle: Text(
+        description,
+        style: textStyles.bodyMedium.copyWith(
+          color: colors.textSecondary,
+        ),
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      padding: EdgeInsets.all(isDesktop ? spacing.xl : spacing.lg),
     );
   }
 }
@@ -97,22 +86,27 @@ class UserGreetingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitleFontSize = responsive['subtitleFontSize'] as double;
     final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
-    return Column(
-      children: [
-        if (subtitle != null) ...[
-          Text(
-            subtitle!,
-            style: TextStyle(
-              fontSize: subtitleFontSize,
-              color: colors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ],
+    return ClarityCard(
+      title: Text(
+        '¡Hola, $userName!',
+        style: textStyles.headlineMedium.copyWith(
+          color: colors.primary,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      subtitle: subtitle != null ? Text(
+        subtitle!,
+        style: textStyles.bodyLarge.copyWith(
+          color: colors.textSecondary,
+        ),
+        textAlign: TextAlign.center,
+      ) : null,
+      padding: EdgeInsets.all(spacing.xl),
     );
   }
 }
@@ -121,16 +115,41 @@ class UserGreetingWidget extends StatelessWidget {
 class DashboardOptionsGrid extends StatelessWidget {
   final List<DashboardFeatureCard> cards;
   final Map<String, dynamic> responsive;
+  final bool verticalMode;
 
   const DashboardOptionsGrid({
     super.key,
     required this.cards,
     required this.responsive,
+    this.verticalMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenType = responsive['screenType'] as ScreenType;
+
+    if (verticalMode) {
+      return Column(
+        children: [
+          const SizedBox(height: 32),
+          Column(
+            children: cards.map((card) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: ListTile(
+                  onTap: card.onTap,
+                  tileColor: Theme.of(context).cardColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  leading: Icon(card.icon, color: card.color, size: 28),
+                  title: Text(card.title, style: context.textStyles.bodyLarge),
+                  subtitle: Text(card.description, style: context.textStyles.bodySmall),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
 
     return Column(
       children: [

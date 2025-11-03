@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_constants.dart';
+import '../config/app_constants.dart';
 
 /// Utilidades para diseño responsive
 class ResponsiveUtils {

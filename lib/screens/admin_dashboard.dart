@@ -2,121 +2,245 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../providers/user_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../utils/responsive_utils.dart';
-import '../widgets/dashboard_widgets.dart';
+import '../widgets/components/index.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
-  Widget _buildUserGreeting(String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
-    final selectedInstitution = authProvider.selectedInstitution;
+  @override
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
 
-    return UserGreetingWidget(
-      userName: userName,
-      responsive: responsive,
-      subtitle: selectedInstitution?.name,
-    );
-  }
+class _AdminDashboardState extends State<AdminDashboard> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-  Widget _buildDashboardOptions(BuildContext context, Map<String, dynamic> responsive) {
-    final colors = context.colors;
-    
-    final cards = [
-      DashboardFeatureCard(
-        icon: Icons.people,
-        title: 'Usuarios',
-        description: 'Gestionar profesores y estudiantes',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-        onTap: () => context.go('/users'),
-      ),
-      DashboardFeatureCard(
-        icon: Icons.class_,
-        title: 'Grupos',
-        description: 'Administrar salones de clase',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-      ),
-      DashboardFeatureCard(
-        icon: Icons.schedule,
-        title: 'Horarios',
-        description: 'Configurar horarios de clases',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-      ),
-      DashboardFeatureCard(
-        icon: Icons.assignment,
-        title: 'Asistencia',
-        description: 'Control y registro de asistencia',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-      ),
-      DashboardFeatureCard(
-        icon: Icons.bar_chart,
-        title: 'Reportes',
-        description: 'Estadísticas de la institución',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-      ),
-      DashboardFeatureCard(
-        icon: Icons.settings,
-        title: 'Configuración',
-        description: 'Ajustes de la institución',
-        color: colors.primary,  // Usar color primario consistente
-        responsive: responsive,
-      ),
-    ];
-
-    return DashboardOptionsGrid(
-      cards: cards,
-      responsive: responsive,
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider, Color primaryColor, String userRole) {
-    return DashboardAppBar(
-      backgroundColor: primaryColor,
-      actions: [
-        DashboardAppBarActions(
-          userRole: userRole,
-          roleIcon: Icons.admin_panel_settings,
-          onLogout: () async {
-            await authProvider.logoutAndClearAllData(context);
-            if (context.mounted) {
-              context.go('/login');
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBody(BuildContext context, String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
-    return DashboardBody(
-      userGreeting: _buildUserGreeting(userName, authProvider, responsive),
-      dashboardOptions: _buildDashboardOptions(context, responsive),
-      responsive: responsive,
-    );
+        final selectedInstitutionId = authProvider.selectedInstitutionId;
+        final token = authProvider.accessToken;
+        if (selectedInstitutionId != null && token != null) {
+          await userProvider.loadUsersByInstitution(token, selectedInstitutionId);
+        }
+      } catch (e) {
+        debugPrint('AdminDashboard init load error: $e');
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Escuchar userProvider para refrescar estadísticas en tiempo real
+    final userProvider = Provider.of<UserProvider>(context);
     final colors = context.colors;
-    
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
+
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
-    final userRole = 'Administrador';
+  // selectedInstitution se obtiene del AuthProvider cuando se necesite en el UI
+
+    // Obtener estadísticas desde el provider
+    final stats = userProvider.getUserStatistics();
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: _buildAppBar(context, authProvider, colors.primary, userRole),
-      body: LayoutBuilder(
-        builder: (ctx, constraints) {
-          final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(context, userName, authProvider, responsive);
-        },
+      // AppBar centralizado en AppShell; este Scaffold mantiene solo el body
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Saludo Sutil
+            Text('¡Hola, $userName!', style: textStyles.displayMedium),
+            SizedBox(height: spacing.sm),
+            Text(
+              'Bienvenido al panel de administración.',
+              style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+            ),
+            SizedBox(height: spacing.xl),
+
+            // 2. Barra de Estadísticas Adaptable (usa stats map)
+            _buildCompactStatsBar(context, stats, userProvider),
+
+            SizedBox(height: spacing.xl),
+
+            // 3. Acciones Principales - Menú Elegante Vertical
+            Text('Acciones Principales', style: textStyles.headlineSmall),
+            SizedBox(height: spacing.md),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(spacing.borderRadius),
+                border: Border.all(color: colors.borderLight),
+              ),
+              child: Column(
+                children: [
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.people_outline_rounded,
+                    label: 'Usuarios',
+                    value: stats['total']?.toString() ?? '0',
+                    color: colors.primary,
+                    onTap: () => context.go('/users'),
+                    isFirst: true,
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.bar_chart_rounded,
+                    label: 'Reportes',
+                    value: 'Análisis',
+                    color: const Color(0xFF7C3AED),
+                    onTap: () {},
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Horarios',
+                    value: 'Gestión',
+                    color: const Color(0xFF06B6D4),
+                    onTap: () {},
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.settings_outlined,
+                    label: 'Ajustes',
+                    value: 'Config',
+                    color: const Color(0xFF8B5CF6),
+                    onTap: () {},
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget para la nueva barra de estadísticas
+  Widget _buildCompactStatsBar(BuildContext context, Map<String, int> stats, UserProvider userProvider) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        border: Border.all(color: colors.borderLight),
+      ),
+      child: SingleChildScrollView( // Permite scroll horizontal si no cabe
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // 'Usuarios' debe reflejar el total informado por la paginación del backend.
+            ClarityCompactStat(
+              value: stats['total']?.toString() ?? '0',
+              title: 'Usuarios',
+              icon: Icons.people,
+              color: colors.primary,
+            ),
+            SizedBox(width: spacing.lg),
+            // 'Profesores' y 'Estudiantes' actualmente reflejan solo la página cargada.
+            // Para una solución completa se requiere agregar endpoints que devuelvan los totales por rol en el backend.
+            ClarityCompactStat(
+              value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
+              title: 'Profesores',
+              icon: Icons.school,
+              color: colors.info,
+            ),
+            SizedBox(width: spacing.lg),
+            ClarityCompactStat(
+              value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
+              title: 'Estudiantes',
+              icon: Icons.person,
+              color: colors.warning,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget para item del menú de acciones
+  Widget _buildMenuActionItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required VoidCallback onTap,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.lg,
+            vertical: spacing.sm,
+          ),
+          child: Row(
+            children: [
+              // Icono con fondo circular
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              SizedBox(width: spacing.md),
+              // Texto principal y valor
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: textStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      value,
+                      style: textStyles.bodySmall.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Icono de flecha
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: context.colors.textSecondary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

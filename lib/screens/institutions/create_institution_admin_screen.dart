@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/form_widgets.dart';
+import '../../widgets/components/clarity_components.dart';
 
 class CreateInstitutionAdminScreen extends StatefulWidget {
   final Institution institution;
@@ -215,7 +216,7 @@ class _CreateInstitutionAdminScreenState extends State<CreateInstitutionAdminScr
                   if (value == null || value.trim().isEmpty) {
                     return 'El email es requerido';
                   }
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
                   if (!emailRegex.hasMatch(value.trim())) {
                     return 'Ingrese un email válido';
                   }
@@ -243,68 +244,43 @@ class _CreateInstitutionAdminScreenState extends State<CreateInstitutionAdminScr
               SizedBox(height: spacing.lg),
 
               // Información de la institución
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+              ClarityCard(
+                title: Text(
+                  'Institución Asignada',
+                  style: textStyles.titleMedium.bold,
                 ),
-                child: Padding(
-                  padding: EdgeInsets.all(spacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Institución Asignada',
-                        style: textStyles.titleMedium.bold,
-                      ),
-                      SizedBox(height: spacing.sm),
-                      Row(
-                        children: [
-                          Icon(Icons.business, color: colors.primary),
-                          SizedBox(width: spacing.sm),
-                          Expanded(
-                            child: Text(
-                              widget.institution.nombre,
-                              style: textStyles.bodyLarge,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                leading: Icon(
+                  Icons.business,
+                  color: colors.primary,
+                ),
+                subtitle: Text(
+                  widget.institution.nombre,
+                  style: textStyles.bodyLarge,
                 ),
               ),
               SizedBox(height: spacing.lg),
 
               // Estado activo
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+              ClarityCard(
+                title: Text(
+                  'Estado del Usuario',
+                  style: textStyles.bodyLarge.semiBold,
                 ),
-                child: Padding(
-                  padding: EdgeInsets.all(spacing.md),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _activo ? Icons.check_circle : Icons.cancel,
-                        color: _activo ? colors.success : colors.error,
-                      ),
-                      SizedBox(width: spacing.md),
-                      Expanded(
-                        child: Text(
-                          'Usuario Activo',
-                          style: textStyles.bodyLarge,
-                        ),
-                      ),
-                      Switch(
-                        value: _activo,
-                        onChanged: (value) {
-                          setState(() => _activo = value);
-                        },
-                        activeColor: colors.primary,
-                      ),
-                    ],
+                trailing: Switch(
+                  value: _activo,
+                  onChanged: (value) {
+                    setState(() => _activo = value);
+                  },
+                  activeColor: colors.primary,
+                ),
+                leading: Icon(
+                  _activo ? Icons.check_circle : Icons.cancel,
+                  color: _activo ? colors.success : colors.error,
+                ),
+                subtitle: Text(
+                  _activo ? 'Usuario activo en el sistema' : 'Usuario inactivo',
+                  style: textStyles.bodyMedium.withColor(
+                    _activo ? colors.success : colors.error,
                   ),
                 ),
               ),

@@ -1,133 +1,210 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/Provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../widgets/role_guard.dart';
-import '../utils/role_enum.dart';
-import '../utils/responsive_utils.dart';
-import '../utils/app_routes.dart';
-import '../widgets/dashboard_widgets.dart';
+// role_guard and role_enum removed — not required after replacing action list
+import '../widgets/components/index.dart';
 
-class StudentDashboard extends StatelessWidget {
-  const StudentDashboard({super.key});
+// Helper para construir acciones con estilo consistente (copiado de admin_dashboard)
+Widget _buildMenuActionItem(
+  BuildContext context, {
+  required IconData icon,
+  required String label,
+  required String value,
+  required Color color,
+  required VoidCallback onTap,
+  bool isFirst = false,
+  bool isLast = false,
+}) {
+  final textStyles = context.textStyles;
+  final spacing = context.spacing;
+  final colors = context.colors;
 
-  Widget _buildUserGreeting(String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
-    final selectedInstitution = authProvider.selectedInstitution;
-
-    return UserGreetingWidget(
-      userName: userName,
-      responsive: responsive,
-      subtitle: selectedInstitution?.name,
-    );
-  }
-
-  Widget _buildDashboardOptions(BuildContext context, Map<String, dynamic> responsive) {
-    final colors = context.colors;
-    
-    return Column(
-      children: [
-        const SizedBox(height: 32),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          alignment: WrapAlignment.center,
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.lg,
+          vertical: spacing.sm,
+        ),
+        child: Row(
           children: [
-            DashboardFeatureCard(
-              icon: Icons.qr_code,
-              title: 'Mi Código QR',
-              description: 'Mostrar código para asistencia',
-              color: colors.primary,  // Usar color primario consistente
-              responsive: responsive,
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              child: Icon(icon, color: color, size: 20),
             ),
-            RoleGuard(
-              allowedRoles: [UserRole.estudiante],
-              child: DashboardFeatureCard(
-                icon: Icons.calendar_today,
-                title: 'Mi Horario',
-                description: 'Ver clases del día',
-                color: colors.primary,  // Usar color primario consistente
-                responsive: responsive,
+            SizedBox(width: spacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: textStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: textStyles.bodySmall.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            DashboardFeatureCard(
-              icon: Icons.assignment,
-              title: 'Asistencia',
-              description: 'Historial de mi asistencia',
-              color: colors.primary,  // Usar color primario consistente
-              responsive: responsive,
-            ),
-            DashboardFeatureCard(
-              icon: Icons.bar_chart,
-              title: 'Estadísticas',
-              description: 'Mi rendimiento académico',
-              color: colors.primary,  // Usar color primario consistente
-              responsive: responsive,
-            ),
-            DashboardFeatureCard(
-              icon: Icons.notifications,
-              title: 'Notificaciones',
-              description: 'Avisos de padres/profesores',
-              color: colors.secondary,  // Usar secundario para variar ligeramente
-              responsive: responsive,
-            ),
-            DashboardFeatureCard(
-              icon: Icons.contact_phone,
-              title: 'Contacto',
-              description: 'Información de contacto',
-              color: colors.info,  // Info para acciones informativas
-              responsive: responsive,
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: colors.textSecondary,
             ),
           ],
         ),
-      ],
-    );
-  }
+      ),
+    ),
+  );
+}
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider, Color primaryColor, String userRole) {
-    return DashboardAppBar(
-      backgroundColor: primaryColor,
-      actions: [
-        DashboardAppBarActions(
-          userRole: userRole,
-          roleIcon: Icons.person,
-          onLogout: () async {
-            await authProvider.logoutAndClearAllData(context);
-            if (context.mounted) {
-              context.go(AppRoutes.login);
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBody(BuildContext context, String userName, AuthProvider authProvider, Map<String, dynamic> responsive) {
-    return DashboardBody(
-      userGreeting: _buildUserGreeting(userName, authProvider, responsive),
-      dashboardOptions: _buildDashboardOptions(context, responsive),
-      responsive: responsive,
-    );
-  }
+class StudentDashboard extends StatelessWidget {
+  const StudentDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final colors = context.colors;
-    
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
+
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
-    final userRole = 'Estudiante';
+  // selectedInstitution disponible en AuthProvider si es necesario
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: _buildAppBar(context, authProvider, colors.primary, userRole),
-      body: LayoutBuilder(
-        builder: (ctx, constraints) {
-          final responsive = ResponsiveUtils.getResponsiveValues(constraints);
-          return _buildBody(context, userName, authProvider, responsive);
-        },
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            // 1. Saludo Sutil
+            Text('¡Hola, $userName!', style: textStyles.displayMedium),
+            SizedBox(height: spacing.sm),
+            Text(
+              'Bienvenido al panel estudiantil.',
+              style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+            ),
+            SizedBox(height: spacing.xl),
+
+            // 2. Barra de Estadísticas Adaptable (simplificada para estudiantes)
+            _buildCompactStatsBar(context),
+
+            SizedBox(height: spacing.xl),
+
+            // 3. Acciones principales en lista compacta (estilo Admin)
+            Text('Acciones Principales', style: textStyles.headlineSmall),
+            SizedBox(height: spacing.md),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(spacing.borderRadius),
+                border: Border.all(color: colors.borderLight),
+              ),
+              child: Column(
+                children: [
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.qr_code_2_rounded,
+                    label: 'Mi Código QR',
+                    value: 'Para registrar asistencia',
+                    color: colors.primary,
+                    onTap: () => context.go('/student/qr'),
+                    isFirst: true,
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Mi Horario',
+                    value: 'Ver mis clases',
+                    color: const Color(0xFF06B6D4),
+                    onTap: () => context.go('/student/schedule'),
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Mi Asistencia',
+                    value: 'Historial y estadísticas',
+                    color: colors.success,
+                    onTap: () => context.go('/student/attendance'),
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.notifications_outlined,
+                    label: 'Notificaciones',
+                    value: 'Ver mensajes',
+                    color: colors.warning,
+                    onTap: () => context.go('/student/notifications'),
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+  }
+
+  // Widget para la nueva barra de estadísticas que se adapta
+  Widget _buildCompactStatsBar(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        border: Border.all(color: colors.borderLight),
+      ),
+      child: SingleChildScrollView( // Permite scroll horizontal si no cabe
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ClarityCompactStat(
+              value: '85%', // Placeholder - se puede conectar a datos reales
+              title: 'Asistencia',
+              icon: Icons.check_circle,
+              color: colors.success,
+            ),
+            SizedBox(width: spacing.lg),
+            ClarityCompactStat(
+              value: '4.2', // Placeholder - se puede conectar a datos reales
+              title: 'Promedio',
+              icon: Icons.grade,
+              color: colors.primary,
+            ),
+            SizedBox(width: spacing.lg),
+            ClarityCompactStat(
+              value: '12', // Placeholder - se puede conectar a datos reales
+              title: 'Materias',
+              icon: Icons.book,
+              color: colors.info,
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  // Large action cards removed — using compact ListTile layout instead.
 }

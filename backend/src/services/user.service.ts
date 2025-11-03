@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '../config/database';
-import { AuthorizationError, ConflictError, CreateUserRequest, CreateUserResponse, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
+import { AuthorizationError, ConflictError, CreateUserRequest, CreateUserResponse, NotFoundError, PaginatedResponse, PaginationParams, UpdateUserRequest, UserFilters, UserRole, UsuarioExtendido, ValidationError } from '../types';
 
 export class UserService {
   /**
@@ -360,6 +360,40 @@ export class UserService {
 
     } catch (error) {
       console.error(`Error al actualizar usuario con ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cambia la contraseña de un usuario y aumenta tokenVersion para invalidar sesiones
+   */
+  public static async changeUserPassword(userId: string, newPassword: string): Promise<boolean> {
+    try {
+      if (!userId || typeof userId !== 'string') {
+        throw new ValidationError('ID de usuario inválido');
+      }
+      if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+        throw new ValidationError('La nueva contraseña debe tener al menos 8 caracteres');
+      }
+
+      const user = await prisma.usuario.findUnique({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundError('Usuario');
+      }
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+
+      await prisma.usuario.update({
+        where: { id: userId },
+        data: {
+          passwordHash: hashed,
+          tokenVersion: (user.tokenVersion ?? 0) + 1,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error(`Error changing password for user ${userId}:`, error);
       throw error;
     }
   }

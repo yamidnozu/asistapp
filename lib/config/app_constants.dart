@@ -1,9 +1,26 @@
-/// Constantes de UI específicas que no cambian con el tema
+/// Constantes globales de la aplicación
+/// Unifica constantes de UI, lógica y configuración
 class AppConstants {
-
   AppConstants._();
 
   static final AppConstants instance = AppConstants._();
+
+  // ============================================================================
+  // CONSTANTES DE CONFIGURACIÓN Y LÓGICA
+  // ============================================================================
+
+  /// Número de elementos por página en todas las paginaciones
+  static const int itemsPerPage = 5;
+
+  /// Timeout para las peticiones HTTP (en segundos)
+  static const int httpTimeoutSeconds = 10;
+
+  /// Número máximo de reintentos para operaciones fallidas
+  static const int maxRetries = 3;
+
+  // ============================================================================
+  // CONSTANTES DE UI - BREAKPOINTS RESPONSIVE
+  // ============================================================================
 
   // Breakpoints responsive
   final double mobileSmall = 480;
@@ -17,6 +34,10 @@ class AppConstants {
   final double maxWidthDesktop = 1024;
   final double maxWidthLargeDesktop = 1400;
 
+  // ============================================================================
+  // CONSTANTES DE UI - TAMAÑOS Y DIMENSIONES
+  // ============================================================================
+
   final double logoSize = 80;
   final double spinnerSize = 20;
   final double buttonBorderRadius = 8;
@@ -26,6 +47,10 @@ class AppConstants {
   final double errorLoggerHeightCollapsed = 60;
   final double errorLoggerWidthExpanded = 300;
   final double errorLoggerHeightExpanded = 200;
+
+  // ============================================================================
+  // CONSTANTES DE UI - TIPOGRAFÍA Y EFECTOS
+  // ============================================================================
 
   final double defaultFontSize = 14;
   final double logoFontSize = 48;
@@ -40,7 +65,11 @@ class AppConstants {
   final double shadowOpacity = 0.1; // 10% para sombras sutiles
   final double surfaceTintOpacity = 0.1;
 
-  // Método para obtener el ancho máximo según el tamaño de pantalla
+  // ============================================================================
+  // MÉTODOS ÚTILES
+  // ============================================================================
+
+  /// Método para obtener el ancho máximo según el tamaño de pantalla
   double getMaxWidth(double screenWidth) {
     if (screenWidth <= mobileSmall) return maxWidthMobile;
     if (screenWidth <= mobileLarge) return maxWidthTablet;
@@ -48,7 +77,7 @@ class AppConstants {
     return maxWidthLargeDesktop;
   }
 
-  // Método para determinar el tipo de pantalla
+  /// Método para determinar el tipo de pantalla
   ScreenType getScreenType(double width) {
     if (width <= mobileSmall) return ScreenType.mobileSmall;
     if (width <= mobileLarge) return ScreenType.mobileLarge;

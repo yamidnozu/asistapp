@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -203,14 +202,16 @@ class AuthProvider with ChangeNotifier {
     await _clearTokens();
 
     // Limpiar datos de otros providers
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.clearData();
+    if (context.mounted) {
+      try {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.clearData();
 
-      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-      institutionProvider.clearData();
-    } catch (e) {
-      debugPrint('Error clearing provider data: $e');
+        final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+        institutionProvider.clearData();
+      } catch (e) {
+        debugPrint('Error clearing provider data: $e');
+      }
     }
   }
 }

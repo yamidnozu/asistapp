@@ -13,6 +13,9 @@ import '../screens/users/user_form_screen.dart';
 import '../screens/users/user_detail_screen.dart';
 import '../screens/institutions/institutions_list_screen.dart';
 import '../screens/institutions/institution_admins_screen.dart';
+import '../screens/institutions/institution_form_screen.dart';
+import '../screens/institutions/create_institution_admin_screen.dart';
+import '../models/institution.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
 
@@ -184,6 +187,32 @@ class AppRouter {
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const InstitutionsListScreen(),
                 ),
+              ),
+              // Route to open the Institution form (create/edit) using extra to pass the Institution object when needed
+              GoRoute(
+                path: '/institutions/form',
+                name: 'institution-form',
+                pageBuilder: (context, state) {
+                  final institution = state.extra as Institution?;
+                  return MaterialPage(
+                    fullscreenDialog: true,
+                    name: 'Institution Form',
+                    child: InstitutionFormScreen(institution: institution),
+                  );
+                },
+              ),
+              // Route to create an admin for an institution (expects Institution in extra)
+              GoRoute(
+                path: '/institutions/create-admin',
+                name: 'institution-create-admin',
+                pageBuilder: (context, state) {
+                  final institution = state.extra as Institution;
+                  return MaterialPage(
+                    fullscreenDialog: true,
+                    name: 'Create Institution Admin',
+                    child: CreateInstitutionAdminScreen(institution: institution),
+                  );
+                },
               ),
               GoRoute(
                 path: '/institutions/:id/admins',

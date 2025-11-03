@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
-import '../utils/app_constants.dart';
+import '../config/app_constants.dart';
 import '../config/app_config.dart';
 
 class PaginatedUserResponse {

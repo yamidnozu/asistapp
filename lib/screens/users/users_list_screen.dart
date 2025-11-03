@@ -7,8 +7,7 @@ import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/management_scaffold.dart';
+import '../../widgets/components/index.dart';
 
 class UsersListScreen extends StatefulWidget {
   const UsersListScreen({super.key});
@@ -152,6 +151,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, UserProvider>(
       builder: (context, authProvider, userProvider, child) {
@@ -159,85 +159,92 @@ class _UsersListScreenState extends State<UsersListScreen> {
         final title = userRole == 'admin_institucion' 
           ? 'Gestión de Profesores'
           : 'Gestión de Usuarios';
+        final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
 
-        return ManagementScaffold(
+        return ClarityManagementPage(
           title: title,
-          isLoading: userProvider.isLoading && userProvider.users.isEmpty,
+          isLoading: userProvider.isLoading,
           hasError: userProvider.hasError,
-          errorMessage: userProvider.errorMessage ?? 'Error desconocido',
+          errorMessage: userProvider.errorMessage,
           itemCount: userProvider.users.length,
-          itemBuilder: (context, index) => _buildUserCard(
-            userProvider.users[index],
-            userProvider,
-            context,
-          ),
-          hasMoreData: userProvider.hasMoreData,
-          onRefresh: () => _loadUsers(),
-          scrollController: _scrollController,
-          floatingActionButton: Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              final userRole = authProvider.user?['rol'] as String?;
-              final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
-              
-              if (!canCreateUsers) return const SizedBox.shrink();
-              
-              // Configuración diferente según el rol
-              if (userRole == 'super_admin') {
-                return SpeedDial(
-                  icon: Icons.add,
-                  activeIcon: Icons.close,
-                  backgroundColor: context.colors.primary,
-                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
-                  children: [
-                    SpeedDialChild(
-                      child: Icon(Icons.admin_panel_settings, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                      backgroundColor: context.colors.primary,
-                      label: 'Crear Admin Institución',
-                      onTap: _navigateToCreateAdminInstitution,
-                    ),
-                    SpeedDialChild(
-                      child: Icon(Icons.shield, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                      backgroundColor: context.colors.primary,
-                      label: 'Crear Super Admin',
-                      onTap: _navigateToCreateSuperAdmin,
-                    ),
-                  ],
-                );
-              } else {
-                // admin_institucion
-                return SpeedDial(
-                  icon: Icons.add,
-                  activeIcon: Icons.close,
-                  backgroundColor: context.colors.primary,
-                  foregroundColor: context.colors.getTextColorForBackground(context.colors.primary),
-                  children: [
-                    SpeedDialChild(
-                      child: Icon(Icons.school, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                      backgroundColor: context.colors.primary,
-                      label: 'Crear Profesor',
-                      onTap: _navigateToCreateProfessor,
-                    ),
-                    SpeedDialChild(
-                      child: Icon(Icons.person, color: context.colors.getTextColorForBackground(context.colors.primary)),
-                      backgroundColor: context.colors.primary,
-                      label: 'Crear Estudiante',
-                      onTap: _navigateToCreateStudent,
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
+          itemBuilder: (context, index) {
+            final user = userProvider.users[index];
+            return _buildUserCard(user, userProvider, context);
+          },
           filterWidgets: _buildFilterWidgets(context, authProvider),
           statisticWidgets: _buildStatisticWidgets(context, userProvider),
-          paginationInfo: null, // No pagination widget for users
-          onPageChange: (_) async {}, // Not used
-          emptyStateTitle: _isSearching ? 'No se encontraron resultados para tu búsqueda' : 'Aún no has creado ningún usuario',
-          emptyStateMessage: _isSearching ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer usuario',
-          emptyStateIcon: _isSearching ? Icons.search_off : Icons.people,
+          onRefresh: _loadUsers,
+          scrollController: _scrollController,
+          hasMoreData: userProvider.hasMoreData,
+          isLoadingMore: userProvider.isLoadingMore,
+          emptyStateWidget: ClarityEmptyState(
+            icon: _isSearching ? Icons.search_off : Icons.people,
+            title: _isSearching
+              ? 'No se encontraron resultados'
+              : 'Aún no has creado ningún usuario',
+            subtitle: _isSearching
+              ? 'Intenta con otros términos de búsqueda'
+              : 'Comienza creando tu primer usuario',
+          ),
+          floatingActionButton: canCreateUsers
+              ? _buildSpeedDial(context, userRole!)
+              : null,
         );
       },
     );
+  }
+
+  Widget _buildSpeedDial(BuildContext context, String userRole) {
+    final colors = context.colors;
+    
+    if (userRole == 'super_admin') {
+      return SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.getTextColorForBackground(colors.primary),
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.admin_panel_settings,
+              color: colors.getTextColorForBackground(colors.primary)),
+            backgroundColor: colors.primary,
+            label: 'Crear Admin Institución',
+            onTap: _navigateToCreateAdminInstitution,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.shield,
+              color: colors.getTextColorForBackground(colors.primary)),
+            backgroundColor: colors.primary,
+            label: 'Crear Super Admin',
+            onTap: _navigateToCreateSuperAdmin,
+          ),
+        ],
+      );
+    } else {
+      // admin_institucion
+      return SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.getTextColorForBackground(colors.primary),
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.school,
+              color: colors.getTextColorForBackground(colors.primary)),
+            backgroundColor: colors.primary,
+            label: 'Crear Profesor',
+            onTap: _navigateToCreateProfessor,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.person,
+              color: colors.getTextColorForBackground(colors.primary)),
+            backgroundColor: colors.primary,
+            label: 'Crear Estudiante',
+            onTap: _navigateToCreateStudent,
+          ),
+        ],
+      );
+    }
   }
 
   List<Widget> _buildFilterWidgets(BuildContext context, AuthProvider authProvider) {
@@ -281,10 +288,12 @@ class _UsersListScreenState extends State<UsersListScreen> {
         onChanged: _onSearchChanged,
       ),
       SizedBox(height: spacing.sm),
-      Row(
+      Wrap(
+        spacing: spacing.md,
+        runSpacing: spacing.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text('Mostrar:', style: textStyles.labelMedium),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Activos'),
             selected: _statusFilter == true && !_isSearching,
@@ -293,7 +302,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
               _loadUsers();
             } : null,
           ),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Inactivos'),
             selected: _statusFilter == false && !_isSearching,
@@ -302,7 +310,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
               _loadUsers();
             } : null,
           ),
-          SizedBox(width: spacing.md),
           FilterChip(
             label: const Text('Todos'),
             selected: _statusFilter == null && !_isSearching,
@@ -311,7 +318,11 @@ class _UsersListScreenState extends State<UsersListScreen> {
               _loadUsers();
             } : null,
           ),
-          SizedBox(width: spacing.md),
+        ],
+      ),
+      SizedBox(height: spacing.sm),
+      Row(
+        children: [
           Expanded(
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
@@ -358,211 +369,101 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   List<Widget> _buildStatisticWidgets(BuildContext context, UserProvider provider) {
     final stats = provider.getUserStatistics();
+    final colors = context.colors;
 
     return [
-      _buildCompactStat(
-        'Total',
-        stats['total'].toString(),
-        Icons.people,
-        context.colors.primary,
-        context.textStyles,
+      ClarityCompactStat(
+        title: 'Total',
+        value: stats['total'].toString(),
+        icon: Icons.people,
+        color: colors.primary,
       ),
-      Container(
-        height: 24,
-        width: 1,
-        color: context.colors.border,
+      ClarityCompactStat(
+        title: 'Activos',
+        value: stats['activos'].toString(),
+        icon: Icons.check_circle,
+        color: colors.success,
       ),
-      _buildCompactStat(
-        'Activos',
-        stats['activos'].toString(),
-        Icons.check_circle,
-        context.colors.success,
-        context.textStyles,
+      ClarityCompactStat(
+        title: 'Profesores',
+        value: stats['profesores'].toString(),
+        icon: Icons.school,
+        color: colors.info,
       ),
-      Container(
-        height: 24,
-        width: 1,
-        color: context.colors.border,
-      ),
-      _buildCompactStat(
-        'Profesores',
-        stats['profesores'].toString(),
-        Icons.school,
-        context.colors.info,
-        context.textStyles,
-      ),
-      Container(
-        height: 24,
-        width: 1,
-        color: context.colors.border,
-      ),
-      _buildCompactStat(
-        'Estudiantes',
-        stats['estudiantes'].toString(),
-        Icons.person,
-        context.colors.warning,
-        context.textStyles,
+      ClarityCompactStat(
+        title: 'Estudiantes',
+        value: stats['estudiantes'].toString(),
+        icon: Icons.person,
+        color: colors.warning,
       ),
     ];
   }
 
-  Widget _buildCompactStat(String title, String value, IconData icon, Color color, AppTextStyles textStyles) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 20, color: color),
-        const SizedBox(width: 6),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: textStyles.titleMedium.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              title,
-              style: textStyles.bodySmall.copyWith(
-                color: color.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildUserCard(User user, UserProvider provider, BuildContext context) {
     final colors = context.colors;
-    final spacing = context.spacing;
     final textStyles = context.textStyles;
-    return Card(
-      margin: EdgeInsets.only(bottom: spacing.xs),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: user.activo ? colors.success : colors.error,
-          child: Icon(
-            user.activo ? Icons.check : Icons.close,
-            color: colors.surface,
+    
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final userRole = authProvider.user?['rol'] as String?;
+        final canEditUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+
+        // FASE 4: Acciones para el menú contextual
+        final List<ClarityContextMenuAction> contextActions = canEditUsers
+            ? [
+                ClarityContextMenuAction(
+                  label: 'Editar',
+                  icon: Icons.edit,
+                  color: colors.primary,
+                  onPressed: () => _navigateToUserEdit(user),
+                ),
+                ClarityContextMenuAction(
+                  label: user.activo ? 'Desactivar' : 'Activar',
+                  icon: user.activo ? Icons.toggle_off : Icons.toggle_on,
+                  color: user.activo ? colors.warning : colors.success,
+                  onPressed: () => _handleMenuAction('toggle_status', user, provider),
+                ),
+                ClarityContextMenuAction(
+                  label: 'Eliminar',
+                  icon: Icons.delete,
+                  color: colors.error,
+                  onPressed: () => _handleMenuAction('delete', user, provider),
+                ),
+              ]
+            : [];
+
+        return ClarityListItem(
+          leading: CircleAvatar(
+            backgroundColor: _getRoleColor(user.rol, context),
+            child: Text(
+              user.nombreCompleto.substring(0, 1).toUpperCase(),
+              style: textStyles.labelMedium.copyWith(color: colors.white),
+            ),
           ),
-        ),
-        title: Text(
-          user.nombreCompleto,
-          style: textStyles.titleMedium.bold,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.email, size: 16, color: colors.textSecondary),
-                SizedBox(width: spacing.xs),
-                Expanded(
-                  child: Text(
-                    user.email,
-                    style: textStyles.bodySmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            if (user.telefono != null) ...[
-              SizedBox(height: spacing.xs),
-              Row(
-                children: [
-                  Icon(Icons.phone, size: 16, color: colors.textSecondary),
-                  SizedBox(width: spacing.xs),
-                  Expanded(
-                    child: Text(
-                      user.telefono!,
-                      style: textStyles.bodySmall,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            SizedBox(height: spacing.xs),
-            Chip(
-              label: Text(
-                _getRoleDisplayName(user.rol),
-                style: textStyles.bodySmall.withColor(colors.primary),
-              ),
-              backgroundColor: colors.primary.withValues(alpha: 0.1),
-              side: BorderSide(color: colors.primary.withValues(alpha: 0.3)),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: EdgeInsets.zero,
-            ),
-          ],
-        ),
-        trailing: Consumer<AuthProvider>(
-          builder: (context, authProvider, child) {
-            final userRole = authProvider.user?['rol'] as String?;
-            final canEditUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
-            
-            if (!canEditUsers) return const SizedBox.shrink();
-            
-            return PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(value, user, provider),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: context.colors.textSecondary),
-                      SizedBox(width: context.spacing.sm),
-                      Text('Editar', style: context.textStyles.bodyMedium),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'toggle_status',
-                  child: Row(
-                    children: [
-                      Icon(Icons.toggle_on, color: context.colors.textSecondary),
-                      SizedBox(width: context.spacing.sm),
-                      Text('Cambiar Estado', style: context.textStyles.bodyMedium),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: context.colors.error),
-                      SizedBox(width: context.spacing.sm),
-                      Text('Eliminar', style: context.textStyles.bodyMedium.withColor(context.colors.error)),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        onTap: () => _navigateToUserDetail(user),
-      ),
+          title: user.nombreCompleto,
+          subtitle: user.email,
+          badgeText: user.activo ? 'Activo' : 'Inactivo',
+          badgeColor: user.activo ? colors.success : colors.error,
+          contextActions: contextActions.isNotEmpty ? contextActions : null,
+          onTap: () => _navigateToUserDetail(user),
+        );
+      },
     );
   }
 
-  String _getRoleDisplayName(String role) {
+  Color _getRoleColor(String role, BuildContext context) {
+    final colors = context.colors;
     switch (role) {
       case 'profesor':
-        return 'Profesor';
+        return colors.info;
       case 'estudiante':
-        return 'Estudiante';
+        return colors.warning;
       case 'admin_institucion':
-        return 'Admin Institución';
+        return colors.primary;
       case 'super_admin':
-        return 'Super Admin';
+        return colors.error;
       default:
-        return role;
+        return colors.primary;
     }
   }
 
@@ -654,8 +555,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
     final success = await provider.deleteUser(
       authProvider.accessToken!,
       user.id,
-      authProvider.user?['rol'] as String? ?? '',
-      user.rol,
     );
 
     if (success && mounted) {
