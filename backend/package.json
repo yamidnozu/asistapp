@@ -8,11 +8,13 @@
     "dev": "ts-node src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-  "prisma:seed": "ts-node prisma/seed.ts",
-  "prisma:seed:host": "node -r ts-node/register prisma/seed.ts",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed:host": "node -r ts-node/register prisma/seed.ts",
+    "setup:test-data": "docker compose run --rm app npx ts-node setup-test-data.ts",
     "cleanup-tokens": "ts-node src/scripts/cleanup-tokens.ts",
     "test": "jest --runInBand",
-    "test:watch": "jest --watch --runInBand"
+    "test:watch": "jest --watch --runInBand",
+    "test:api": "npm run setup:test-data && ts-node test-api-complete.ts"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +39,7 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^20.14.10",
+    "axios": "^1.13.2",
     "jest": "^30.2.0",
     "prisma": "^6.18.0",
     "ts-jest": "^29.4.5",

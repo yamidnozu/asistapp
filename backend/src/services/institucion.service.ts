@@ -38,8 +38,14 @@ export class InstitucionService {
    */
   public static async getAllInstitutions(pagination?: PaginationParams, filters?: InstitutionFilters): Promise<PaginatedResponse<InstitutionResponse>> {
     try {
+      // Validar parámetros de paginación
       const page = pagination?.page || 1;
       const limit = pagination?.limit || 10;
+
+      if (page < 1 || limit < 1 || limit > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
       const skip = (page - 1) * limit;
 
       // Construir cláusula where dinámicamente
@@ -97,7 +103,10 @@ export class InstitucionService {
       return result;
     } catch (error) {
       console.error('Error al obtener todas las instituciones:', error);
-      throw error;
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new Error('Error al obtener las instituciones');
     }
   }
 

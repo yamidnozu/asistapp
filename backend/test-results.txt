@@ -1,0 +1,594 @@
+🔍 Verificando conexión con el servidor...
+✅ Servidor conectado
+
+🚀 INICIANDO PRUEBAS EXHAUSTIVAS DE FLUJOS COMPLETOS - AsistApp Backend
+========================================================================
+
+
+🔐 ===== FLUJO 1: AUTENTICACIÓN Y SESIONES =====
+
+📱 1.1 LOGIN - Simulando login desde Flutter
+🔐 Iniciando sesión como ADMIN_INSTITUCION (admin@sanjose.edu)...
+❌ Error iniciando sesión para ADMIN_INSTITUCION: {
+  success: false,
+  error: 'Credenciales inválidas',
+  code: 'AUTHENTICATION_ERROR'
+}
+🔐 Iniciando sesión como PROFESOR (ana.lopez@sanjose.edu)...
+✅ Sesión iniciada para PROFESOR
+   👤 Usuario: Ana López
+   🏫 Institución ID: undefined
+🔐 Iniciando sesión como ESTUDIANTE (juan.perez@sanjose.edu)...
+✅ Sesión iniciada para ESTUDIANTE
+   👤 Usuario: Juan Pérez
+   🏫 Institución ID: undefined
+
+📱 1.2 VERIFICACIÓN DE SESIÓN - App verifica token guardado
+
+🧪 Verificar token Admin Institución
+   GET /auth/verify
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Verificar token Profesor
+   GET /auth/verify
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Verificar token Estudiante
+   GET /auth/verify
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+📱 1.3 ACCESO SIN AUTENTICACIÓN - Usuario sin login
+
+🧪 Verificar token sin autenticación (Sin autenticación)
+   GET /auth/verify
+✅ Status: 401 (esperado: 401)
+
+🧪 Acceder a datos sin token (Sin autenticación)
+   GET /grupos
+✅ Status: 401 (esperado: 401)
+
+📱 1.4 LOGOUT - Usuario cierra sesión
+   🔄 Simulando logout - removiendo tokens...
+
+👨‍🏫 ===== FLUJO 2: GESTIÓN DE PROFESORES =====
+
+📱 2.1 LISTADO DE PROFESORES - Admin ve lista de profesores
+
+🧪 Listar todos los profesores
+   GET /institution-admin/profesores
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Listar profesores con paginación
+   GET /institution-admin/profesores?page=1&limit=5
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Filtrar profesores activos
+   GET /institution-admin/profesores?activo=true
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Buscar profesores por nombre
+   GET /institution-admin/profesores?search=Juan
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 2.2 CREAR PROFESOR - Admin crea nuevo profesor
+
+🧪 Crear nuevo profesor
+   POST /institution-admin/profesores
+❌ Status: 401 (esperado: 201)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 2.8 ACCESO DENEGADO - Otros roles intentan gestionar profesores
+
+🧪 Profesor intenta ver lista de profesores (debe fallar)
+   GET /institution-admin/profesores
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+🧪 Estudiante intenta ver lista de profesores (debe fallar)
+   GET /institution-admin/profesores
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+🏫 ===== FLUJO 3: GESTIÓN DE GRUPOS =====
+❌ Error obteniendo periodo académico: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 3.1 LISTADO DE GRUPOS - Admin ve todos los grupos
+
+🧪 Listar todos los grupos
+   GET /grupos
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Listar grupos con paginación
+   GET /grupos?page=1&limit=10
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 3.2 CREAR GRUPO - Admin crea nuevo grupo
+
+🧪 Crear nuevo grupo
+   POST /grupos
+❌ Status: 401 (esperado: 201)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 3.6 VALIDACIONES - Crear grupo con datos inválidos
+
+🧪 Crear grupo sin nombre (debe fallar)
+   POST /grupos
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Crear grupo sin grado (debe fallar)
+   POST /grupos
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Crear grupo sin periodoId (debe fallar)
+   POST /grupos
+✅ Status: 400 (esperado: 400)
+   ⚠️  Respuesta esperada con error: undefined
+
+📱 3.7 ACCESO DENEGADO - Otros roles intentan gestionar grupos
+
+🧪 Profesor intenta ver grupos (debe fallar)
+   GET /grupos
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+🧪 Estudiante intenta ver grupos (debe fallar)
+   GET /grupos
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+📚 ===== FLUJO 4: GESTIÓN DE MATERIAS =====
+
+📱 4.1 LISTADO DE MATERIAS - Admin ve todas las materias
+
+🧪 Listar todas las materias
+   GET /materias
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Listar materias con paginación
+   GET /materias?page=1&limit=10
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 4.2 CREAR MATERIA - Admin crea nueva materia
+
+🧪 Crear nueva materia
+   POST /materias
+❌ Status: 401 (esperado: 201)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 4.6 VALIDACIONES - Crear materia con datos inválidos
+
+🧪 Crear materia sin nombre (debe fallar)
+   POST /materias
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 4.7 ACCESO DENEGADO - Otros roles intentan gestionar materias
+
+🧪 Profesor intenta ver materias (debe fallar)
+   GET /materias
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+🧪 Estudiante intenta ver materias (debe fallar)
+   GET /materias
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+📅 ===== FLUJO 5: GESTIÓN DE HORARIOS =====
+
+📱 5.1 LISTADO DE HORARIOS - Admin ve todos los horarios
+
+🧪 Listar todos los horarios
+   GET /horarios
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Listar horarios con paginación
+   GET /horarios?page=1&limit=10
+❌ Status: 401 (esperado: 200)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+   ⚠️  Error obteniendo entidades existentes para horario
+
+📱 5.6 VALIDACIONES - Crear horario con datos inválidos
+
+🧪 Crear horario con IDs inválidos (debe fallar)
+   POST /horarios
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Crear horario con día de semana inválido (debe fallar)
+   POST /horarios
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 5.7 ACCESO DENEGADO - Otros roles intentan gestionar horarios
+
+🧪 Profesor intenta ver horarios (debe fallar)
+   GET /horarios
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+🧪 Estudiante intenta ver horarios (debe fallar)
+   GET /horarios
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+👨‍🏫 ===== FLUJO 6: DASHBOARD DEL PROFESOR =====
+
+📱 6.1 CLASES DEL DÍA - Profesor ve sus clases de hoy
+
+🧪 Ver clases del día actual (día 3)
+   GET /profesores/dashboard/clases-hoy
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+   📄 Datos: [
+  {
+    id: '8beb4af4-e151-4070-b39b-1915aa0011b2',
+    diaSemana: 3,
+    horaInicio: '08:00',
+    horaFin: '09:00',
+    grupo: {
+      id: '0d72c922-e10b-4ea6-8afd-e6b26234a415',
+      nombre: 'Grupo A',
+      grado: '1ro',
+      seccion: 'A'
+    },
+    materia: {
+      id: 'f048b756-4fc6-4586-b03a-abc272a5d100',
+      nombre: 'Física',
+      codigo: 'FIS101'
+    },
+    periodoAcademico: {
+      id: 'b26845b1-763b-4739-98e0-0ecfecc45a7f',
+      nombre: 'Periodo 2025-1',
+      activo: true
+    },
+    institucion: {
+      id: '7d1e254c-3774-41c9-aa50-ffa10a9b6205',
+      nombre: 'Colegio San José'
+    }
+  }
+]
+
+📱 6.2 CLASES POR DÍA ESPECÍFICO - Profesor consulta diferentes días
+
+🧪 Ver clases del Lunes (día 1)
+   GET /profesores/dashboard/clases/1
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Martes (día 2)
+   GET /profesores/dashboard/clases/2
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Miércoles (día 3)
+   GET /profesores/dashboard/clases/3
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Jueves (día 4)
+   GET /profesores/dashboard/clases/4
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Viernes (día 5)
+   GET /profesores/dashboard/clases/5
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Sábado (día 6)
+   GET /profesores/dashboard/clases/6
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+🧪 Ver clases del Domingo (día 7)
+   GET /profesores/dashboard/clases/7
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+
+📱 6.3 HORARIO SEMANAL COMPLETO - Profesor ve todo su horario
+
+🧪 Ver horario semanal completo
+   GET /profesores/dashboard/horario-semanal
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+   📄 Datos: {
+  '1': [
+    {
+      id: 'd2c98398-f097-4340-9af6-a1ca40282141',
+      diaSemana: 1,
+      horaInicio: '08:00',
+      horaFin: '09:00',
+      grupo: [Object],
+      materia: [Object],
+      periodoAcademico: [Object],
+      institucion: [Object]
+    }
+  ],
+  '2': [
+    {
+      id: 'f7890dd8-a1f1-4b30-8cf5-6e3026a89e9d',
+      diaSemana: 2,
+      horaInicio: '08:00',
+      horaFin: '09:00',
+      grupo: [Object],
+      materia: [Object],
+      periodoAcademico: [Object],
+      institucion: [Object]
+    }
+  ],
+  '3': [
+    {
+      id: '8beb4af4-e151-4070-b39b-1915aa0011b2',
+      diaSemana: 3,
+      horaInicio: '08:00',
+      horaFin: '09:00',
+      grupo: [Object],
+      materia: [Object],
+      periodoAcademico: [Object],
+      institucion: [Object]
+    }
+  ],
+  '4': [],
+  '5': [],
+  '6': [],
+  '7': []
+}
+
+📱 6.4 ACCESO DENEGADO - Otros roles intentan ver dashboard del profesor
+
+🧪 Admin institución intenta ver dashboard profesor (debe fallar)
+   GET /profesores/dashboard/clases-hoy
+❌ Status: 401 (esperado: 403)
+   Error: { success: false }
+
+🧪 Estudiante intenta ver dashboard profesor (debe fallar)
+   GET /profesores/dashboard/clases-hoy
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+📱 6.5 ACCESO SIN AUTENTICACIÓN - Usuario no logueado
+
+🧪 Acceder a dashboard sin autenticación (debe fallar) (Sin autenticación)
+   GET /profesores/dashboard/clases-hoy
+✅ Status: 401 (esperado: 401)
+
+🎓 ===== FLUJO 7: DASHBOARD DEL ESTUDIANTE =====
+
+📱 7.1 INTENTANDO ACCEDER A DASHBOARD ESTUDIANTE
+
+🧪 Ver clases del día - Estudiante
+   GET /estudiantes/dashboard/clases-hoy
+✅ Status: 200 (esperado: 200)
+   ✅ Respuesta exitosa
+   📄 Datos: [
+  {
+    id: '8beb4af4-e151-4070-b39b-1915aa0011b2',
+    diaSemana: 3,
+    horaInicio: '08:00',
+    horaFin: '09:00',
+    materia: {
+      id: 'f048b756-4fc6-4586-b03a-abc272a5d100',
+      nombre: 'Física',
+      codigo: 'FIS101'
+    },
+    profesor: {
+      id: '3ab9cc61-3324-4ae9-a4e1-9952fb4a00ae',
+      nombres: 'Ana',
+      apellidos: 'López'
+    },
+    grupo: {
+      id: '0d72c922-e10b-4ea6-8afd-e6b26234a415',
+      nombre: 'Grupo A',
+      grado: '1ro',
+      seccion: 'A'
+    }
+  }
+]
+
+📱 7.2 ACCESO DENEGADO - Otros roles intentan ver dashboard estudiante
+
+🧪 Admin institución intenta ver dashboard estudiante (debe fallar)
+   GET /estudiantes/dashboard/clases-hoy
+❌ Status: 401 (esperado: 403)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Profesor intenta ver dashboard estudiante (debe fallar)
+   GET /estudiantes/dashboard/clases-hoy
+✅ Status: 403 (esperado: 403)
+   ⚠️  Respuesta esperada con error: undefined
+
+⚠️ ===== FLUJO 8: VALIDACIONES Y MANEJO DE ERRORES =====
+
+📱 8.1 TOKENS EXPIRADOS O INVÁLIDOS
+   ✅ Token inválido correctamente rechazado
+
+📱 8.2 PARÁMETROS INVÁLIDOS EN QUERIES
+
+🧪 Paginación con página negativa (debe fallar)
+   GET /grupos?page=-1&limit=10
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Paginación con límite cero (debe fallar)
+   GET /grupos?page=1&limit=0
+❌ Status: 401 (esperado: 400)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Día de semana 0 inválido (debe fallar)
+   GET /profesores/dashboard/clases/0
+✅ Status: 400 (esperado: 400)
+   ⚠️  Respuesta esperada con error: undefined
+
+🧪 Día de semana 8 inválido (debe fallar)
+   GET /profesores/dashboard/clases/8
+✅ Status: 400 (esperado: 400)
+   ⚠️  Respuesta esperada con error: undefined
+
+📱 8.3 IDs INEXISTENTES
+
+🧪 Buscar grupo con ID inexistente (debe fallar)
+   GET /grupos/00000000-0000-0000-0000-000000000000
+❌ Status: 401 (esperado: 404)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Buscar materia con ID inexistente (debe fallar)
+   GET /materias/00000000-0000-0000-0000-000000000000
+❌ Status: 401 (esperado: 404)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+🧪 Buscar horario con ID inexistente (debe fallar)
+   GET /horarios/00000000-0000-0000-0000-000000000000
+❌ Status: 401 (esperado: 404)
+   Error: {
+  success: false,
+  error: 'Token de autenticación inválido',
+  code: 'AUTHENTICATION_ERROR'
+}
+
+📱 8.4 MÉTODOS HTTP INCORRECTOS
+   ✅ POST sin datos requeridos correctamente rechazado
+
+🎯 ===== RESULTADOS FINALES =====
+Total de pruebas ejecutadas: 59
+Pruebas exitosas: 32
+Pruebas fallidas: 27
+Tasa de éxito: 54.2%
+
+📋 RESUMEN DE FLUJOS PROBADOS:
+• 🔐 Autenticación completa y gestión de sesiones
+• 👨‍🏫 Gestión completa de Profesores (CRUD + toggle status)
+• 🏫 Gestión completa de Grupos (CRUD)
+• 📚 Gestión completa de Materias (CRUD)
+• 📅 Gestión completa de Horarios (CRUD)
+• 👨‍🏫 Dashboard del Profesor (clases del día, semanal)
+• 🎓 Dashboard del Estudiante (básico)
+• ⚠️ Validaciones exhaustivas y manejo de errores
+• 🚫 Control de acceso basado en roles
+• 📱 Simulación completa de flujos de Flutter
+
+⚠️ 27 pruebas fallaron. Revisa los logs anteriores para detalles.
+🔧 Algunos flujos pueden necesitar ajustes o pueden no estar implementados aún.
+
+📊 ENTIDADES CREADAS DURANTE LAS PRUEBAS:
+
+💡 RECOMENDACIONES:
+• Implementar endpoints faltantes si algunas pruebas fallaron
+• Agregar más validaciones de negocio según requerimientos
+• Considerar implementar rate limiting para producción
+• Agregar logging detallado para debugging
+• Implementar tests de carga para endpoints críticos

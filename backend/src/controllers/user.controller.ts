@@ -28,10 +28,28 @@ export class UserController {
     try {
       const { page, limit, rol, institucionId, activo, search } = request.query;
 
-      // Construir paginación
+      // Construir paginación con validación
       const pagination: PaginationParams = {};
-      if (page) pagination.page = parseInt(page, 10);
-      if (limit) pagination.limit = parseInt(limit, 10);
+      if (page) {
+        const pageNum = parseInt(page, 10);
+        if (pageNum < 1) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro page debe ser mayor a 0.',
+          });
+        }
+        pagination.page = pageNum;
+      }
+      if (limit) {
+        const limitNum = parseInt(limit, 10);
+        if (limitNum < 1 || limitNum > 100) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro limit debe ser mayor a 0 y máximo 100.',
+          });
+        }
+        pagination.limit = limitNum;
+      }
 
       // Construir filtros
       const filters: UserFilters = {};
@@ -145,10 +163,28 @@ export class UserController {
       const { role } = request.params;
       const { page, limit, institucionId, activo, search } = request.query;
 
-      // Construir paginación
+      // Construir paginación con validación
       const pagination: PaginationParams = {};
-      if (page) pagination.page = parseInt(page, 10);
-      if (limit) pagination.limit = parseInt(limit, 10);
+      if (page) {
+        const pageNum = parseInt(page, 10);
+        if (pageNum < 1) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro page debe ser mayor a 0.',
+          });
+        }
+        pagination.page = pageNum;
+      }
+      if (limit) {
+        const limitNum = parseInt(limit, 10);
+        if (limitNum < 1 || limitNum > 100) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro limit debe ser mayor a 0 y máximo 100.',
+          });
+        }
+        pagination.limit = limitNum;
+      }
 
       // Construir filtros adicionales
       const filters: UserFilters = {};
@@ -189,10 +225,28 @@ export class UserController {
       const { institucionId } = request.params;
       const { page, limit, rol, activo, search } = request.query;
 
-      // Construir paginación
+      // Construir paginación con validación
       const pagination: PaginationParams = {};
-      if (page) pagination.page = parseInt(page, 10);
-      if (limit) pagination.limit = parseInt(limit, 10);
+      if (page) {
+        const pageNum = parseInt(page, 10);
+        if (pageNum < 1) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro page debe ser mayor a 0.',
+          });
+        }
+        pagination.page = pageNum;
+      }
+      if (limit) {
+        const limitNum = parseInt(limit, 10);
+        if (limitNum < 1 || limitNum > 100) {
+          return reply.code(400).send({
+            success: false,
+            error: 'El parámetro limit debe ser mayor a 0 y máximo 100.',
+          });
+        }
+        pagination.limit = limitNum;
+      }
 
       // Construir filtros
       const filters: UserFilters = {};

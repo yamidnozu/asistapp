@@ -298,6 +298,205 @@ async function main() {
 
   console.log('✅ Estudiantes creados:', estudiantes.length);
 
+  // --- CAPA 5: PERIODOS ACADÉMICOS (El Tiempo Educativo) ---
+  console.log('📅 Creando periodos académicos...');
+
+  let periodoActual = await prisma.periodoAcademico.findFirst({
+    where: { nombre: 'Periodo 2025-1', institucionId: colegioSanJose.id }
+  });
+  if (!periodoActual) {
+    periodoActual = await prisma.periodoAcademico.create({
+      data: {
+        nombre: 'Periodo 2025-1',
+        institucionId: colegioSanJose.id,
+        fechaInicio: new Date('2025-01-15'),
+        fechaFin: new Date('2025-06-15'),
+        activo: true,
+      },
+    });
+  }
+
+  let periodoSantander = await prisma.periodoAcademico.findFirst({
+    where: { nombre: 'Periodo 2025-1', institucionId: ieSantander.id }
+  });
+  if (!periodoSantander) {
+    periodoSantander = await prisma.periodoAcademico.create({
+      data: {
+        nombre: 'Periodo 2025-1',
+        institucionId: ieSantander.id,
+        fechaInicio: new Date('2025-01-15'),
+        fechaFin: new Date('2025-06-15'),
+        activo: true,
+      },
+    });
+  }
+
+  console.log('✅ Periodos académicos creados.');
+
+  // --- CAPA 6: GRUPOS (Las Clases) ---
+  console.log('👥 Creando grupos...');
+
+  let grupoA = await prisma.grupo.findFirst({
+    where: { nombre: 'Grupo A', institucionId: colegioSanJose.id }
+  });
+  if (!grupoA) {
+    grupoA = await prisma.grupo.create({
+      data: {
+        nombre: 'Grupo A',
+        grado: '1ro',
+        seccion: 'A',
+        institucionId: colegioSanJose.id,
+        periodoId: periodoActual.id,
+      },
+    });
+  }
+
+  let grupoB = await prisma.grupo.findFirst({
+    where: { nombre: 'Grupo B', institucionId: colegioSanJose.id }
+  });
+  if (!grupoB) {
+    grupoB = await prisma.grupo.create({
+      data: {
+        nombre: 'Grupo B',
+        grado: '2do',
+        seccion: 'B',
+        institucionId: colegioSanJose.id,
+        periodoId: periodoActual.id,
+      },
+    });
+  }
+
+  console.log('✅ Grupos creados.');
+
+  // --- CAPA 7: ASIGNACIÓN DE ESTUDIANTES A GRUPOS ---
+  console.log('🔗 Asignando estudiantes a grupos...');
+
+  // Grupo A - primeros 5 estudiantes
+  for (let i = 0; i < 5; i++) {
+    const existing = await prisma.estudianteGrupo.findFirst({
+      where: {
+        estudianteId: estudiantes[i].estudiante.id,
+        grupoId: grupoA.id
+      }
+    });
+    if (!existing) {
+      await prisma.estudianteGrupo.create({
+        data: {
+          estudianteId: estudiantes[i].estudiante.id,
+          grupoId: grupoA.id,
+        },
+      });
+    }
+  }
+
+  // Grupo B - siguientes 4 estudiantes
+  for (let i = 5; i < 9; i++) {
+    const existing = await prisma.estudianteGrupo.findFirst({
+      where: {
+        estudianteId: estudiantes[i].estudiante.id,
+        grupoId: grupoB.id
+      }
+    });
+    if (!existing) {
+      await prisma.estudianteGrupo.create({
+        data: {
+          estudianteId: estudiantes[i].estudiante.id,
+          grupoId: grupoB.id,
+        },
+      });
+    }
+  }
+
+  console.log('✅ Estudiantes asignados a grupos.');
+
+  // --- CAPA 8: MATERIAS (Las Asignaturas) ---
+  console.log('📚 Creando materias...');
+
+  const materiasData = [
+    { nombre: 'Matemáticas', codigo: 'MAT101', institucion: colegioSanJose },
+    { nombre: 'Física', codigo: 'FIS101', institucion: colegioSanJose },
+    { nombre: 'Biología', codigo: 'BIO101', institucion: colegioSanJose },
+    { nombre: 'Historia', codigo: 'HIS101', institucion: colegioSanJose },
+    { nombre: 'Química', codigo: 'QUI101', institucion: colegioSanJose },
+  ];
+
+  const materias = [];
+  for (const matData of materiasData) {
+    let materia = await prisma.materia.findFirst({
+      where: {
+        nombre: matData.nombre,
+        institucionId: matData.institucion.id
+      }
+    });
+    if (!materia) {
+      materia = await prisma.materia.create({
+        data: {
+          nombre: matData.nombre,
+          codigo: matData.codigo,
+          institucionId: matData.institucion.id,
+        },
+      });
+    }
+    materias.push(materia);
+  }
+
+  console.log('✅ Materias creadas:', materias.length);
+
+  // --- CAPA 9: HORARIOS (El Calendario) ---
+  console.log('📅 Creando horarios...');
+
+  const horariosData = [
+    // Lunes - Grupo A
+    { diaSemana: 1, horaInicio: '08:00', horaFin: '09:00', materia: materias[0], profesor: profesores[0], grupo: grupoA }, // Matemáticas - Juan Pérez
+    { diaSemana: 1, horaInicio: '09:00', horaFin: '10:00', materia: materias[1], profesor: profesores[1], grupo: grupoA }, // Física - María García
+
+    // Martes - Grupo A
+    { diaSemana: 2, horaInicio: '08:00', horaFin: '09:00', materia: materias[2], profesor: profesores[1], grupo: grupoA }, // Biología - María García
+    { diaSemana: 2, horaInicio: '09:00', horaFin: '10:00', materia: materias[3], profesor: profesores[2], grupo: grupoA }, // Historia - Carlos López
+
+    // Miércoles - Grupo A
+    { diaSemana: 3, horaInicio: '08:00', horaFin: '09:00', materia: materias[1], profesor: profesores[1], grupo: grupoA }, // Física - María García
+
+    // Viernes - Grupo A
+    { diaSemana: 5, horaInicio: '14:00', horaFin: '15:00', materia: materias[2], profesor: profesores[2], grupo: grupoA }, // Biología - Carlos López
+
+    // Sábado - Grupo A
+    { diaSemana: 6, horaInicio: '16:00', horaFin: '17:00', materia: materias[2], profesor: profesores[2], grupo: grupoA }, // Biología - Carlos López
+
+    // Lunes - Grupo B
+    { diaSemana: 1, horaInicio: '10:00', horaFin: '11:00', materia: materias[0], profesor: profesores[0], grupo: grupoB }, // Matemáticas - Juan Pérez
+    { diaSemana: 1, horaInicio: '11:00', horaFin: '12:00', materia: materias[4], profesor: profesores[1], grupo: grupoB }, // Química - María García
+  ];
+
+  const horarios = [];
+  for (const horData of horariosData) {
+    const existing = await prisma.horario.findFirst({
+      where: {
+        grupoId: horData.grupo.id,
+        materiaId: horData.materia.id,
+        diaSemana: horData.diaSemana,
+        horaInicio: horData.horaInicio,
+      }
+    });
+    if (!existing) {
+      const horario = await prisma.horario.create({
+        data: {
+          institucionId: horData.grupo.institucionId,
+          periodoId: horData.grupo.periodoId,
+          grupoId: horData.grupo.id,
+          materiaId: horData.materia.id,
+          profesorId: horData.profesor.id,
+          diaSemana: horData.diaSemana,
+          horaInicio: horData.horaInicio,
+          horaFin: horData.horaFin,
+        },
+      });
+      horarios.push(horario);
+    }
+  }
+
+  console.log('✅ Horarios creados:', horarios.length);
+
   console.log('\n��� Seed maestro completado exitosamente!');
   console.log('\n��� Resumen del universo de pruebas creado:');
   console.log('��� Instituciones:', 3, '(2 activas, 1 inactiva)');
@@ -305,6 +504,10 @@ async function main() {
   console.log('���‍��� Admins de Institución:', 5, '(casos diversos de actividad y multi-institución)');
   console.log('���‍��� Profesores:', profesores.length, '(distribuidos en instituciones activas)');
   console.log('���‍��� Estudiantes:', estudiantes.length, '(18 estudiantes en instituciones activas)');
+  console.log('📅 Periodos Académicos:', 2, '(1 por institución activa)');
+  console.log('👥 Grupos:', 2, '(Grupo A y Grupo B en San José)');
+  console.log('📚 Materias:', materias.length, '(5 materias básicas)');
+  console.log('📅 Horarios:', horarios.length, '(horarios de ejemplo creados)');
 
   console.log('\n��� Credenciales de acceso de prueba:');
   console.log('\n��� SUPER ADMINS:');

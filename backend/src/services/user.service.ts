@@ -9,8 +9,14 @@ export class UserService {
    */
   public static async getAllUsers(pagination?: PaginationParams, filters?: UserFilters): Promise<PaginatedResponse<UsuarioExtendido>> {
     try {
+      // Validar parámetros de paginación
       const page = pagination?.page || 1;
-      const limit = pagination?.limit || 50; // Default limit
+      const limit = pagination?.limit || 50;
+
+      if (page < 1 || limit < 1 || limit > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
       const skip = (page - 1) * limit;
 
       // Construir cláusula where dinámicamente
@@ -80,7 +86,10 @@ export class UserService {
       };
     } catch (error) {
       console.error('Error al obtener todos los usuarios:', error);
-      throw error;
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new Error('Error al obtener los usuarios');
     }
   }
 

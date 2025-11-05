@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../config/database';
 import ProfesorService, { ProfesorFilters, UpdateProfesorRequest } from '../services/profesor.service';
-import { ApiResponse, AuthenticatedRequest, NotFoundError, PaginationParams } from '../types';
+import { ApiResponse, AuthenticatedRequest, NotFoundError, PaginationParams, ValidationError } from '../types';
 
 interface CreateProfesorBody {
   nombres: string;
@@ -58,10 +58,22 @@ export class InstitutionAdminController {
 
       const institucionId = usuarioInstitucion.institucionId;
 
-      // Construir paginación
+      // Construir paginación con validación
       const pagination: PaginationParams = {};
-      if (page) pagination.page = parseInt(page, 10);
-      if (limit) pagination.limit = parseInt(limit, 10);
+      if (page) {
+        const pageNum = parseInt(page, 10);
+        if (pageNum < 1) {
+          throw new ValidationError('El parámetro page debe ser mayor a 0.');
+        }
+        pagination.page = pageNum;
+      }
+      if (limit) {
+        const limitNum = parseInt(limit, 10);
+        if (limitNum < 1 || limitNum > 100) {
+          throw new ValidationError('El parámetro limit debe ser mayor a 0 y máximo 100.');
+        }
+        pagination.limit = limitNum;
+      }
 
       // Construir filtros
       const filters: ProfesorFilters = { institucionId };

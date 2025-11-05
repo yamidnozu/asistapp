@@ -32,9 +32,20 @@ export class InstitucionController {
         search?: string;
       };
 
+      // Validar parámetros de paginación
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 10;
+
+      if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+        return reply.code(400).send({
+          success: false,
+          error: 'Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.',
+        });
+      }
+
       const pagination = {
-        page: page ? parseInt(page, 10) : 1,
-        limit: limit ? parseInt(limit, 10) : 10,
+        page: pageNum,
+        limit: limitNum,
       };
 
       const filters = {
