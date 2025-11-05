@@ -367,8 +367,8 @@ class CompleteFlowTester {
     console.log('\n📱 1.1 LOGIN - Simulando login desde Flutter');
 
     countTest(await this.login('admin@sanjose.edu', 'SanJose123!', 'ADMIN_INSTITUCION'));
-    countTest(await this.login('maria.garcia@sanjose.edu', 'Prof123!', 'PROFESOR'));
-    countTest(await this.login('santiago.gomez@sanjose.edu', 'Est123!', 'ESTUDIANTE'));
+    countTest(await this.login('juan.perez@sanjose.edu', 'Prof123!', 'PROFESOR'));
+    countTest(await this.login('santiago.mendoza@sanjose.edu', 'Est123!', 'ESTUDIANTE'));
 
     // 1.2 Verificación de tokens (como hace Flutter al iniciar)
     console.log('\n📱 1.2 VERIFICACIÓN DE SESIÓN - App verifica token guardado');
@@ -909,6 +909,142 @@ class CompleteFlowTester {
     return { passed, total };
   }
 
+  // Flujo 9: Gestión completa de Estudiantes
+  async testEstudianteManagementFlows(): Promise<{ passed: number, total: number }> {
+    console.log('\n🎓 ===== FLUJO 9: GESTIÓN DE ESTUDIANTES =====');
+    let passed = 0, total = 0;
+
+    const countTest = (result: boolean) => { total++; if (result) passed++; };
+
+    console.log('\n📱 9.1 LISTADO DE ESTUDIANTES - Admin ve lista de estudiantes');
+
+    // Obtener lista completa
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', undefined, 200,
+      'Listar todos los estudiantes', true));
+
+    // Con paginación
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes?page=1&limit=5', 'ADMIN_INSTITUCION', undefined, 200,
+      'Listar estudiantes con paginación', true));
+
+    // Con filtros
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes?activo=true', 'ADMIN_INSTITUCION', undefined, 200,
+      'Filtrar estudiantes activos', true));
+
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes?search=Santiago', 'ADMIN_INSTITUCION', undefined, 200,
+      'Buscar estudiantes por nombre', true));
+
+    console.log('\n📱 9.2 CREAR ESTUDIANTE - Admin crea nuevo estudiante');
+
+    const timestamp = Date.now();
+    const nuevoEstudiante = {
+      nombres: 'Carlos',
+      apellidos: `Rodríguez ${timestamp}`,
+      email: `carlos.rodriguez${timestamp}@sanjose.edu`,
+      password: 'Est123!',
+      identificacion: `ID${timestamp}`,
+      nombreResponsable: 'María Rodríguez',
+      telefonoResponsable: '3001234567'
+    };
+
+    const createResult = await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION',
+      nuevoEstudiante, 201, 'Crear nuevo estudiante', true);
+
+    countTest(createResult);
+
+    // Guardar ID del estudiante creado para operaciones posteriores
+    let estudianteId = '';
+    if (createResult) {
+      try {
+        const response = await axios.post('/institution-admin/estudiantes', nuevoEstudiante, {
+          headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` }
+        });
+        estudianteId = response.data.data.id;
+        if (!this.createdEntities.estudiantes) this.createdEntities.estudiantes = [];
+        this.createdEntities.estudiantes.push(estudianteId);
+        console.log(`   📝 Estudiante creado con ID: ${estudianteId}`);
+      } catch (error) {
+        console.log('   ❌ Error obteniendo ID del estudiante creado');
+      }
+    }
+
+    if (estudianteId) {
+      console.log('\n📱 9.3 DETALLES DEL ESTUDIANTE - Admin ve detalles específicos');
+
+      countTest(await this.testEndpoint('GET', `/institution-admin/estudiantes/${estudianteId}`, 'ADMIN_INSTITUCION',
+        undefined, 200, `Ver detalles del estudiante ${estudianteId}`, true));
+
+      console.log('\n📱 9.4 EDITAR ESTUDIANTE - Admin modifica datos del estudiante');
+
+      const datosActualizados = {
+        nombres: 'Carlos Alberto',
+        apellidos: `Rodríguez Gómez ${timestamp}`,
+        nombreResponsable: 'María Gómez'
+      };
+
+      countTest(await this.testEndpoint('PUT', `/institution-admin/estudiantes/${estudianteId}`, 'ADMIN_INSTITUCION',
+        datosActualizados, 200, 'Actualizar datos del estudiante', true));
+
+      console.log('\n📱 9.5 CAMBIAR ESTADO ESTUDIANTE - Admin desactiva estudiante');
+
+      countTest(await this.testEndpoint('PATCH', `/institution-admin/estudiantes/${estudianteId}/toggle-status`, 'ADMIN_INSTITUCION',
+        {}, 200, 'Desactivar estudiante', true));
+
+      // Verificar que ahora está inactivo
+      countTest(await this.testEndpoint('GET', `/institution-admin/estudiantes?activo=false`, 'ADMIN_INSTITUCION',
+        undefined, 200, 'Verificar estudiante inactivo en lista', true));
+
+      console.log('\n📱 9.6 REACTIVAR ESTUDIANTE - Admin vuelve a activar estudiante');
+
+      countTest(await this.testEndpoint('PATCH', `/institution-admin/estudiantes/${estudianteId}/toggle-status`, 'ADMIN_INSTITUCION',
+        {}, 200, 'Reactivar estudiante', true));
+
+      console.log('\n📱 9.7 ELIMINAR ESTUDIANTE - Admin elimina estudiante');
+
+      countTest(await this.testEndpoint('DELETE', `/institution-admin/estudiantes/${estudianteId}`, 'ADMIN_INSTITUCION',
+        undefined, 200, 'Eliminar estudiante', true));
+
+      // Verificar que ya no existe
+      countTest(await this.testEndpoint('GET', `/institution-admin/estudiantes/${estudianteId}`, 'ADMIN_INSTITUCION',
+        undefined, 404, 'Verificar estudiante eliminado (debe fallar)', false));
+    }
+
+    console.log('\n📱 9.8 VALIDACIONES - Crear estudiante con datos inválidos');
+
+    countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
+      nombres: '',
+      apellidos: 'Test',
+      email: 'test@sanjose.edu',
+      password: 'Est123!',
+      identificacion: 'ID123'
+    }, 400, 'Crear estudiante sin nombre (debe fallar)'));
+
+    countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
+      nombres: 'Test',
+      apellidos: '',
+      email: 'test@sanjose.edu',
+      password: 'Est123!',
+      identificacion: 'ID123'
+    }, 400, 'Crear estudiante sin apellidos (debe fallar)'));
+
+    countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
+      nombres: 'Test',
+      apellidos: 'Test',
+      email: '',
+      password: 'Est123!',
+      identificacion: 'ID123'
+    }, 400, 'Crear estudiante sin email (debe fallar)'));
+
+    console.log('\n📱 9.9 ACCESO DENEGADO - Otros roles intentan gestionar estudiantes');
+
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes', 'PROFESOR', undefined, 403,
+      'Profesor intenta ver lista de estudiantes (debe fallar)'));
+
+    countTest(await this.testEndpoint('GET', '/institution-admin/estudiantes', 'ESTUDIANTE', undefined, 403,
+      'Estudiante intenta ver lista de estudiantes (debe fallar)'));
+
+    return { passed, total };
+  }
+
   // Flujo 8: Validaciones y errores exhaustivos
   async testValidationAndErrorFlows(): Promise<{ passed: number, total: number }> {
     console.log('\n⚠️ ===== FLUJO 8: VALIDACIONES Y MANEJO DE ERRORES =====');
@@ -1003,6 +1139,7 @@ class CompleteFlowTester {
     accumulateResults(await this.testHorarioManagementFlows());
     accumulateResults(await this.testProfesorDashboardFlows());
     accumulateResults(await this.testEstudianteDashboardFlows());
+    accumulateResults(await this.testEstudianteManagementFlows());
     accumulateResults(await this.testValidationAndErrorFlows());
 
     console.log('\n🎯 ===== RESULTADOS FINALES =====');
@@ -1019,6 +1156,7 @@ class CompleteFlowTester {
     console.log('• 📅 Gestión completa de Horarios (CRUD)');
     console.log('• 👨‍🏫 Dashboard del Profesor (clases del día, semanal)');
     console.log('• 🎓 Dashboard del Estudiante (básico)');
+    console.log('• 🎓 Gestión completa de Estudiantes (CRUD + toggle status)');
     console.log('• ⚠️ Validaciones exhaustivas y manejo de errores');
     console.log('• 🚫 Control de acceso basado en roles');
     console.log('• 📱 Simulación completa de flujos de Flutter\n');

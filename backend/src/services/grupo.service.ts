@@ -406,11 +406,15 @@ export class GrupoService {
       const existingGrupo = await prisma.grupo.findUnique({
         where: { id },
         include: {
-          _count: {
-            select: {
-              estudiantesGrupos: true,
-              horarios: true,
-              asistencias: true,
+          estudiantesGrupos: true,
+          horarios: {
+            include: {
+              asistencias: {
+                select: {
+                  id: true,
+                },
+                take: 1, // Solo necesitamos saber si existe al menos una
+              },
             },
           },
         },
@@ -421,17 +425,18 @@ export class GrupoService {
       }
 
       // Verificar que no tenga estudiantes asignados
-      if (existingGrupo._count.estudiantesGrupos > 0) {
+      if (existingGrupo.estudiantesGrupos.length > 0) {
         throw new ValidationError('No se puede eliminar el grupo porque tiene estudiantes asignados');
       }
 
       // Verificar que no tenga horarios asignados
-      if (existingGrupo._count.horarios > 0) {
+      if (existingGrupo.horarios.length > 0) {
         throw new ValidationError('No se puede eliminar el grupo porque tiene horarios asignados');
       }
 
-      // Verificar que no tenga asistencias registradas
-      if (existingGrupo._count.asistencias > 0) {
+      // Verificar que no tenga asistencias registradas (a través de horarios)
+      const tieneAsistencias = existingGrupo.horarios.some((horario: any) => horario.asistencias.length > 0);
+      if (tieneAsistencias) {
         throw new ValidationError('No se puede eliminar el grupo porque tiene asistencias registradas');
       }
 

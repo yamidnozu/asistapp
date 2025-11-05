@@ -14,7 +14,7 @@ FROM node:18-alpine
 WORKDIR /app
 # Copia solo los archivos necesarios de la etapa anterior
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules ./node_modules
 # Copia el schema de Prisma para que esté disponible en producción
 COPY --from=builder /app/prisma ./prisma

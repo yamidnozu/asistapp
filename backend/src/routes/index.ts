@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import adminInstitucionRoutes from './admin-institucion.routes';
+import asistenciaRoutes from './asistencia.routes';
 import authRoutes from './auth.routes';
 import estudianteRoutes from './estudiante.routes';
 import grupoRoutes from './grupo.routes';
@@ -44,6 +45,7 @@ export default async function routes(fastify: FastifyInstance) {
   await fastify.register(materiaRoutes, { prefix: '/materias' });
   await fastify.register(horarioRoutes, { prefix: '/horarios' });
   await fastify.register(profesorRoutes, { prefix: '/profesores' });
+  await fastify.register(asistenciaRoutes, { prefix: '/asistencias' });
 
   console.log('🎓 Registrando rutas del estudiante...');
   await fastify.register(estudianteRoutes, { prefix: '/estudiantes' });

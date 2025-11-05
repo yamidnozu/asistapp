@@ -36,6 +36,7 @@ model Institucion {
   grupos               Grupo[]
   materias             Materia[]
   horarios             Horario[]
+  asistencias          Asistencia[]
   configuraciones      Configuracion?
 
   @@map("instituciones")
@@ -136,7 +137,6 @@ model Grupo {
   periodoAcademico   PeriodoAcademico @relation(fields: [periodoId], references: [id], onDelete: Cascade)
   estudiantesGrupos  EstudianteGrupo[]
   horarios           Horario[]
-  asistencias        Asistencia[]
 
   @@map("grupos")
 }
@@ -202,29 +202,24 @@ model EstudianteGrupo {
 // 9. ASISTENCIAS (Registro de asistencia por clase)
 model Asistencia {
   id            String   @id @default(uuid()) @db.Uuid
-  estudianteId  String   @map("estudiante_id") @db.Uuid
+  fecha         DateTime @default(now())
+  estado        String   @default("PRESENTE") // PRESENTE, AUSENTE, TARDANZA, JUSTIFICADO
+
   horarioId     String   @map("horario_id") @db.Uuid
-  grupoId       String   @map("grupo_id") @db.Uuid
-  profesorId    String?  @map("profesor_id") @db.Uuid
+  estudianteId  String   @map("estudiante_id") @db.Uuid
+  profesorId    String   @map("profesor_id") @db.Uuid
+  institucionId String   @map("institucion_id") @db.Uuid
 
-  // Fecha y hora del registro
-  fecha         DateTime @db.Date
-  horaRegistro  DateTime @default(now()) @map("hora_registro")
+  horaRegistro  DateTime @default(now()) @map("hora_registro") // Hora exacta del registro
+  tipoRegistro  String   @default("MANUAL") @map("tipo_registro") // MANUAL, QR, AUTOMATICO
+  observaciones String?  @db.Text // Notas adicionales
 
-  // Tipo de registro
-  tipoRegistro  String   @default("qr") @map("tipo_registro") // 'qr', 'manual'
+  horario       Horario     @relation(fields: [horarioId], references: [id])
+  estudiante    Estudiante  @relation(fields: [estudianteId], references: [id])
+  profesor      Usuario     @relation(fields: [profesorId], references: [id])
+  institucion   Institucion @relation(fields: [institucionId], references: [id])
 
-  // Notas opcionales
-  observaciones String?  @db.Text
-
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  // Relaciones
-  estudiante    Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  horario       Horario @relation(fields: [horarioId], references: [id], onDelete: Cascade)
-  grupo         Grupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
-  profesor      Usuario? @relation(fields: [profesorId], references: [id], onDelete: SetNull)
-
+  @@unique([horarioId, estudianteId, fecha]) // Un estudiante solo puede tener un registro por clase al día
   @@map("asistencias")
 }
 

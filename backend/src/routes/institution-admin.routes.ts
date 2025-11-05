@@ -49,5 +49,41 @@ export default async function institutionAdminRoutes(fastify: FastifyInstance) {
    */
   fastify.patch('/profesores/:id/toggle-status', InstitutionAdminController.toggleProfesorStatus);
 
-  // TODO: Agregar rutas para gestión de estudiantes
+  // ========== GESTIÓN DE ESTUDIANTES ==========
+
+  /**
+   * GET /institution-admin/estudiantes
+   * Obtiene todos los estudiantes de la institución del admin
+   */
+  fastify.get('/estudiantes', InstitutionAdminController.getAllEstudiantes);
+
+  /**
+   * GET /institution-admin/estudiantes/:id
+   * Obtiene un estudiante específico por ID
+   */
+  fastify.get('/estudiantes/:id', InstitutionAdminController.getEstudianteById);
+
+  /**
+   * POST /institution-admin/estudiantes
+   * Crea un nuevo estudiante
+   */
+  fastify.post('/estudiantes', InstitutionAdminController.createEstudiante);
+
+  /**
+   * PUT /institution-admin/estudiantes/:id
+   * Actualiza un estudiante
+   */
+  fastify.put('/estudiantes/:id', InstitutionAdminController.updateEstudiante);
+
+  /**
+   * DELETE /institution-admin/estudiantes/:id
+   * Elimina un estudiante (desactivación lógica)
+   */
+  fastify.delete('/estudiantes/:id', InstitutionAdminController.deleteEstudiante);
+
+  /**
+   * PATCH /institution-admin/estudiantes/:id/toggle-status
+   * Activa/desactiva un estudiante
+   */
+  fastify.patch('/estudiantes/:id/toggle-status', InstitutionAdminController.toggleEstudianteStatus);
 }
