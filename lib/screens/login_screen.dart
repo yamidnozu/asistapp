@@ -120,65 +120,42 @@ class _LoginScreenState extends State<LoginScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            // Super Admins
+
             _buildUserCategory(
               '👑 Super Administradores',
               [
-                _buildTestUserButton('Super Admin (Activo)', 'superadmin@asistapp.com', 'Admin123!', 'super_admin', 'Sistema completo', responsive),
-                _buildTestUserButton('Super Admin (Inactivo)', 'inactive.super@asistapp.com', 'InactiveSuper123!', 'super_admin', 'Inactivo', responsive),
+                _buildTestUserButton('Super Admin', 'superadmin@asistapp.com', 'Admin123!', 'super_admin', 'Gestión de instituciones y admins.', responsive),
               ],
               responsive,
             ),
 
-            // Admins de Institución
             _buildUserCategory(
               '👨‍💼 Administradores de Institución',
               [
-                _buildTestUserButton('Admin San José', 'admin@sanjose.edu', 'SanJose123!', 'admin_institucion', 'Colegio San José', responsive),
-                _buildTestUserButton('Admin Inactivo', 'inactive.admin@sanjose.edu', 'InactiveAdmin123!', 'admin_institucion', 'Usuario inactivo', responsive),
-                _buildTestUserButton('Admin Inst. Inactiva', 'admin@inactiva.edu', 'AdminInactiva123!', 'admin_institucion', 'Institución inactiva', responsive),
-                _buildTestUserButton('Admin Multi-Inst.', 'multi@asistapp.com', 'Multi123!', 'admin_institucion', '2 instituciones', responsive),
-                _buildTestUserButton('Admin Mixto', 'admin.mixto@asistapp.com', 'AdminMixto123!', 'admin_institucion', 'Mixto activo/inactivo', responsive),
+                _buildTestUserButton('Admin San José', 'admin@sanjose.edu', 'SanJose123!', 'admin_institucion', 'Probar gestión académica (grupos, materias, horarios).', responsive),
+                _buildTestUserButton('Admin Santander', 'admin@santander.edu', 'Santander123!', 'admin_institucion', 'Probar en institución con menos datos.', responsive),
+                _buildTestUserButton('Admin Multi-Sede', 'multiadmin@asistapp.com', 'Multi123!', 'admin_institucion', 'Probar pantalla de selección de institución.', responsive),
               ],
               responsive,
             ),
 
-            // Profesores
             _buildUserCategory(
               '👨‍🏫 Profesores',
               [
-                _buildTestUserButton('Juan Pérez', 'juan.perez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
-                _buildTestUserButton('María García', 'maria.garcia@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
-                _buildTestUserButton('Carlos López', 'carlos.lopez@sanjose.edu', 'Prof123!', 'profesor', 'San José', responsive),
-                _buildTestUserButton('Prof. Inactivo', 'profesor.inactivo@sanjose.edu', 'Prof123!', 'profesor', 'Inactivo', responsive),
-                _buildTestUserButton('Sofía Ramírez', 'sofia.ramirez@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
-                _buildTestUserButton('Diego Morales', 'diego.morales@santander.edu', 'Prof123!', 'profesor', 'Santander', responsive),
+                _buildTestUserButton('Juan Pérez', 'juan.perez@sanjose.edu', 'Prof123!', 'profesor', 'San José - Tiene clases hoy para probar el dashboard.', responsive),
+                _buildTestUserButton('Laura Gómez', 'laura.gomez@sanjose.edu', 'Prof123!', 'profesor', 'San José - Tiene clases en diferentes grupos.', responsive),
+                _buildTestUserButton('Profe Sin Clases', 'vacio.profe@sanjose.edu', 'Prof123!', 'profesor', 'San José - Probar dashboard sin clases asignadas.', responsive),
+                _buildTestUserButton('Carlos Díaz', 'carlos.diaz@santander.edu', 'Prof123!', 'profesor', 'Santander - Probar dashboard en otra institución.', responsive),
               ],
               responsive,
             ),
 
-            // Estudiantes
             _buildUserCategory(
               '👨‍🎓 Estudiantes',
               [
-                _buildTestUserButton('Santiago Gómez', 'santiago.gomez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Valeria Fernández', 'valeria.fernandez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Mateo Silva', 'mateo.silva@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Isabella Ruiz', 'isabella.ruiz@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Lucas Moreno', 'lucas.moreno@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Mariana Jiménez', 'mariana.jimenez@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Daniel Herrera', 'daniel.herrera@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Gabriela Medina', 'gabriela.medina@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Alejandro Castro', 'alejandro.castro@sanjose.edu', 'Est123!', 'estudiante', 'San José', responsive),
-                _buildTestUserButton('Est. Inactivo', 'estudiante.inactivo@sanjose.edu', 'Est123!', 'estudiante', 'Inactivo', responsive),
-                _buildTestUserButton('Leonardo Ramos', 'leonardo.ramos@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Sara Torres', 'sara.torres@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Emiliano Flores', 'emiliano.flores@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Valentina Rivera', 'valentina.rivera@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Diego Gutiérrez', 'diego.gutierrez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Camila Sánchez', 'camila.sanchez@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Sebastián Romero', 'sebastian.romero@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
-                _buildTestUserButton('Lucía Díaz', 'lucia.diaz@santander.edu', 'Est123!', 'estudiante', 'Santander', responsive),
+                _buildTestUserButton('Santiago Mendoza', 'santiago.mendoza@sanjose.edu', 'Est123!', 'estudiante', 'San José - Asignado al Grupo 10-A.', responsive),
+                _buildTestUserButton('Mateo Castro', 'mateo.castro@sanjose.edu', 'Est123!', 'estudiante', 'San José - Asignado al Grupo 11-B.', responsive),
+                _buildTestUserButton('Sofía Núñez', 'sofia.nunez@santander.edu', 'Est123!', 'estudiante', 'Santander - Asignada al Grupo 6-1.', responsive),
               ],
               responsive,
             ),

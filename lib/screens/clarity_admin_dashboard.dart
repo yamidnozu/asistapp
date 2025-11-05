@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../theme/app_colors.dart';
@@ -163,10 +164,12 @@ class ClarityAdminDashboard extends StatelessWidget {
                       ),
                       Divider(color: colors.borderLight),
                       ListTile(
-                        leading: Icon(Icons.calendar_today, color: colors.featureSchedule),
-                        title: Text('Horarios', style: textStyles.bodyLarge),
-                        subtitle: Text('Gestionar clases', style: textStyles.bodySmall.copyWith(color: colors.textMuted)),
-                        onTap: () {},
+                        leading: Icon(Icons.school, color: colors.featureClasses),
+                        title: Text('Gestión Académica', style: textStyles.bodyLarge),
+                        subtitle: Text('Grupos, materias y horarios', style: textStyles.bodySmall.copyWith(color: colors.textMuted)),
+                        onTap: () {
+                          context.push('/academic');
+                        },
                       ),
                       Divider(color: colors.borderLight),
                       ListTile(

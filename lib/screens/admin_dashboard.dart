@@ -95,11 +95,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
                   _buildMenuActionItem(
                     context,
-                    icon: Icons.bar_chart_rounded,
-                    label: 'Reportes',
-                    value: 'Análisis',
-                    color: const Color(0xFF7C3AED),
-                    onTap: () {},
+                    icon: Icons.school_outlined,
+                    label: 'Gestión Académica',
+                    value: 'Grupos & Materias',
+                    color: const Color(0xFF10B981),
+                    onTap: () => context.go('/academic'),
                   ),
                   Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
                   _buildMenuActionItem(

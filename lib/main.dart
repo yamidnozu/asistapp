@@ -5,6 +5,7 @@ import 'config/app_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/horario_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
@@ -38,6 +39,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final AppLifecycleManager _lifecycleManager;
   late final AuthProvider _authProvider;
   late final InstitutionProvider _institutionProvider;
+  late final HorarioProvider _horarioProvider;
   late AppRouter _appRouter;
 
   @override
@@ -47,6 +49,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _lifecycleManager = AppLifecycleManager();
     _authProvider = AuthProvider();
     _institutionProvider = InstitutionProvider();
+    _horarioProvider = HorarioProvider();
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -64,6 +67,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
         ChangeNotifierProvider.value(value: _institutionProvider),
+        ChangeNotifierProvider.value(value: _horarioProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],

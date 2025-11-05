@@ -15,6 +15,10 @@ import '../screens/institutions/institutions_list_screen.dart';
 import '../screens/institutions/institution_admins_screen.dart';
 import '../screens/institutions/institution_form_screen.dart';
 import '../screens/institutions/create_institution_admin_screen.dart';
+import '../screens/academic/gestion_academica_screen.dart';
+import '../screens/academic/grupos_screen.dart';
+import '../screens/academic/materias_screen.dart';
+import '../screens/academic/horarios_screen.dart';
 import '../models/institution.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
@@ -174,6 +178,43 @@ class AppRouter {
                   child: _getDashboardForRole(),
                 ),
               ),
+              // Rutas académicas
+              GoRoute(
+                path: '/academic',
+                name: 'academic-management',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const GestionAcademicaScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/grupos',
+                name: 'academic-grupos',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const GruposScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/materias',
+                name: 'academic-materias',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const MateriasScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/horarios',
+                name: 'academic-horarios',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const HorariosScreen(),
+                ),
+              ),
+              // TODO: Agregar ruta para horarios cuando se implemente
+              // GoRoute(
+              //   path: '/academic/horarios',
+              //   name: 'academic-horarios',
+              //   pageBuilder: (context, state) => NoTransitionPage(
+              //     child: const HorariosScreen(),
+              //   ),
+              // ),
             ],
           ),
 
