@@ -15,7 +15,7 @@
 │   └── user_provider.dart [406]
 ├── 📂 screens
 │   ├── admin_dashboard.dart [227]
-│   ├── app_shell.dart [301]
+│   ├── app_shell.dart [323]
 │   ├── clarity_admin_dashboard.dart [257]
 │   ├── home_screen.dart [339]
 │   ├── 📂 institutions
@@ -27,7 +27,7 @@
 │   │   │   └── institution_contact_step.dart [90]
 │   │   ├── institutions_list_screen.dart [403]
 │   │   ├── institution_admins_screen.dart [485]
-│   │   └── institution_form_screen.dart [277]
+│   │   └── institution_form_screen.dart [278]
 │   ├── institution_selection_screen.dart [173]
 │   ├── login_screen.dart [402]
 │   ├── student_dashboard.dart [197]
@@ -42,9 +42,9 @@
 │   │   │   ├── role_specific_details_step.dart [266]
 │   │   │   ├── user_account_step.dart [179]
 │   │   │   └── user_personal_info_step.dart [261]
-│   │   ├── users_list_screen.dart [586]
+│   │   ├── users_list_screen.dart [588]
 │   │   ├── user_detail_screen.dart [160]
-│   │   └── user_form_screen.dart [733]
+│   │   └── user_form_screen.dart [734]
 │   └── welcome_screen.dart [91]
 ├── 📂 services
 │   ├── auth_service.dart [181]
@@ -101,9 +101,13 @@
 │   ├── 📂 controllers
 │   │   ├── admin-institucion.controller.js [103]
 │   │   ├── auth.controller.js [128]
+│   │   ├── grupo.controller.js [132]
+│   │   ├── horario.controller.js [168]
 │   │   ├── institucion.controller.js [143]
 │   │   ├── institution-admin.controller.js [247]
-│   │   └── user.controller.js [172]
+│   │   ├── materia.controller.js [132]
+│   │   ├── profesor.controller.js [33]
+│   │   └── user.controller.js [205]
 │   ├── index.js [84]
 │   ├── 📂 middleware
 │   │   ├── auth.js [88]
@@ -111,18 +115,25 @@
 │   ├── 📂 routes
 │   │   ├── admin-institucion.routes.js [30]
 │   │   ├── auth.routes.js [40]
-│   │   ├── index.js [55]
+│   │   ├── grupo.routes.js [34]
+│   │   ├── horario.routes.js [39]
+│   │   ├── index.js [63]
 │   │   ├── institucion.routes.js [40]
 │   │   ├── institution-admin.routes.js [28]
-│   │   └── user.routes.js [41]
+│   │   ├── materia.routes.js [34]
+│   │   ├── profesor.routes.js [19]
+│   │   └── user.routes.js [46]
 │   ├── 📂 scripts
 │   │   └── cleanup-tokens.js [33]
 │   ├── 📂 services
 │   │   ├── admin-institucion.service.js [247]
 │   │   ├── auth.service.js [238]
+│   │   ├── grupo.service.js [162]
+│   │   ├── horario.service.js [296]
 │   │   ├── institucion.service.js [301]
-│   │   ├── profesor.service.js [310]
-│   │   └── user.service.js [381]
+│   │   ├── materia.service.js [122]
+│   │   ├── profesor.service.js [385]
+│   │   └── user.service.js [409]
 │   ├── 📂 types
 │   │   └── index.js [44]
 │   └── 📂 utils
@@ -182,10 +193,10 @@
 │   └── user.validation.test.ts [217]
 
 
-Total de líneas resumidas: 24911
-Total de archivos: 139
-Promedio de líneas por archivo: 179
-Archivo más grande: user_form_screen.dart (733 líneas)
+Total de líneas resumidas: 26257
+Total de archivos: 150
+Promedio de líneas por archivo: 175
+Archivo más grande: user_form_screen.dart (734 líneas)
 
 
 /* Inicio lib\config\app_config.dart */
@@ -2142,6 +2153,28 @@ class _AppShellState extends State<AppShell> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
+          if (accessibleBranches.isEmpty) {
+            return Scaffold(
+              key: _scaffoldKey,
+              appBar: AppBar(
+                backgroundColor: context.colors.surface,
+                elevation: 0,
+                foregroundColor: context.colors.textPrimary,
+                title: Text(institutionName != null ? 'Dashboard — $institutionName' : 'Dashboard'),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.logout, color: context.colors.error),
+                    tooltip: 'Cerrar sesión',
+                    onPressed: () async {
+                      await authProvider.logoutAndClearAllData(context);
+                      if (context.mounted) context.go('/login');
+                    },
+                  ),
+                ],
+              ),
+              body: widget.navigationShell,
+            );
+          }
           if (!responsive['isMobile']) {
             return Scaffold(
               key: _scaffoldKey,
@@ -2177,7 +2210,7 @@ class _AppShellState extends State<AppShell> {
                         for (final branch in accessibleBranches)
                           NavigationRailDestination(
                             icon: Icon(branch.icon),
-                            label: Text("branch.label"),
+                            label: Text(branch.label),
                           ),
                       ],
                     ),
@@ -4587,6 +4620,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                   ],
                   Expanded(
                     child: ElevatedButton(
+                      key: const Key('formSaveButton'),
                       onPressed: _isLoading ? null : details.onStepContinue,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -7049,6 +7083,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         foregroundColor: colors.getTextColorForBackground(colors.primary),
         children: [
           SpeedDialChild(
+            key: const Key('createUser_professor'),
             child: Icon(Icons.school,
               color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
@@ -7056,6 +7091,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
             onTap: _navigateToCreateProfessor,
           ),
           SpeedDialChild(
+            key: const Key('createUser_student'),
             child: Icon(Icons.person,
               color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
@@ -8135,6 +8171,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   ],
                   Expanded(
                     child: ElevatedButton(
+                      key: const Key('formSaveButton'),
                       onPressed: _isLoading ? null : details.onStepContinue,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -14638,6 +14675,312 @@ exports.default = AuthController;
 
 /* Fin backend\dist\controllers\auth.controller.js */
 
+/* Inicio backend\dist\controllers\grupo.controller.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GrupoController = void 0;
+const database_1 = require("../config/database");
+const grupo_service_1 = __importDefault(require("../services/grupo.service"));
+const types_1 = require("../types");
+
+class GrupoController {
+
+    static async getGrupos(request, reply) {
+        try {
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden acceder a grupos');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+            const grupos = await grupo_service_1.default.getGruposByInstitucion(usuarioInstitucion.institucionId);
+            return reply.code(200).send({
+                success: true,
+                data: grupos,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async createGrupo(request, reply) {
+        try {
+            const { nombre } = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden crear grupos');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+            const grupo = await grupo_service_1.default.createGrupo({
+                nombre,
+                institucionId: usuarioInstitucion.institucionId,
+            });
+            return reply.code(201).send({
+                success: true,
+                data: grupo,
+                message: 'Grupo creado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async updateGrupo(request, reply) {
+        try {
+            const { id } = request.params;
+            const { nombre } = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden actualizar grupos');
+            }
+
+            const grupo = await grupo_service_1.default.getGrupoById(id);
+            if (!grupo) {
+                throw new types_1.NotFoundError('Grupo');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || grupo.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para actualizar este grupo');
+            }
+            const updatedGrupo = await grupo_service_1.default.updateGrupo(id, { nombre });
+            return reply.code(200).send({
+                success: true,
+                data: updatedGrupo,
+                message: 'Grupo actualizado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async deleteGrupo(request, reply) {
+        try {
+            const { id } = request.params;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden eliminar grupos');
+            }
+
+            const grupo = await grupo_service_1.default.getGrupoById(id);
+            if (!grupo) {
+                throw new types_1.NotFoundError('Grupo');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || grupo.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para eliminar este grupo');
+            }
+            await grupo_service_1.default.deleteGrupo(id);
+            return reply.code(200).send({
+                success: true,
+                message: 'Grupo eliminado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+}
+exports.GrupoController = GrupoController;
+exports.default = GrupoController;
+
+/* Fin backend\dist\controllers\grupo.controller.js */
+
+/* Inicio backend\dist\controllers\horario.controller.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HorarioController = void 0;
+const database_1 = require("../config/database");
+const horario_service_1 = __importDefault(require("../services/horario.service"));
+const types_1 = require("../types");
+
+class HorarioController {
+
+    static async getHorarios(request, reply) {
+        try {
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden acceder a horarios');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+            const horarios = await horario_service_1.default.getHorariosByInstitucion(usuarioInstitucion.institucionId);
+            return reply.code(200).send({
+                success: true,
+                data: horarios,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async getHorariosByGrupo(request, reply) {
+        try {
+            const { grupoId } = request.params;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden acceder a horarios');
+            }
+
+            const grupo = await database_1.prisma.grupo.findUnique({
+                where: { id: grupoId },
+            });
+            if (!grupo) {
+                throw new types_1.NotFoundError('Grupo');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || grupo.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para acceder a este grupo');
+            }
+            const horarios = await horario_service_1.default.getHorariosByGrupo(grupoId);
+            return reply.code(200).send({
+                success: true,
+                data: horarios,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async createHorario(request, reply) {
+        try {
+            const horarioData = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden crear horarios');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+
+            const periodo = await database_1.prisma.periodoAcademico.findUnique({
+                where: { id: horarioData.periodoAcademicoId },
+            });
+            if (!periodo || periodo.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('Periodo académico no válido o no pertenece a tu institución');
+            }
+            const horario = await horario_service_1.default.createHorario(horarioData);
+            return reply.code(201).send({
+                success: true,
+                data: horario,
+                message: 'Horario creado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async updateHorario(request, reply) {
+        try {
+            const { id } = request.params;
+            const horarioData = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden actualizar horarios');
+            }
+
+            const horario = await horario_service_1.default.getHorarioById(id);
+            if (!horario) {
+                throw new types_1.NotFoundError('Horario');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || horario.periodoAcademico.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para actualizar este horario');
+            }
+            const updatedHorario = await horario_service_1.default.updateHorario(id, horarioData);
+            return reply.code(200).send({
+                success: true,
+                data: updatedHorario,
+                message: 'Horario actualizado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async deleteHorario(request, reply) {
+        try {
+            const { id } = request.params;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden eliminar horarios');
+            }
+
+            const horario = await horario_service_1.default.getHorarioById(id);
+            if (!horario) {
+                throw new types_1.NotFoundError('Horario');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || horario.periodoAcademico.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para eliminar este horario');
+            }
+            await horario_service_1.default.deleteHorario(id);
+            return reply.code(200).send({
+                success: true,
+                message: 'Horario eliminado exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+}
+exports.HorarioController = HorarioController;
+exports.default = HorarioController;
+
+/* Fin backend\dist\controllers\horario.controller.js */
+
 /* Inicio backend\dist\controllers\institucion.controller.js */
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -15034,6 +15377,177 @@ exports.default = InstitutionAdminController;
 
 /* Fin backend\dist\controllers\institution-admin.controller.js */
 
+/* Inicio backend\dist\controllers\materia.controller.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MateriaController = void 0;
+const database_1 = require("../config/database");
+const materia_service_1 = __importDefault(require("../services/materia.service"));
+const types_1 = require("../types");
+
+class MateriaController {
+
+    static async getMaterias(request, reply) {
+        try {
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden acceder a materias');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+            const materias = await materia_service_1.default.getMateriasByInstitucion(usuarioInstitucion.institucionId);
+            return reply.code(200).send({
+                success: true,
+                data: materias,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async createMateria(request, reply) {
+        try {
+            const { nombre } = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden crear materias');
+            }
+
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion) {
+                throw new types_1.AuthorizationError('No tienes una institución asignada');
+            }
+            const materia = await materia_service_1.default.createMateria({
+                nombre,
+                institucionId: usuarioInstitucion.institucionId,
+            });
+            return reply.code(201).send({
+                success: true,
+                data: materia,
+                message: 'Materia creada exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async updateMateria(request, reply) {
+        try {
+            const { id } = request.params;
+            const { nombre } = request.body;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden actualizar materias');
+            }
+
+            const materia = await materia_service_1.default.getMateriaById(id);
+            if (!materia) {
+                throw new types_1.NotFoundError('Materia');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || materia.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para actualizar esta materia');
+            }
+            const updatedMateria = await materia_service_1.default.updateMateria(id, { nombre });
+            return reply.code(200).send({
+                success: true,
+                data: updatedMateria,
+                message: 'Materia actualizada exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async deleteMateria(request, reply) {
+        try {
+            const { id } = request.params;
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'admin_institucion') {
+                throw new types_1.AuthorizationError('Solo administradores de institución pueden eliminar materias');
+            }
+
+            const materia = await materia_service_1.default.getMateriaById(id);
+            if (!materia) {
+                throw new types_1.NotFoundError('Materia');
+            }
+            const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: user.id, activo: true },
+            });
+            if (!usuarioInstitucion || materia.institucionId !== usuarioInstitucion.institucionId) {
+                throw new types_1.AuthorizationError('No tienes permiso para eliminar esta materia');
+            }
+            await materia_service_1.default.deleteMateria(id);
+            return reply.code(200).send({
+                success: true,
+                message: 'Materia eliminada exitosamente',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+}
+exports.MateriaController = MateriaController;
+exports.default = MateriaController;
+
+/* Fin backend\dist\controllers\materia.controller.js */
+
+/* Inicio backend\dist\controllers\profesor.controller.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProfesorController = void 0;
+const profesor_service_1 = __importDefault(require("../services/profesor.service"));
+const types_1 = require("../types");
+
+class ProfesorController {
+
+    static async getClasesDelDia(request, reply) {
+        try {
+            const authReq = request;
+            const user = authReq.user;
+            if (user.rol !== 'profesor') {
+                throw new types_1.AuthorizationError('Solo profesores pueden acceder a esta información');
+            }
+            const clases = await profesor_service_1.default.getClasesDelDia(user.id);
+            return reply.code(200).send({
+                success: true,
+                data: clases,
+                message: clases.length > 0 ? `Tienes ${clases.length} clase(s) hoy` : 'No tienes clases programadas para hoy',
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+}
+exports.ProfesorController = ProfesorController;
+exports.default = ProfesorController;
+
+/* Fin backend\dist\controllers\profesor.controller.js */
+
 /* Inicio backend\dist\controllers\user.controller.js */
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -15041,6 +15555,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
+const database_1 = require("../config/database");
 const user_service_1 = __importDefault(require("../services/user.service"));
 const types_1 = require("../types");
 
@@ -15071,6 +15586,38 @@ class UserController {
                 data: result.data,
                 pagination: result.pagination,
             });
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    static async changePassword(request, reply) {
+        try {
+            const { id } = request.params;
+            const { newPassword } = request.body;
+
+            const authReq = request;
+            const invoker = authReq.user;
+            if (invoker.rol === 'admin_institucion') {
+
+                const usuarioInstitucion = await database_1.prisma.usuarioInstitucion.findFirst({
+                    where: { usuarioId: invoker.id, activo: true },
+                });
+                if (!usuarioInstitucion) {
+                    throw new types_1.AuthorizationError('No tienes una institución asignada');
+                }
+                const institucionId = usuarioInstitucion.institucionId;
+
+                const targetRelation = await database_1.prisma.usuarioInstitucion.findFirst({
+                    where: { usuarioId: id, institucionId, activo: true },
+                });
+                if (!targetRelation) {
+                    throw new types_1.AuthorizationError('No tienes permiso para cambiar la contraseña de este usuario');
+                }
+            }
+            await user_service_1.default.changeUserPassword(id, newPassword);
+            return reply.code(200).send({ success: true, message: 'Contraseña actualizada exitosamente' });
         }
         catch (error) {
             throw error;
@@ -15564,6 +16111,85 @@ async function authRoutes(fastify) {
 
 /* Fin backend\dist\routes\auth.routes.js */
 
+/* Inicio backend\dist\routes\grupo.routes.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = grupoRoutes;
+const grupo_controller_1 = __importDefault(require("../controllers/grupo.controller"));
+const auth_1 = require("../middleware/auth");
+
+async function grupoRoutes(fastify) {
+
+    fastify.addHook('preHandler', auth_1.authenticate);
+
+    fastify.get('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: grupo_controller_1.default.getGrupos,
+    });
+
+    fastify.post('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: grupo_controller_1.default.createGrupo,
+    });
+
+    fastify.put('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: grupo_controller_1.default.updateGrupo,
+    });
+
+    fastify.delete('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: grupo_controller_1.default.deleteGrupo,
+    });
+}
+
+/* Fin backend\dist\routes\grupo.routes.js */
+
+/* Inicio backend\dist\routes\horario.routes.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = horarioRoutes;
+const horario_controller_1 = __importDefault(require("../controllers/horario.controller"));
+const auth_1 = require("../middleware/auth");
+
+async function horarioRoutes(fastify) {
+
+    fastify.addHook('preHandler', auth_1.authenticate);
+
+    fastify.get('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: horario_controller_1.default.getHorarios,
+    });
+
+    fastify.get('/grupo/:grupoId', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: horario_controller_1.default.getHorariosByGrupo,
+    });
+
+    fastify.post('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: horario_controller_1.default.createHorario,
+    });
+
+    fastify.put('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: horario_controller_1.default.updateHorario,
+    });
+
+    fastify.delete('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: horario_controller_1.default.deleteHorario,
+    });
+}
+
+/* Fin backend\dist\routes\horario.routes.js */
+
 /* Inicio backend\dist\routes\index.js */
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -15573,8 +16199,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = routes;
 const admin_institucion_routes_1 = __importDefault(require("./admin-institucion.routes"));
 const auth_routes_1 = __importDefault(require("./auth.routes"));
+const grupo_routes_1 = __importDefault(require("./grupo.routes"));
+const horario_routes_1 = __importDefault(require("./horario.routes"));
 const institucion_routes_1 = __importDefault(require("./institucion.routes"));
 const institution_admin_routes_1 = __importDefault(require("./institution-admin.routes"));
+const materia_routes_1 = __importDefault(require("./materia.routes"));
+const profesor_routes_1 = __importDefault(require("./profesor.routes"));
 const user_routes_1 = __importDefault(require("./user.routes"));
 async function routes(fastify) {
     fastify.get('/', async (request, reply) => {
@@ -15618,6 +16248,10 @@ async function routes(fastify) {
     await fastify.register(admin_institucion_routes_1.default, { prefix: '/admin-institucion' });
     await fastify.register(institution_admin_routes_1.default, { prefix: '/institution-admin' });
     await fastify.register(institucion_routes_1.default, { prefix: '/instituciones' });
+    await fastify.register(grupo_routes_1.default, { prefix: '/grupos' });
+    await fastify.register(materia_routes_1.default, { prefix: '/materias' });
+    await fastify.register(horario_routes_1.default, { prefix: '/horarios' });
+    await fastify.register(profesor_routes_1.default, { prefix: '/profesor' });
 }
 
 /* Fin backend\dist\routes\index.js */
@@ -15696,6 +16330,65 @@ async function institutionAdminRoutes(fastify) {
 
 /* Fin backend\dist\routes\institution-admin.routes.js */
 
+/* Inicio backend\dist\routes\materia.routes.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = materiaRoutes;
+const materia_controller_1 = __importDefault(require("../controllers/materia.controller"));
+const auth_1 = require("../middleware/auth");
+
+async function materiaRoutes(fastify) {
+
+    fastify.addHook('preHandler', auth_1.authenticate);
+
+    fastify.get('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: materia_controller_1.default.getMaterias,
+    });
+
+    fastify.post('/', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: materia_controller_1.default.createMateria,
+    });
+
+    fastify.put('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: materia_controller_1.default.updateMateria,
+    });
+
+    fastify.delete('/:id', {
+        preHandler: (0, auth_1.authorize)(['admin_institucion']),
+        handler: materia_controller_1.default.deleteMateria,
+    });
+}
+
+/* Fin backend\dist\routes\materia.routes.js */
+
+/* Inicio backend\dist\routes\profesor.routes.js */
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = profesorRoutes;
+const profesor_controller_1 = __importDefault(require("../controllers/profesor.controller"));
+const auth_1 = require("../middleware/auth");
+
+async function profesorRoutes(fastify) {
+
+    fastify.addHook('preHandler', auth_1.authenticate);
+
+    fastify.get('/clases-del-dia', {
+        preHandler: (0, auth_1.authorize)(['profesor']),
+        handler: profesor_controller_1.default.getClasesDelDia,
+    });
+}
+
+/* Fin backend\dist\routes\profesor.routes.js */
+
 /* Inicio backend\dist\routes\user.routes.js */
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -15734,6 +16427,11 @@ async function userRoutes(fastify) {
     fastify.delete('/:id', {
         preHandler: (0, auth_1.authorize)(['super_admin', 'admin_institucion']),
         handler: user_controller_1.default.deleteUser,
+    });
+
+    fastify.patch('/:id/change-password', {
+        preHandler: (0, auth_1.authorize)(['super_admin', 'admin_institucion']),
+        handler: user_controller_1.default.changePassword,
     });
 
 }
@@ -16267,6 +16965,470 @@ exports.default = AuthService;
 
 /* Fin backend\dist\services\auth.service.js */
 
+/* Inicio backend\dist\services\grupo.service.js */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GrupoService = void 0;
+const database_1 = require("../config/database");
+const types_1 = require("../types");
+class GrupoService {
+
+    static async getGruposByInstitucion(institucionId) {
+        try {
+            const grupos = await database_1.prisma.grupo.findMany({
+                where: { institucionId },
+                include: {
+                    estudiantesGrupos: {
+                        include: {
+                            estudiante: {
+                                include: {
+                                    usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    horarios: true,
+                    asistencias: true,
+                },
+                orderBy: { nombre: 'asc' },
+            });
+            return grupos;
+        }
+        catch (error) {
+            console.error('Error al obtener grupos:', error);
+            throw error;
+        }
+    }
+
+    static async getGrupoById(id) {
+        try {
+            const grupo = await database_1.prisma.grupo.findUnique({
+                where: { id },
+                include: {
+                    estudiantesGrupos: {
+                        include: {
+                            estudiante: {
+                                include: {
+                                    usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    horarios: true,
+                    asistencias: true,
+                },
+            });
+            return grupo;
+        }
+        catch (error) {
+            console.error(`Error al obtener grupo con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async createGrupo(data) {
+        try {
+
+            if (!data.nombre || !data.institucionId) {
+                throw new types_1.ValidationError('Nombre e institucionId son requeridos');
+            }
+
+            const institucion = await database_1.prisma.institucion.findUnique({
+                where: { id: data.institucionId },
+            });
+            if (!institucion) {
+                throw new types_1.NotFoundError('Institución');
+            }
+            const grupo = await database_1.prisma.grupo.create({
+                data: {
+                    nombre: data.nombre,
+                    institucionId: data.institucionId,
+                },
+                include: {
+                    estudiantesGrupos: {
+                        include: {
+                            estudiante: {
+                                include: {
+                                    usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    horarios: true,
+                    asistencias: true,
+                },
+            });
+            return grupo;
+        }
+        catch (error) {
+            console.error('Error al crear grupo:', error);
+            throw error;
+        }
+    }
+
+    static async updateGrupo(id, data) {
+        try {
+
+            const existingGrupo = await this.getGrupoById(id);
+            if (!existingGrupo) {
+                throw new types_1.NotFoundError('Grupo');
+            }
+            const grupo = await database_1.prisma.grupo.update({
+                where: { id },
+                data: {
+                    nombre: data.nombre,
+                },
+                include: {
+                    estudiantesGrupos: {
+                        include: {
+                            estudiante: {
+                                include: {
+                                    usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    horarios: true,
+                    asistencias: true,
+                },
+            });
+            return grupo;
+        }
+        catch (error) {
+            console.error(`Error al actualizar grupo con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async deleteGrupo(id) {
+        try {
+
+            const existingGrupo = await this.getGrupoById(id);
+            if (!existingGrupo) {
+                throw new types_1.NotFoundError('Grupo');
+            }
+
+            const horariosCount = await database_1.prisma.horario.count({
+                where: { grupoId: id },
+            });
+            if (horariosCount > 0) {
+                throw new types_1.ValidationError('No se puede eliminar un grupo que tiene horarios asociados');
+            }
+            await database_1.prisma.grupo.delete({
+                where: { id },
+            });
+            return true;
+        }
+        catch (error) {
+            console.error(`Error al eliminar grupo con ID ${id}:`, error);
+            throw error;
+        }
+    }
+}
+exports.GrupoService = GrupoService;
+exports.default = GrupoService;
+
+/* Fin backend\dist\services\grupo.service.js */
+
+/* Inicio backend\dist\services\horario.service.js */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HorarioService = void 0;
+const database_1 = require("../config/database");
+const types_1 = require("../types");
+class HorarioService {
+
+    static async getHorariosByInstitucion(institucionId) {
+        try {
+            const horarios = await database_1.prisma.horario.findMany({
+                where: {
+                    periodoAcademico: {
+                        institucionId,
+                    },
+                },
+                include: {
+                    periodoAcademico: true,
+                    grupo: true,
+                    materia: true,
+                    profesor: {
+                        select: {
+                            id: true,
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                    asistencias: true,
+                },
+                orderBy: [
+                    { diaSemana: 'asc' },
+                    { horaInicio: 'asc' },
+                ],
+            });
+            return horarios;
+        }
+        catch (error) {
+            console.error('Error al obtener horarios:', error);
+            throw error;
+        }
+    }
+
+    static async getHorariosByGrupo(grupoId) {
+        try {
+            const horarios = await database_1.prisma.horario.findMany({
+                where: { grupoId },
+                include: {
+                    periodoAcademico: true,
+                    grupo: true,
+                    materia: true,
+                    profesor: {
+                        select: {
+                            id: true,
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                    asistencias: true,
+                },
+                orderBy: [
+                    { diaSemana: 'asc' },
+                    { horaInicio: 'asc' },
+                ],
+            });
+            return horarios;
+        }
+        catch (error) {
+            console.error(`Error al obtener horarios del grupo ${grupoId}:`, error);
+            throw error;
+        }
+    }
+
+    static async getHorarioById(id) {
+        try {
+            const horario = await database_1.prisma.horario.findUnique({
+                where: { id },
+                include: {
+                    periodoAcademico: true,
+                    grupo: true,
+                    materia: true,
+                    profesor: {
+                        select: {
+                            id: true,
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                    asistencias: true,
+                },
+            });
+            return horario;
+        }
+        catch (error) {
+            console.error(`Error al obtener horario con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async createHorario(data) {
+        try {
+
+            if (data.diaSemana === undefined ||
+                !data.horaInicio ||
+                !data.horaFin ||
+                !data.periodoAcademicoId ||
+                !data.grupoId ||
+                !data.materiaId) {
+                throw new types_1.ValidationError('Todos los campos son requeridos');
+            }
+
+            const periodo = await database_1.prisma.periodoAcademico.findUnique({
+                where: { id: data.periodoAcademicoId },
+            });
+            if (!periodo) {
+                throw new types_1.NotFoundError('Periodo Académico');
+            }
+            const grupo = await database_1.prisma.grupo.findUnique({
+                where: { id: data.grupoId },
+            });
+            if (!grupo || grupo.institucionId !== periodo.institucionId) {
+                throw new types_1.ValidationError('Grupo no válido o no pertenece a la institución');
+            }
+            const materia = await database_1.prisma.materia.findUnique({
+                where: { id: data.materiaId },
+            });
+            if (!materia || materia.institucionId !== periodo.institucionId) {
+                throw new types_1.ValidationError('Materia no válida o no pertenece a la institución');
+            }
+            if (data.profesorId) {
+                const profesor = await database_1.prisma.usuario.findUnique({
+                    where: { id: data.profesorId },
+                });
+                if (!profesor || profesor.rol !== 'profesor') {
+                    throw new types_1.ValidationError('Profesor no válido');
+                }
+            }
+
+            const conflicto = await database_1.prisma.horario.findFirst({
+                where: {
+                    periodoAcademicoId: data.periodoAcademicoId,
+                    grupoId: data.grupoId,
+                    diaSemana: data.diaSemana,
+                    OR: [
+                        {
+                            AND: [
+                                { horaInicio: { lte: data.horaInicio } },
+                                { horaFin: { gt: data.horaInicio } },
+                            ],
+                        },
+                        {
+                            AND: [
+                                { horaInicio: { lt: data.horaFin } },
+                                { horaFin: { gte: data.horaFin } },
+                            ],
+                        },
+                    ],
+                },
+            });
+            if (conflicto) {
+                throw new types_1.ValidationError('Ya existe una clase en este horario para este grupo');
+            }
+            const horario = await database_1.prisma.horario.create({
+                data: {
+                    diaSemana: data.diaSemana,
+                    horaInicio: data.horaInicio,
+                    horaFin: data.horaFin,
+                    periodoAcademicoId: data.periodoAcademicoId,
+                    grupoId: data.grupoId,
+                    materiaId: data.materiaId,
+                    profesorId: data.profesorId,
+                },
+                include: {
+                    periodoAcademico: true,
+                    grupo: true,
+                    materia: true,
+                    profesor: {
+                        select: {
+                            id: true,
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                    asistencias: true,
+                },
+            });
+            return horario;
+        }
+        catch (error) {
+            console.error('Error al crear horario:', error);
+            throw error;
+        }
+    }
+
+    static async updateHorario(id, data) {
+        try {
+
+            const existingHorario = await this.getHorarioById(id);
+            if (!existingHorario) {
+                throw new types_1.NotFoundError('Horario');
+            }
+
+            if (data.diaSemana !== undefined || data.horaInicio || data.horaFin) {
+                const diaSemana = data.diaSemana ?? existingHorario.diaSemana;
+                const horaInicio = data.horaInicio ?? existingHorario.horaInicio;
+                const horaFin = data.horaFin ?? existingHorario.horaFin;
+                const conflicto = await database_1.prisma.horario.findFirst({
+                    where: {
+                        periodoAcademicoId: existingHorario.periodoAcademico.id,
+                        grupoId: existingHorario.grupoId,
+                        diaSemana,
+                        id: { not: id }, // Excluir el horario actual
+                        OR: [
+                            {
+                                AND: [
+                                    { horaInicio: { lte: horaInicio } },
+                                    { horaFin: { gt: horaInicio } },
+                                ],
+                            },
+                            {
+                                AND: [
+                                    { horaInicio: { lt: horaFin } },
+                                    { horaFin: { gte: horaFin } },
+                                ],
+                            },
+                        ],
+                    },
+                });
+                if (conflicto) {
+                    throw new types_1.ValidationError('Ya existe una clase en este horario para este grupo');
+                }
+            }
+            if (data.profesorId) {
+                const profesor = await database_1.prisma.usuario.findUnique({
+                    where: { id: data.profesorId },
+                });
+                if (!profesor || profesor.rol !== 'profesor') {
+                    throw new types_1.ValidationError('Profesor no válido');
+                }
+            }
+            const horario = await database_1.prisma.horario.update({
+                where: { id },
+                data: {
+                    diaSemana: data.diaSemana,
+                    horaInicio: data.horaInicio,
+                    horaFin: data.horaFin,
+                    profesorId: data.profesorId,
+                },
+                include: {
+                    periodoAcademico: true,
+                    grupo: true,
+                    materia: true,
+                    profesor: {
+                        select: {
+                            id: true,
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                    asistencias: true,
+                },
+            });
+            return horario;
+        }
+        catch (error) {
+            console.error(`Error al actualizar horario con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async deleteHorario(id) {
+        try {
+
+            const existingHorario = await this.getHorarioById(id);
+            if (!existingHorario) {
+                throw new types_1.NotFoundError('Horario');
+            }
+
+            const asistenciasCount = await database_1.prisma.asistencia.count({
+                where: { horarioId: id },
+            });
+            if (asistenciasCount > 0) {
+                throw new types_1.ValidationError('No se puede eliminar un horario que tiene asistencias registradas');
+            }
+            await database_1.prisma.horario.delete({
+                where: { id },
+            });
+            return true;
+        }
+        catch (error) {
+            console.error(`Error al eliminar horario con ID ${id}:`, error);
+            throw error;
+        }
+    }
+}
+exports.HorarioService = HorarioService;
+exports.default = HorarioService;
+
+/* Fin backend\dist\services\horario.service.js */
+
 /* Inicio backend\dist\services\institucion.service.js */
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16570,6 +17732,131 @@ exports.InstitucionService = InstitucionService;
 exports.default = InstitucionService;
 
 /* Fin backend\dist\services\institucion.service.js */
+
+/* Inicio backend\dist\services\materia.service.js */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MateriaService = void 0;
+const database_1 = require("../config/database");
+const types_1 = require("../types");
+class MateriaService {
+
+    static async getMateriasByInstitucion(institucionId) {
+        try {
+            const materias = await database_1.prisma.materia.findMany({
+                where: { institucionId },
+                include: {
+                    horarios: true,
+                },
+                orderBy: { nombre: 'asc' },
+            });
+            return materias;
+        }
+        catch (error) {
+            console.error('Error al obtener materias:', error);
+            throw error;
+        }
+    }
+
+    static async getMateriaById(id) {
+        try {
+            const materia = await database_1.prisma.materia.findUnique({
+                where: { id },
+                include: {
+                    horarios: true,
+                },
+            });
+            return materia;
+        }
+        catch (error) {
+            console.error(`Error al obtener materia con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async createMateria(data) {
+        try {
+
+            if (!data.nombre || !data.institucionId) {
+                throw new types_1.ValidationError('Nombre e institucionId son requeridos');
+            }
+
+            const institucion = await database_1.prisma.institucion.findUnique({
+                where: { id: data.institucionId },
+            });
+            if (!institucion) {
+                throw new types_1.NotFoundError('Institución');
+            }
+            const materia = await database_1.prisma.materia.create({
+                data: {
+                    nombre: data.nombre,
+                    institucionId: data.institucionId,
+                },
+                include: {
+                    horarios: true,
+                },
+            });
+            return materia;
+        }
+        catch (error) {
+            console.error('Error al crear materia:', error);
+            throw error;
+        }
+    }
+
+    static async updateMateria(id, data) {
+        try {
+
+            const existingMateria = await this.getMateriaById(id);
+            if (!existingMateria) {
+                throw new types_1.NotFoundError('Materia');
+            }
+            const materia = await database_1.prisma.materia.update({
+                where: { id },
+                data: {
+                    nombre: data.nombre,
+                },
+                include: {
+                    horarios: true,
+                },
+            });
+            return materia;
+        }
+        catch (error) {
+            console.error(`Error al actualizar materia con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async deleteMateria(id) {
+        try {
+
+            const existingMateria = await this.getMateriaById(id);
+            if (!existingMateria) {
+                throw new types_1.NotFoundError('Materia');
+            }
+
+            const horariosCount = await database_1.prisma.horario.count({
+                where: { materiaId: id },
+            });
+            if (horariosCount > 0) {
+                throw new types_1.ValidationError('No se puede eliminar una materia que tiene horarios asociados');
+            }
+            await database_1.prisma.materia.delete({
+                where: { id },
+            });
+            return true;
+        }
+        catch (error) {
+            console.error(`Error al eliminar materia con ID ${id}:`, error);
+            throw error;
+        }
+    }
+}
+exports.MateriaService = MateriaService;
+exports.default = MateriaService;
+
+/* Fin backend\dist\services\materia.service.js */
 
 /* Inicio backend\dist\services\profesor.service.js */
 "use strict";
@@ -16877,6 +18164,81 @@ class ProfesorService {
             institucion: updatedProfesor.usuarioInstituciones[0]?.institucion,
             createdAt: updatedProfesor.createdAt,
         };
+    }
+
+    static async getClasesDelDia(profesorId) {
+        try {
+
+            const hoy = new Date();
+            const diaSemana = hoy.getDay()
+
+            const profesorInstitucion = await prisma.usuarioInstitucion.findFirst({
+                where: { usuarioId: profesorId, activo: true },
+            });
+            if (!profesorInstitucion) {
+                throw new types_1.ValidationError('Profesor no tiene institución asignada');
+            }
+            const periodoActivo = await prisma.periodoAcademico.findFirst({
+                where: {
+                    institucionId: profesorInstitucion.institucionId,
+                    activo: true,
+                },
+            });
+            if (!periodoActivo) {
+                return []
+            }
+
+            const clases = await prisma.horario.findMany({
+                where: {
+                    profesorId,
+                    diaSemana,
+                    periodoAcademicoId: periodoActivo.id,
+                },
+                include: {
+                    grupo: {
+                        include: {
+                            estudiantesGrupos: {
+                                include: {
+                                    estudiante: {
+                                        include: {
+                                            usuario: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    materia: true,
+                    periodoAcademico: true,
+                },
+                orderBy: { horaInicio: 'asc' },
+            });
+
+            const clasesFormateadas = clases.map(clase => ({
+                id: clase.id,
+                diaSemana: clase.diaSemana,
+                horaInicio: clase.horaInicio,
+                horaFin: clase.horaFin,
+                grupo: {
+                    id: clase.grupo.id,
+                    nombre: clase.grupo.nombre,
+                    estudiantesCount: clase.grupo.estudiantesGrupos.length,
+                },
+                materia: {
+                    id: clase.materia.id,
+                    nombre: clase.materia.nombre,
+                },
+                periodoAcademico: {
+                    id: clase.periodoAcademico.id,
+                    nombre: clase.periodoAcademico.nombre,
+                },
+            }));
+            return clasesFormateadas;
+        }
+        catch (error) {
+            console.error(`Error al obtener clases del día para profesor ${profesorId}:`, error);
+            throw error;
+        }
     }
 }
 exports.ProfesorService = ProfesorService;
@@ -17196,6 +18558,34 @@ class UserService {
         }
         catch (error) {
             console.error(`Error al actualizar usuario con ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async changeUserPassword(userId, newPassword) {
+        try {
+            if (!userId || typeof userId !== 'string') {
+                throw new types_1.ValidationError('ID de usuario inválido');
+            }
+            if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+                throw new types_1.ValidationError('La nueva contraseña debe tener al menos 8 caracteres');
+            }
+            const user = await database_1.prisma.usuario.findUnique({ where: { id: userId } });
+            if (!user) {
+                throw new types_1.NotFoundError('Usuario');
+            }
+            const hashed = await bcryptjs_1.default.hash(newPassword, 10);
+            await database_1.prisma.usuario.update({
+                where: { id: userId },
+                data: {
+                    passwordHash: hashed,
+                    tokenVersion: (user.tokenVersion ?? 0) + 1,
+                },
+            });
+            return true;
+        }
+        catch (error) {
+            console.error(`Error changing password for user ${userId}:`, error);
             throw error;
         }
     }

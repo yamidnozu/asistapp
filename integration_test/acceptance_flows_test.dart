@@ -22,36 +22,30 @@ void main() {
     await prefs.remove('selectedInstitutionId');
   }
 
-  /// Login general - Busca campos por tipo (más robusto)
+  /// Login general - Usa Keys específicas para mayor robustez
   Future<void> loginAs(
     WidgetTester tester,
     String email,
     String password,
   ) async {
     print('\n[LOGIN] Iniciando sesión con: $email');
-    
-    // Buscar por tipo de widget (más robusto en desktop)
-    final textFields = find.byType(TextFormField);
-    
-    if (textFields.evaluate().isEmpty) {
-      throw Exception('No se encontraron campos de texto en la pantalla de login');
-    }
 
-    // Ingresar email en primer campo
-    await tester.enterText(textFields.at(0), email);
+    // Usar Keys específicas definidas en login_screen.dart
+    final emailField = find.byKey(const Key('emailField'));
+    final passwordField = find.byKey(const Key('passwordField'));
+    final loginButton = find.byKey(const Key('loginButton'));
+
+    expect(emailField, findsOneWidget, reason: 'Campo de email no encontrado');
+    expect(passwordField, findsOneWidget, reason: 'Campo de contraseña no encontrado');
+    expect(loginButton, findsOneWidget, reason: 'Botón de login no encontrado');
+
+    await tester.enterText(emailField, email);
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-    // Ingresar contraseña en segundo campo
-    await tester.enterText(textFields.at(1), password);
+    await tester.enterText(passwordField, password);
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-    // Presionar botón de login
-    final buttons = find.byType(ElevatedButton);
-    if (buttons.evaluate().isEmpty) {
-      throw Exception('No se encontró botón de login');
-    }
-
-    await tester.tap(buttons.first);
+    await tester.tap(loginButton);
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
     print('✅ Login completado');
@@ -107,45 +101,109 @@ void main() {
     }
   }
 
-  /// Crear una institución
+  /// Crear una institución usando el stepper actual (versión simplificada)
   Future<void> createInstitution(
     WidgetTester tester, {
     required String nombre,
-    required String codigo,
     required String email,
+    String direccion = 'Dirección de prueba',
+    String telefono = '+506 8888 9999',
+    bool activa = true,
   }) async {
     print('\n[CREATE] Creando institución: $nombre');
 
     try {
-      // Presionar FAB
+      // Presionar FAB para agregar
       final fabButton = find.byType(FloatingActionButton);
-      if (fabButton.evaluate().isNotEmpty) {
-        await tester.tap(fabButton.first);
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-      }
+      expect(fabButton, findsWidgets, reason: 'Debe haber botón FAB para agregar institución');
+      await tester.tap(fabButton.first);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      // Rellenar formulario
+      // Verificar que estamos en el formulario
+      expect(find.text('Nueva Institución'), findsOneWidget, reason: 'Debe mostrar pantalla de nueva institución');
+
+      // ===== PASO 1: Información Básica =====
+      print('📝 Paso 1: Información básica');
+
+      // Llenar campos del paso 1
       final textFields = find.byType(TextFormField);
-      if (textFields.evaluate().length >= 3) {
-        await tester.enterText(textFields.at(0), nombre);
-        await tester.pumpAndSettle(const Duration(milliseconds: 300));
-        
-        await tester.enterText(textFields.at(1), codigo);
-        await tester.pumpAndSettle(const Duration(milliseconds: 300));
-        
-        await tester.enterText(textFields.at(2), email);
-        await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      expect(textFields, findsAtLeastNWidgets(2), reason: 'Debe haber al menos 2 campos de texto');
 
-        // Presionar botón de guardar
-        final saveButton = find.byType(ElevatedButton);
-        if (saveButton.evaluate().isNotEmpty) {
-          await tester.tap(saveButton.first);
-          await tester.pumpAndSettle(const Duration(seconds: 2));
-          print('✅ Institución creada exitosamente');
+      await tester.enterText(textFields.at(0), nombre); // nombre
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      await tester.enterText(textFields.at(1), email); // email
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      // Presionar "Siguiente" usando selector más específico - tomar el primer botón encontrado
+      final nextButtons = find.descendant(
+        of: find.byType(Stepper),
+        matching: find.text('Siguiente'),
+      );
+      expect(nextButtons, findsWidgets, reason: 'Debe haber al menos un botón Siguiente');
+      await tester.tap(nextButtons.first);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // ===== PASO 2: Contacto =====
+      print('📞 Paso 2: Información de contacto');
+
+      final textFieldsStep2 = find.byType(TextFormField);
+      expect(textFieldsStep2, findsAtLeastNWidgets(2), reason: 'Debe haber campos de dirección y teléfono');
+
+      await tester.enterText(textFieldsStep2.at(0), direccion); // dirección
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      await tester.enterText(textFieldsStep2.at(1), telefono); // teléfono
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      // Hacer scroll hacia arriba para asegurar que los controles del paso 2 sean visibles
+      final nextButtons2 = find.descendant(
+        of: find.byType(Stepper),
+        matching: find.text('Siguiente'),
+      );
+      await tester.ensureVisible(nextButtons2.first);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Presionar "Siguiente" usando selector más específico - tomar el primer botón encontrado
+      expect(nextButtons2, findsWidgets, reason: 'Debe haber al menos un botón Siguiente en paso 2');
+      await tester.tap(nextButtons2.first, warnIfMissed: false);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // ===== PASO 3: Configuración =====
+      print('⚙️ Paso 3: Configuración');
+
+      // El estado por defecto es true (activa), pero si necesitamos cambiarlo
+      if (!activa) {
+        final switches = find.byType(Switch);
+        if (switches.evaluate().isNotEmpty) {
+          await tester.tap(switches.first);
+          await tester.pumpAndSettle(const Duration(milliseconds: 300));
         }
       }
+
+      // Hacer scroll para asegurar que los controles del paso 3 sean visibles
+      final createButton = find.byKey(const Key('formSaveButton'));
+      await tester.ensureVisible(createButton.last);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Presionar "Crear" usando el último botón con Key formSaveButton (el activo)
+      expect(createButton, findsWidgets, reason: 'Debe haber al menos un botón con Key formSaveButton');
+      await tester.tap(createButton.last, warnIfMissed: false);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Verificar que se procesó correctamente - verificar que no hay errores visibles
+      // y que el botón de loading desapareció (lo que indica que el proceso terminó)
+      final loadingButtons = find.byType(CircularProgressIndicator);
+      expect(loadingButtons, findsNothing, reason: 'No debe haber indicadores de loading');
+
+      // Verificar que no hay mensajes de error
+      final errorMessages = find.textContaining('Error');
+      expect(errorMessages, findsNothing, reason: 'No debe haber mensajes de error');
+
+      print('✅ Institución creada exitosamente');
     } catch (e) {
       print('⚠️ Error al crear institución: $e');
+      rethrow;
     }
   }
 
@@ -262,8 +320,9 @@ void main() {
           await createInstitution(
             tester,
             nombre: 'Instituto E2E $timestamp',
-            codigo: 'e2e-$timestamp',
             email: 'e2e$timestamp@test.edu',
+            direccion: 'Dirección E2E $timestamp',
+            telefono: '+506 8888 $timestamp'.substring(0, 12), // Limitar longitud
           );
         }
 

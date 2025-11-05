@@ -188,6 +188,30 @@ class _AppShellState extends State<AppShell> {
         builder: (context, constraints) {
           final responsive = ResponsiveUtils.getResponsiveValues(constraints);
 
+          // Si no hay ramas accesibles, mostrar solo el contenido sin navegación
+          if (accessibleBranches.isEmpty) {
+            return Scaffold(
+              key: _scaffoldKey,
+              appBar: AppBar(
+                backgroundColor: context.colors.surface,
+                elevation: 0,
+                foregroundColor: context.colors.textPrimary,
+                title: Text(institutionName != null ? 'Dashboard — $institutionName' : 'Dashboard'),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.logout, color: context.colors.error),
+                    tooltip: 'Cerrar sesión',
+                    onPressed: () async {
+                      await authProvider.logoutAndClearAllData(context);
+                      if (context.mounted) context.go('/login');
+                    },
+                  ),
+                ],
+              ),
+              body: widget.navigationShell,
+            );
+          }
+
           // Si no es móvil (tablet o escritorio), usamos NavigationRail
           if (!responsive['isMobile']) {
             return Scaffold(
@@ -224,7 +248,7 @@ class _AppShellState extends State<AppShell> {
                         for (final branch in accessibleBranches)
                           NavigationRailDestination(
                             icon: Icon(branch.icon),
-                            label: Text("branch.label"),
+                            label: Text(branch.label),
                           ),
                       ],
                     ),

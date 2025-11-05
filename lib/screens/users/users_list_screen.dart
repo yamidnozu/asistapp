@@ -229,6 +229,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         foregroundColor: colors.getTextColorForBackground(colors.primary),
         children: [
           SpeedDialChild(
+            key: const Key('createUser_professor'),
             child: Icon(Icons.school,
               color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
@@ -236,6 +237,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
             onTap: _navigateToCreateProfessor,
           ),
           SpeedDialChild(
+            key: const Key('createUser_student'),
             child: Icon(Icons.person,
               color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,

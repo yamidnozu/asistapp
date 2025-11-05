@@ -33,6 +33,8 @@ flutter:
   # Configuración de assets
   assets:
     - assets/audio/
+    - .env
+    - .env.test
 
   # Configuración de iconos de la app
   # Para generar iconos: flutter pub run flutter_launcher_icons:main

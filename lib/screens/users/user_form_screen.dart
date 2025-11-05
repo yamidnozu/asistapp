@@ -589,6 +589,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   ],
                   Expanded(
                     child: ElevatedButton(
+                      key: const Key('formSaveButton'),
                       onPressed: _isLoading ? null : details.onStepContinue,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: spacing.md),
