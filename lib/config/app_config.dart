@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -9,12 +10,24 @@ class AppConfig {
     try {
       await dotenv.load(fileName: ".env");
       final envUrl = dotenv.env['API_BASE_URL'];
-      _baseUrl = envUrl != null && envUrl.isNotEmpty ? envUrl : 'http://localhost:3000';
+      
+      if (envUrl != null && envUrl.isNotEmpty) {
+        _baseUrl = envUrl;
+      } else {
+        // Detectar plataforma y usar configuración apropiada
+        _baseUrl = _getDefaultUrl();
+      }
     } catch (e) {
-      // Si falla la carga de dotenv, usar valor por defecto
-      _baseUrl = 'http://localhost:3000';
+      // Si falla la carga de dotenv, usar valor por defecto según plataforma
+      _baseUrl = _getDefaultUrl();
       debugPrint('Error cargando configuración: $e. Usando valor por defecto.');
     }
+  }
+
+  /// Determina la URL por defecto según la plataforma
+  static String _getDefaultUrl() {
+      return 'http://192.168.20.22:3001';
+    
   }
 
   /// Devuelve la URL base de la API (síncrona)

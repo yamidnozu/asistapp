@@ -11,7 +11,7 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   // ============================================
   // REGISTRAR ASISTENCIA (QR Code)
   // ============================================
-  fastify.post('/asistencias/registrar', {
+  fastify.post('/registrar', {
     preHandler: [
       authenticate,
       authorize(['profesor', 'admin_institucion']),
@@ -160,6 +160,83 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
       },
     },
     handler: AsistenciaController.getEstadisticasAsistencia,
+  });
+
+  // ============================================
+  // REGISTRAR ASISTENCIA MANUAL (sin QR)
+  // ============================================
+  fastify.post('/registrar-manual', {
+    preHandler: [
+      authenticate,
+      authorize(['profesor', 'admin_institucion']),
+    ],
+    schema: {
+      description: 'Registra la asistencia de un estudiante manualmente (sin código QR)',
+      tags: ['Asistencias'],
+      summary: 'Registro manual de asistencia',
+      body: {
+        type: 'object',
+        required: ['horarioId', 'estudianteId'],
+        properties: {
+          horarioId: {
+            type: 'string',
+            description: 'ID del horario/clase',
+          },
+          estudianteId: {
+            type: 'string',
+            description: 'ID del estudiante',
+          },
+        },
+      },
+      response: {
+        201: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                fecha: { type: 'string', format: 'date-time' },
+                estado: { type: 'string' },
+                horarioId: { type: 'string' },
+                estudianteId: { type: 'string' },
+                profesorId: { type: 'string' },
+                institucionId: { type: 'string' },
+                estudiante: { type: 'object' },
+                horario: { type: 'object' },
+              },
+            },
+          },
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
+        },
+        403: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
+        },
+      },
+    },
+    handler: AsistenciaController.registrarAsistenciaManual,
   });
 }
 

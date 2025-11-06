@@ -8,7 +8,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
   fastify.register(async function (horarioRoutes) {
 
     horarioRoutes.addHook('preHandler', authenticate);
-    horarioRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    // REMOVED: horarioRoutes.addHook('preHandler', authorize(['admin_institucion']));
 
     /**
      * GET /horarios

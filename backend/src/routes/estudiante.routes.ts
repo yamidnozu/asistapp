@@ -171,6 +171,48 @@ export default async function estudianteRoutes(fastify: FastifyInstance) {
       }
     });
 
+    estudianteRoutes.get('/me', {
+      handler: EstudianteController.getMyInfo as any,
+      schema: {
+        description: 'Obtiene la información del estudiante autenticado incluyendo código QR',
+        tags: ['Estudiantes'],
+        summary: 'Información del estudiante',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              data: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  usuarioId: { type: 'string' },
+                  identificacion: { type: 'string' },
+                  codigoQr: { type: 'string' },
+                  nombreResponsable: { type: 'string', nullable: true },
+                  telefonoResponsable: { type: 'string', nullable: true },
+                  usuario: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      nombres: { type: 'string' },
+                      apellidos: { type: 'string' },
+                      email: { type: 'string' },
+                      rol: { type: 'string' }
+                    }
+                  },
+                  createdAt: { type: 'string' },
+                  updatedAt: { type: 'string' }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
   });
 
   console.log('✅ Rutas del estudiante registradas exitosamente');

@@ -308,4 +308,68 @@ export class EstudianteController {
       throw error;
     }
   }
+
+  /**
+   * Obtiene la información del estudiante autenticado incluyendo código QR
+   * GET /estudiantes/me
+   */
+  public static async getMyInfo(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const userId = request.user!.id;
+
+      const estudiante = await prisma.estudiante.findUnique({
+        where: { usuarioId: userId },
+        include: {
+          usuario: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true,
+              email: true,
+              rol: true,
+            },
+          },
+        },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundError('Perfil de estudiante');
+      }
+
+      const response = {
+        id: estudiante.id,
+        usuarioId: estudiante.usuarioId,
+        identificacion: estudiante.identificacion,
+        codigoQr: estudiante.codigoQr,
+        nombreResponsable: estudiante.nombreResponsable,
+        telefonoResponsable: estudiante.telefonoResponsable,
+        usuario: estudiante.usuario,
+        createdAt: estudiante.createdAt,
+        updatedAt: estudiante.updatedAt,
+      };
+
+      reply.code(200).send({
+        success: true,
+        message: 'Información del estudiante obtenida exitosamente',
+        data: response,
+      });
+    } catch (error: any) {
+      console.error('Error en getMyInfo:', error);
+
+      if (error.message?.includes('NotFoundError')) {
+        reply.code(404).send({
+          success: false,
+          message: error.message,
+          error: error.constructor.name,
+        });
+        return;
+      }
+
+      reply.code(500).send({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'InternalServerError',
+      });
+    }
+  }
 }

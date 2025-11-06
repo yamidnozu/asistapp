@@ -5,6 +5,7 @@ import '../providers/horario_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/components/index.dart';
 import '../models/clase_del_dia.dart';
+import '../screens/attendance_screen.dart';
 
 class TeacherDashboard extends StatefulWidget {
   const TeacherDashboard({super.key});
@@ -177,11 +178,15 @@ class _TeacherDashboardState extends State<TeacherDashboard> with TickerProvider
                     size: 18,
                   ),
                   SizedBox(width: spacing.sm),
-                  Text(
-                    _getCurrentDate(),
-                    style: textStyles.bodyMedium.copyWith(
-                      color: colors.white,
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      _getCurrentDate(),
+                      style: textStyles.bodyMedium.copyWith(
+                        color: colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -259,13 +264,16 @@ class _TeacherDashboardState extends State<TeacherDashboard> with TickerProvider
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Mis Clases de Hoy',
-                style: textStyles.headlineMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
+              Expanded(
+                child: Text(
+                  'Mis Clases de Hoy',
+                  style: textStyles.headlineMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               IconButton(
@@ -513,6 +521,7 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                           ],
                         ),
                       ),
+                      SizedBox(width: spacing.sm),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
                         decoration: BoxDecoration(
@@ -556,16 +565,27 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                           ),
                         ),
                         const Spacer(),
-                        Icon(
-                          Icons.location_on,
-                          color: colors.textMuted,
-                          size: 18,
-                        ),
-                        SizedBox(width: spacing.xs),
-                        Text(
-                          'Aula 101', // TODO: Agregar información real de aula
-                          style: textStyles.bodyMedium.copyWith(
-                            color: colors.textMuted,
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: colors.textMuted,
+                                size: 18,
+                              ),
+                              SizedBox(width: spacing.xs),
+                              Flexible(
+                                child: Text(
+                                  'Aula 101', // TODO: Agregar información real de aula
+                                  style: textStyles.bodyMedium.copyWith(
+                                    color: colors.textMuted,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -579,14 +599,19 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Implementar funcionalidad de tomar asistencia
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Tomando asistencia de ${widget.clase.materia.nombre}...'),
-                                backgroundColor: colors.success,
+                          onPressed: () async {
+                            // Navegar a la pantalla de asistencia
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AttendanceScreen(
+                                  clase: widget.clase,
+                                ),
                               ),
                             );
+
+                            // Después de regresar, podríamos refrescar datos si fuera necesario
+                            // Por ahora, la pantalla de asistencia maneja su propio estado
                           },
                           icon: const Icon(Icons.qr_code_scanner),
                           label: const Text('Tomar Asistencia'),
@@ -601,17 +626,21 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                         ),
                       ),
                       SizedBox(width: spacing.md),
-                      IconButton(
-                        onPressed: () {
-                          // TODO: Mostrar menú de opciones
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Opciones próximamente')),
-                          );
-                        },
-                        icon: Icon(Icons.more_vert, color: colors.textMuted),
-                        style: IconButton.styleFrom(
-                          backgroundColor: colors.surface,
-                          side: BorderSide(color: colors.borderLight),
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: IconButton(
+                          onPressed: () {
+                            // TODO: Mostrar menú de opciones
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Opciones próximamente')),
+                            );
+                          },
+                          icon: Icon(Icons.more_vert, color: colors.textMuted),
+                          style: IconButton.styleFrom(
+                            backgroundColor: colors.surface,
+                            side: BorderSide(color: colors.borderLight),
+                          ),
                         ),
                       ),
                     ],

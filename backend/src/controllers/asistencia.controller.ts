@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { AuthenticatedRequest } from '../middleware/auth';
 import AsistenciaService, { RegistrarAsistenciaRequest } from '../services/asistencia.service';
 
 export interface RegistrarAsistenciaBody {
@@ -46,23 +47,40 @@ export class AsistenciaController {
     } catch (error: any) {
       console.error('Error en registrarAsistencia:', error);
 
-      if (error.message?.includes('NotFoundError') ||
-          error.message?.includes('ValidationError') ||
-          error.message?.includes('AuthorizationError')) {
-        const statusCode = error.message.includes('NotFoundError') ? 404 :
-                          error.message.includes('ValidationError') ? 400 : 403;
-
-        reply.code(statusCode).send({
+      // Manejar errores conocidos por nombre de clase
+      const errorName = error.constructor?.name || '';
+      
+      if (errorName === 'NotFoundError') {
+        reply.code(404).send({
           success: false,
-          message: error.message,
-          error: error.constructor.name,
+          message: error.message || 'Recurso no encontrado',
+          error: 'NotFoundError',
+        });
+        return;
+      }
+      
+      if (errorName === 'ValidationError') {
+        reply.code(400).send({
+          success: false,
+          message: error.message || 'Datos inválidos',
+          error: 'ValidationError',
+        });
+        return;
+      }
+      
+      if (errorName === 'AuthorizationError') {
+        reply.code(403).send({
+          success: false,
+          message: error.message || 'No autorizado',
+          error: 'AuthorizationError',
         });
         return;
       }
 
+      // Error genérico
       reply.code(500).send({
         success: false,
-        message: 'Error interno del servidor',
+        message: error.message || 'Error interno del servidor',
         error: 'InternalServerError',
       });
     }
@@ -73,13 +91,14 @@ export class AsistenciaController {
    * GET /horarios/:horarioId/asistencias
    */
   public static async getAsistenciasPorHorario(
-    request: FastifyRequest<{ Params: GetAsistenciasParams }>,
+    request: AuthenticatedRequest & FastifyRequest<{ Params: GetAsistenciasParams }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
       const { horarioId } = request.params;
+      const profesorId = request.user!.id;
 
-      const resultado = await AsistenciaService.getAsistenciasPorHorario(horarioId);
+      const resultado = await AsistenciaService.getAsistenciasPorHorario(horarioId, profesorId);
 
       reply.code(200).send({
         success: true,
@@ -94,6 +113,15 @@ export class AsistenciaController {
           success: false,
           message: error.message,
           error: error.constructor.name,
+        });
+        return;
+      }
+
+      if (error.message?.includes('ForbiddenError') || error.message?.includes('no tiene permisos')) {
+        reply.code(403).send({
+          success: false,
+          message: error.message,
+          error: 'ForbiddenError',
         });
         return;
       }
@@ -130,6 +158,71 @@ export class AsistenciaController {
       reply.code(500).send({
         success: false,
         message: 'Error interno del servidor',
+        error: 'InternalServerError',
+      });
+    }
+  }
+
+  /**
+   * Registra la asistencia de un estudiante manualmente (sin QR)
+   * POST /asistencias/registrar-manual
+   */
+  public static async registrarAsistenciaManual(
+    request: FastifyRequest<{ Body: { horarioId: string; estudianteId: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const { horarioId, estudianteId } = request.body;
+      const profesorId = (request as any).user.id;
+
+      const resultado = await AsistenciaService.registrarAsistenciaManual(
+        horarioId,
+        estudianteId,
+        profesorId
+      );
+
+      reply.code(201).send({
+        success: true,
+        message: 'Asistencia registrada manualmente',
+        data: resultado,
+      });
+    } catch (error: any) {
+      console.error('Error en registrarAsistenciaManual:', error);
+
+      // Manejar errores conocidos por nombre de clase
+      const errorName = error.constructor?.name || '';
+      
+      if (errorName === 'NotFoundError') {
+        reply.code(404).send({
+          success: false,
+          message: error.message || 'Recurso no encontrado',
+          error: 'NotFoundError',
+        });
+        return;
+      }
+      
+      if (errorName === 'ValidationError') {
+        reply.code(400).send({
+          success: false,
+          message: error.message || 'Datos inválidos',
+          error: 'ValidationError',
+        });
+        return;
+      }
+      
+      if (errorName === 'AuthorizationError') {
+        reply.code(403).send({
+          success: false,
+          message: error.message || 'No autorizado',
+          error: 'AuthorizationError',
+        });
+        return;
+      }
+
+      // Error genérico
+      reply.code(500).send({
+        success: false,
+        message: error.message || 'Error interno del servidor',
         error: 'InternalServerError',
       });
     }

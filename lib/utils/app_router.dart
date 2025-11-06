@@ -22,6 +22,7 @@ import '../screens/academic/horarios_screen.dart';
 import '../models/institution.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
+import '../screens/my_qr_code_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -207,14 +208,14 @@ class AppRouter {
                   child: const HorariosScreen(),
                 ),
               ),
-              // TODO: Agregar ruta para horarios cuando se implemente
-              // GoRoute(
-              //   path: '/academic/horarios',
-              //   name: 'academic-horarios',
-              //   pageBuilder: (context, state) => NoTransitionPage(
-              //     child: const HorariosScreen(),
-              //   ),
-              // ),
+              // Ruta para el código QR del estudiante
+              GoRoute(
+                path: '/student/qr',
+                name: 'student-qr',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const MyQRCodeScreen(),
+                ),
+              ),
             ],
           ),
 

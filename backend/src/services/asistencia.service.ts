@@ -138,6 +138,7 @@ export class AsistenciaService {
           institucionId: horario.institucionId,
           estado: 'PRESENTE',
           fecha: hoy,
+          tipoRegistro: 'QR',
         },
         include: {
           estudiante: {
@@ -218,9 +219,9 @@ export class AsistenciaService {
    * Obtiene la lista de asistencias para un horario específico en la fecha actual
    * Incluye todos los estudiantes del grupo con su estado de asistencia
    */
-  public static async getAsistenciasPorHorario(horarioId: string): Promise<AsistenciaGrupoResponse[]> {
+  public static async getAsistenciasPorHorario(horarioId: string, profesorId: string): Promise<AsistenciaGrupoResponse[]> {
     try {
-      // 1. Obtener el horario con su grupo
+      // 1. Obtener el horario con su grupo y profesor
       const horario = await prisma.horario.findUnique({
         where: { id: horarioId },
         include: {
@@ -237,6 +238,7 @@ export class AsistenciaService {
               },
             },
           },
+          profesor: true,
         },
       });
 
@@ -244,7 +246,12 @@ export class AsistenciaService {
         throw new NotFoundError('Horario/Clase');
       }
 
-      // 2. Obtener todos los estudiantes del grupo
+      // 2. Verificar que el profesor que hace la petición sea el profesor asignado al horario
+      if (horario.profesorId !== profesorId) {
+        throw new AuthorizationError('No tienes permisos para acceder a las asistencias de esta clase');
+      }
+
+      // 3. Obtener todos los estudiantes del grupo
       const estudiantesDelGrupo = horario.grupo.estudiantesGrupos.map((eg: any) => eg.estudiante);
 
       // 3. Obtener todos los registros de asistencia para ese horarioId en la fecha de hoy
@@ -336,6 +343,163 @@ export class AsistenciaService {
     });
 
     return horario?.grupo.estudiantesGrupos.length || 0;
+  }
+
+  /**
+   * Registra la asistencia de un estudiante manualmente (sin QR)
+   * Usado por profesores para marcar presente a un estudiante ausente
+   */
+  public static async registrarAsistenciaManual(
+    horarioId: string,
+    estudianteId: string,
+    profesorId: string
+  ): Promise<AsistenciaResponse> {
+    try {
+      // 1. Verificar que la clase (horarioId) exista y esté activa
+      const horario = await prisma.horario.findUnique({
+        where: { id: horarioId },
+        include: {
+          grupo: true,
+          periodoAcademico: true,
+          profesor: true,
+          institucion: true,
+          materia: true,
+        },
+      });
+
+      if (!horario) {
+        throw new NotFoundError('Horario/Clase');
+      }
+
+      if (!horario.periodoAcademico.activo) {
+        throw new ValidationError('No se puede registrar asistencia en un periodo académico inactivo');
+      }
+
+      // 2. Verificar que el estudiante existe
+      const estudiante = await prisma.estudiante.findUnique({
+        where: { id: estudianteId },
+        include: {
+          usuario: true,
+          estudiantesGrupos: {
+            include: {
+              grupo: true,
+            },
+          },
+        },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundError('Estudiante');
+      }
+
+      // 3. Verificar que el estudiante pertenece al grupo asociado a esa clase
+      const perteneceAlGrupo = estudiante.estudiantesGrupos.some(
+        (eg: any) => eg.grupoId === horario.grupoId && eg.grupo.periodoId === horario.periodoId
+      );
+
+      if (!perteneceAlGrupo) {
+        throw new AuthorizationError('El estudiante no pertenece al grupo de esta clase');
+      }
+
+      // 4. Verificar si ya existe un registro de asistencia para hoy
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const asistenciaExistente = await prisma.asistencia.findFirst({
+        where: {
+          horarioId,
+          estudianteId: estudiante.id,
+          fecha: hoy,
+        },
+      });
+
+      if (asistenciaExistente) {
+        throw new ValidationError('El estudiante ya tiene registrada su asistencia para esta clase hoy');
+      }
+
+      // 5. Crear nueva entrada de asistencia
+      const nuevaAsistencia = await prisma.asistencia.create({
+        data: {
+          horarioId,
+          estudianteId: estudiante.id,
+          profesorId,
+          fecha: hoy,
+          estado: 'PRESENTE',
+          tipoRegistro: 'MANUAL',
+          institucionId: horario.institucionId,
+        },
+      });
+
+      // 6. Cargar datos completos para la respuesta
+      const asistenciaCompleta = await prisma.asistencia.findUnique({
+        where: { id: nuevaAsistencia.id },
+        include: {
+          estudiante: {
+            include: {
+              usuario: {
+                select: {
+                  nombres: true,
+                  apellidos: true,
+                },
+              },
+            },
+          },
+          horario: {
+            include: {
+              grupo: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  grado: true,
+                  seccion: true,
+                },
+              },
+              materia: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!asistenciaCompleta) {
+        throw new Error('Error al recuperar la asistencia creada');
+      }
+
+      // 7. Formatear respuesta
+      const response: AsistenciaResponse = {
+        id: asistenciaCompleta.id,
+        fecha: asistenciaCompleta.fecha,
+        estado: asistenciaCompleta.estado,
+        horarioId: asistenciaCompleta.horarioId,
+        estudianteId: asistenciaCompleta.estudianteId,
+        profesorId: asistenciaCompleta.profesorId!,
+        institucionId: asistenciaCompleta.institucionId,
+        estudiante: {
+          id: asistenciaCompleta.estudiante.id,
+          nombres: asistenciaCompleta.estudiante.usuario.nombres,
+          apellidos: asistenciaCompleta.estudiante.usuario.apellidos,
+          identificacion: asistenciaCompleta.estudiante.identificacion,
+        },
+        horario: {
+          id: asistenciaCompleta.horario.id,
+          diaSemana: asistenciaCompleta.horario.diaSemana,
+          horaInicio: asistenciaCompleta.horario.horaInicio,
+          horaFin: asistenciaCompleta.horario.horaFin,
+          grupo: asistenciaCompleta.horario.grupo,
+          materia: asistenciaCompleta.horario.materia,
+        },
+      };
+
+      return response;
+    } catch (error) {
+      console.error('❌ Error en registrarAsistenciaManual:', error);
+      throw error;
+    }
   }
 }
 

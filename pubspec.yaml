@@ -19,6 +19,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   uuid: ^4.4.0
   mobile_scanner: ^5.1.1
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
