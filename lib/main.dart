@@ -7,6 +7,8 @@ import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/horario_provider.dart';
 import 'providers/asistencia_provider.dart';
+import 'providers/grupo_provider.dart';
+import 'providers/materia_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
@@ -42,6 +44,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final InstitutionProvider _institutionProvider;
   late final HorarioProvider _horarioProvider;
   late final AsistenciaProvider _asistenciaProvider;
+  late final GrupoProvider _grupoProvider;
+  late final MateriaProvider _materiaProvider;
   late AppRouter _appRouter;
 
   @override
@@ -53,6 +57,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _institutionProvider = InstitutionProvider();
     _horarioProvider = HorarioProvider();
     _asistenciaProvider = AsistenciaProvider();
+    _grupoProvider = GrupoProvider();
+    _materiaProvider = MateriaProvider();
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -72,6 +78,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider.value(value: _institutionProvider),
         ChangeNotifierProvider.value(value: _horarioProvider),
         ChangeNotifierProvider.value(value: _asistenciaProvider),
+        ChangeNotifierProvider.value(value: _grupoProvider),
+        ChangeNotifierProvider.value(value: _materiaProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],

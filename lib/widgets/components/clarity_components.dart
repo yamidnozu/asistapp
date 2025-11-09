@@ -171,26 +171,41 @@ class ClarityStatusBadge extends StatelessWidget {
     final textStyles = AppTextStyles.instance;
     final spacing = AppSpacing.instance;
 
+    // Nuevo estilo: fondo neutro, pequeño indicador de icono a la izquierda y texto en estilo sutil.
+    final indicatorColor = textColor ?? backgroundColor ?? colors.primary;
+    final bg = backgroundColor ?? colors.surfaceLight;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: spacing.sm,
-        vertical: spacing.xs,
+        vertical: spacing.xs - 2,
       ),
       decoration: BoxDecoration(
-        color: backgroundColor ?? colors.primary.withValues(alpha: 0.1),
+        color: bg,
         borderRadius: BorderRadius.circular(spacing.borderRadiusLarge),
         border: Border.all(
-          color: backgroundColor?.withValues(alpha: 0.2) ?? colors.primary.withValues(alpha: 0.2),
-          width: 1,
+          color: colors.borderLight,
+          width: 0.8,
         ),
       ),
-      child: Text(
-        text,
-        style: textStyles.statusText.copyWith(
-          color: textColor ?? colors.primary,
-          fontSize: fontSize,
-        ),
-        textAlign: TextAlign.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Indicador de icono pequeño
+          Icon(
+            text == 'Activo' ? Icons.check_circle : Icons.cancel,
+            size: 14,
+            color: indicatorColor,
+          ),
+          SizedBox(width: spacing.xs),
+          Text(
+            text,
+            style: textStyles.statusText.copyWith(
+              color: colors.textPrimary,
+              fontSize: fontSize,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -277,6 +292,7 @@ class ClarityEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
+  final Widget? subtitleWidget;
   final Widget? action;
 
   const ClarityEmptyState({
@@ -284,6 +300,7 @@ class ClarityEmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     this.subtitle,
+    this.subtitleWidget,
     this.action,
   });
 
@@ -505,7 +522,7 @@ class ClarityContextMenu extends StatelessWidget {
         color: iconColor ?? colors.primary,
         size: spacing.iconSize,
       ),
-      tooltip: tooltip,
+      tooltip: tooltip ?? 'Mostrar menú',
       onSelected: (index) {
         if (index < actions.length) {
           actions[index].onPressed?.call();
@@ -606,6 +623,7 @@ class ClarityListItem extends StatelessWidget {
   final Widget leading;
   final String title;
   final String? subtitle;
+  final Widget? subtitleWidget;
   final List<ClarityContextMenuAction>? contextActions;
   final VoidCallback? onTap;
   final Color? backgroundColor;
@@ -617,6 +635,7 @@ class ClarityListItem extends StatelessWidget {
     required this.leading,
     required this.title,
     this.subtitle,
+    this.subtitleWidget,
     this.contextActions,
     this.onTap,
     this.backgroundColor,
@@ -642,7 +661,17 @@ class ClarityListItem extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          if (subtitle != null) ...[
+          if (subtitleWidget != null) ...[
+            SizedBox(height: spacing.xs),
+            DefaultTextStyle(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.textMuted,
+                  ) ?? const TextStyle(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              child: subtitleWidget!,
+            ),
+          ] else if (subtitle != null) ...[
             SizedBox(height: spacing.xs),
             Text(
               subtitle!,

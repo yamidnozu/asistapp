@@ -87,6 +87,7 @@ class UserService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        debugPrint('GET /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
           return User.fromJson(responseData['data']);
         }
@@ -415,8 +416,15 @@ class UserService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        debugPrint('PUT /usuarios/$userId - request: ${jsonEncode(userData.toJson())}');
+        debugPrint('PUT /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
-          return User.fromJson(responseData['data']);
+          // Use the API response as the source of truth.
+          // The backend was updated to persist and return professor-specific
+          // fields (titulo, especialidad). Remove the previous client-side
+          // merge-workaround so UI reflects what the server returns.
+          final data = responseData['data'] as Map<String, dynamic>;
+          return User.fromJson(data);
         }
       } else {
         debugPrint('Error updating user: ${response.statusCode} - ${response.body}');

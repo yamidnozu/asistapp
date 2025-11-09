@@ -7,9 +7,13 @@ class User {
   final String apellidos;
   final String rol;
   final String? telefono;
+  final String? identificacion;
   final bool activo;
   final List<UserInstitution> instituciones;
   final StudentDetails? estudiante;
+  // Campos específicos para profesores
+  final String? titulo;
+  final String? especialidad;
 
   User({
     required this.id,
@@ -18,9 +22,12 @@ class User {
     required this.apellidos,
     required this.rol,
     this.telefono,
+    this.identificacion,
     required this.activo,
     required this.instituciones,
     this.estudiante,
+    this.titulo,
+    this.especialidad,
   });
 
   String get nombreCompleto => '$nombres $apellidos';
@@ -38,6 +45,7 @@ class User {
       apellidos: json['apellidos'] as String? ?? '',
       rol: json['rol'] as String? ?? 'profesor', // Default to profesor for institution-admin context
       telefono: json['telefono'] as String?,
+      identificacion: json['identificacion'] as String?,
       activo: json['activo'] as bool? ?? true,
       instituciones: (json['usuarioInstituciones'] as List<dynamic>?)
           ?.map((e) => UserInstitution.fromJson(e as Map<String, dynamic>))
@@ -45,6 +53,8 @@ class User {
       estudiante: json['estudiante'] != null
           ? StudentDetails.fromJson(json['estudiante'] as Map<String, dynamic>)
           : null,
+  titulo: json['titulo'] as String?,
+  especialidad: json['especialidad'] as String?,
     );
   }
 
@@ -56,9 +66,12 @@ class User {
       'apellidos': apellidos,
       'rol': rol,
       'telefono': telefono,
+      'identificacion': identificacion,
       'activo': activo,
       'usuarioInstituciones': instituciones.map((e) => e.toJson()).toList(),
       if (estudiante != null) 'estudiante': estudiante!.toJson(),
+      if (titulo != null) 'titulo': titulo,
+      if (especialidad != null) 'especialidad': especialidad,
     };
   }
 
@@ -69,9 +82,12 @@ class User {
     String? apellidos,
     String? rol,
     String? telefono,
+    String? identificacion,
     bool? activo,
     List<UserInstitution>? instituciones,
     StudentDetails? estudiante,
+    String? titulo,
+    String? especialidad,
   }) {
     return User(
       id: id ?? this.id,
@@ -80,9 +96,12 @@ class User {
       apellidos: apellidos ?? this.apellidos,
       rol: rol ?? this.rol,
       telefono: telefono ?? this.telefono,
+      identificacion: identificacion ?? this.identificacion,
       activo: activo ?? this.activo,
       instituciones: instituciones ?? this.instituciones,
       estudiante: estudiante ?? this.estudiante,
+      titulo: titulo ?? this.titulo,
+      especialidad: especialidad ?? this.especialidad,
     );
   }
 }
@@ -230,6 +249,9 @@ class UpdateUserRequest {
   final String? identificacion;
   final String? nombreResponsable;
   final String? telefonoResponsable;
+  // Para profesores
+  final String? titulo;
+  final String? especialidad;
 
   UpdateUserRequest({
     this.email,
@@ -240,6 +262,8 @@ class UpdateUserRequest {
     this.identificacion,
     this.nombreResponsable,
     this.telefonoResponsable,
+    this.titulo,
+    this.especialidad,
   });
 
   Map<String, dynamic> toJson() {
@@ -253,6 +277,8 @@ class UpdateUserRequest {
     if (identificacion != null) data['identificacion'] = identificacion;
     if (nombreResponsable != null) data['nombreResponsable'] = nombreResponsable;
     if (telefonoResponsable != null) data['telefonoResponsable'] = telefonoResponsable;
+  if (titulo != null) data['titulo'] = titulo;
+  if (especialidad != null) data['especialidad'] = especialidad;
 
     return data;
   }

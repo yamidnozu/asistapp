@@ -108,82 +108,90 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _limpiarSeleccion, // Limpiar selección al tocar fuera
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Tomar Asistencia'),
-          backgroundColor: colors.primary,
-          foregroundColor: colors.white,
-        ),
-        body: Consumer<AsistenciaProvider>(
-          builder: (context, asistenciaProvider, child) {
-          if (asistenciaProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Tomar Asistencia'),
+              backgroundColor: colors.primary,
+              foregroundColor: colors.white,
+            ),
+            body: Consumer<AsistenciaProvider>(
+              builder: (context, asistenciaProvider, child) {
+                if (asistenciaProvider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-          if (asistenciaProvider.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: colors.error,
-                  ),
-                  SizedBox(height: spacing.md),
-                  Text(
-                    'Error al cargar asistencias',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  SizedBox(height: spacing.sm),
-                  Text(
-                    asistenciaProvider.errorMessage ?? 'Error desconocido',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colors.textMuted,
+                if (asistenciaProvider.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: colors.error,
+                        ),
+                        SizedBox(height: spacing.md),
+                        Text(
+                          'Error al cargar asistencias',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: spacing.sm),
+                        Text(
+                          asistenciaProvider.errorMessage ?? 'Error desconocido',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: colors.textMuted,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: spacing.lg),
+                        ElevatedButton.icon(
+                          onPressed: _loadAsistencias,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Reintentar'),
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: spacing.lg),
-                  ElevatedButton.icon(
-                    onPressed: _loadAsistencias,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Reintentar'),
-                  ),
-                ],
-              ),
-            );
-          }
+                  );
+                }
 
-          return Column(
-            children: [
-              // Información de la clase
-              _buildClassInfo(),
+                return Column(
+                  children: [
+                    // Información de la clase
+                    _buildClassInfo(constraints),
 
-              // Estadísticas de asistencia
-              _buildAttendanceStats(asistenciaProvider),
+                    // Estadísticas de asistencia
+                    _buildAttendanceStats(asistenciaProvider, constraints),
 
-              // Lista de estudiantes
-              Expanded(
-                child: _buildStudentsList(asistenciaProvider.asistencias),
-              ),
-            ],
+                    // Lista de estudiantes
+                    Expanded(
+                      child: _buildStudentsList(asistenciaProvider.asistencias),
+                    ),
+                  ],
+                );
+              },
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: _onScanQR,
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Escanear QR'),
+              backgroundColor: colors.primary,
+              foregroundColor: colors.white,
+            ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _onScanQR,
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Escanear QR'),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
-      ),
       ),
     );
   }
 
-  Widget _buildClassInfo() {
+  Widget _buildClassInfo(BoxConstraints constraints) {
     return Container(
       padding: EdgeInsets.all(spacing.lg),
       decoration: BoxDecoration(
@@ -202,6 +210,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               fontWeight: FontWeight.bold,
               color: colors.textPrimary,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: spacing.xs),
           Text(
@@ -209,6 +219,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colors.textSecondary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: spacing.sm),
           // Horario
@@ -220,10 +232,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 color: colors.textMuted,
               ),
               SizedBox(width: spacing.sm),
-              Text(
-                widget.clase.horarioFormato,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colors.textMuted,
+              Expanded(
+                child: Text(
+                  widget.clase.horarioFormato,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colors.textMuted,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -233,9 +249,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildAttendanceStats(AsistenciaProvider provider) {
+  Widget _buildAttendanceStats(AsistenciaProvider provider, BoxConstraints constraints) {
     final stats = provider.getEstadisticas();
     final porcentaje = (provider.getPorcentajeAsistencia() * 100).round();
+
+    // Si el ancho es pequeño, usar layout vertical
+    final isSmallScreen = constraints.maxWidth < 400;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
@@ -245,36 +264,71 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           bottom: BorderSide(color: colors.borderLight, width: 1),
         ),
       ),
-      child: Row(
-        children: [
-          // Estadísticas principales
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: isSmallScreen
+          ? Column(
               children: [
-                _buildStatItem('Presentes', stats['presentes']!, colors.success),
-                _buildStatItem('Ausentes', stats['ausentes']!, colors.error),
-                _buildStatItem('Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                // Estadísticas en columna
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatItem('Presentes', stats['presentes']!, colors.success),
+                    _buildStatItem('Ausentes', stats['ausentes']!, colors.error),
+                  ],
+                ),
+                SizedBox(height: spacing.sm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatItem('Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                    // Porcentaje
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                      ),
+                      child: Text(
+                        '$porcentaje%',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                // Estadísticas principales
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatItem('Presentes', stats['presentes']!, colors.success),
+                      _buildStatItem('Ausentes', stats['ausentes']!, colors.error),
+                      _buildStatItem('Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                    ],
+                  ),
+                ),
+                // Porcentaje
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(spacing.borderRadius),
+                  ),
+                  child: Text(
+                    '$porcentaje%',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          // Porcentaje
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(spacing.borderRadius),
-            ),
-            child: Text(
-              '$porcentaje%',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -315,6 +369,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: colors.textMuted,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -356,6 +413,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             subtitle: Row(
               children: [
@@ -364,14 +423,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colors.textMuted,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (estaSeleccionado) ...[
                   SizedBox(width: spacing.sm),
-                  Text(
-                    'Toca de nuevo para confirmar',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.warning,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Toca de nuevo para confirmar',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.warning,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

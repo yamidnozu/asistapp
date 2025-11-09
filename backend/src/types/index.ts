@@ -68,6 +68,9 @@ export interface UserResponse {
   apellidos: string;
   rol: UserRole;
   telefono?: string | null;
+  // Campos para profesores (opcionales)
+  titulo?: string | null;
+  especialidad?: string | null;
   activo: boolean;
   instituciones: {
     id: string;
@@ -207,10 +210,13 @@ export interface CreateUserRequest {
   apellidos: string;
   rol: UserRole;
   telefono?: string;
+  identificacion?: string; // Documento de identidad (todos los usuarios)
   institucionId?: string; // Para asignar institución inicial
   rolEnInstitucion?: string; // Rol específico en la institución
+  // Campos específicos para profesores
+  titulo?: string;
+  especialidad?: string;
   // Campos específicos para estudiantes
-  identificacion?: string; // Solo para estudiantes
   nombreResponsable?: string; // Solo para estudiantes
   telefonoResponsable?: string; // Solo para estudiantes
 }
@@ -225,6 +231,9 @@ export interface UpdateUserRequest {
   identificacion?: string;
   nombreResponsable?: string;
   telefonoResponsable?: string;
+  // Para profesores
+  titulo?: string;
+  especialidad?: string;
 }
 
 export interface CreateUserResponse extends UserResponse {

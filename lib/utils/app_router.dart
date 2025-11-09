@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
-import '../screens/institution_selection_screen.dart';
-import '../screens/home_screen.dart';
 import '../screens/super_admin_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/teacher_dashboard.dart';
@@ -23,6 +21,7 @@ import '../models/institution.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
 import '../screens/my_qr_code_screen.dart';
+import '../screens/test_runner_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -107,51 +106,27 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: '/institution-selection',
-        name: 'institution-selection',
+        path: '/test-runner',
+        name: 'test-runner',
         pageBuilder: (context, state) => _fadePage(
           context,
           state,
-          const InstitutionSelectionScreen(),
+          const TestRunnerScreen(),
         ),
       ),
 
       // --- RUTAS DE FORMULARIOS (NIVEL SUPERIOR) ---
       GoRoute(
-        path: '/users/professor/create',
-        name: 'create-professor',
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          name: 'Crear Profesor',
-          child: UserFormScreen(userRole: 'profesor'),
-        ),
-      ),
-      GoRoute(
-        path: '/users/student/create',
-        name: 'create-student',
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          name: 'Crear Estudiante',
-          child: UserFormScreen(userRole: 'estudiante'),
-        ),
-      ),
-      GoRoute(
-        path: '/users/admin_institucion/create',
-        name: 'create-admin-institucion',
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          name: 'Crear Admin Institución',
-          child: UserFormScreen(userRole: 'admin_institucion'),
-        ),
-      ),
-      GoRoute(
-        path: '/users/super_admin/create',
-        name: 'create-super-admin',
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          name: 'Crear Super Admin',
-          child: UserFormScreen(userRole: 'super_admin'),
-        ),
+        path: '/users/create',
+        name: 'create-user',
+        pageBuilder: (context, state) {
+          final userRole = state.extra as String?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            name: 'Crear Usuario',
+            child: UserFormScreen(userRole: userRole ?? 'estudiante'),
+          );
+        },
       ),
       GoRoute(
         path: '/users/detail/:id',
@@ -305,7 +280,8 @@ class AppRouter {
       case 'estudiante':
         return const StudentDashboard();
       default:
-        return const HomeScreen();
+        // Rol desconocido, redirigir a login
+        return const LoginScreen();
     }
   }
 

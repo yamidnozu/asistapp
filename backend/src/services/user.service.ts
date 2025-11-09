@@ -221,6 +221,10 @@ export class UserService {
             apellidos: userData.apellidos,
             rol: userData.rol,
             telefono: userData.telefono,
+            identificacion: userData.identificacion,
+            // Campos profesor (opcional)
+            titulo: userData.titulo,
+            especialidad: userData.especialidad,
           },
         });
 
@@ -273,6 +277,8 @@ export class UserService {
         apellidos: userWithRelations.apellidos,
         rol: userWithRelations.rol as UserRole,
         telefono: userWithRelations.telefono,
+        titulo: (userWithRelations as any).titulo ?? null,
+        especialidad: (userWithRelations as any).especialidad ?? null,
         activo: userWithRelations.activo,
         instituciones: userWithRelations.usuarioInstituciones?.map(ui => ({
           id: ui.institucion.id,
@@ -332,12 +338,19 @@ export class UserService {
           apellidos?: string;
           telefono?: string | null;
           activo?: boolean;
+          identificacion?: string | null;
+          titulo?: string | null;
+          especialidad?: string | null;
         } = {};
         if (userData.email !== undefined) updateData.email = userData.email.toLowerCase();
         if (userData.nombres !== undefined) updateData.nombres = userData.nombres;
         if (userData.apellidos !== undefined) updateData.apellidos = userData.apellidos;
         if (userData.telefono !== undefined) updateData.telefono = userData.telefono;
         if (userData.activo !== undefined) updateData.activo = userData.activo;
+  if (userData.identificacion !== undefined) updateData.identificacion = userData.identificacion;
+  // Actualizar campos de profesor si se proporcionan
+  if ((userData as any).titulo !== undefined) updateData.titulo = (userData as any).titulo;
+  if ((userData as any).especialidad !== undefined) updateData.especialidad = (userData as any).especialidad;
 
         const updatedUser = await tx.usuario.update({
           where: { id },

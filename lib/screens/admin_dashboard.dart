@@ -50,89 +50,98 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // Obtener estadísticas desde el provider
     final stats = userProvider.getUserStatistics();
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      // AppBar centralizado en AppShell; este Scaffold mantiene solo el body
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(spacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Saludo Sutil
-            Text('¡Hola, $userName!', style: textStyles.displayMedium),
-            SizedBox(height: spacing.sm),
-            Text(
-              'Bienvenido al panel de administración.',
-              style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          backgroundColor: colors.background,
+          // AppBar centralizado en AppShell; este Scaffold mantiene solo el body
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(spacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Saludo Sutil
+                Text('¡Hola, $userName!', style: textStyles.displayMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                SizedBox(height: spacing.sm),
+                Text(
+                  'Bienvenido al panel de administración.',
+                  style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: spacing.xl),
+
+                // 2. Barra de Estadísticas Adaptable (usa stats map)
+                _buildCompactStatsBar(context, stats, userProvider, constraints),
+
+                SizedBox(height: spacing.xl),
+
+                // 3. Acciones Principales - Menú Elegante Vertical
+                Text('Acciones Principales', style: textStyles.headlineSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                SizedBox(height: spacing.md),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(spacing.borderRadius),
+                    border: Border.all(color: colors.borderLight),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildMenuActionItem(
+                        context,
+                        icon: Icons.people_outline_rounded,
+                        label: 'Usuarios',
+                        value: stats['total']?.toString() ?? '0',
+                        color: colors.primary,
+                        onTap: () => context.go('/users'),
+                        isFirst: true,
+                      ),
+                      Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                      _buildMenuActionItem(
+                        context,
+                        icon: Icons.school_outlined,
+                        label: 'Gestión Académica',
+                        value: 'Grupos & Materias',
+                        color: const Color(0xFF10B981),
+                        onTap: () => context.go('/academic'),
+                      ),
+                      Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                      _buildMenuActionItem(
+                        context,
+                        icon: Icons.calendar_today_outlined,
+                        label: 'Horarios',
+                        value: 'Gestión',
+                        color: const Color(0xFF06B6D4),
+                        onTap: () {},
+                      ),
+                      Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                      _buildMenuActionItem(
+                        context,
+                        icon: Icons.settings_outlined,
+                        label: 'Ajustes',
+                        value: 'Config',
+                        color: const Color(0xFF8B5CF6),
+                        onTap: () {},
+                        isLast: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: spacing.xl),
-
-            // 2. Barra de Estadísticas Adaptable (usa stats map)
-            _buildCompactStatsBar(context, stats, userProvider),
-
-            SizedBox(height: spacing.xl),
-
-            // 3. Acciones Principales - Menú Elegante Vertical
-            Text('Acciones Principales', style: textStyles.headlineSmall),
-            SizedBox(height: spacing.md),
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.borderLight),
-              ),
-              child: Column(
-                children: [
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.people_outline_rounded,
-                    label: 'Usuarios',
-                    value: stats['total']?.toString() ?? '0',
-                    color: colors.primary,
-                    onTap: () => context.go('/users'),
-                    isFirst: true,
-                  ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.school_outlined,
-                    label: 'Gestión Académica',
-                    value: 'Grupos & Materias',
-                    color: const Color(0xFF10B981),
-                    onTap: () => context.go('/academic'),
-                  ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Horarios',
-                    value: 'Gestión',
-                    color: const Color(0xFF06B6D4),
-                    onTap: () {},
-                  ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.settings_outlined,
-                    label: 'Ajustes',
-                    value: 'Config',
-                    color: const Color(0xFF8B5CF6),
-                    onTap: () {},
-                    isLast: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   // Widget para la nueva barra de estadísticas
-  Widget _buildCompactStatsBar(BuildContext context, Map<String, int> stats, UserProvider userProvider) {
+  Widget _buildCompactStatsBar(BuildContext context, Map<String, int> stats, UserProvider userProvider, BoxConstraints constraints) {
     final colors = context.colors;
     final spacing = context.spacing;
+
+    // Si el ancho es pequeño, usar layout vertical
+    final isSmallScreen = constraints.maxWidth < 400;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
@@ -141,37 +150,62 @@ class _AdminDashboardState extends State<AdminDashboard> {
         borderRadius: BorderRadius.circular(spacing.borderRadius),
         border: Border.all(color: colors.borderLight),
       ),
-      child: SingleChildScrollView( // Permite scroll horizontal si no cabe
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // 'Usuarios' debe reflejar el total informado por la paginación del backend.
-            ClarityCompactStat(
-              value: stats['total']?.toString() ?? '0',
-              title: 'Usuarios',
-              icon: Icons.people,
-              color: colors.primary,
+      child: isSmallScreen
+          ? Column(
+              children: [
+                ClarityCompactStat(
+                  value: stats['total']?.toString() ?? '0',
+                  title: 'Usuarios',
+                  icon: Icons.people,
+                  color: colors.primary,
+                ),
+                SizedBox(height: spacing.md),
+                ClarityCompactStat(
+                  value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
+                  title: 'Profesores',
+                  icon: Icons.school,
+                  color: colors.info,
+                ),
+                SizedBox(height: spacing.md),
+                ClarityCompactStat(
+                  value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
+                  title: 'Estudiantes',
+                  icon: Icons.person,
+                  color: colors.warning,
+                ),
+              ],
+            )
+          : SingleChildScrollView( // Permite scroll horizontal si no cabe
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 'Usuarios' debe reflejar el total informado por la paginación del backend.
+                  ClarityCompactStat(
+                    value: stats['total']?.toString() ?? '0',
+                    title: 'Usuarios',
+                    icon: Icons.people,
+                    color: colors.primary,
+                  ),
+                  SizedBox(width: spacing.lg),
+                  // 'Profesores' y 'Estudiantes' actualmente reflejan solo la página cargada.
+                  // Para una solución completa se requiere agregar endpoints que devuelvan los totales por rol en el backend.
+                  ClarityCompactStat(
+                    value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
+                    title: 'Profesores',
+                    icon: Icons.school,
+                    color: colors.info,
+                  ),
+                  SizedBox(width: spacing.lg),
+                  ClarityCompactStat(
+                    value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
+                    title: 'Estudiantes',
+                    icon: Icons.person,
+                    color: colors.warning,
+                  ),
+                ],
+              ),
             ),
-            SizedBox(width: spacing.lg),
-            // 'Profesores' y 'Estudiantes' actualmente reflejan solo la página cargada.
-            // Para una solución completa se requiere agregar endpoints que devuelvan los totales por rol en el backend.
-            ClarityCompactStat(
-              value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
-              title: 'Profesores',
-              icon: Icons.school,
-              color: colors.info,
-            ),
-            SizedBox(width: spacing.lg),
-            ClarityCompactStat(
-              value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
-              title: 'Estudiantes',
-              icon: Icons.person,
-              color: colors.warning,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

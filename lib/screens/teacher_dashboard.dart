@@ -148,6 +148,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> with TickerProvider
                           color: colors.white,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: spacing.xs),
                       Text(
@@ -155,6 +157,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> with TickerProvider
                         style: textStyles.bodyLarge.copyWith(
                           color: colors.white.withValues(alpha: 0.9),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -215,38 +219,75 @@ class _TeacherDashboardState extends State<TeacherDashboard> with TickerProvider
             ),
           ),
           SizedBox(height: spacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: ClarityKPICard(
-                  value: horarioProvider.clasesDelDiaCount.toString(),
-                  label: 'Clases Hoy',
-                  icon: Icons.class_,
-                  iconColor: colors.primary,
-                  backgroundColor: colors.primary.withValues(alpha: 0.05),
-                ),
-              ),
-              SizedBox(width: spacing.md),
-              Expanded(
-                child: ClarityKPICard(
-                  value: _calculateTotalStudents(horarioProvider).toString(),
-                  label: 'Estudiantes',
-                  icon: Icons.people,
-                  iconColor: colors.info,
-                  backgroundColor: colors.info.withValues(alpha: 0.05),
-                ),
-              ),
-              SizedBox(width: spacing.md),
-              Expanded(
-                child: ClarityKPICard(
-                  value: '95%', // TODO: Calcular asistencia real
-                  label: 'Asistencia Promedio',
-                  icon: Icons.check_circle,
-                  iconColor: colors.success,
-                  backgroundColor: colors.success.withValues(alpha: 0.05),
-                ),
-              ),
-            ],
+          // Usar LayoutBuilder para detectar el ancho disponible
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Si el ancho es pequeño, usar columna en lugar de fila
+              if (constraints.maxWidth < 400) {
+                return Column(
+                  children: [
+                    ClarityKPICard(
+                      value: horarioProvider.clasesDelDiaCount.toString(),
+                      label: 'Clases Hoy',
+                      icon: Icons.class_,
+                      iconColor: colors.primary,
+                      backgroundColor: colors.primary.withValues(alpha: 0.05),
+                    ),
+                    SizedBox(height: spacing.md),
+                    ClarityKPICard(
+                      value: _calculateTotalStudents(horarioProvider).toString(),
+                      label: 'Estudiantes',
+                      icon: Icons.people,
+                      iconColor: colors.info,
+                      backgroundColor: colors.info.withValues(alpha: 0.05),
+                    ),
+                    SizedBox(height: spacing.md),
+                    ClarityKPICard(
+                      value: '95%', // TODO: Calcular asistencia real
+                      label: 'Asistencia Promedio',
+                      icon: Icons.check_circle,
+                      iconColor: colors.success,
+                      backgroundColor: colors.success.withValues(alpha: 0.05),
+                    ),
+                  ],
+                );
+              } else {
+                // Para anchos mayores, usar Row
+                return Row(
+                  children: [
+                    Expanded(
+                      child: ClarityKPICard(
+                        value: horarioProvider.clasesDelDiaCount.toString(),
+                        label: 'Clases Hoy',
+                        icon: Icons.class_,
+                        iconColor: colors.primary,
+                        backgroundColor: colors.primary.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    SizedBox(width: spacing.md),
+                    Expanded(
+                      child: ClarityKPICard(
+                        value: _calculateTotalStudents(horarioProvider).toString(),
+                        label: 'Estudiantes',
+                        icon: Icons.people,
+                        iconColor: colors.info,
+                        backgroundColor: colors.info.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    SizedBox(width: spacing.md),
+                    Expanded(
+                      child: ClarityKPICard(
+                        value: '95%', // TODO: Calcular asistencia real
+                        label: 'Asistencia Promedio',
+                        icon: Icons.check_circle,
+                        iconColor: colors.success,
+                        backgroundColor: colors.success.withValues(alpha: 0.05),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ],
       ),
@@ -506,7 +547,7 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                                 fontWeight: FontWeight.bold,
                                 color: colors.primary,
                               ),
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: spacing.xs),

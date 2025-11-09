@@ -62,17 +62,21 @@ model UsuarioInstitucion {
 
 // 2. USUARIOS (Admins, Profesores, Estudiantes)
 model Usuario {
-  id           String   @id @default(uuid()) @db.Uuid
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  nombres      String   @db.VarChar(255)
-  apellidos    String   @db.VarChar(255)
-  rol          String   @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante'
-  telefono     String?  @db.VarChar(20)
-  activo       Boolean  @default(true)
-  tokenVersion Int      @default(1) @map("token_version") // Para revocación rápida de tokens
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  email          String   @unique @db.VarChar(255)
+  passwordHash   String   @map("password_hash") @db.VarChar(255)
+  nombres        String   @db.VarChar(255)
+  apellidos      String   @db.VarChar(255)
+  identificacion String?  @db.VarChar(50) // Documento de identidad (cédula, DNI, etc.)
+  // Campos específicos para profesores
+  titulo         String?  @db.VarChar(255)
+  especialidad   String?  @db.VarChar(255)
+  rol            String   @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante'
+  telefono       String?  @db.VarChar(20)
+  activo         Boolean  @default(true)
+  tokenVersion   Int      @default(1) @map("token_version") // Para revocación rápida de tokens
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones
   estudiante           Estudiante?

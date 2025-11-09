@@ -51,6 +51,8 @@ Widget _buildMenuActionItem(
                       fontWeight: FontWeight.w600,
                       color: colors.textPrimary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     value,
@@ -58,6 +60,8 @@ Widget _buildMenuActionItem(
                       color: color,
                       fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -94,11 +98,13 @@ class StudentDashboard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
             // 1. Saludo Sutil
-            Text('¡Hola, $userName!', style: textStyles.displayMedium),
+            Text('¡Hola, $userName!', style: textStyles.displayMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
             SizedBox(height: spacing.sm),
             Text(
               'Bienvenido al panel estudiantil.',
               style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: spacing.xl),
 

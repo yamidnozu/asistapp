@@ -11,6 +11,7 @@ class UserPersonalInfoStep extends StatelessWidget {
   final String userRole;
   final bool activo;
   final ValueChanged<bool> onActivoChanged;
+  final bool activoEditable;
   final FocusNode? nombresFocusNode;
   final FocusNode? apellidosFocusNode;
   final FocusNode? telefonoFocusNode;
@@ -29,6 +30,7 @@ class UserPersonalInfoStep extends StatelessWidget {
     required this.userRole,
     required this.activo,
     required this.onActivoChanged,
+    this.activoEditable = true,
     this.nombresFocusNode,
     this.apellidosFocusNode,
     this.telefonoFocusNode,
@@ -261,7 +263,7 @@ class UserPersonalInfoStep extends StatelessWidget {
             ),
           ),
           value: activo,
-          onChanged: onActivoChanged,
+          onChanged: activoEditable ? onActivoChanged : null,
           activeColor: context.colors.success,
         ),
       ],

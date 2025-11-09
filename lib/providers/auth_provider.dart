@@ -22,6 +22,49 @@ class AuthProvider with ChangeNotifier {
   String? get selectedInstitutionId => _selectedInstitutionId;
   List<Institution>? get institutions => _institutions;
 
+  /// Intento robusto de obtener un nombre representativo de la administración
+  /// a partir de los datos del usuario. Se usa como fallback en UIs donde
+  /// la lista de instituciones no está disponible por permisos.
+  String? get administrationName {
+    if (_user == null) return null;
+    try {
+      final userMap = _user!;
+
+      // Caso: usuario.administracion.nombre
+      if (userMap['administracion'] is Map) {
+        final nombre = userMap['administracion']?['nombre'] as String?;
+        if (nombre != null && nombre.isNotEmpty) return nombre;
+      }
+
+      // Claves alternativas planas
+      final alt = (userMap['administracionNombre'] as String?) ??
+          (userMap['administracion_nombre'] as String?) ??
+          (userMap['company'] as String?) ??
+          (userMap['organizacion'] as String?) ??
+          (userMap['organization'] as String?);
+      if (alt != null && alt.isNotEmpty) return alt;
+
+      // Si el usuario tiene usuarioInstituciones, tomar el nombre de la primera
+      if (userMap['usuarioInstituciones'] is List) {
+        final lista = userMap['usuarioInstituciones'] as List;
+        if (lista.isNotEmpty) {
+          final first = lista.first;
+          if (first is Map) {
+            if (first['institucion'] is Map) {
+              final nombre = first['institucion']?['nombre'] as String?;
+              if (nombre != null && nombre.isNotEmpty) return nombre;
+            }
+            final direct = first['nombre'] as String?;
+            if (direct != null && direct.isNotEmpty) return direct;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error extracting administrationName: $e');
+    }
+    return null;
+  }
+
   bool get isAuthenticated => _accessToken != null && _user != null;
 
   Institution? get selectedInstitution {

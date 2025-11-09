@@ -75,81 +75,94 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
     final userName = user?['nombres'] ?? 'Usuario';
     final userLastName = user?['apellidos'] ?? '';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Código QR'),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(spacing.lg),
-        child: Column(
-          children: [
-            // Información del estudiante
-            Container(
-              padding: EdgeInsets.all(spacing.lg),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.borderLight),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.person,
-                    size: 48,
-                    color: colors.primary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Mi Código QR'),
+            backgroundColor: colors.primary,
+            foregroundColor: colors.white,
+          ),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(spacing.lg),
+            child: Column(
+              children: [
+                // Información del estudiante
+                Container(
+                  padding: EdgeInsets.all(spacing.lg),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(spacing.borderRadius),
+                    border: Border.all(color: colors.borderLight),
                   ),
-                  SizedBox(height: spacing.md),
-                  Text(
-                    '$userName $userLastName',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colors.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: 48,
+                        color: colors.primary,
+                      ),
+                      SizedBox(height: spacing.md),
+                      Text(
+                        '$userName $userLastName',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: spacing.sm),
+                      Text(
+                        'Estudiante',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: spacing.sm),
-                  Text(
-                    'Estudiante',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colors.textSecondary,
-                    ),
+                ),
+
+                SizedBox(height: spacing.xl),
+
+                // Código QR
+                Container(
+                  padding: EdgeInsets.all(spacing.xl),
+                  decoration: BoxDecoration(
+                    color: colors.white,
+                    borderRadius: BorderRadius.circular(spacing.borderRadius),
+                    border: Border.all(color: colors.borderLight),
                   ),
-                ],
-              ),
+                  child: _buildQRContent(constraints),
+                ),
+
+                SizedBox(height: spacing.lg),
+
+                // Instrucciones
+                Text(
+                  'Muestra este código QR a tu profesor para registrar tu asistencia',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-
-            SizedBox(height: spacing.xl),
-
-            // Código QR
-            Container(
-              padding: EdgeInsets.all(spacing.xl),
-              decoration: BoxDecoration(
-                color: colors.white,
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.borderLight),
-              ),
-              child: _buildQRContent(),
-            ),
-
-            SizedBox(height: spacing.lg),
-
-            // Instrucciones
-            Text(
-              'Muestra este código QR a tu profesor para registrar tu asistencia',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildQRContent() {
+  Widget _buildQRContent(BoxConstraints constraints) {
+    // Ajustar tamaño del QR según el ancho de pantalla
+    final qrSize = constraints.maxWidth < 400 ? 150.0 : 200.0;
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -171,6 +184,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
               'Error al cargar el código QR',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: spacing.sm),
             Text(
@@ -179,6 +194,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                 color: colors.textSecondary,
               ),
               textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: spacing.lg),
             ElevatedButton.icon(
@@ -207,6 +224,9 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: colors.textMuted,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -233,7 +253,7 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
           child: QrImageView(
             data: _qrCode!,
             version: QrVersions.auto,
-            size: 200.0,
+            size: qrSize,
             backgroundColor: colors.white,
           ),
         ),
@@ -248,6 +268,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             fontFamily: 'monospace',
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

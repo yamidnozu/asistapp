@@ -104,6 +104,36 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       builder: (context, authProvider, institutionProvider, child) {
         final userRole = authProvider.user?['rol'] as String?;
         final canCreateInstitutions = userRole == 'super_admin';
+        final administrationName = authProvider.administrationName;
+
+        final List<Widget> filters = _buildFilterWidgets(context);
+        if (userRole == 'admin_institucion' && administrationName != null) {
+          filters.insert(
+            0,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.admin_panel_settings, size: 18, color: context.colors.primary),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Eres administrador de: $administrationName',
+                      style: context.textStyles.bodyMedium.copyWith(color: context.colors.textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Tooltip(
+                    message: 'Tu cuenta tiene permisos administrativos sobre esta institución',
+                    child: Icon(Icons.info_outline, size: 18, color: context.colors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
         return ClarityManagementPage(
           title: 'Gestión de Instituciones',
@@ -121,15 +151,25 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           scrollController: _scrollController,
           hasMoreData: institutionProvider.hasMoreData,
           isLoadingMore: institutionProvider.isLoadingMore,
-          emptyStateWidget: ClarityEmptyState(
-            icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
-            title: _searchQuery.isNotEmpty
-                ? 'No se encontraron instituciones'
-                : 'No hay instituciones',
-            subtitle: _searchQuery.isNotEmpty
-                ? 'Intenta con otros términos de búsqueda'
-                : 'Comienza creando tu primera institución',
-          ),
+      emptyStateWidget: (institutionProvider.institutions.isEmpty || institutionProvider.hasError) && administrationName != null
+        ? ClarityEmptyState(
+          icon: Icons.account_balance,
+          title: administrationName,
+          subtitle: institutionProvider.hasError
+            ? 'No tienes permiso para ver la lista completa de instituciones. Mostrando el nombre de la administración.'
+            : (_searchQuery.isNotEmpty
+              ? 'No se encontraron instituciones para "$_searchQuery". Mostrando la administración: $administrationName'
+              : 'No hay instituciones disponibles. Mostrando la administración: $administrationName'),
+        )
+        : ClarityEmptyState(
+          icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
+          title: _searchQuery.isNotEmpty
+            ? 'No se encontraron instituciones'
+            : 'No hay instituciones',
+          subtitle: _searchQuery.isNotEmpty
+            ? 'Intenta con otros términos de búsqueda'
+            : 'Comienza creando tu primera institución',
+        ),
           floatingActionButton: canCreateInstitutions
               ? FloatingActionButton(
                   onPressed: () => _navigateToForm(context),
@@ -294,9 +334,57 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             size: 32,
           ),
           title: institution.nombre,
-          subtitle: institution.email ?? institution.telefono ?? 'Sin contacto',
-          badgeText: institution.activa ? 'Activa' : 'Inactiva',
-          badgeColor: institution.activa ? colors.success : colors.error,
+          subtitleWidget: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  institution.email ?? institution.telefono ?? 'Sin contacto',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(width: 8),
+              // Chip de estado discreto
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: colors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colors.borderLight,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: institution.activa 
+                          ? colors.primary.withValues(alpha: 0.7)
+                          : colors.textMuted,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      institution.activa ? 'Activa' : 'Inactiva',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           contextActions: contextActions,
           onTap: () => _navigateToForm(context, institution: institution),
         );

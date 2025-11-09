@@ -239,9 +239,55 @@ class _GruposScreenState extends State<GruposScreen> {
         ),
       ),
       title: grupo.nombre,
-      subtitle: 'Grado: ${grupo.grado}${grupo.seccion != null ? ' - Sección: ${grupo.seccion}' : ''}',
-      badgeText: grupo.periodoAcademico.activo ? 'Activo' : 'Inactivo',
-      badgeColor: grupo.periodoAcademico.activo ? colors.success : colors.error,
+      subtitleWidget: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Grado: ${grupo.grado}${grupo.seccion != null ? ' - Sección: ${grupo.seccion}' : ''}',
+              style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(width: 8),
+          // Chip de estado discreto
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colors.borderLight,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: grupo.periodoAcademico.activo 
+                      ? colors.primary.withValues(alpha: 0.7)
+                      : colors.textMuted,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 4),
+                Text(
+                  grupo.periodoAcademico.activo ? 'Activo' : 'Inactivo',
+                  style: textStyles.bodySmall.copyWith(
+                    color: colors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       contextActions: contextActions,
       onTap: () => _navigateToGrupoDetail(grupo),
     );

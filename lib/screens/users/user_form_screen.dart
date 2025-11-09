@@ -65,6 +65,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
   bool _activo = true;
   User? _user; // Usuario cargado para edición
   String? _selectedInstitutionId; // Institución seleccionada para admin_institucion
+  // Indica si el formulario está editando al usuario de la sesión
+  bool _isSelfEditing = false;
+  String? _currentSessionUserRole;
 
   @override
   void initState() {
@@ -81,8 +84,19 @@ class _UserFormScreenState extends State<UserFormScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadUserIfEditing();
-    _loadInstitutionsIfNeeded();
+    // Ejecutar la carga de datos después del primer frame para evitar que
+    // ChangeNotifier.notifyListeners() sea llamado durante la fase de build,
+    // lo que provocaba la excepción: "setState() or markNeedsBuild() called during build.".
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // A veces un postFrameCallback aún puede coincidir con fases de build
+      // en flujos complejos (navegación rápida). Encapsulamos en un
+      // microtask para garantizar que la llamada ocurra completamente
+      // fuera del ciclo de construcción y evitar notifyListeners durante build.
+      Future.microtask(() {
+        _loadUserIfEditing();
+        _loadInstitutionsIfNeeded();
+      });
+    });
   }
 
   Future<void> _loadUserIfEditing() async {
@@ -114,7 +128,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
         
         final user = userProvider.selectedUser;
         if (user != null && mounted) {
-          setState(() => _user = user);
+          // Detectar si estamos editando al usuario de la sesión
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          final sessionUserId = authProvider.user?['id']?.toString();
+          final sessionRole = authProvider.user?['rol'] as String?;
+          setState(() {
+            _user = user;
+            _isSelfEditing = sessionUserId != null && sessionUserId == user.id;
+            _currentSessionUserRole = sessionRole;
+          });
           _fillFormWithUserData();
         }
       } catch (e) {
@@ -177,6 +199,16 @@ class _UserFormScreenState extends State<UserFormScreen> {
       _nombreResponsableController.text = user.estudiante!.nombreResponsable ?? '';
       _telefonoResponsableController.text = user.estudiante!.telefonoResponsable ?? '';
     }
+
+    // Para profesores, cargar título, especialidad e identificación si están disponibles
+    try {
+      // user.titulo, user.especialidad y user.identificacion añadidos al modelo
+      if (user.rol == 'profesor') {
+        _tituloController.text = (user.titulo ?? '').toString();
+        _especialidadController.text = (user.especialidad ?? '').toString();
+        _identificacionController.text = (user.identificacion ?? '').toString();
+      }
+    } catch (_) {}
 
     // Para profesores, los campos específicos no están disponibles en el modelo User actual
     // Se podrían cargar desde una API adicional si es necesario
@@ -265,10 +297,13 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
+          identificacion: (widget.userRole == 'estudiante' || widget.userRole == 'profesor') ? _identificacionController.text.trim() : null,
           nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
           telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
           activo: _activo,
+          // Campos profesor
+          titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
+          especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
         );
 
         final success = await userProvider.updateUser(
@@ -302,7 +337,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           nombres: _nombresController.text.trim(),
           apellidos: _apellidosController.text.trim(),
           telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: widget.userRole == 'estudiante' ? _identificacionController.text.trim() : null,
+          identificacion: (widget.userRole == 'estudiante' || widget.userRole == 'profesor') ? _identificacionController.text.trim() : null,
           rol: widget.userRole,
           titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
           especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
@@ -663,7 +698,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
             emailController: _emailController,
             userRole: widget.userRole,
             selectedInstitutionId: _selectedInstitutionId,
+            selectedInstitutionName: _user != null && _user!.instituciones.isNotEmpty ? _user!.instituciones.first.nombre : null,
             onInstitutionChanged: (value) => setState(() => _selectedInstitutionId = value),
+            // Si el usuario de sesión es admin_institucion y está editando su propio usuario,
+            // no permitir cambiar la institución desde el formulario.
+            disableInstitution: _isSelfEditing && _currentSessionUserRole == 'admin_institucion',
             emailFocusNode: _emailFocus,
             institutionFocusNode: _institutionFocus,
             isEditMode: _user != null,
@@ -689,6 +728,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
             userRole: widget.userRole,
             activo: _activo,
             onActivoChanged: (value) => setState(() => _activo = value),
+            // El switch de 'activo' debe ser de solo lectura si el usuario de sesión es
+            // admin_institucion y está editando su propia cuenta.
+            activoEditable: !(_isSelfEditing && _currentSessionUserRole == 'admin_institucion'),
             nombresFocusNode: _nombresFocus,
             apellidosFocusNode: _apellidosFocus,
             telefonoFocusNode: _telefonoFocus,

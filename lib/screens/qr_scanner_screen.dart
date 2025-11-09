@@ -298,188 +298,197 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Escanear Código QR'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flashlight_on),
-            onPressed: () => controller?.toggleTorch(),
-            tooltip: 'Alternar flash',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Ajustar tamaño del marco según el ancho de pantalla
+        final frameSize = constraints.maxWidth < 400 ? 200.0 : 250.0;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Escanear Código QR'),
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.flashlight_on),
+                onPressed: () => controller?.toggleTorch(),
+                tooltip: 'Alternar flash',
+              ),
+              IconButton(
+                icon: const Icon(Icons.cameraswitch),
+                onPressed: () => controller?.switchCamera(),
+                tooltip: 'Cambiar cámara',
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.cameraswitch),
-            onPressed: () => controller?.switchCamera(),
-            tooltip: 'Cambiar cámara',
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Escáner de QR
-          MobileScanner(
-            controller: controller,
-            onDetect: _onDetect,
-          ),
+          body: Stack(
+            children: [
+              // Escáner de QR
+              MobileScanner(
+                controller: controller,
+                onDetect: _onDetect,
+              ),
 
-          // Overlay con marco de escaneo
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.5),
-            ),
-            child: Stack(
-              children: [
-                // Marco de escaneo centrado
-                Center(
-                  child: Container(
-                    width: 250,
-                    height: 250,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Stack(
-                      children: [
-                        // Esquinas del marco
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                top: BorderSide(color: Colors.blue, width: 4),
-                                left: BorderSide(color: Colors.blue, width: 4),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                top: BorderSide(color: Colors.blue, width: 4),
-                                right: BorderSide(color: Colors.blue, width: 4),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: Colors.blue, width: 4),
-                                left: BorderSide(color: Colors.blue, width: 4),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: Colors.blue, width: 4),
-                                right: BorderSide(color: Colors.blue, width: 4),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              // Overlay con marco de escaneo
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
                 ),
-
-                // Instrucciones
-                Positioned(
-                  top: 100,
-                  left: 20,
-                  right: 20,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Coloca el código QR dentro del marco para registrar la asistencia',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-
-                // Botón de cancelar
-                Positioned(
-                  bottom: 50,
-                  left: 20,
-                  right: 20,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Cancelar',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-
-                // Indicador de procesamiento
-                if (_isProcessing)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    child: const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(
+                child: Stack(
+                  children: [
+                    // Marco de escaneo centrado
+                    Center(
+                      child: Container(
+                        width: frameSize,
+                        height: frameSize,
+                        decoration: BoxDecoration(
+                          border: Border.all(
                             color: Colors.white,
+                            width: 2,
                           ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Procesando...',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Esquinas del marco
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: Colors.blue, width: 4),
+                                    left: BorderSide(color: Colors.blue, width: 4),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: Colors.blue, width: 4),
+                                    right: BorderSide(color: Colors.blue, width: 4),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(color: Colors.blue, width: 4),
+                                    left: BorderSide(color: Colors.blue, width: 4),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(color: Colors.blue, width: 4),
+                                    right: BorderSide(color: Colors.blue, width: 4),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+
+                    // Instrucciones
+                    Positioned(
+                      top: constraints.maxWidth < 400 ? 80 : 100,
+                      left: 20,
+                      right: 20,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Coloca el código QR dentro del marco para registrar la asistencia',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: constraints.maxWidth < 400 ? 14 : 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+
+                    // Botón de cancelar
+                    Positioned(
+                      bottom: 50,
+                      left: 20,
+                      right: 20,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancelar',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+
+                    // Indicador de procesamiento
+                    if (_isProcessing)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Procesando...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

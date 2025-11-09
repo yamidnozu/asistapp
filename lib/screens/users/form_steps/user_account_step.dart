@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/theme_extensions.dart';
 import '../../../widgets/form_widgets.dart';
 import '../../../providers/institution_provider.dart';
+import '../../../models/institution.dart';
 import '../../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -10,8 +11,10 @@ class UserAccountStep extends StatefulWidget {
   final TextEditingController emailController;
   final String userRole;
   final String? selectedInstitutionId;
+  final String? selectedInstitutionName;
   final ValueChanged<String?> onInstitutionChanged;
   final bool isEditMode;
+  final bool disableInstitution;
   final FocusNode? emailFocusNode;
   final FocusNode? institutionFocusNode;
   final GlobalKey<FormFieldState<String>>? emailFieldKey;
@@ -24,6 +27,8 @@ class UserAccountStep extends StatefulWidget {
     required this.selectedInstitutionId,
     required this.onInstitutionChanged,
     this.isEditMode = false,
+    this.selectedInstitutionName,
+    this.disableInstitution = false,
     this.emailFocusNode,
     this.institutionFocusNode,
     this.emailFieldKey,
@@ -84,6 +89,43 @@ class _UserAccountStepState extends State<UserAccountStep> {
         if (widget.userRole == 'admin_institucion') ...[
           Consumer2<AuthProvider, InstitutionProvider>(
             builder: (context, authProvider, institutionProvider, child) {
+              // Si es self-edit por admin_institucion y la institución está bloqueada,
+              // mostrar un campo de solo lectura con el nombre de la institución.
+              if (widget.disableInstitution) {
+                // Intentar obtener el nombre desde el provider o desde auth
+                final selected = institutionProvider.institutions.firstWhere(
+                  (i) => i.id == widget.selectedInstitutionId,
+                  orElse: () {
+                    final fallbackName = widget.selectedInstitutionName ?? authProvider.administrationName ?? '—';
+                    return Institution(id: widget.selectedInstitutionId ?? '', nombre: fallbackName, direccion: null, telefono: null, email: null, activa: true);
+                  },
+                );
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Institución', style: context.textStyles.labelLarge),
+                    SizedBox(height: spacing.sm),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: context.colors.borderLight),
+                      ),
+                      child: Text(selected.nombre, style: context.textStyles.bodyMedium),
+                    ),
+                    SizedBox(height: spacing.sm),
+                    Text(
+                      'No puedes cambiar la institución de tu propia cuenta',
+                      style: context.textStyles.bodySmall.copyWith(color: context.colors.textSecondary),
+                    ),
+                    SizedBox(height: spacing.md),
+                  ],
+                );
+              }
+
               // Mostrar dropdown cuando se crea un admin_institucion.
               // Si la lista de instituciones está vacía, mostrar un mensaje y un botón para recargar.
               if (institutionProvider.institutions.isEmpty) {
@@ -149,7 +191,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
                   }
                   return null;
                 },
-                onChanged: widget.onInstitutionChanged,
+                onChanged: widget.disableInstitution ? null : widget.onInstitutionChanged,
               );
             },
           ),
