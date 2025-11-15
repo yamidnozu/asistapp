@@ -1,0 +1,178 @@
+{
+  "total": 39,
+  "passed": 25,
+  "failed": 14,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "PASSED",
+      "result": true
+    },
+    {
+      "name": "Login Admin de Institución",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Profesor",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores (Paginación)",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Buscar Profesores por Nombre",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Filtrar Profesores Activos",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Crear Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Profesor por ID",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Actualizar Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Cambiar Status del Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Eliminar Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Grupos",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Grupos (Paginación)",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Buscar Grupos por Nombre",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Filtrar Grupos Activos",
+      "status": "FAILED",
+      "error": "No todos los grupos filtrados están activos"
+    },
+    {
+      "name": "Admin Inst - Crear Grupo",
+      "status": "FAILED",
+      "error": "Request failed with status code 400"
+    },
+    {
+      "name": "Admin Inst - Listar Materias",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Materias (Paginación)",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Buscar Materias por Nombre",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Crear Materia",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Materia por ID",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Actualizar Materia",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Eliminar Materia",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Estudiantes",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Listar Estudiantes (Paginación)",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Buscar Estudiantes por Nombre",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Filtrar Estudiantes Activos",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Crear Estudiante",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Obtener Grupos para Horarios",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Materias para Horarios",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Profesores para Horarios",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Periodos para Horarios",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Crear Horario",
+      "status": "FAILED",
+      "error": "No hay periodos disponibles para crear horario"
+    },
+    {
+      "name": "Admin Inst - Listar Asistencias",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Listar Asistencias (Paginación)",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Admin Inst - Filtrar Asistencias por Fecha",
+      "status": "FAILED",
+      "error": "Request failed with status code 404"
+    }
+  ]
+}

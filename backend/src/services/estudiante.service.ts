@@ -1,5 +1,5 @@
 import { prisma } from '../config/database';
-import { ConflictError, NotFoundError } from '../types';
+import { ConflictError, NotFoundError, ValidationError } from '../types';
 
 export interface CreateEstudianteRequest {
   nombres: string;
@@ -199,6 +199,32 @@ export class EstudianteService {
       grupoId,
     } = data;
 
+    console.log('🔍 Validando datos de estudiante:', { nombres, apellidos, email, identificacion });
+
+    // Validar campos requeridos
+    if (!nombres || nombres === '' || nombres.trim() === '') {
+      console.log('❌ Validación fallida: nombres vacío');
+      throw new ValidationError('El nombre es requerido');
+    }
+    if (!apellidos || apellidos === '' || apellidos.trim() === '') {
+      console.log('❌ Validación fallida: apellidos vacío');
+      throw new ValidationError('Los apellidos son requeridos');
+    }
+    if (!email || email === '' || email.trim() === '') {
+      console.log('❌ Validación fallida: email vacío');
+      throw new ValidationError('El email es requerido');
+    }
+    if (!password || password === '' || password.trim() === '') {
+      console.log('❌ Validación fallida: password vacío');
+      throw new ValidationError('La contraseña es requerida');
+    }
+    if (!identificacion || identificacion === '' || identificacion.trim() === '') {
+      console.log('❌ Validación fallida: identificacion vacío');
+      throw new ValidationError('La identificación es requerida');
+    }
+
+    console.log('✅ Validaciones pasaron, creando estudiante...');
+
     // Validar que el email no exista
     const existingUser = await prisma.usuario.findUnique({
       where: { email },
@@ -351,6 +377,9 @@ export class EstudianteService {
       // Asignar al nuevo grupo si se especificó
       if (grupoId) {
         await this.assignEstudianteToGrupo(id, grupoId);
+        // Recargar para incluir el nuevo grupo
+        const estudianteConGrupo = await this.getEstudianteById(id, institucionId);
+        return estudianteConGrupo;
       }
     }
 

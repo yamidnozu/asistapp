@@ -501,6 +501,251 @@ export class AsistenciaService {
       throw error;
     }
   }
+
+  /**
+   * Obtiene todas las asistencias con filtros opcionales y paginación
+   */
+  public static async getAllAsistencias(pagination: { page: number; limit: number }, filters: any) {
+    try {
+      const { page, limit } = pagination;
+      const { institucionId, fecha, horarioId, estudianteId, estado } = filters;
+
+      const skip = (page - 1) * limit;
+
+      // Construir where clause
+      const where: any = {
+        institucionId,
+      };
+
+      console.log('🔍 getAllAsistencias - Filtros recibidos:', { institucionId, fecha, horarioId, estudianteId, estado });
+
+      if (fecha) {
+        // Parsear la fecha en UTC para evitar problemas de zona horaria
+        const [year, month, day] = fecha.split('-').map(Number);
+        const fechaFiltro = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        where.fecha = {
+          gte: fechaFiltro,
+          lt: new Date(fechaFiltro.getTime() + 24 * 60 * 60 * 1000) // Siguiente día
+        };
+        console.log('📅 Filtro de fecha aplicado:', { gte: fechaFiltro, lt: new Date(fechaFiltro.getTime() + 24 * 60 * 60 * 1000) });
+      }
+
+      if (horarioId) {
+        where.horarioId = horarioId;
+      }
+
+      if (estudianteId) {
+        where.estudianteId = estudianteId;
+      }
+
+      if (estado) {
+        where.estado = estado;
+      }
+
+      console.log('🔍 WHERE final para consulta:', JSON.stringify(where, null, 2));
+
+      // Obtener total de registros
+      const total = await prisma.asistencia.count({ where });
+      console.log('📊 Total de asistencias encontradas:', total);
+
+      // Obtener registros con paginación
+      const asistencias = await prisma.asistencia.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          fecha: 'desc',
+        },
+        include: {
+          estudiante: {
+            include: {
+              usuario: {
+                select: {
+                  nombres: true,
+                  apellidos: true,
+                },
+              },
+            },
+          },
+          horario: {
+            include: {
+              grupo: {
+                select: {
+                  id: true,
+                  nombre: true,
+                },
+              },
+              materia: {
+                select: {
+                  id: true,
+                  nombre: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: asistencias.map((asistencia: any) => ({
+          id: asistencia.id,
+          fecha: asistencia.fecha.toISOString().split('T')[0],
+          estado: asistencia.estado,
+          horarioId: asistencia.horarioId,
+          estudianteId: asistencia.estudianteId,
+          profesorId: asistencia.profesorId,
+          institucionId: asistencia.institucionId,
+          estudiante: {
+            id: asistencia.estudiante.id,
+            nombres: asistencia.estudiante.usuario.nombres,
+            apellidos: asistencia.estudiante.usuario.apellidos,
+          },
+          horario: {
+            id: asistencia.horario.id,
+            diaSemana: asistencia.horario.diaSemana,
+            horaInicio: asistencia.horario.horaInicio,
+            horaFin: asistencia.horario.horaFin,
+            materia: {
+              id: asistencia.horario.materia.id,
+              nombre: asistencia.horario.materia.nombre,
+            },
+            grupo: {
+              id: asistencia.horario.grupo.id,
+              nombre: asistencia.horario.grupo.nombre,
+            },
+          },
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error('Error al obtener todas las asistencias:', error);
+      throw new Error('Error al obtener las asistencias');
+    }
+  }
+
+  /**
+   * Obtiene las asistencias de un estudiante específico con paginación y filtros opcionales
+   */
+  public static async getAsistenciasByEstudiante(
+    estudianteId: string,
+    pagination: { page: number; limit: number },
+    filters: { fecha?: string }
+  ) {
+    try {
+      const { page, limit } = pagination;
+      const { fecha } = filters;
+
+      const skip = (page - 1) * limit;
+
+      // Construir where clause
+      const where: any = {
+        estudianteId,
+      };
+
+      if (fecha) {
+        const fechaFiltro = new Date(fecha);
+        fechaFiltro.setHours(0, 0, 0, 0);
+        where.fecha = fechaFiltro;
+      }
+
+      // Obtener total de registros
+      const total = await prisma.asistencia.count({ where });
+
+      // Obtener registros con paginación
+      const asistencias = await prisma.asistencia.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          fecha: 'desc',
+        },
+        include: {
+          horario: {
+            include: {
+              grupo: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  grado: true,
+                  seccion: true,
+                },
+              },
+              materia: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+              profesor: {
+                select: {
+                  id: true,
+                  nombres: true,
+                  apellidos: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: asistencias.map((asistencia: any) => ({
+          id: asistencia.id,
+          fecha: asistencia.fecha.toISOString().split('T')[0],
+          estado: asistencia.estado,
+          horarioId: asistencia.horarioId,
+          estudianteId: asistencia.estudianteId,
+          profesorId: asistencia.profesorId,
+          institucionId: asistencia.institucionId,
+          horario: {
+            id: asistencia.horario.id,
+            diaSemana: asistencia.horario.diaSemana,
+            horaInicio: asistencia.horario.horaInicio,
+            horaFin: asistencia.horario.horaFin,
+            materia: {
+              id: asistencia.horario.materia.id,
+              nombre: asistencia.horario.materia.nombre,
+              codigo: asistencia.horario.materia.codigo,
+            },
+            grupo: {
+              id: asistencia.horario.grupo.id,
+              nombre: asistencia.horario.grupo.nombre,
+              grado: asistencia.horario.grupo.grado,
+              seccion: asistencia.horario.grupo.seccion,
+            },
+            profesor: asistencia.horario.profesor ? {
+              id: asistencia.horario.profesor.id,
+              nombres: asistencia.horario.profesor.nombres,
+              apellidos: asistencia.horario.profesor.apellidos,
+            } : null,
+          },
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error('Error al obtener asistencias del estudiante:', error);
+      throw new Error('Error al obtener las asistencias del estudiante');
+    }
+  }
 }
 
 export default AsistenciaService;

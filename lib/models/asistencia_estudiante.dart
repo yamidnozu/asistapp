@@ -48,6 +48,22 @@ class AsistenciaEstudiante {
   /// Obtiene el nombre completo del estudiante
   String get nombreCompleto => '$nombres $apellidos';
 
+  /// Obtiene la inicial del estudiante para mostrar en avatares
+  String get inicial {
+    // Primero intentar usar la primera letra de nombres
+    if (nombres.isNotEmpty) {
+      return nombres[0].toUpperCase();
+    }
+    
+    // Si nombres está vacío, usar la primera letra del nombre completo
+    if (nombreCompleto.isNotEmpty && nombreCompleto != ' ') {
+      return nombreCompleto[0].toUpperCase();
+    }
+    
+    // Último recurso
+    return '?';
+  }
+
   /// Verifica si el estudiante está presente
   bool get estaPresente => estado == 'PRESENTE';
 

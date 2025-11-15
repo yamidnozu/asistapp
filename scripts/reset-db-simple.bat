@@ -27,19 +27,29 @@ ping -n 11 127.0.0.1 >nul
 echo Done.
 
 echo [4/6] Applying Prisma schema...
+docker compose exec -T db psql -U arroz -d asistapp -c "SELECT 1;" >nul 2>&1
+if errorlevel 1 (
+    echo Database not ready, waiting...
+    ping -n 6 127.0.0.1 >nul
+)
 cd backend
 call npx prisma db push --accept-data-loss
 cd ..
 echo Done.
 
 echo [5/6] Running seed...
+docker compose exec -T db psql -U arroz -d asistapp -c "SELECT 1;" >nul 2>&1
+if errorlevel 1 (
+    echo Database not ready for seed, waiting...
+    ping -n 6 127.0.0.1 >nul
+)
 cd backend
 call npm run prisma:seed:host
 cd ..
 echo Done.
 
-echo [6/6] Starting backend...
-docker compose up -d --build backend
+echo [6/6] Starting backend and database...
+docker compose up -d --build
 echo Done.
 
 echo.

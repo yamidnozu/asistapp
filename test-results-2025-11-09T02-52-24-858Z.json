@@ -1,0 +1,66 @@
+{
+  "total": 14,
+  "passed": 12,
+  "failed": 2,
+  "tests": [
+    {
+      "name": "Health Check",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Super Admin",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Endpoint sin Autenticación (debería fallar)",
+      "status": "PASSED",
+      "result": true
+    },
+    {
+      "name": "Login Admin de Institución",
+      "status": "PASSED"
+    },
+    {
+      "name": "Login Profesor",
+      "status": "FAILED",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Listar Profesores (Paginación)",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Buscar Profesores por Nombre",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Filtrar Profesores Activos",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Crear Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Obtener Profesor por ID",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Actualizar Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Cambiar Status del Profesor",
+      "status": "PASSED"
+    },
+    {
+      "name": "Admin Inst - Eliminar Profesor",
+      "status": "PASSED"
+    }
+  ]
+}

@@ -69,7 +69,7 @@ await TestFlowManager.step2CrearInstitucion(context);
 ## 📝 Detalle del Flujo Completo
 
 ### PASO 1: Login como Super Admin
-- **Usuario**: `superadmin@test.com`
+- **Usuario**: `superadmin@asistapp.com`
 - **Contraseña**: `Super123!`
 - **Verificación**: Confirma acceso al dashboard de super admin
 
@@ -156,7 +156,7 @@ flutter run
 
 ### Credenciales de Acceso
 - **Super Admin**:
-  - Email: `superadmin@test.com`
+  - Email: `superadmin@asistapp.com`
   - Password: `Super123!`
 
 - **Admin Institución** (creado en pruebas):

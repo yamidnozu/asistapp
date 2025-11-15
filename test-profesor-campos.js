@@ -4,7 +4,7 @@ function request(method, path, headers, body) {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: '127.0.0.1',
-      port: 3000,
+      port: 3005,
       path: path,
       method: method,
       headers: headers
@@ -31,8 +31,8 @@ function request(method, path, headers, body) {
 async function test() {
   console.log('\n=== PASO 1: LOGIN CON SUPERADMIN ===');
   const loginBody = {
-    email: 'superadmin@asistapp.com',
-    password: 'Admin123!'
+    email: 'admin@asistapp.com',
+    password: 'pollo'
   };
   
   const loginRes = await request('POST', '/auth/login', {

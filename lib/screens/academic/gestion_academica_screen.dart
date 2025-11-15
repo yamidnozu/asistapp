@@ -52,10 +52,19 @@ class GestionAcademicaScreen extends StatelessWidget {
                 children: [
                   _buildMenuOption(
                     context,
+                    icon: Icons.calendar_today,
+                    title: 'Gestionar Períodos',
+                    subtitle: 'Administrar períodos académicos',
+                    color: colors.info,
+                    onTap: () => context.push('/academic/periodos'),
+                  ),
+                  Divider(color: colors.borderLight),
+                  _buildMenuOption(
+                    context,
                     icon: Icons.group,
                     title: 'Gestionar Grupos',
                     subtitle: 'Crear y administrar grupos académicos',
-                    color: colors.info,
+                    color: colors.primary,
                     onTap: () => context.push('/academic/grupos'),
                   ),
                   Divider(color: colors.borderLight),

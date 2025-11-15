@@ -17,11 +17,16 @@ import '../screens/academic/gestion_academica_screen.dart';
 import '../screens/academic/grupos_screen.dart';
 import '../screens/academic/materias_screen.dart';
 import '../screens/academic/horarios_screen.dart';
+import '../screens/academic/grupo_detail_screen.dart';
 import '../models/institution.dart';
 import '../screens/app_shell.dart';
 import '../models/user.dart';
+import '../models/grupo.dart';
+import '../screens/student_schedule_screen.dart';
+import '../screens/student_attendance_screen.dart';
+import '../screens/student_notifications_screen.dart';
+import '../screens/test_multi_hora_screen.dart';
 import '../screens/my_qr_code_screen.dart';
-import '../screens/test_runner_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -105,16 +110,6 @@ class AppRouter {
         ),
       ),
 
-      GoRoute(
-        path: '/test-runner',
-        name: 'test-runner',
-        pageBuilder: (context, state) => _fadePage(
-          context,
-          state,
-          const TestRunnerScreen(),
-        ),
-      ),
-
       // --- RUTAS DE FORMULARIOS (NIVEL SUPERIOR) ---
       GoRoute(
         path: '/users/create',
@@ -183,12 +178,51 @@ class AppRouter {
                   child: const HorariosScreen(),
                 ),
               ),
+              GoRoute(
+                path: '/test-multi-hora',
+                name: 'test-multi-hora',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const TestMultiHoraScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/grupos/:id',
+                name: 'academic-grupo-detail',
+                pageBuilder: (context, state) {
+                  final grupo = state.extra as Grupo;
+                  return NoTransitionPage(
+                    child: GrupoDetailScreen(grupo: grupo),
+                  );
+                },
+              ),
               // Ruta para el código QR del estudiante
               GoRoute(
                 path: '/student/qr',
                 name: 'student-qr',
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const MyQRCodeScreen(),
+                ),
+              ),
+              // Rutas para módulos del estudiante
+              GoRoute(
+                path: '/student/schedule',
+                name: 'student-schedule',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const StudentScheduleScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/student/attendance',
+                name: 'student-attendance',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const StudentAttendanceScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/student/notifications',
+                name: 'student-notifications',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const StudentNotificationsScreen(),
                 ),
               ),
             ],

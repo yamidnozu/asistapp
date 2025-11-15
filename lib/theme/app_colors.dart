@@ -107,6 +107,9 @@ class AppColors {
   final Color textOnDarkSecondary = const Color(0xFFE2E8F0); // Gris muy claro
   final Color textOnDarkMuted = const Color(0xFFCBD5E1); // Gris claro
 
+  // Texto sobre colores primarios
+  final Color onPrimary = const Color(0xFFFFFFFF); // Blanco sobre primary
+
   // ═══════════════════════════════════════════════════════════════════════════
   // BORDES Y DIVISORES - SUAVES Y MODERNOS
   // ═══════════════════════════════════════════════════════════════════════════

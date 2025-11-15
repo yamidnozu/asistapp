@@ -5,21 +5,21 @@
 Modificado `lib/config/app_config.dart` para que detecte automáticamente la plataforma:
 
 - **Web:** `http://localhost:3001`
-- **Android/iOS:** `http://192.168.20.22:3001` (tu IP local)
+- **Android/iOS:** `http://192.168.20.22:3002` (tu IP local)
 - **Desktop:** `http://localhost:3001`
 
 ---
 
 ## 🔥 **CONFIGURAR FIREWALL DE WINDOWS**
 
-Para que tu Android pueda conectarse al backend, necesitas abrir el puerto 3001 en el firewall de Windows:
+Para que tu Android pueda conectarse al backend, necesitas abrir el puerto 3002 en el firewall de Windows:
 
 ### **Opción 1: Usando PowerShell (Recomendado)**
 
 Ejecuta como **Administrador**:
 
 ```powershell
-# Crear regla de firewall para el puerto 3001
+# Crear regla de firewall para el puerto 3002
 New-NetFirewallRule -DisplayName "AsistApp Backend (Docker)" -Direction Inbound -Protocol TCP -LocalPort 3001 -Action Allow
 
 # Verificar que se creó
@@ -31,7 +31,7 @@ Get-NetFirewallRule -DisplayName "AsistApp Backend (Docker)"
 1. Presiona `Win + R` y escribe: `wf.msc`
 2. Click en **"Reglas de entrada"** → **"Nueva regla..."**
 3. Selecciona **"Puerto"** → Next
-4. **TCP** → Puerto específico: **3001** → Next
+4. **TCP** → Puerto específico: **3002** → Next
 5. **Permitir la conexión** → Next
 6. Marca: **Dominio, Privado, Público** → Next
 7. Nombre: **"AsistApp Backend"** → Finalizar
@@ -58,7 +58,7 @@ Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 ### **2. Probar conexión desde el navegador del Android:**
 Abre Chrome en tu Android y visita:
 ```
-http://192.168.20.22:3001/health
+http://192.168.20.22:3002/health
 ```
 
 **Respuesta esperada:**
@@ -82,7 +82,7 @@ cd /c/Proyectos/DemoLife
 flutter run -d android
 ```
 
-La app ahora usará automáticamente `http://192.168.20.22:3001` en lugar de `localhost`.
+La app ahora usará automáticamente `http://192.168.20.22:3002` en lugar de `localhost`.
 
 ---
 
@@ -93,12 +93,12 @@ La app ahora usará automáticamente `http://192.168.20.22:3001` en lugar de `lo
 1. **Docker está corriendo:**
    ```bash
    docker ps
-   # Debe mostrar asistapp_backend en puerto 3001
+   # Debe mostrar asistapp_backend en puerto 3002
    ```
 
 2. **Backend responde en la red:**
    ```bash
-   curl http://192.168.20.22:3001/health
+   curl http://192.168.20.22:3002/health
    ```
 
 3. **Android está en la misma red WiFi:**
@@ -117,7 +117,7 @@ La app ahora usará automáticamente `http://192.168.20.22:3001` en lugar de `lo
 La app mostrará en la consola:
 ```
 I/flutter: Inicializando AppConfig...
-I/flutter: URL base configurada: http://192.168.20.22:3001
+   I/flutter: URL base configurada: http://192.168.20.22:3002
 ```
 
 Si ves:
@@ -159,9 +159,9 @@ Si tu PC obtiene una IP diferente (ej: después de reiniciar el router), necesit
 3. Ejecutar: `flutter run -d android`
 
 O simplemente crea un archivo `.env` en la raíz del proyecto:
-```env
-API_BASE_URL=http://192.168.20.22:3001
-```
+   ```env
+   API_BASE_URL=http://192.168.20.22:3002
+   ```
 
 Y la app lo usará automáticamente sin necesidad de recompilar.
 

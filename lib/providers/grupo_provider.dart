@@ -25,6 +25,12 @@ class GrupoProvider with ChangeNotifier {
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
 
+  // Estados para estudiantes
+  List<User> _estudiantesByGrupo = [];
+  List<User> _estudiantesSinAsignar = [];
+  PaginationInfo? _estudiantesPaginationInfo;
+  PaginationInfo? _estudiantesSinAsignarPaginationInfo;
+
   // Getters
   GrupoState get state => _state;
   String? get errorMessage => _errorMessage;
@@ -32,6 +38,12 @@ class GrupoProvider with ChangeNotifier {
   Grupo? get selectedGrupo => _selectedGrupo;
   String? get selectedPeriodoId => _selectedPeriodoId;
   PaginationInfo? get paginationInfo => _paginationInfo;
+
+  // Getters para estudiantes
+  List<User> get estudiantesByGrupo => _estudiantesByGrupo;
+  List<User> get estudiantesSinAsignar => _estudiantesSinAsignar;
+  PaginationInfo? get estudiantesPaginationInfo => _estudiantesPaginationInfo;
+  PaginationInfo? get estudiantesSinAsignarPaginationInfo => _estudiantesSinAsignarPaginationInfo;
 
   bool get isLoading => _state == GrupoState.loading;
   bool get hasError => _state == GrupoState.error;
@@ -367,5 +379,95 @@ class GrupoProvider with ChangeNotifier {
   void resetPagination() {
     _hasMoreData = true;
     _isLoadingMore = false;
+  }
+
+  /// Carga estudiantes asignados a un grupo específico
+  Future<void> loadEstudiantesByGrupo(String accessToken, String grupoId, {int? page, int? limit}) async {
+    try {
+      final response = await _academicService.getEstudiantesByGrupo(
+        accessToken,
+        grupoId,
+        page: page ?? 1,
+        limit: limit ?? 10,
+      );
+      if (response != null) {
+        _estudiantesByGrupo = response.users;
+        _estudiantesPaginationInfo = response.pagination;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading estudiantes by grupo: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Carga estudiantes sin asignar a ningún grupo
+  Future<void> loadEstudiantesSinAsignar(String accessToken, {int? page, int? limit}) async {
+    try {
+      final response = await _academicService.getEstudiantesSinAsignar(
+        accessToken,
+        page: page ?? 1,
+        limit: limit ?? 10,
+      );
+      if (response != null) {
+        _estudiantesSinAsignar = response.users;
+        _estudiantesSinAsignarPaginationInfo = response.pagination;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading estudiantes sin asignar: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Asigna un estudiante a un grupo
+  Future<bool> asignarEstudianteAGrupo(String accessToken, String grupoId, String estudianteId) async {
+    try {
+      final success = await _academicService.asignarEstudianteAGrupo(accessToken, grupoId, estudianteId);
+      if (success) {
+        // Actualizar las listas locales
+        final estudiante = _estudiantesSinAsignar.firstWhere((e) => e.id == estudianteId);
+        _estudiantesSinAsignar.removeWhere((e) => e.id == estudianteId);
+        _estudiantesByGrupo.add(estudiante);
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      debugPrint('Error asignando estudiante a grupo: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Desasigna un estudiante de un grupo
+  Future<bool> desasignarEstudianteDeGrupo(String accessToken, String grupoId, String estudianteId) async {
+    try {
+      final success = await _academicService.desasignarEstudianteDeGrupo(accessToken, grupoId, estudianteId);
+      if (success) {
+        // Actualizar las listas locales
+        final estudiante = _estudiantesByGrupo.firstWhere((e) => e.id == estudianteId);
+        _estudiantesByGrupo.removeWhere((e) => e.id == estudianteId);
+        _estudiantesSinAsignar.add(estudiante);
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      debugPrint('Error desasignando estudiante de grupo: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Limpia los datos de estudiantes
+  void clearEstudiantesData() {
+    _estudiantesByGrupo = [];
+    _estudiantesSinAsignar = [];
+    _estudiantesPaginationInfo = null;
+    _estudiantesSinAsignarPaginationInfo = null;
+    notifyListeners();
   }
 }

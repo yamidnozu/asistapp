@@ -10,7 +10,11 @@ export class AuthController {
    */
   public static async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
+      console.log('🔐 LOGIN: Request received', request.body);
       const credentials = request.body;
+
+  // Debug: registrar intentos de login para diagnóstico (no guardar contraseñas en logs)
+  console.log('🔐 AUTH: intento de login para email:', credentials.email);
 
       if (!credentials.email || !credentials.password) {
         throw new ValidationError('Email y contraseña son requeridos');
@@ -70,6 +74,70 @@ export class AuthController {
       return reply.code(200).send({
         success: true,
         data: instituciones,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene los periodos académicos del usuario autenticado
+   */
+  public static async getUserPeriodos(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const user = request.user;
+
+      if (!user) {
+        throw new AuthenticationError('Usuario no autenticado');
+      }
+
+      // Obtener las instituciones del usuario
+      const usuarioInstituciones = await prisma.usuarioInstitucion.findMany({
+        where: {
+          usuarioId: user.id,
+          activo: true
+        },
+        include: {
+          institucion: {
+            include: {
+              periodosAcademicos: {
+                where: {
+                  activo: true
+                },
+                orderBy: {
+                  fechaInicio: 'desc'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Extraer todos los periodos únicos
+      const periodosMap = new Map();
+      usuarioInstituciones.forEach((ui: any) => {
+        if (ui.institucion?.periodosAcademicos) {
+          ui.institucion.periodosAcademicos.forEach((periodo: any) => {
+            if (!periodosMap.has(periodo.id)) {
+              periodosMap.set(periodo.id, {
+                id: periodo.id,
+                nombre: periodo.nombre,
+                fechaInicio: periodo.fechaInicio.toISOString().split('T')[0],
+                fechaFin: periodo.fechaFin.toISOString().split('T')[0],
+                activo: periodo.activo,
+                institucionId: periodo.institucionId,
+                institucionNombre: ui.institucion.nombre
+              });
+            }
+          });
+        }
+      });
+
+      const periodos = Array.from(periodosMap.values());
+
+      return reply.code(200).send({
+        success: true,
+        data: periodos,
       });
     } catch (error) {
       throw error;

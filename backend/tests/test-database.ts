@@ -16,7 +16,7 @@ class TestDatabaseService {
   public getClient(): PrismaClient {
     if (!this.prisma) {
       this.prisma = new PrismaClient({
-        datasourceUrl: 'file:./test.db',
+        datasourceUrl: process.env.DATABASE_URL,
       });
     }
     return this.prisma;

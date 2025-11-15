@@ -44,6 +44,24 @@ export interface GrupoResponse {
   };
 }
 
+export interface EstudianteGrupoResponse {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  usuario?: {
+    id: string;
+    nombres: string;
+    apellidos: string;
+    email?: string;
+    activo?: boolean;
+    createdAt?: string;
+  } | null;
+  identificacion: string;
+  telefonoResponsable: string | null;
+  createdAt: string;
+  asignadoAt: string; // Fecha de asignación al grupo
+}
+
 export class GrupoService {
   /**
    * Obtiene todos los grupos de una institución con paginación y filtros
@@ -510,6 +528,443 @@ export class GrupoService {
     } catch (error) {
       console.error('Error al obtener grupos disponibles:', error);
       throw new Error('Error al obtener los grupos disponibles');
+    }
+  }
+
+  /**
+   * Activa/desactiva un grupo cambiando su periodo académico
+   */
+  public static async toggleGrupoStatus(id: string): Promise<GrupoResponse | null> {
+    try {
+      // Obtener el grupo actual
+      const grupo = await prisma.grupo.findUnique({
+        where: { id },
+        include: {
+          periodoAcademico: true,
+          _count: {
+            select: {
+              estudiantesGrupos: true,
+              horarios: true,
+            },
+          },
+        },
+      });
+
+      if (!grupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      // Cambiar el periodo académico activo por uno inactivo o viceversa
+      const nuevoPeriodo = await prisma.periodoAcademico.findFirst({
+        where: {
+          institucionId: grupo.institucionId,
+          activo: !grupo.periodoAcademico.activo,
+        },
+        orderBy: {
+          fechaInicio: 'desc',
+        },
+      });
+
+      // Si no hay periodo alternativo, el grupo ya está en el estado correcto
+      if (!nuevoPeriodo) {
+        // En lugar de devolver el grupo, devolver null para indicar que no se cambió nada
+        // El controlador debe manejar este caso como éxito
+        return null;
+      }
+
+      // Actualizar el grupo con el nuevo periodo
+      const grupoActualizado = await prisma.grupo.update({
+        where: { id },
+        data: {
+          periodoId: nuevoPeriodo.id,
+        },
+        include: {
+          periodoAcademico: {
+            select: {
+              id: true,
+              nombre: true,
+              fechaInicio: true,
+              fechaFin: true,
+              activo: true,
+            },
+          },
+          _count: {
+            select: {
+              estudiantesGrupos: true,
+              horarios: true,
+            },
+          },
+        },
+      });
+
+      return {
+        id: grupoActualizado.id,
+        nombre: grupoActualizado.nombre,
+        grado: grupoActualizado.grado,
+        seccion: grupoActualizado.seccion,
+        periodoId: grupoActualizado.periodoId,
+        institucionId: grupoActualizado.institucionId,
+        createdAt: grupoActualizado.createdAt.toISOString(),
+        periodoAcademico: {
+          id: grupoActualizado.periodoAcademico.id,
+          nombre: grupoActualizado.periodoAcademico.nombre,
+          fechaInicio: grupoActualizado.periodoAcademico.fechaInicio.toISOString(),
+          fechaFin: grupoActualizado.periodoAcademico.fechaFin.toISOString(),
+          activo: grupoActualizado.periodoAcademico.activo,
+        },
+        _count: grupoActualizado._count,
+      };
+    } catch (error) {
+      console.error('Error al cambiar status del grupo:', error);
+      if (error instanceof NotFoundError || error instanceof ValidationError) {
+        throw error;
+      }
+      throw new Error('Error al cambiar el status del grupo');
+    }
+  }
+
+  /**
+   * Obtiene los estudiantes asignados a un grupo específico
+   */
+  public static async getEstudiantesByGrupo(grupoId: string, pagination?: PaginationParams): Promise<PaginatedResponse<EstudianteGrupoResponse>> {
+    try {
+      // Validar parámetros de paginación
+      const page = pagination?.page || 1;
+      const limit = pagination?.limit || 10;
+
+      if (page < 1 || limit < 1 || limit > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Verificar que el grupo existe
+      const grupo = await prisma.grupo.findUnique({
+        where: { id: grupoId },
+        select: { id: true, institucionId: true },
+      });
+
+      if (!grupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      // Obtener total de estudiantes asignados
+      const total = await prisma.estudianteGrupo.count({
+        where: { grupoId: grupoId },
+      });
+
+      // Obtener estudiantes asignados con paginación
+      const estudiantesGrupos = await prisma.estudianteGrupo.findMany({
+        where: { grupoId: grupoId },
+        skip,
+        take: limit,
+        orderBy: [
+          { createdAt: 'asc' }, // Ordenar por fecha de asignación
+        ],
+        include: {
+          estudiante: {
+            include: {
+              usuario: {
+                select: {
+                  nombres: true,
+                  apellidos: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: estudiantesGrupos.map((eg: any) => ({
+          id: eg.estudiante.id,
+          nombres: eg.estudiante.usuario.nombres,
+          apellidos: eg.estudiante.usuario.apellidos,
+          usuario: {
+            id: eg.estudiante.usuario.id,
+            nombres: eg.estudiante.usuario.nombres,
+            apellidos: eg.estudiante.usuario.apellidos,
+            email: eg.estudiante.usuario.email,
+            activo: eg.estudiante.usuario.activo,
+            createdAt: eg.estudiante.usuario.createdAt?.toISOString?.(),
+          },
+          identificacion: eg.estudiante.identificacion,
+          telefonoResponsable: eg.estudiante.telefonoResponsable,
+          createdAt: eg.estudiante.createdAt.toISOString(),
+          asignadoAt: eg.createdAt.toISOString(),
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error('Error al obtener estudiantes del grupo:', error);
+      if (error instanceof ValidationError || error instanceof NotFoundError) {
+        throw error;
+      }
+      throw new Error('Error al obtener los estudiantes del grupo');
+    }
+  }
+
+  /**
+   * Obtiene estudiantes sin asignar a ningún grupo en el período académico activo
+   */
+  public static async getEstudiantesSinGrupo(institucionId: string, pagination?: PaginationParams): Promise<PaginatedResponse<EstudianteGrupoResponse>> {
+    try {
+      // Validar parámetros de paginación
+      const page = pagination?.page || 1;
+      const limit = pagination?.limit || 10;
+
+      if (page < 1 || limit < 1 || limit > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Obtener el período académico activo de la institución
+      const periodoActivo = await prisma.periodoAcademico.findFirst({
+        where: {
+          institucionId: institucionId,
+          activo: true,
+        },
+      });
+
+      if (!periodoActivo) {
+        // Si no hay período activo, devolver lista vacía
+        return {
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        };
+      }
+
+      // Obtener estudiantes de la institución que no están asignados a ningún grupo del período activo
+      const estudiantesQuery = await prisma.estudiante.findMany({
+        where: {
+          usuario: {
+            usuarioInstituciones: {
+              some: {
+                institucionId: institucionId,
+                activo: true,
+              },
+            },
+          },
+          estudiantesGrupos: {
+            none: {
+              grupo: {
+                periodoId: periodoActivo.id,
+              },
+            },
+          },
+        },
+        include: {
+          usuario: {
+            select: {
+              nombres: true,
+              apellidos: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: [
+          { usuario: { apellidos: 'asc' } },
+          { usuario: { nombres: 'asc' } },
+        ],
+      });
+
+      // Obtener el total de estudiantes sin asignar
+      const total = await prisma.estudiante.count({
+        where: {
+          usuario: {
+            usuarioInstituciones: {
+              some: {
+                institucionId: institucionId,
+                activo: true,
+              },
+            },
+          },
+          estudiantesGrupos: {
+            none: {
+              grupo: {
+                periodoId: periodoActivo.id,
+              },
+            },
+          },
+        },
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: estudiantesQuery.map((estudiante: any) => ({
+          id: estudiante.id,
+          nombres: estudiante.usuario.nombres,
+          apellidos: estudiante.usuario.apellidos,
+          usuario: {
+            id: estudiante.usuario.id,
+            nombres: estudiante.usuario.nombres,
+            apellidos: estudiante.usuario.apellidos,
+            email: estudiante.usuario.email,
+            activo: estudiante.usuario.activo,
+            createdAt: estudiante.usuario.createdAt?.toISOString?.(),
+          },
+          identificacion: estudiante.identificacion,
+          telefonoResponsable: estudiante.telefonoResponsable,
+          createdAt: estudiante.createdAt.toISOString(),
+          asignadoAt: new Date().toISOString(), // No aplica para estudiantes sin asignar
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error('Error al obtener estudiantes sin grupo:', error);
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new Error('Error al obtener los estudiantes sin grupo');
+    }
+  }
+
+  /**
+   * Asigna un estudiante a un grupo
+   */
+  public static async asignarEstudiante(grupoId: string, estudianteId: string): Promise<boolean> {
+    try {
+      // Verificar que el grupo existe
+      const grupo = await prisma.grupo.findUnique({
+        where: { id: grupoId },
+        select: { id: true, institucionId: true, periodoId: true },
+      });
+
+      if (!grupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      // Verificar que el estudiante existe y pertenece a la misma institución
+      const estudiante = await prisma.estudiante.findFirst({
+        where: { id: estudianteId },
+        include: {
+          usuario: {
+            include: {
+              usuarioInstituciones: {
+                where: { activo: true },
+                select: { institucionId: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundError('Estudiante');
+      }
+
+      // Obtener la institución del estudiante
+      const estudianteInstitucionId = estudiante.usuario.usuarioInstituciones[0]?.institucionId;
+      if (!estudianteInstitucionId) {
+        throw new ValidationError('El estudiante no tiene una institución asignada');
+      }
+
+      if (estudianteInstitucionId !== grupo.institucionId) {
+        throw new ValidationError('El estudiante y el grupo deben pertenecer a la misma institución');
+      }
+
+      // Verificar que el estudiante no esté ya asignado a este grupo
+      const asignacionExistente = await prisma.estudianteGrupo.findFirst({
+        where: {
+          estudianteId: estudianteId,
+          grupoId: grupoId,
+        },
+      });
+
+      if (asignacionExistente) {
+        throw new ConflictError('El estudiante ya está asignado a este grupo');
+      }
+
+      // Verificar que el estudiante no esté asignado a otro grupo del mismo período
+      const asignacionPeriodo = await prisma.estudianteGrupo.findFirst({
+        where: {
+          estudianteId: estudianteId,
+          grupo: {
+            periodoId: grupo.periodoId,
+          },
+        },
+      });
+
+      if (asignacionPeriodo) {
+        throw new ConflictError('El estudiante ya está asignado a otro grupo en este período académico');
+      }
+
+      // Crear la asignación
+      await prisma.estudianteGrupo.create({
+        data: {
+          estudianteId: estudianteId,
+          grupoId: grupoId,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error al asignar estudiante al grupo:', error);
+      if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
+        throw error;
+      }
+      throw new Error('Error al asignar el estudiante al grupo');
+    }
+  }
+
+  /**
+   * Desasigna un estudiante de un grupo
+   */
+  public static async desasignarEstudiante(grupoId: string, estudianteId: string): Promise<boolean> {
+    try {
+      // Verificar que la asignación existe
+      const asignacion = await prisma.estudianteGrupo.findFirst({
+        where: {
+          estudianteId: estudianteId,
+          grupoId: grupoId,
+        },
+      });
+
+      if (!asignacion) {
+        throw new NotFoundError('Asignación de estudiante a grupo');
+      }
+
+      // Eliminar la asignación
+      await prisma.estudianteGrupo.deleteMany({
+        where: {
+          estudianteId: estudianteId,
+          grupoId: grupoId,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error al desasignar estudiante del grupo:', error);
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      throw new Error('Error al desasignar el estudiante del grupo');
     }
   }
 }

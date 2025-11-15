@@ -8,8 +8,11 @@ import horarioRoutes from './horario.routes';
 import institucionRoutes from './institucion.routes';
 import institutionAdminRoutes from './institution-admin.routes';
 import materiaRoutes from './materia.routes';
+import periodoAcademicoRoutes from './periodo-academico.routes';
 import profesorRoutes from './profesor.routes';
 import userRoutes from './user.routes';
+
+
 
 console.log('🔄 Iniciando registro de rutas...');
 
@@ -36,12 +39,15 @@ export default async function routes(fastify: FastifyInstance) {
     });
   });
 
+  console.log('🔐 Registrando rutas de autenticación...');
   await fastify.register(authRoutes, { prefix: '/auth' });
+  console.log('✅ Rutas de autenticación registradas exitosamente');
   await fastify.register(userRoutes, { prefix: '/usuarios' });
   await fastify.register(adminInstitucionRoutes, { prefix: '/admin-institucion' });
   await fastify.register(institutionAdminRoutes, { prefix: '/institution-admin' });
   await fastify.register(institucionRoutes, { prefix: '/instituciones' });
   await fastify.register(grupoRoutes, { prefix: '/grupos' });
+  await fastify.register(periodoAcademicoRoutes, { prefix: '/periodos-academicos' });
   await fastify.register(materiaRoutes, { prefix: '/materias' });
   await fastify.register(horarioRoutes, { prefix: '/horarios' });
   await fastify.register(profesorRoutes, { prefix: '/profesores' });

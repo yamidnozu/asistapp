@@ -14,6 +14,8 @@ export const setupErrorHandler = (fastify: FastifyInstance) => {
         success: false,
         error: error.message,
         code: error.code,
+        reason: (error as any).reason || undefined,
+        meta: (error as any).meta || undefined,
       });
     }
 

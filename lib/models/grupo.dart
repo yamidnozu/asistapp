@@ -26,15 +26,23 @@ class Grupo {
 
   factory Grupo.fromJson(Map<String, dynamic> json) {
     return Grupo(
-      id: json['id'],
-      nombre: json['nombre'],
-      grado: json['grado'],
+      id: json['id'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? '',
+      grado: json['grado'] as String? ?? '',
       seccion: json['seccion'],
-      periodoId: json['periodoId'],
-      institucionId: json['institucionId'],
-      createdAt: DateTime.parse(json['createdAt']),
-      periodoAcademico: PeriodoAcademico.fromJson(json['periodoAcademico']),
-      count: GrupoCount.fromJson(json['_count']),
+  periodoId: json['periodoId'] ?? '',
+  institucionId: json['institucionId'] ?? '',
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      periodoAcademico: json['periodoAcademico'] != null
+          ? PeriodoAcademico.fromJson(json['periodoAcademico'])
+          : PeriodoAcademico(
+              id: json['periodoId'] ?? '',
+              nombre: '',
+              fechaInicio: DateTime.now(),
+              fechaFin: DateTime.now(),
+              activo: false,
+            ),
+      count: json['_count'] != null ? GrupoCount.fromJson(json['_count']) : GrupoCount(estudiantesGrupos: 0, horarios: 0),
     );
   }
 
@@ -95,11 +103,17 @@ class PeriodoAcademico {
   });
 
   factory PeriodoAcademico.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      final parsed = DateTime.tryParse(value);
+      return parsed ?? DateTime.now();
+    }
+
     return PeriodoAcademico(
-      id: json['id'],
-      nombre: json['nombre'],
-      fechaInicio: DateTime.parse(json['fechaInicio']),
-      fechaFin: DateTime.parse(json['fechaFin']),
+      id: json['id'] ?? '',
+      nombre: json['nombre'] ?? '',
+      fechaInicio: parseDate(json['fechaInicio']),
+      fechaFin: parseDate(json['fechaFin']),
       activo: json['activo'] ?? false,
     );
   }

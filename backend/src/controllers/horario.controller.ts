@@ -46,6 +46,29 @@ export class HorarioController {
    */
   public static async getAll(request: AuthenticatedRequest & FastifyRequest<{ Querystring: GetHorariosQuery }>, reply: FastifyReply) {
     try {
+      console.log('🔍 Verificando usuario en getAll horarios:', request.user);
+
+      // Verificar autorización manualmente
+      if (!request.user) {
+        console.log('❌ No hay usuario autenticado');
+        return reply.code(401).send({
+          success: false,
+          error: 'Usuario no autenticado',
+          code: 'AUTHENTICATION_ERROR',
+        });
+      }
+
+      if (request.user.rol !== 'admin_institucion') {
+        console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a horarios`);
+        return reply.code(403).send({
+          success: false,
+          error: 'Acceso denegado: se requiere rol de administrador de institución',
+          code: 'AUTHORIZATION_ERROR',
+        });
+      }
+
+      console.log('✅ Autorización exitosa para admin_institucion');
+
       // Obtener la institución del admin autenticado
       const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
         where: { usuarioId: request.user!.id, activo: true },
@@ -79,6 +102,11 @@ export class HorarioController {
         profesorId: profesorId || undefined,
         diaSemana: diaSemana ? parseInt(diaSemana, 10) : undefined,
       };
+
+      // Validar día de semana si se proporciona
+      if (diaSemana && (filters.diaSemana! < 1 || filters.diaSemana! > 7)) {
+        throw new ValidationError('El día de semana debe estar entre 1 (Lunes) y 7 (Domingo)');
+      }
 
       const result = await HorarioService.getAllHorariosByInstitucion(usuarioInstitucion.institucionId, pagination, filters);
 
@@ -172,6 +200,10 @@ export class HorarioController {
    */
   public static async create(request: AuthenticatedRequest & FastifyRequest<{ Body: CreateHorarioBody }>, reply: FastifyReply) {
     try {
+      console.log('🔍 CONTROLLER: Iniciando create horario');
+      console.log('🔍 CONTROLLER: Body recibido:', JSON.stringify(request.body, null, 2));
+      console.log('🔍 CONTROLLER: Usuario:', request.user?.id);
+
       const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
         where: { usuarioId: request.user!.id, activo: true },
       });
@@ -182,6 +214,8 @@ export class HorarioController {
           error: 'El usuario no tiene una institución asignada',
         });
       }
+
+      console.log('🔍 CONTROLLER: Institución del usuario:', usuarioInstitucion.institucionId);
 
       // Validar formato de UUIDs antes de consultar la base de datos
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -208,6 +242,19 @@ export class HorarioController {
         institucionId: usuarioInstitucion.institucionId,
       };
 
+      console.log('🔍 CONTROLLER: Llamando al servicio con data:', JSON.stringify(data, null, 2));
+      
+      // Validar que todos los campos requeridos estén presentes y sean válidos
+      console.log('🔍 CONTROLLER: Validando campos...');
+      console.log('periodoId:', data.periodoId, 'tipo:', typeof data.periodoId, 'longitud:', data.periodoId?.length);
+      console.log('grupoId:', data.grupoId, 'tipo:', typeof data.grupoId, 'longitud:', data.grupoId?.length);
+      console.log('materiaId:', data.materiaId, 'tipo:', typeof data.materiaId, 'longitud:', data.materiaId?.length);
+      console.log('profesorId:', data.profesorId, 'tipo:', typeof data.profesorId, 'longitud:', data.profesorId?.length);
+      console.log('diaSemana:', data.diaSemana, 'tipo:', typeof data.diaSemana);
+      console.log('horaInicio:', data.horaInicio, 'tipo:', typeof data.horaInicio);
+      console.log('horaFin:', data.horaFin, 'tipo:', typeof data.horaFin);
+      console.log('institucionId:', data.institucionId, 'tipo:', typeof data.institucionId, 'longitud:', data.institucionId?.length);
+
       const horario = await HorarioService.createHorario(data);
 
       return reply.code(201).send({
@@ -216,7 +263,8 @@ export class HorarioController {
         message: 'Horario creado exitosamente',
       });
     } catch (error) {
-      console.error('Error en create horario:', error);
+      console.error('❌ CONTROLLER: Error en create horario:', error);
+      console.error('❌ CONTROLLER: Stack trace:', (error as Error).stack);
       
       // Si es un error de validación de Prisma (IDs inválidos), devolver 400
       if ((error as any).code === 'P2025' || (error as any).code === 'P2003') {

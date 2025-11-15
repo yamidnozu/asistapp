@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../models/grupo.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/grupo_provider.dart';
+import '../../providers/periodo_academico_provider.dart';
 import '../../services/academic_service.dart' as academic_service;
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
@@ -99,8 +101,8 @@ class _GruposScreenState extends State<GruposScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, GrupoProvider>(
-      builder: (context, authProvider, grupoProvider, child) {
+    return Consumer3<AuthProvider, GrupoProvider, PeriodoAcademicoProvider>(
+      builder: (context, authProvider, grupoProvider, periodoProvider, child) {
         return ClarityManagementPage(
           title: 'Gestión de Grupos',
           isLoading: grupoProvider.isLoading,
@@ -378,10 +380,7 @@ class _GruposScreenState extends State<GruposScreen> {
   }
 
   void _navigateToGrupoDetail(Grupo grupo) {
-    // TODO: Implementar navegación a detalle de grupo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Detalle de grupo: ${grupo.nombre}')),
-    );
+    context.push('/academic/grupos/${grupo.id}', extra: grupo);
   }
 }
 
@@ -399,7 +398,21 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
   final _gradoController = TextEditingController();
   final _seccionController = TextEditingController();
 
+  String? _selectedPeriodoId;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cargar períodos activos al inicializar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+      if (authProvider.accessToken != null) {
+        periodoProvider.loadPeriodosActivos(authProvider.accessToken!);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -414,67 +427,96 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
-      title: Text('Crear Grupo', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: InputDecoration(
-                labelText: 'Nombre del Grupo',
-                hintText: 'Ej: Grupo A, 1ro Básico A',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
+    return Consumer<PeriodoAcademicoProvider>(
+      builder: (context, periodoProvider, child) {
+        return AlertDialog(
+          title: Text('Crear Grupo', style: textStyles.headlineMedium),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _nombreController,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre del Grupo',
+                    hintText: 'Ej: Grupo A, 1ro Básico A',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El nombre es requerido';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+                TextFormField(
+                  controller: _gradoController,
+                  decoration: InputDecoration(
+                    labelText: 'Grado',
+                    hintText: 'Ej: 1ro, 2do, 3ro',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El grado es requerido';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+                TextFormField(
+                  controller: _seccionController,
+                  decoration: InputDecoration(
+                    labelText: 'Sección (opcional)',
+                    hintText: 'Ej: A, B, C',
+                  ),
+                ),
+                SizedBox(height: spacing.md),
+                DropdownButtonFormField<String>(
+                  value: _selectedPeriodoId,
+                  decoration: InputDecoration(
+                    labelText: 'Período Académico',
+                    hintText: 'Selecciona un período académico',
+                  ),
+                  items: periodoProvider.periodosActivos.map((periodo) {
+                    return DropdownMenuItem<String>(
+                      value: periodo.id,
+                      child: Text('${periodo.nombre} (${periodo.fechaInicio.year}-${periodo.fechaFin.year})'),
+                    );
+                  }).toList(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Debes seleccionar un período académico';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedPeriodoId = value;
+                    });
+                  },
+                ),
+              ],
             ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _gradoController,
-              decoration: InputDecoration(
-                labelText: 'Grado',
-                hintText: 'Ej: 1ro, 2do, 3ro',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El grado es requerido';
-                }
-                return null;
-              },
+          ),
+          actions: [
+            TextButton(
+              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+              child: Text('Cancelar'),
             ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _seccionController,
-              decoration: InputDecoration(
-                labelText: 'Sección (opcional)',
-                hintText: 'Ej: A, B, C',
-              ),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _createGrupo,
+              child: _isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('Crear'),
             ),
           ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createGrupo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Crear'),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -487,16 +529,13 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
 
-      // TODO: Obtener periodo académico activo
-      const periodoId = '550e8400-e29b-41d4-a716-446655440000'; // ID por defecto
-
       final success = await grupoProvider.createGrupo(
         authProvider.accessToken!,
         academic_service.CreateGrupoRequest(
           nombre: _nombreController.text.trim(),
           grado: _gradoController.text.trim(),
           seccion: _seccionController.text.trim().isEmpty ? null : _seccionController.text.trim(),
-          periodoId: periodoId,
+          periodoId: _selectedPeriodoId!,
         ),
       );
 
@@ -571,66 +610,76 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
 
     return AlertDialog(
       title: Text('Editar Grupo', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: InputDecoration(
-                labelText: 'Nombre del Grupo',
-                hintText: 'Ej: Grupo A, 1ro Básico A',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _nombreController,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre del Grupo',
+                    hintText: 'Ej: Grupo A, 1ro Básico A',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El nombre es requerido';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+                TextFormField(
+                  controller: _gradoController,
+                  decoration: InputDecoration(
+                    labelText: 'Grado',
+                    hintText: 'Ej: 1ro, 2do, 3ro',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El grado es requerido';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: spacing.md),
+                TextFormField(
+                  controller: _seccionController,
+                  decoration: InputDecoration(
+                    labelText: 'Sección (opcional)',
+                    hintText: 'Ej: A, B, C',
+                  ),
+                ),
+                SizedBox(height: spacing.md),
+                TextFormField(
+                  initialValue: '${widget.grupo.periodoAcademico.nombre} (${widget.grupo.periodoAcademico.fechaInicio.year}-${widget.grupo.periodoAcademico.fechaFin.year})',
+                  decoration: InputDecoration(
+                    labelText: 'Período Académico',
+                    hintText: 'Período académico del grupo',
+                  ),
+                  readOnly: true,
+                  enabled: false,
+                ),
+              ],
             ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _gradoController,
-              decoration: InputDecoration(
-                labelText: 'Grado',
-                hintText: 'Ej: 1ro, 2do, 3ro',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El grado es requerido';
-                }
-                return null;
-              },
+          ),
+          actions: [
+            TextButton(
+              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+              child: Text('Cancelar'),
             ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _seccionController,
-              decoration: InputDecoration(
-                labelText: 'Sección (opcional)',
-                hintText: 'Ej: A, B, C',
-              ),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _updateGrupo,
+              child: _isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('Actualizar'),
             ),
           ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updateGrupo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Actualizar'),
-        ),
-      ],
-    );
+        );
   }
 
   Future<void> _updateGrupo() async {

@@ -309,7 +309,7 @@ export class MateriaService {
 
       // Verificar que no tenga horarios asignados
       if (existingMateria._count.horarios > 0) {
-        throw new ValidationError('No se puede eliminar la materia porque tiene horarios asignados');
+        throw new ConflictError('No se puede eliminar la materia porque tiene horarios asignados');
       }
 
       await prisma.materia.delete({
@@ -319,7 +319,7 @@ export class MateriaService {
       return true;
     } catch (error) {
       console.error('Error al eliminar materia:', error);
-      if (error instanceof NotFoundError || error instanceof ValidationError) {
+      if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
       throw new Error('Error al eliminar la materia');

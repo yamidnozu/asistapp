@@ -222,7 +222,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
           CircleAvatar(
             backgroundColor: colors.primary.withValues(alpha: 0.1),
             child: Text(
-              user.nombres.isNotEmpty ? user.nombres[0].toUpperCase() : '?',
+              user.inicial,
               style: textStyles.bodyMedium.withColor(colors.primary),
             ),
           ),

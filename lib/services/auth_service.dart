@@ -64,6 +64,9 @@ class AuthService {
       });
       
       
+      debugPrint('AuthService.login - URL: $url');
+      debugPrint('AuthService.login - Request body: $requestBody');
+
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -159,7 +162,7 @@ class AuthService {
     try {
   final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
-        Uri.parse('$baseUrlValue/auth/instituciones'),
+        Uri.parse('$baseUrlValue/auth/institutions'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

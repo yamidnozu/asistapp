@@ -317,6 +317,34 @@ export default async function grupoRoutes(fastify: FastifyInstance) {
     });
 
     /**
+     * PATCH /grupos/:id/toggle-status
+     * Activa/desactiva un grupo
+     */
+    grupoRoutes.patch('/:id/toggle-status', {
+      handler: GrupoController.toggleStatus as any,
+      schema: {
+        description: 'Activar/desactivar un grupo',
+        tags: ['Grupos'],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID del grupo' },
+          },
+          required: ['id'],
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    });
+
+    /**
      * DELETE /grupos/:id
      * Elimina un grupo
      */
@@ -331,6 +359,211 @@ export default async function grupoRoutes(fastify: FastifyInstance) {
             id: { type: 'string', description: 'ID del grupo' },
           },
           required: ['id'],
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    });
+
+    /**
+     * GET /grupos/:id/estudiantes
+     * Obtiene los estudiantes asignados a un grupo
+     */
+    grupoRoutes.get('/:id/estudiantes', {
+      handler: GrupoController.getEstudiantesByGrupo as any,
+      schema: {
+        description: 'Obtener estudiantes asignados a un grupo',
+        tags: ['Grupos'],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID del grupo' },
+          },
+          required: ['id'],
+        },
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'string', description: 'Número de página' },
+            limit: { type: 'string', description: 'Elementos por página' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'array',
+                    items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    nombres: { type: 'string' },
+                    apellidos: { type: 'string' },
+                    usuario: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombres: { type: 'string' },
+                        apellidos: { type: 'string' },
+                        email: { type: 'string' },
+                        activo: { type: 'boolean' },
+                        createdAt: { type: 'string' },
+                      }
+                    },
+                    identificacion: { type: 'string' },
+                    telefonoResponsable: { type: 'string', nullable: true },
+                    createdAt: { type: 'string' },
+                    asignadoAt: { type: 'string' },
+                  },
+                },
+              },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'number' },
+                  limit: { type: 'number' },
+                  total: { type: 'number' },
+                  totalPages: { type: 'number' },
+                  hasNext: { type: 'boolean' },
+                  hasPrev: { type: 'boolean' },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    /**
+     * GET /grupos/estudiantes-sin-asignar
+     * Obtiene estudiantes sin asignar a ningún grupo en el período activo
+     */
+    grupoRoutes.get('/estudiantes-sin-asignar', {
+      handler: GrupoController.getEstudiantesSinAsignar as any,
+      schema: {
+        description: 'Obtener estudiantes sin asignar a grupos',
+        tags: ['Grupos'],
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'string', description: 'Número de página' },
+            limit: { type: 'string', description: 'Elementos por página' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'array',
+                    items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    nombres: { type: 'string' },
+                    apellidos: { type: 'string' },
+                    usuario: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombres: { type: 'string' },
+                        apellidos: { type: 'string' },
+                        email: { type: 'string' },
+                        activo: { type: 'boolean' },
+                        createdAt: { type: 'string' },
+                      }
+                    },
+                    identificacion: { type: 'string' },
+                    telefonoResponsable: { type: 'string', nullable: true },
+                    createdAt: { type: 'string' },
+                    asignadoAt: { type: 'string' },
+                  },
+                },
+              },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'number' },
+                  limit: { type: 'number' },
+                  total: { type: 'number' },
+                  totalPages: { type: 'number' },
+                  hasNext: { type: 'boolean' },
+                  hasPrev: { type: 'boolean' },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    /**
+     * POST /grupos/:id/asignar-estudiante
+     * Asigna un estudiante a un grupo
+     */
+    grupoRoutes.post('/:id/asignar-estudiante', {
+      handler: GrupoController.asignarEstudiante as any,
+      schema: {
+        description: 'Asignar estudiante a un grupo',
+        tags: ['Grupos'],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID del grupo' },
+          },
+          required: ['id'],
+        },
+        body: {
+          type: 'object',
+          properties: {
+            estudianteId: { type: 'string', description: 'ID del estudiante' },
+          },
+          required: ['estudianteId'],
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    });
+
+    /**
+     * POST /grupos/:id/desasignar-estudiante
+     * Desasigna un estudiante de un grupo
+     */
+    grupoRoutes.post('/:id/desasignar-estudiante', {
+      handler: GrupoController.desasignarEstudiante as any,
+      schema: {
+        description: 'Desasignar estudiante de un grupo',
+        tags: ['Grupos'],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID del grupo' },
+          },
+          required: ['id'],
+        },
+        body: {
+          type: 'object',
+          properties: {
+            estudianteId: { type: 'string', description: 'ID del estudiante' },
+          },
+          required: ['estudianteId'],
         },
         response: {
           200: {

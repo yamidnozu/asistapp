@@ -20,8 +20,8 @@ import '../services/academic_service.dart';
 /// Este archivo contiene funciones para probar todas las funcionalidades
 /// desde la creación de instituciones hasta el marcado de asistencias
 class TestFlowManager {
-  static const String testSuperAdminEmail = 'superadmin@test.com';
-  static const String testSuperAdminPassword = 'Super123!';
+  static const String testSuperAdminEmail = 'superadmin@asistapp.com';
+  static const String testSuperAdminPassword = 'Admin123!';
 
   /// ===========================================
   /// FLUJO COMPLETO DE PRUEBAS - PASO A PASO

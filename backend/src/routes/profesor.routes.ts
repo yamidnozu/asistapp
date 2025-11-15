@@ -1,16 +1,39 @@
 import { FastifyInstance } from 'fastify';
 import { ProfesorController } from '../controllers/profesor.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
 export default async function profesorRoutes(fastify: FastifyInstance) {
 
   fastify.register(async function (profesorRoutes) {
 
     profesorRoutes.addHook('preHandler', authenticate);
-    profesorRoutes.addHook('preHandler', authorize(['profesor']));
+    // Removido: profesorRoutes.addHook('preHandler', authorize(['profesor']));
 
     profesorRoutes.get('/dashboard/clases-hoy', {
-      handler: ProfesorController.getClasesDelDia as any,
+      handler: async (request: AuthenticatedRequest, reply) => {
+        console.log('🔍 GET /profesores/dashboard/clases-hoy - Verificando usuario:', request.user?.rol);
+        
+        if (!request.user) {
+          console.log('❌ No hay usuario autenticado');
+          return reply.code(401).send({
+            success: false,
+            error: 'Usuario no autenticado',
+            code: 'AUTHENTICATION_ERROR',
+          });
+        }
+
+        if (request.user.rol !== 'profesor') {
+          console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a dashboard profesor`);
+          return reply.code(403).send({
+            success: false,
+            error: 'Acceso denegado: se requiere rol de profesor',
+            code: 'AUTHORIZATION_ERROR',
+          });
+        }
+
+        console.log('✅ Autorización exitosa, llamando al controlador');
+        return ProfesorController.getClasesDelDia(request as any, reply);
+      },
       schema: {
         description: 'Obtiene las clases que el profesor tiene hoy',
         tags: ['Profesores - Dashboard'],
@@ -94,7 +117,30 @@ export default async function profesorRoutes(fastify: FastifyInstance) {
     });
 
     profesorRoutes.get('/dashboard/clases/:diaSemana', {
-      handler: ProfesorController.getClasesPorDia as any,
+      handler: async (request: AuthenticatedRequest, reply) => {
+        console.log('🔍 GET /profesores/dashboard/clases/:diaSemana - Verificando usuario:', request.user?.rol);
+        
+        if (!request.user) {
+          console.log('❌ No hay usuario autenticado');
+          return reply.code(401).send({
+            success: false,
+            error: 'Usuario no autenticado',
+            code: 'AUTHENTICATION_ERROR',
+          });
+        }
+
+        if (request.user.rol !== 'profesor') {
+          console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a dashboard profesor`);
+          return reply.code(403).send({
+            success: false,
+            error: 'Acceso denegado: se requiere rol de profesor',
+            code: 'AUTHORIZATION_ERROR',
+          });
+        }
+
+        console.log('✅ Autorización exitosa, llamando al controlador');
+        return ProfesorController.getClasesPorDia(request as any, reply);
+      },
       schema: {
         description: 'Obtiene las clases que el profesor tiene en un día específico de la semana',
         tags: ['Profesores - Dashboard'],
@@ -196,7 +242,30 @@ export default async function profesorRoutes(fastify: FastifyInstance) {
     });
 
     profesorRoutes.get('/dashboard/horario-semanal', {
-      handler: ProfesorController.getHorarioSemanal as any,
+      handler: async (request: AuthenticatedRequest, reply) => {
+        console.log('🔍 GET /profesores/dashboard/horario-semanal - Verificando usuario:', request.user?.rol);
+        
+        if (!request.user) {
+          console.log('❌ No hay usuario autenticado');
+          return reply.code(401).send({
+            success: false,
+            error: 'Usuario no autenticado',
+            code: 'AUTHENTICATION_ERROR',
+          });
+        }
+
+        if (request.user.rol !== 'profesor') {
+          console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a dashboard profesor`);
+          return reply.code(403).send({
+            success: false,
+            error: 'Acceso denegado: se requiere rol de profesor',
+            code: 'AUTHORIZATION_ERROR',
+          });
+        }
+
+        console.log('✅ Autorización exitosa, llamando al controlador');
+        return ProfesorController.getHorarioSemanal(request as any, reply);
+      },
       schema: {
         description: 'Obtiene el horario semanal completo del profesor',
         tags: ['Profesores - Dashboard'],

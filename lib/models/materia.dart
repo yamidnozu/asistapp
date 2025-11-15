@@ -15,11 +15,11 @@ class Materia {
 
   factory Materia.fromJson(Map<String, dynamic> json) {
     return Materia(
-      id: json['id'],
-      nombre: json['nombre'],
+      id: json['id'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? '',
       codigo: json['codigo'],
-      institucionId: json['institucionId'],
-      createdAt: DateTime.parse(json['createdAt']),
+      institucionId: json['institucionId'] as String? ?? '',
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
     );
   }
 

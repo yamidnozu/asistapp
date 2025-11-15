@@ -4,6 +4,7 @@ import '../services/academic_service.dart' as academic_service;
 import '../models/horario.dart';
 import '../models/clase_del_dia.dart';
 import '../models/user.dart'; // Para PaginationInfo
+import '../models/conflict_error.dart';
 
 enum HorarioState {
   initial,
@@ -17,6 +18,7 @@ class HorarioProvider with ChangeNotifier {
 
   HorarioState _state = HorarioState.initial;
   String? _errorMessage;
+  ConflictError? _conflictError;
   List<Horario> _horarios = [];
   List<ClaseDelDia> _clasesDelDia = [];
   List<ClaseDelDia> _horarioSemanal = [];
@@ -32,6 +34,7 @@ class HorarioProvider with ChangeNotifier {
   // Getters
   HorarioState get state => _state;
   String? get errorMessage => _errorMessage;
+  ConflictError? get conflictError => _conflictError;
   List<Horario> get horarios => _horarios;
   List<ClaseDelDia> get clasesDelDia => _clasesDelDia;
   List<ClaseDelDia> get horarioSemanal => _horarioSemanal;
@@ -49,6 +52,14 @@ class HorarioProvider with ChangeNotifier {
   // Computed properties
   List<Horario> get horariosActivos => _horarios.where((horario) => horario.periodoAcademico.activo).toList();
 
+  /// 🔧 NUEVO: Devuelve SOLO los horarios del grupo seleccionado
+  /// Utilizado para renderizar la grilla (grid de horarios)
+  /// Mientras que _horarios contiene TODOS los horarios del período (para detectar conflictos)
+  List<Horario> get horariosDelGrupoSeleccionado {
+    if (_selectedGrupoId == null) return [];
+    return _horarios.where((h) => h.grupo.id == _selectedGrupoId).toList();
+  }
+
   // Número de horarios actualmente cargados en memoria (página actual)
   int get loadedHorariosCount => _horarios.length;
   int get clasesDelDiaCount => _clasesDelDia.length;
@@ -60,6 +71,10 @@ class HorarioProvider with ChangeNotifier {
   void _setState(HorarioState newState, [String? error]) {
     _state = newState;
     _errorMessage = error;
+    // Limpiar el error de conflicto cuando cambie el estado
+    if (newState != HorarioState.error) {
+      _conflictError = null;
+    }
     notifyListeners();
   }
 
@@ -119,6 +134,56 @@ class HorarioProvider with ChangeNotifier {
     }
   }
 
+  /// Carga horarios del grupo Y TODOS los horarios del período (para detectar conflictos)
+  /// Sin sobrescribirse entre sí
+  Future<void> loadHorariosForGrupoWithConflictDetection(
+    String accessToken,
+    String grupoId,
+    String periodoId,
+  ) async {
+    if (_state == HorarioState.loading) return;
+
+    _setState(HorarioState.loading);
+    _selectedGrupoId = grupoId;
+    _selectedPeriodoId = periodoId;
+
+    try {
+      debugPrint('HorarioProvider: Cargando horarios para grupo $grupoId y período $periodoId...');
+
+      // Cargar ambas solicitudes en paralelo
+      final grupoHorariosTask = _academicService.getHorariosPorGrupo(accessToken, grupoId);
+      final periodHorariosTask = _academicService.getHorarios(
+        accessToken,
+        page: 1,
+        limit: 100, // 🔧 Máximo permitido por el backend
+        periodoId: periodoId,
+      );
+
+      final grupoHorarios = await grupoHorariosTask;
+      final periodResponse = await periodHorariosTask;
+
+      if (grupoHorarios != null && periodResponse != null) {
+        debugPrint('HorarioProvider: Recibidos ${grupoHorarios.length} horarios del grupo');
+        debugPrint('HorarioProvider: Recibidos ${periodResponse.horarios.length} horarios del período');
+
+        // IMPORTANTE: Usar TODOS los horarios del período para detectar conflictos
+        // Pero mantener una referencia al grupo para la pantalla
+        _horarios = periodResponse.horarios;
+        _selectedGrupoId = grupoId; // Guardar el grupo seleccionado
+        _paginationInfo = periodResponse.pagination;
+        _hasMoreData = false;
+        _setState(HorarioState.loaded);
+
+        debugPrint('HorarioProvider: Total horarios en memoria: ${_horarios.length}');
+      } else {
+        _setState(HorarioState.error, 'Error al cargar horarios');
+      }
+    } catch (e) {
+      debugPrint('HorarioProvider: Error loading horarios with conflict detection: $e');
+      _setState(HorarioState.error, e.toString());
+    }
+  }
+
   /// Carga un horario específico por ID
   Future<void> loadHorarioById(String accessToken, String horarioId) async {
     _setState(HorarioState.loading);
@@ -154,7 +219,15 @@ class HorarioProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error creating horario: $e');
-      _setState(HorarioState.error, e.toString());
+      final errorString = e.toString();
+
+      // Verificar si es un error de conflicto (HTTP 409)
+      if (errorString.contains('409') || errorString.contains('Conflict')) {
+        _conflictError = ConflictError.fromBackendError(errorString);
+        _setState(HorarioState.error, _conflictError!.userFriendlyMessage);
+      } else {
+        _setState(HorarioState.error, errorString);
+      }
       return false;
     }
   }
@@ -185,7 +258,15 @@ class HorarioProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error updating horario: $e');
-      _setState(HorarioState.error, e.toString());
+      final errorString = e.toString();
+
+      // Verificar si es un error de conflicto (HTTP 409)
+      if (errorString.contains('409') || errorString.contains('Conflict')) {
+        _conflictError = ConflictError.fromBackendError(errorString);
+        _setState(HorarioState.error, _conflictError!.userFriendlyMessage);
+      } else {
+        _setState(HorarioState.error, errorString);
+      }
       return false;
     }
   }
@@ -406,4 +487,44 @@ class HorarioProvider with ChangeNotifier {
     _hasMoreData = true;
     _isLoadingMore = false;
   }
+
+  /// Obtiene profesores disponibles para un horario específico
+  /// Sin conflictos en ese día y hora
+  List<User> getProfesoresDisponibles(
+    List<User> allProfesors,
+    int diaSemana,
+    String horaInicio,
+    String horaFin,
+  ) {
+    final profesoresConConflicto = <String>{};
+
+    // Convertir horas a minutos
+    final inicioMinutos = _timeToMinutes(horaInicio);
+    final finMinutos = _timeToMinutes(horaFin);
+
+    // Encontrar profesores con conflictos
+    for (final horario in _horarios) {
+      if (horario.diaSemana == diaSemana && horario.profesor != null) {
+        final hInicio = _timeToMinutes(horario.horaInicio);
+        final hFin = _timeToMinutes(horario.horaFin);
+
+        // Hay conflicto si se solapan los horarios
+        if (inicioMinutos < hFin && finMinutos > hInicio) {
+          profesoresConConflicto.add(horario.profesor!.id);
+        }
+      }
+    }
+
+    // Retornar solo los profesores sin conflictos
+    return allProfesors.where((profesor) => !profesoresConConflicto.contains(profesor.id)).toList();
+  }
+
+  /// Convierte una hora en formato HH:MM a minutos
+  int _timeToMinutes(String time) {
+    final parts = time.split(':');
+    final hours = int.parse(parts[0]);
+    final minutes = int.parse(parts[1]);
+    return hours * 60 + minutes;
+  }
+
 }

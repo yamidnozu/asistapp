@@ -18,15 +18,15 @@ services:
       - asistapp-network
 
   # Servicio del Backend (Node.js)
-  backend:
+  app:
     build:
       context: ./backend
       dockerfile: Dockerfile
     image: asistapp_backend:latest
-    container_name: asistapp_backend
+    container_name: backend-app-v3
     restart: always
     ports:
-      - "3001:3000"
+      - "3002:3000"
     environment:
       DATABASE_URL: "postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}?schema=public"
       PORT: 3000

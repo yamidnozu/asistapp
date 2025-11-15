@@ -401,7 +401,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   ? colors.warning.withValues(alpha: 0.3)
                   : colors.primary.withValues(alpha: 0.1),
               child: Text(
-                estudiante.nombres[0].toUpperCase(),
+                estudiante.inicial,
                 style: TextStyle(
                   color: estaSeleccionado ? colors.warning : colors.primary,
                   fontWeight: FontWeight.bold,

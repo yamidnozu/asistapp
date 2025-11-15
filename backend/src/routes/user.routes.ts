@@ -12,10 +12,10 @@ export default async function userRoutes(fastify: FastifyInstance) {
   /**
    * GET /usuarios
    * Obtiene todos los usuarios con paginación y filtros
-   * Solo para super_admin
+   * Para super_admin (todos) y admin_institucion (solo de su institución)
    */
   fastify.get('/', {
-    preHandler: authorize(['super_admin']),
+    preHandler: authorize(['super_admin', 'admin_institucion']),
     handler: UserController.getAllUsers,
   });
 

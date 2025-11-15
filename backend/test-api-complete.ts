@@ -10,7 +10,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 // Configuración base
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3002';
 
 // Interfaces para respuestas
 interface AuthResponse {
@@ -367,7 +367,7 @@ class CompleteFlowTester {
     console.log('\n📱 1.1 LOGIN - Simulando login desde Flutter');
 
     countTest(await this.login('admin@sanjose.edu', 'SanJose123!', 'ADMIN_INSTITUCION'));
-    countTest(await this.login('juan.perez@sanjose.edu', 'Prof123!', 'PROFESOR'));
+    countTest(await this.login('ana.lopez@sanjose.edu', 'Prof123!', 'PROFESOR'));
     countTest(await this.login('santiago.mendoza@sanjose.edu', 'Est123!', 'ESTUDIANTE'));
 
     // 1.2 Verificación de tokens (como hace Flutter al iniciar)
@@ -1013,17 +1013,17 @@ class CompleteFlowTester {
     countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
       nombres: '',
       apellidos: 'Test',
-      email: 'test@sanjose.edu',
+      email: `test${Date.now()}@sanjose.edu`,
       password: 'Est123!',
-      identificacion: 'ID123'
+      identificacion: `ID${Date.now()}`
     }, 400, 'Crear estudiante sin nombre (debe fallar)'));
 
     countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
       nombres: 'Test',
       apellidos: '',
-      email: 'test@sanjose.edu',
+      email: `test${Date.now() + 1}@sanjose.edu`,
       password: 'Est123!',
-      identificacion: 'ID123'
+      identificacion: `ID${Date.now() + 1}`
     }, 400, 'Crear estudiante sin apellidos (debe fallar)'));
 
     countTest(await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION', {
@@ -1031,7 +1031,7 @@ class CompleteFlowTester {
       apellidos: 'Test',
       email: '',
       password: 'Est123!',
-      identificacion: 'ID123'
+      identificacion: `ID${Date.now() + 2}`
     }, 400, 'Crear estudiante sin email (debe fallar)'));
 
     console.log('\n📱 9.9 ACCESO DENEGADO - Otros roles intentan gestionar estudiantes');

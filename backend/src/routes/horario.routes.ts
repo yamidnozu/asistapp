@@ -1,21 +1,45 @@
 import { FastifyInstance } from 'fastify';
 import AsistenciaController from '../controllers/asistencia.controller';
 import HorarioController from '../controllers/horario.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, AuthenticatedRequest, authorize } from '../middleware/auth';
+
+console.log('🔄 Cargando rutas de horario...');
 
 export default async function horarioRoutes(fastify: FastifyInstance) {
 
   fastify.register(async function (horarioRoutes) {
-
-    horarioRoutes.addHook('preHandler', authenticate);
-    // REMOVED: horarioRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    console.log('📅 horario.routes.ts - REGISTER EJECUTADO');
 
     /**
      * GET /horarios
      * Obtiene todos los horarios de la institución del admin autenticado
      */
     horarioRoutes.get('/', {
-      handler: HorarioController.getAll as any,
+      preHandler: authenticate,
+      handler: async (request: AuthenticatedRequest, reply) => {
+        console.log('🔍 GET /horarios - Verificando usuario:', request.user?.rol);
+        
+        if (!request.user) {
+          console.log('❌ No hay usuario autenticado');
+          return reply.code(401).send({
+            success: false,
+            error: 'Usuario no autenticado',
+            code: 'AUTHENTICATION_ERROR',
+          });
+        }
+
+        if (request.user.rol !== 'admin_institucion') {
+          console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a horarios`);
+          return reply.code(403).send({
+            success: false,
+            error: 'Acceso denegado: se requiere rol de administrador de institución',
+            code: 'AUTHORIZATION_ERROR',
+          });
+        }
+
+        console.log('✅ Autorización exitosa, llamando al controlador');
+        return HorarioController.getAll(request as any, reply);
+      },
       schema: {
         description: 'Obtener todos los horarios de la institución',
         tags: ['Horarios'],
@@ -67,6 +91,16 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
                         nombre: { type: 'string' },
                         grado: { type: 'string' },
                         seccion: { type: 'string', nullable: true },
+                        periodoAcademico: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string' },
+                            nombre: { type: 'string' },
+                            fechaInicio: { type: 'string' },
+                            fechaFin: { type: 'string' },
+                            activo: { type: 'boolean' },
+                          },
+                        },
                       },
                     },
                     materia: {
@@ -108,6 +142,22 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
               },
             },
           },
+          401: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              code: { type: 'string' },
+            },
+          },
+          403: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              code: { type: 'string' },
+            },
+          },
         },
       },
     });
@@ -117,6 +167,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Obtiene todos los horarios de un grupo específico
      */
     horarioRoutes.get('/grupo/:grupoId', {
+      preHandler: [authenticate, authorize(['admin_institucion'])],
       handler: HorarioController.getByGrupo as any,
       schema: {
         description: 'Obtener todos los horarios de un grupo específico',
@@ -165,6 +216,16 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
                         nombre: { type: 'string' },
                         grado: { type: 'string' },
                         seccion: { type: 'string', nullable: true },
+                        periodoAcademico: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string' },
+                            nombre: { type: 'string' },
+                            fechaInicio: { type: 'string' },
+                            fechaFin: { type: 'string' },
+                            activo: { type: 'boolean' },
+                          },
+                        },
                       },
                     },
                     materia: {
@@ -204,6 +265,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Obtiene un horario por ID
      */
     horarioRoutes.get('/:id', {
+      preHandler: [authenticate, authorize(['admin_institucion'])],
       handler: HorarioController.getById as any,
       schema: {
         description: 'Obtener un horario por ID',
@@ -288,6 +350,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Crea un nuevo horario
      */
     horarioRoutes.post('/', {
+      preHandler: [authenticate, authorize(['admin_institucion'])],
       handler: HorarioController.create as any,
       schema: {
         description: 'Crear un nuevo horario',
@@ -379,6 +442,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Actualiza un horario
      */
     horarioRoutes.put('/:id', {
+      preHandler: [authenticate, authorize(['admin_institucion'])],
       handler: HorarioController.update as any,
       schema: {
         description: 'Actualizar un horario',
@@ -475,6 +539,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Elimina un horario
      */
     horarioRoutes.delete('/:id', {
+      preHandler: [authenticate, authorize(['admin_institucion'])],
       handler: HorarioController.delete as any,
       schema: {
         description: 'Eliminar un horario',
@@ -558,6 +623,21 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
           },
         },
       },
+    });
+
+    // ========== ENDPOINT DE PRUEBA ==========
+
+    /**
+     * GET /horarios/test
+     * Endpoint de prueba para verificar funcionamiento
+     */
+    horarioRoutes.get('/test', async (request, reply) => {
+      console.log('🧪 GET /horarios/test - Endpoint ejecutado');
+      return reply.code(200).send({
+        success: true,
+        message: 'horario routes funcionando correctamente',
+        timestamp: new Date().toISOString(),
+      });
     });
   });
 }

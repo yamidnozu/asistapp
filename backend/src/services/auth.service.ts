@@ -281,8 +281,8 @@ export class AuthService {
         console.log('✅ Usuario administrador ya existe:', adminExists.email);
       }
     } catch (error) {
-      console.error('❌ Error al verificar/crear usuario administrador:', error);
-      throw error;
+      console.log('⚠️  No se pudo verificar/crear usuario administrador (DB no disponible):', error instanceof Error ? error.message : String(error));
+      // No fallar, continuar sin admin
     }
   }
 }

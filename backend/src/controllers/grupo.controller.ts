@@ -13,6 +13,19 @@ interface GetGruposQuery {
   search?: string;
 }
 
+interface GetEstudiantesParams {
+  id: string;
+}
+
+interface GetEstudiantesSinAsignarQuery {
+  page?: string;
+  limit?: string;
+}
+
+interface AsignarEstudianteBody {
+  estudianteId: string;
+}
+
 interface GetGrupoParams {
   id: string;
 }
@@ -234,6 +247,50 @@ export class GrupoController {
   }
 
   /**
+   * Activa/desactiva un grupo
+   */
+  public static async toggleStatus(request: AuthenticatedRequest & FastifyRequest<{ Params: GetGrupoParams }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+
+      // Verificar que el grupo existe y pertenece a la institución del admin
+      const existingGrupo = await GrupoService.getGrupoById(id);
+      if (!existingGrupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (usuarioInstitucion && existingGrupo.institucionId !== usuarioInstitucion.institucionId) {
+        return reply.code(403).send({
+          success: false,
+          error: 'No tienes permisos para modificar este grupo',
+        });
+      }
+
+      const grupo = await GrupoService.toggleGrupoStatus(id);
+
+      if (grupo === null) {
+        // No hay periodo alternativo, el grupo ya está en el estado correcto
+        return reply.code(200).send({
+          success: true,
+          message: 'El grupo ya está en el estado correcto (no hay periodo alternativo disponible)',
+        });
+      }
+
+      return reply.code(200).send({
+        success: true,
+        message: `Grupo ${grupo.periodoAcademico.activo ? 'activado' : 'desactivado'} exitosamente`,
+      });
+    } catch (error) {
+      console.error('Error en toggleStatus grupo:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene los grupos disponibles para asignar estudiantes (solo periodos activos)
    */
   public static async getGruposDisponibles(request: AuthenticatedRequest, reply: FastifyReply) {
@@ -257,6 +314,173 @@ export class GrupoController {
       });
     } catch (error) {
       console.error('Error en getGruposDisponibles:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene los estudiantes asignados a un grupo
+   */
+  public static async getEstudiantesByGrupo(request: AuthenticatedRequest & FastifyRequest<{ Params: GetEstudiantesParams; Querystring: GetEstudiantesSinAsignarQuery }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { page, limit } = request.query;
+
+      // Verificar que el grupo existe y pertenece a la institución del admin
+      const existingGrupo = await GrupoService.getGrupoById(id);
+      if (!existingGrupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (usuarioInstitucion && existingGrupo.institucionId !== usuarioInstitucion.institucionId) {
+        return reply.code(403).send({
+          success: false,
+          error: 'No tienes permisos para acceder a este grupo',
+        });
+      }
+
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 10;
+
+      if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
+      const pagination = {
+        page: pageNum,
+        limit: limitNum,
+      };
+
+      const result = await GrupoService.getEstudiantesByGrupo(id, pagination);
+
+      return reply.code(200).send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      console.error('Error en getEstudiantesByGrupo:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene estudiantes sin asignar a ningún grupo en el período activo
+   */
+  public static async getEstudiantesSinAsignar(request: AuthenticatedRequest & FastifyRequest<{ Querystring: GetEstudiantesSinAsignarQuery }>, reply: FastifyReply) {
+    try {
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (!usuarioInstitucion) {
+        return reply.code(400).send({
+          success: false,
+          error: 'El usuario no tiene una institución asignada',
+        });
+      }
+
+      const { page, limit } = request.query;
+
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 10;
+
+      if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+        throw new ValidationError('Los parámetros de paginación deben ser mayores a 0. El límite máximo es 100.');
+      }
+
+      const pagination = {
+        page: pageNum,
+        limit: limitNum,
+      };
+
+      const result = await GrupoService.getEstudiantesSinGrupo(usuarioInstitucion.institucionId, pagination);
+
+      return reply.code(200).send({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      console.error('Error en getEstudiantesSinAsignar:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Asigna un estudiante a un grupo
+   */
+  public static async asignarEstudiante(request: AuthenticatedRequest & FastifyRequest<{ Params: GetEstudiantesParams; Body: AsignarEstudianteBody }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { estudianteId } = request.body;
+
+      // Verificar que el grupo existe y pertenece a la institución del admin
+      const existingGrupo = await GrupoService.getGrupoById(id);
+      if (!existingGrupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (usuarioInstitucion && existingGrupo.institucionId !== usuarioInstitucion.institucionId) {
+        return reply.code(403).send({
+          success: false,
+          error: 'No tienes permisos para modificar este grupo',
+        });
+      }
+
+      const success = await GrupoService.asignarEstudiante(id, estudianteId);
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Estudiante asignado al grupo exitosamente',
+      });
+    } catch (error) {
+      console.error('Error en asignarEstudiante:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Desasigna un estudiante de un grupo
+   */
+  public static async desasignarEstudiante(request: AuthenticatedRequest & FastifyRequest<{ Params: GetEstudiantesParams; Body: AsignarEstudianteBody }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { estudianteId } = request.body;
+
+      // Verificar que el grupo existe y pertenece a la institución del admin
+      const existingGrupo = await GrupoService.getGrupoById(id);
+      if (!existingGrupo) {
+        throw new NotFoundError('Grupo');
+      }
+
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (usuarioInstitucion && existingGrupo.institucionId !== usuarioInstitucion.institucionId) {
+        return reply.code(403).send({
+          success: false,
+          error: 'No tienes permisos para modificar este grupo',
+        });
+      }
+
+      const success = await GrupoService.desasignarEstudiante(id, estudianteId);
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Estudiante desasignado del grupo exitosamente',
+      });
+    } catch (error) {
+      console.error('Error en desasignarEstudiante:', error);
       throw error;
     }
   }

@@ -37,12 +37,33 @@ class User {
   bool get esAdminInstitucion => rol == 'admin_institucion';
   bool get esSuperAdmin => rol == 'super_admin';
 
+  /// Obtiene la inicial del usuario para mostrar en avatares
+  String get inicial {
+    // Primero intentar usar la primera letra de nombres
+    if (nombres.isNotEmpty) {
+      return nombres[0].toUpperCase();
+    }
+    
+    // Si nombres está vacío, usar la primera letra del nombre completo
+    if (nombreCompleto.isNotEmpty && nombreCompleto != ' ') {
+      return nombreCompleto[0].toUpperCase();
+    }
+    
+    // Si nombre completo también está vacío, usar la primera letra del email
+    if (email.isNotEmpty) {
+      return email[0].toUpperCase();
+    }
+    
+    // Último recurso
+    return '?';
+  }
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      nombres: json['nombres'] as String? ?? '',
-      apellidos: json['apellidos'] as String? ?? '',
+  nombres: (json['nombres'] as String?) ?? (json['usuario']?['nombres'] as String?) ?? (json['nombre'] as String?) ?? '',
+  apellidos: (json['apellidos'] as String?) ?? (json['usuario']?['apellidos'] as String?) ?? (json['apellido'] as String?) ?? '',
       rol: json['rol'] as String? ?? 'profesor', // Default to profesor for institution-admin context
       telefono: json['telefono'] as String?,
       identificacion: json['identificacion'] as String?,

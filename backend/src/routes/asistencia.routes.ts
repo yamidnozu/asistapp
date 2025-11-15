@@ -238,6 +238,28 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
     },
     handler: AsistenciaController.registrarAsistenciaManual,
   });
+
+  // ============================================
+  // LISTAR ASISTENCIAS (Admin/Profesor)
+  // ============================================
+  fastify.get('/', {
+    preHandler: [
+      authenticate,
+      authorize(['admin_institucion', 'profesor']),
+    ],
+    handler: AsistenciaController.getAllAsistencias as any,
+  });
+
+  // ============================================
+  // ASISTENCIAS DEL ESTUDIANTE AUTENTICADO
+  // ============================================
+  fastify.get('/estudiante', {
+    preHandler: [
+      authenticate,
+      authorize(['estudiante']),
+    ],
+    handler: AsistenciaController.getAsistenciasEstudiante as any,
+  });
 }
 
 export default asistenciaRoutes;

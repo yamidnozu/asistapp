@@ -101,17 +101,22 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+  meta?: any; // Datos adicionales relacionados con la respuesta
 }
 
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
+  public readonly reason?: string;
+  public readonly meta?: any;
   public readonly isOperational: boolean;
 
-  constructor(message: string, statusCode: number = 500, code: string = 'INTERNAL_ERROR') {
+  constructor(message: string, statusCode: number = 500, code: string = 'INTERNAL_ERROR', reason?: string, meta?: any) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
+    this.reason = reason;
+    this.meta = meta;
     this.isOperational = true;
 
     Error.captureStackTrace(this, this.constructor);
@@ -143,8 +148,8 @@ export class NotFoundError extends AppError {
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string) {
-    super(message, 409, 'CONFLICT_ERROR');
+  constructor(message: string, reason?: string, meta?: any) {
+    super(message, 409, 'CONFLICT_ERROR', reason, meta);
   }
 }
 

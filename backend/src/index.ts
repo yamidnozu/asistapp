@@ -1,8 +1,10 @@
 import fastifyCors from '@fastify/cors';
 import fastifyFormbody from '@fastify/formbody';
+import 'dotenv/config';
 import Fastify from 'fastify';
 import { config } from './config/app';
 import { databaseService } from './config/database';
+import { authenticate } from './middleware/auth';
 import setupErrorHandler from './middleware/errorHandler';
 import routes from './routes';
 import AuthService from './services/auth.service';
@@ -19,6 +21,9 @@ fastify.register(fastifyCors, {
 });
 
 fastify.register(fastifyFormbody);
+
+// Register authentication decorator
+fastify.decorate('authenticate', authenticate);
 
 // TEMPORALMENTE DESHABILITADO PARA PRUEBAS
 // fastify.register(fastifyRateLimit, {

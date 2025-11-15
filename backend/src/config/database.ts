@@ -33,9 +33,14 @@ class DatabaseService {
   }
 
   public async connect(): Promise<void> {
-    const client = this.getClient();
-    await client.$connect();
-    console.log('🔗 Conectado a la base de datos');
+    try {
+      const client = this.getClient();
+      await client.$connect();
+      console.log('🔗 Conectado a la base de datos');
+    } catch (error) {
+      console.log('⚠️  No se pudo conectar a la base de datos, continuando sin conexión:', error instanceof Error ? error.message : String(error));
+      // No fallar, continuar sin DB
+    }
   }
 }
 

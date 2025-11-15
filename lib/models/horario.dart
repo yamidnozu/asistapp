@@ -1,5 +1,6 @@
 import 'grupo.dart';
 import 'materia.dart';
+import 'user.dart';
 
 class Horario {
   final String id;
@@ -15,6 +16,7 @@ class Horario {
   final Grupo grupo;
   final Materia materia;
   final PeriodoAcademico periodoAcademico;
+  final User? profesor;
 
   Horario({
     required this.id,
@@ -30,23 +32,52 @@ class Horario {
     required this.grupo,
     required this.materia,
     required this.periodoAcademico,
+    this.profesor,
   });
 
   factory Horario.fromJson(Map<String, dynamic> json) {
     return Horario(
-      id: json['id'],
-      periodoId: json['periodoId'],
-      grupoId: json['grupoId'],
-      materiaId: json['materiaId'],
+      id: json['id'] as String? ?? '',
+      periodoId: json['periodoId'] as String? ?? '',
+      grupoId: json['grupoId'] as String? ?? '',
+      materiaId: json['materiaId'] as String? ?? '',
       profesorId: json['profesorId'],
-      diaSemana: json['diaSemana'],
-      horaInicio: json['horaInicio'],
-      horaFin: json['horaFin'],
-      institucionId: json['institucionId'],
-      createdAt: DateTime.parse(json['createdAt']),
-      grupo: Grupo.fromJson(json['grupo']),
-      materia: Materia.fromJson(json['materia']),
-      periodoAcademico: PeriodoAcademico.fromJson(json['periodoAcademico']),
+      diaSemana: json['diaSemana'] as int? ?? 1,
+      horaInicio: json['horaInicio'] as String? ?? '08:00',
+      horaFin: json['horaFin'] as String? ?? '10:00',
+      institucionId: json['institucionId'] as String? ?? '',
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
+      grupo: json['grupo'] != null ? Grupo.fromJson(json['grupo']) : Grupo(
+        id: json['grupoId'] ?? '',
+        nombre: 'Grupo desconocido',
+        grado: 'N/A',
+        periodoId: json['periodoId'] ?? '',
+        institucionId: json['institucionId'] ?? '',
+        createdAt: DateTime.now(),
+        periodoAcademico: PeriodoAcademico(
+          id: json['periodoId'] ?? '',
+          nombre: 'Periodo desconocido',
+          fechaInicio: DateTime.now(),
+          fechaFin: DateTime.now(),
+          activo: false,
+        ),
+        count: GrupoCount(estudiantesGrupos: 0, horarios: 0),
+      ),
+      materia: json['materia'] != null ? Materia.fromJson(json['materia']) : Materia(
+        id: json['materiaId'] ?? '',
+        nombre: 'Materia desconocida',
+        codigo: null,
+        institucionId: json['institucionId'] ?? '',
+        createdAt: DateTime.now(),
+      ),
+      periodoAcademico: json['periodoAcademico'] != null ? PeriodoAcademico.fromJson(json['periodoAcademico']) : PeriodoAcademico(
+        id: json['periodoId'] ?? '',
+        nombre: 'Periodo desconocido',
+        fechaInicio: DateTime.now(),
+        fechaFin: DateTime.now(),
+        activo: false,
+      ),
+      profesor: json['profesor'] != null ? User.fromJson(json['profesor']) : null,
     );
   }
 
@@ -65,6 +96,7 @@ class Horario {
       'grupo': grupo.toJson(),
       'materia': materia.toJson(),
       'periodoAcademico': periodoAcademico.toJson(),
+      if (profesor != null) 'profesor': profesor!.toJson(),
     };
   }
 
@@ -75,5 +107,5 @@ class Horario {
 
   String get horarioFormato => '$horaInicio - $horaFin';
 
-  String get descripcion => '${materia.nombre} - ${grupo.nombreCompleto}';
+  String get descripcion => '${materia.nombre} - ${grupo.nombreCompleto}${profesor != null ? ' (${profesor!.nombreCompleto})' : ''}';
 }
