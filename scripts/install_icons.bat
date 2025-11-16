@@ -47,9 +47,7 @@ REM Windows
   if exist "%SRC_DIR%\app_icon.ico" (
   )
   REM If the source had launcher_icon, copy it to ic_launcher (preferred)
-  for %%F in ("%TARGET%\launcher_icon.png") do (
-    if exist "%%~fF" if not exist "%TARGET%\ic_launcher.png" copy "%%~fF" "%TARGET%\ic_launcher.png"
-  )
+  REM Do not copy launcher_icon fallback. We prefer ic_launcher and clean launcher_icon files.
   set TARGET=%REPO_ROOT%\windows\runner\resources\app_icon.ico
   if exist "%TARGET%" (
     rename "%TARGET%" "%TARGET%.backup"

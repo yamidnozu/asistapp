@@ -38,9 +38,7 @@ for d in "$SRC_DIR"/mipmap-*; do
     # also copy/copy-to expected name for Android manifest
     # also copy/copy-to expected name for Android manifest
     # If the source had launcher_icon (older naming), ensure we have ic_launcher (preferred)
-    if [[ -f "$target/launcher_icon.png" && ! -f "$target/ic_launcher.png" ]]; then
-      cp -v "$target/launcher_icon.png" "$target/ic_launcher.png"
-    fi
+    # Do not add launcher_icon fallback – we prefer ic_launcher and remove old launcher_icon files from repo.
   fi
 done
 
