@@ -65,8 +65,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
-      final userRole = authProvider.user?['rol'] as String?;
-      _loadMoreUsers(userProvider, authProvider.accessToken, userRole);
+  final userRole = authProvider.user?['rol'] as String?;
+  final token = authProvider.accessToken;
+  _loadMoreUsers(userProvider, token, userRole);
     }
   }
 
@@ -75,7 +76,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userRole = authProvider.user?['rol'] as String?;
 
-    if (authProvider.accessToken == null) {
+    final token = authProvider.accessToken;
+    if (token == null) {
       debugPrint('Error: No hay token de acceso para cargar usuarios.');
       return;
     }
@@ -90,7 +92,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
           : [_selectedRoleFilter];
 
       await userProvider.loadUsers(
-        authProvider.accessToken!,
+        token,
         page: 1,
         limit: 15,
         search: _searchQuery.isEmpty ? null : _searchQuery,
@@ -102,7 +104,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
       if (authProvider.selectedInstitutionId != null) {
         debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
         await userProvider.loadUsersByInstitution(
-          authProvider.accessToken!,
+          token,
           authProvider.selectedInstitutionId!,
           page: 1,
           limit: 5,
@@ -624,8 +626,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
       case 'toggle_status':
         final newStatus = !user.activo;
+        final token = authProvider.accessToken;
+        if (token == null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
+          return;
+        }
+
         final success = await provider.updateUser(
-          authProvider.accessToken!,
+          token,
           user.id,
           UpdateUserRequest(
             activo: newStatus,
@@ -699,8 +707,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
   Future<void> _deleteUser(User user, UserProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
+    final token = authProvider.accessToken;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar usuarios')));
+      return;
+    }
+
     final success = await provider.deleteUser(
-      authProvider.accessToken!,
+      token,
       user.id,
     );
 

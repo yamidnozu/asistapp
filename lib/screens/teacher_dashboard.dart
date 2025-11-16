@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/horario_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/components/index.dart';
 import '../models/clase_del_dia.dart';
-import '../screens/attendance_screen.dart';
+// AttendanceScreen route is opened via go_router; import not required here
 
 class TeacherDashboard extends StatefulWidget {
   const TeacherDashboard({super.key});
@@ -642,14 +643,8 @@ class _ClaseCardProState extends State<ClaseCardPro> with TickerProviderStateMix
                         child: ElevatedButton.icon(
                           onPressed: () async {
                             // Navegar a la pantalla de asistencia
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AttendanceScreen(
-                                  clase: widget.clase,
-                                ),
-                              ),
-                            );
+                            // Navigate via go_router so routing works consistently
+                            context.pushNamed('teacher-attendance', extra: widget.clase);
 
                             // Después de regresar, podríamos refrescar datos si fuera necesario
                             // Por ahora, la pantalla de asistencia maneja su propio estado

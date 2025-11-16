@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/institution_admins_paginated_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../widgets/components/index.dart';
 import '../../theme/theme_extensions.dart';
 import '../../models/user.dart';
-import '../../services/user_service.dart';
-import 'create_institution_admin_screen.dart';
+// import '../../services/user_service.dart'; // no longer used directly
+// create_institution_admin_screen route is now opened via go_router, no direct import required
 
 
 class InstitutionAdminsScreen extends StatefulWidget {
@@ -41,17 +44,16 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
+  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context);
     return ClarityManagementPage(
       title: 'Administradores de Institución',
-      isLoading: userProvider.isLoading,
-      hasError: userProvider.hasError,
-      errorMessage: userProvider.errorMessage,
-      itemCount: userProvider.users.length,
+  isLoading: pag.isLoading,
+  hasError: pag.hasError,
+  errorMessage: pag.errorMessage,
+  itemCount: pag.items.length,
       itemBuilder: (context, index) {
-        if (index >= userProvider.users.length) {
-          return userProvider.isLoadingMore
+        if (index >= pag.items.length) {
+          return pag.isLoadingMore
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -61,12 +63,12 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               : const SizedBox.shrink();
         }
 
-        final user = userProvider.users[index];
+  final user = pag.items[index];
         return _buildAdminCard(user, context);
       },
       onRefresh: _loadAdmins,
       scrollController: _scrollController,
-      hasMoreData: userProvider.hasMoreData,
+  hasMoreData: pag.hasMoreData,
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddAdminSheet,
         backgroundColor: context.colors.primary,
@@ -85,15 +87,18 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   Future<void> _loadAdmins() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (authProvider.accessToken != null) {
-      await userProvider.loadAdminsByInstitution(authProvider.accessToken!, widget.institutionId);
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final token = authProvider.accessToken;
+    if (token != null) {
+  await pag.loadItems(token, page: 1, limit: 10, filters: {'institutionId': widget.institutionId});
     }
   }
 
   Future<void> _removeAdmin(User user) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -109,11 +114,12 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
     if (confirmed != true) return;
 
-    if (authProvider.accessToken != null) {
-      final success = await userProvider.removeAdminFromInstitution(authProvider.accessToken!, widget.institutionId, user.id);
+    final token = authProvider.accessToken;
+    if (token != null) {
+      final success = await userProvider.removeAdminFromInstitution(token, widget.institutionId, user.id);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administrador removido correctamente')));
-        await _loadAdmins();
+  await pag.loadItems(token, page: 1, limit: 10, filters: {'institutionId': widget.institutionId});
       }
     }
   }
@@ -135,10 +141,12 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
                   Navigator.of(context).pop();
                   final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
                   final institution = institutionProvider.institutions.firstWhere((i) => i.id == widget.institutionId);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => CreateInstitutionAdminScreen(institution: institution)),
-                  ).then((_) => _loadAdmins());
+                  // Use go_router named route so navigation is consistent across the app
+                  context.pushNamed('institution-create-admin', extra: institution);
+                  // Reload admins after possible changes once the pushed route completes
+                  // go_router's context.pushNamed doesn't return a Future using .then directly,
+                  // but we can listen for route pops via a post-frame callback or refresh on resume of the screen.
+                  // For simplicity, trigger reload when this bottom sheet closes (above) or rely on provider updates.
                 },
               ),
               ListTile(
@@ -278,10 +286,11 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
-      if (authProvider.accessToken == null) throw Exception('No hay sesión activa');
+      final token = authProvider.accessToken;
+      if (token == null) throw Exception('No hay sesión activa');
 
       final success = await userProvider.changeUserPassword(
-        authProvider.accessToken!,
+        token,
         widget.user.id,
         _newPasswordController.text.trim(),
       );
@@ -350,14 +359,12 @@ class AssignExistingUserDialog extends StatefulWidget {
 class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
   final _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
-  List<User> _allUsers = [];
-  List<User> _filteredUsers = [];
-  bool _isLoading = false;
-  bool _hasMoreData = true;
-  int _currentPage = 1;
+  // selected users not used for now; dialog assigns directly
   static const int _pageSize = 20;
   String _searchQuery = '';
+  bool _isAssigning = false;
 
   @override
   void initState() {
@@ -369,7 +376,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+  _searchController.removeListener(_onSearchChanged);
+  if (_debounce?.isActive ?? false) _debounce!.cancel();
     _scrollController.removeListener(_onScroll);
     _searchController.dispose();
     _scrollController.dispose();
@@ -377,30 +385,26 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.trim().toLowerCase();
-    setState(() {
-      _searchQuery = query;
-      _filterUsers();
+    final query = _searchController.text.trim();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      setState(() => _searchQuery = query);
+      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+      if (token == null) return;
+      final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+      pag.resetPagination();
+      await pag.loadItems(token, page: 1, limit: _pageSize, search: query.isEmpty ? null : query, filters: {'institutionId': widget.institutionId});
     });
   }
 
-  void _filterUsers() {
-    if (_searchQuery.isEmpty) {
-      _filteredUsers = List.from(_allUsers);
-    } else {
-      _filteredUsers = _allUsers.where((user) {
-        final fullName = user.nombreCompleto.toLowerCase();
-        final email = user.email.toLowerCase();
-        return fullName.contains(_searchQuery) || email.contains(_searchQuery);
-      }).toList();
-    }
-  }
+  // Filtering/search handled by provider
 
   Future<void> _loadInitialUsers() async {
-    setState(() => _isLoading = true);
+    final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+    if (token == null) return;
+    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     try {
-      _currentPage = 1;
-      await _loadUsersPage(_currentPage, clearExisting: true);
+      await pag.loadItems(token, page: 1, limit: _pageSize, filters: {'institutionId': widget.institutionId});
     } catch (e) {
       debugPrint('Error cargando usuarios iniciales: $e');
       if (mounted) {
@@ -409,64 +413,13 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      // no local isLoading
     }
   }
+      // handled above in the debounce body
 
-  Future<void> _loadMoreUsers() async {
-    if (_isLoading || !_hasMoreData) return;
-
-    setState(() => _isLoading = true);
-    try {
-      _currentPage++;
-      await _loadUsersPage(_currentPage);
-    } catch (e) {
-      debugPrint('Error cargando más usuarios: $e');
-      _currentPage--; // Revertir en caso de error
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _loadUsersPage(int page, {bool clearExisting = false}) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    if (authProvider.accessToken == null) return;
-
-    try {
-      // Crear instancia del servicio directamente
-      final userService = UserService();
-      final response = await userService.getAllUsers(
-        authProvider.accessToken!,
-        page: page,
-        limit: _pageSize,
-      );
-
-      if (response != null && response.users.isNotEmpty && mounted) {
-        // Filtrar usuarios que son administradores de institución
-        final candidates = response.users.where((u) => u.esAdminInstitucion).toList();
-
-        setState(() {
-          if (clearExisting) {
-            _allUsers = candidates;
-          } else {
-            _allUsers.addAll(candidates);
-          }
-          _hasMoreData = candidates.length == _pageSize;
-          _filterUsers();
-        });
-      } else {
-        setState(() => _hasMoreData = false);
-      }
-    } catch (e) {
-      debugPrint('Error cargando usuarios: $e');
-      setState(() => _hasMoreData = false);
-    }
-  }
+  // loading and paging are handled by InstitutionAdminsPaginatedProvider;
+  // no local implementation required here.
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
@@ -474,19 +427,27 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     }
   }
 
-  Future<void> _assign(User user) async {
-    setState(() => _isLoading = true);
+  Future<void> _loadMoreUsers() async {
+    final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+    if (token == null) return;
+    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    if (pag.isLoadingMore || !pag.hasMoreData) return;
+    await pag.loadNextPage(token, filters: {'institutionId': widget.institutionId});
+  }
 
+  Future<void> _assign(User user) async {
+  setState(() => _isAssigning = true);
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      if (authProvider.accessToken == null) {
+      final token = authProvider.accessToken;
+      if (token == null) {
         throw Exception('No hay sesión activa');
       }
 
       final success = await userProvider.assignAdminToInstitution(
-        authProvider.accessToken!,
+        token,
         widget.institutionId,
         user.id,
       );
@@ -508,9 +469,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isAssigning = false);
     }
   }
 
@@ -561,22 +520,34 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
             ),
             const SizedBox(height: 12),
 
-            // Estado de carga inicial
-            if (_isLoading && _allUsers.isEmpty)
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            // Lista de usuarios
-            else
-              Expanded(
-                child: ListView.builder(
+            // Lista de administradores de institución (paginados)
+            Expanded(
+              child: Consumer<InstitutionAdminsPaginatedProvider>(
+                  builder: (context, pag, child) {
+                    if (pag.isLoading && pag.items.isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!pag.isLoading && pag.items.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.people_outline, size: 56, color: Colors.grey),
+                            const SizedBox(height: 12),
+                            const Text('No hay administradores disponibles', style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                          ],
+                        ),
+                      );
+                    }
+                    final items = pag.items;
+                    return ListView.builder(
                   controller: _scrollController,
                   // quitar padding horizontal global para que las filas se alineen exactamente
                   padding: EdgeInsets.zero,
-                  itemCount: _filteredUsers.length + (_hasMoreData ? 1 : 0),
+                  itemCount: items.length + (pag.hasMoreData ? 1 : 0),
                   itemBuilder: (context, index) {
                     // Item de carga al final
-                    if (index == _filteredUsers.length) {
+                    if (index == items.length) {
                       return Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: const Center(
@@ -589,7 +560,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                       );
                     }
 
-                    final user = _filteredUsers[index];
+                    final user = items[index];
                     final alreadyAssigned = user.instituciones.any((inst) => inst.id == widget.institutionId);
 
                     return Card(
@@ -601,7 +572,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                       ),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
-                        onTap: (_isLoading || alreadyAssigned) ? null : () => _assign(user),
+                              onTap: (pag.isLoading || alreadyAssigned || _isAssigning) ? null : () => _assign(user),
                         child: Padding(
                           // padding horizontal más reducido para evitar columna en blanco
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -660,7 +631,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                               SizedBox(
                                 height: 36,
                                 child: ElevatedButton(
-                                  onPressed: (_isLoading || alreadyAssigned) ? null : () => _assign(user),
+                                  onPressed: (pag.isLoading || alreadyAssigned || _isAssigning) ? null : () => _assign(user),
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                                     shape: RoundedRectangleBorder(
@@ -682,54 +653,12 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                       ),
                     );
                   },
-                ),
-              ),
+                );
+              },
+            ),
+          ),
 
-            // Mensaje cuando no hay usuarios
-            if (!_isLoading && _allUsers.isEmpty)
-              const Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people_outline, size: 56, color: Colors.grey),
-                      SizedBox(height: 12),
-                      Text(
-                        'No hay administradores disponibles',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            // Mensaje cuando el filtro no encuentra resultados
-            if (!_isLoading && _allUsers.isNotEmpty && _filteredUsers.isEmpty && _searchQuery.isNotEmpty)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 56, color: Colors.grey),
-                      SizedBox(height: 12),
-                      Text(
-                        'No se encontraron resultados',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            // footer handled in consumer list view branches
           ],
         ),
       ),

@@ -61,8 +61,9 @@ class _MateriasScreenState extends State<MateriasScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
 
-    if (authProvider.accessToken != null) {
-      await materiaProvider.loadMaterias(authProvider.accessToken!, search: search);
+    final token = authProvider.accessToken;
+    if (token != null) {
+      await materiaProvider.loadMaterias(token, search: search);
     }
   }
 
@@ -70,9 +71,10 @@ class _MateriasScreenState extends State<MateriasScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
 
-    if (authProvider.accessToken != null) {
+    final token = authProvider.accessToken;
+    if (token != null) {
       final search = _isSearching ? _searchController.text.trim() : null;
-      await materiaProvider.loadMoreMaterias(authProvider.accessToken!, search: search);
+      await materiaProvider.loadMoreMaterias(token, search: search);
     }
   }
 
@@ -276,8 +278,14 @@ class _MateriasScreenState extends State<MateriasScreen> {
   Future<void> _deleteMateria(Materia materia, MateriaProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
+    final token = authProvider.accessToken;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar una materia')));
+      return;
+    }
+
     final success = await provider.deleteMateria(
-      authProvider.accessToken!,
+      token,
       materia.id,
     );
 

@@ -50,16 +50,18 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   Future<void> _loadPeriodos({String? search}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-    if (authProvider.accessToken != null) {
-      await periodoProvider.loadPeriodosAcademicos(authProvider.accessToken!);
+    final token = authProvider.accessToken;
+    if (token != null) {
+      await periodoProvider.loadPeriodosAcademicos(token);
     }
   }
 
   Future<void> _loadMorePeriodos() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-    if (authProvider.accessToken != null && (periodoProvider.paginationInfo?.hasNext ?? false)) {
-      await periodoProvider.loadNextPage(authProvider.accessToken!);
+    final token2 = authProvider.accessToken;
+    if (token2 != null && (periodoProvider.paginationInfo?.hasNext ?? false)) {
+      await periodoProvider.loadNextPage(token2);
     }
   }
 
@@ -228,7 +230,13 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   final colors = Theme.of(context).colorScheme;
   final messenger = ScaffoldMessenger.of(context);
 
-  final success = await provider.togglePeriodoStatus(authProvider.accessToken!, periodo.id);
+  final tokenLocal = authProvider.accessToken;
+  if (tokenLocal == null) {
+    messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para cambiar el estado de un período')));
+    return;
+  }
+
+  final success = await provider.togglePeriodoStatus(tokenLocal, periodo.id);
 
     if (!mounted) return;
 
@@ -283,7 +291,13 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
               Navigator.of(context).pop();
               final authProvider = Provider.of<AuthProvider>(context, listen: false);
               final messenger = ScaffoldMessenger.of(context);
-              final success = await provider.deletePeriodoAcademico(authProvider.accessToken!, periodo.id);
+              final tokenDelete = authProvider.accessToken;
+              if (tokenDelete == null) {
+                messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar un período')));
+                return;
+              }
+
+              final success = await provider.deletePeriodoAcademico(tokenDelete, periodo.id);
               if (!mounted) return;
               if (success) {
                 messenger.showSnackBar(const SnackBar(content: Text('Período académico eliminado correctamente')));
@@ -408,8 +422,14 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
       final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
       final colors = Theme.of(context).colorScheme;
 
+      final token = authProvider.accessToken;
+      if (token == null) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear períodos')));
+        return false;
+      }
+
       final success = await periodoProvider.createPeriodoAcademico(
-        authProvider.accessToken!,
+        token,
         academic_service.CreatePeriodoAcademicoRequest(
           nombre: _nombreController.text.trim(),
           fechaInicio: _fechaInicio!.toIso8601String(),
@@ -561,8 +581,14 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
       final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
       final colors = Theme.of(context).colorScheme;
 
+      final token = authProvider.accessToken;
+      if (token == null) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para actualizar períodos')));
+        return false;
+      }
+
       final success = await periodoProvider.updatePeriodoAcademico(
-        authProvider.accessToken!,
+        token,
         widget.periodo.id,
         academic_service.UpdatePeriodoAcademicoRequest(
           nombre: _nombreController.text.trim(),

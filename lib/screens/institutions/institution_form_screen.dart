@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
-import '../../theme/theme_extensions.dart';
+// theme extensions not required after switching to MultiStepFormScaffold
+import '../../widgets/common/multi_step_form_scaffold.dart';
 import 'form_steps/index.dart';
 
 class InstitutionFormScreen extends StatefulWidget {
@@ -18,14 +19,14 @@ class InstitutionFormScreen extends StatefulWidget {
 
 class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  int _currentStep = 0;
+  // MultiStepFormScaffold manages the current step internally now.
   final _nombreController = TextEditingController();
   final _direccionController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _emailController = TextEditingController();
 
   bool _activa = true;
-  bool _isLoading = false;
+  // Loading is managed by the MultiStepFormScaffold; avoid duplicating state
 
   bool get isEditing => widget.institution != null;
 
@@ -58,7 +59,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   Future<void> _saveInstitution() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+  // MultiStepFormScaffold handles loading UI
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -72,17 +73,23 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
         'activa': _activa,
       };
 
+      final token = authProvider.accessToken;
+      if (token == null) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear una institución')));
+        return;
+      }
+
       bool success;
       if (widget.institution == null) {
         // Crear nueva institución
         success = await institutionProvider.createInstitution(
-          authProvider.accessToken!,
+          token,
           institutionData,
         );
       } else {
         // Actualizar institución existente
         success = await institutionProvider.updateInstitution(
-          authProvider.accessToken!,
+          token,
           widget.institution!.id,
           nombre: institutionData['nombre'] as String?,
           direccion: institutionData['direccion'] as String?,
@@ -119,121 +126,30 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      // Nothing to do - scaffold will hide the spinner when onSave future resolves
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.spacing;
-    final colors = context.colors;
-    final textStyles = context.textStyles;
+  // spacing intentionally unused; MultiStepFormScaffold handles button spacing
     final title = isEditing ? 'Editar Institución' : 'Nueva Institución';
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
-      ),
-      body: Form(
-        key: _formKey,
-        child: Stepper(
-          currentStep: _currentStep,
-          onStepContinue: _onStepContinue,
-          onStepCancel: _onStepCancel,
-          onStepTapped: (step) => setState(() => _currentStep = step),
-          controlsBuilder: (context, details) {
-            final isLastStep = details.currentStep == 2; // 3 steps total (0, 1, 2)
-            
-            return Padding(
-              padding: EdgeInsets.only(top: spacing.lg),
-              child: Row(
-                children: [
-                  if (details.currentStep > 0) ...[
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isLoading ? null : details.onStepCancel,
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: spacing.md),
-                          side: BorderSide(color: colors.primary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(spacing.borderRadius),
-                          ),
-                        ),
-                        child: Text(
-                          'Anterior',
-                          style: textStyles.button.withColor(colors.primary),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: spacing.md),
-                  ],
-                  Expanded(
-                    child: ElevatedButton(
-                      key: const Key('formSaveButton'),
-                      onPressed: _isLoading ? null : details.onStepContinue,
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: spacing.md),
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(
-                              isLastStep ? (isEditing ? 'Actualizar' : 'Crear') : 'Siguiente',
-                              style: textStyles.button.withColor(colors.white),
-                            ),
-                    ),
-                  ),
-                  if (details.currentStep == 0) ...[
-                    SizedBox(width: spacing.md),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isLoading ? null : () => context.pop(),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: spacing.md),
-                          side: BorderSide(color: colors.error),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(spacing.borderRadius),
-                          ),
-                        ),
-                        child: Text(
-                          'Cancelar',
-                          style: textStyles.button.withColor(colors.error),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
-          steps: [
-            // Step 1: Información Básica
-            Step(
-              title: const Text('Información'),
-              subtitle: const Text('Datos básicos'),
-              content: InstitutionBasicInfoStep(
-                nombreController: _nombreController,
-                emailController: _emailController,
-              ),
-              isActive: _currentStep >= 0,
-              state: _currentStep > 0 ? StepState.complete : StepState.indexed,
-            ),
+    return MultiStepFormScaffold(
+      title: title,
+      formKey: _formKey,
+      onSave: _saveInstitution,
+      submitLabel: isEditing ? 'Actualizar' : 'Crear',
+      steps: [
+        // Step 1: Información Básica
+        Step(
+          title: const Text('Información'),
+          subtitle: const Text('Datos básicos'),
+          content: InstitutionBasicInfoStep(
+            nombreController: _nombreController,
+            emailController: _emailController,
+          ),
+        ),
 
             // Step 2: Contacto y Ubicación
             Step(
@@ -243,8 +159,6 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 direccionController: _direccionController,
                 telefonoController: _telefonoController,
               ),
-              isActive: _currentStep >= 1,
-              state: _currentStep > 1 ? StepState.complete : (_currentStep == 1 ? StepState.indexed : StepState.disabled),
             ),
 
             // Step 3: Configuración
@@ -256,32 +170,10 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 onActivaChanged: (value) => setState(() => _activa = value),
                 isEditMode: isEditing,
               ),
-              isActive: _currentStep >= 2,
-              state: _currentStep == 2 ? StepState.indexed : StepState.disabled,
             ),
-          ],
-        ),
-      ),
+        ],
     );
   }
 
-  void _onStepContinue() {
-    // Validar el step actual antes de continuar
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_currentStep < 2) {
-      setState(() => _currentStep++);
-    } else {
-      // Último step: guardar
-      _saveInstitution();
-    }
-  }
-
-  void _onStepCancel() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep--);
-    }
-  }
+  // Control de pasos ahora centralizado por MultiStepFormScaffold
 }

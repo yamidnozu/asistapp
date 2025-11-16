@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../models/grupo.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/grupo_provider.dart';
+import '../../providers/grupo_paginated_provider.dart';
 import '../../providers/periodo_academico_provider.dart';
 import '../../services/academic_service.dart' as academic_service;
 import '../../theme/theme_extensions.dart';
@@ -48,7 +48,7 @@ class _GruposScreenState extends State<GruposScreen> {
   void _onScroll() {
     if (_isSearching) return;
 
-    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
 
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -58,29 +58,35 @@ class _GruposScreenState extends State<GruposScreen> {
 
   Future<void> _loadGrupos() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
 
-    if (authProvider.accessToken == null) {
+    final token = authProvider.accessToken;
+    if (token == null) {
       debugPrint('Error: No hay token de acceso para cargar grupos.');
       return;
     }
 
-    await grupoProvider.loadGrupos(
-      authProvider.accessToken!,
+    await grupoProvider.loadItems(
+      token,
       page: 1,
       limit: 10,
-      periodoId: _selectedPeriodoId.isEmpty ? null : _selectedPeriodoId,
       search: _searchQuery.isEmpty ? null : _searchQuery,
+      filters: {
+        if (_selectedPeriodoId.isNotEmpty) 'periodoId': _selectedPeriodoId,
+      },
     );
   }
 
-  Future<void> _loadMoreGrupos(GrupoProvider provider, String? accessToken) async {
-    if (accessToken == null || provider.isLoadingMore || !provider.hasMoreData) return;
+  Future<void> _loadMoreGrupos(GrupoPaginatedProvider provider, String? accessToken) async {
+    final tokenLocal = accessToken;
+    if (tokenLocal == null || provider.isLoadingMore || !provider.hasMoreData) return;
 
-    await provider.loadMoreGrupos(
-      accessToken,
-      periodoId: _selectedPeriodoId.isEmpty ? null : _selectedPeriodoId,
-      search: _searchQuery.isEmpty ? null : _searchQuery,
+    await provider.loadNextPage(
+      tokenLocal,
+      filters: {
+        if (_selectedPeriodoId.isNotEmpty) 'periodoId': _selectedPeriodoId,
+        if (_searchQuery.isNotEmpty) 'search': _searchQuery,
+      },
     );
   }
 
@@ -101,16 +107,16 @@ class _GruposScreenState extends State<GruposScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<AuthProvider, GrupoProvider, PeriodoAcademicoProvider>(
+  return Consumer3<AuthProvider, GrupoPaginatedProvider, PeriodoAcademicoProvider>(
       builder: (context, authProvider, grupoProvider, periodoProvider, child) {
         return ClarityManagementPage(
           title: 'Gestión de Grupos',
           isLoading: grupoProvider.isLoading,
           hasError: grupoProvider.hasError,
           errorMessage: grupoProvider.errorMessage,
-          itemCount: grupoProvider.grupos.length,
+          itemCount: grupoProvider.items.length,
           itemBuilder: (context, index) {
-            final grupo = grupoProvider.grupos[index];
+            final grupo = grupoProvider.items[index];
             return _buildGrupoCard(grupo, grupoProvider, context);
           },
           filterWidgets: _buildFilterWidgets(context),
@@ -187,8 +193,14 @@ class _GruposScreenState extends State<GruposScreen> {
     ];
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, GrupoProvider provider) {
-    final stats = provider.getGruposStatistics();
+  List<Widget> _buildStatisticWidgets(BuildContext context, GrupoPaginatedProvider provider) {
+    final total = provider.paginationInfo?.total ?? provider.items.length;
+    final activos = provider.items.where((g) => g.periodoAcademico.activo).length;
+    final stats = {
+      'total': total,
+      'activos': activos,
+      'inactivos': provider.items.length - activos,
+    };
     final colors = context.colors;
 
     return [
@@ -213,7 +225,7 @@ class _GruposScreenState extends State<GruposScreen> {
     ];
   }
 
-  Widget _buildGrupoCard(Grupo grupo, GrupoProvider provider, BuildContext context) {
+  Widget _buildGrupoCard(Grupo grupo, GrupoPaginatedProvider provider, BuildContext context) {
     final colors = context.colors;
     final textStyles = context.textStyles;
 
@@ -317,7 +329,7 @@ class _GruposScreenState extends State<GruposScreen> {
     });
   }
 
-  void _showDeleteConfirmationDialog(Grupo grupo, GrupoProvider provider) {
+  void _showDeleteConfirmationDialog(Grupo grupo, GrupoPaginatedProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -345,11 +357,19 @@ class _GruposScreenState extends State<GruposScreen> {
     );
   }
 
-  Future<void> _deleteGrupo(Grupo grupo, GrupoProvider provider) async {
+  Future<void> _deleteGrupo(Grupo grupo, GrupoPaginatedProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    final success = await provider.deleteGrupo(
-      authProvider.accessToken!,
+    final token = authProvider.accessToken;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Debes iniciar sesión para eliminar un grupo')),
+      );
+      return;
+    }
+
+    final success = await provider.deleteItem(
+      token,
       grupo.id,
     );
 
@@ -408,8 +428,9 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-      if (authProvider.accessToken != null) {
-        periodoProvider.loadPeriodosActivos(authProvider.accessToken!);
+      final createToken = authProvider.accessToken;
+      if (createToken != null) {
+        periodoProvider.loadPeriodosActivos(createToken);
       }
     });
   }
@@ -509,10 +530,20 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+      final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
 
-      final success = await grupoProvider.createGrupo(
-        authProvider.accessToken!,
+      final createToken = authProvider.accessToken;
+      if (createToken == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Debes iniciar sesión para crear un grupo')),
+          );
+        }
+        return false;
+      }
+
+      final success = await grupoProvider.createItem(
+        createToken,
         academic_service.CreateGrupoRequest(
           nombre: _nombreController.text.trim(),
           grado: _gradoController.text.trim(),
@@ -655,10 +686,16 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+      final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
 
-      final success = await grupoProvider.updateGrupo(
-        authProvider.accessToken!,
+      final updateToken = authProvider.accessToken;
+      if (updateToken == null) {
+        messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar un grupo')));
+        return false;
+      }
+
+      final success = await grupoProvider.updateItem(
+        updateToken,
         widget.grupo.id,
         academic_service.UpdateGrupoRequest(
           nombre: _nombreController.text.trim(),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../../models/grupo.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/grupo_provider.dart';
+import '../../providers/estudiantes_by_grupo_paginated_provider.dart';
+import '../../providers/estudiantes_sin_asignar_paginated_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
 
@@ -20,35 +23,31 @@ class GrupoDetailScreen extends StatefulWidget {
 }
 
 class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
-  bool _isLoading = false;
-  List<User> _estudiantesAsignados = [];
-  List<User> _estudiantesDisponibles = [];
+  // Loading and students are handled by paginated providers
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadEstudiantes();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadEstudiantes();
     });
   }
 
   Future<void> _loadEstudiantes() async {
-    setState(() => _isLoading = true);
+    // no local loading flags: use paginated providers
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
       final token = authProvider.accessToken;
       if (token == null) return;
 
-      // Cargar estudiantes asignados al grupo
-      await grupoProvider.loadEstudiantesByGrupo(token, widget.grupo.id);
-      _estudiantesAsignados = grupoProvider.estudiantesByGrupo;
-
-      // Cargar estudiantes sin asignar
-      await grupoProvider.loadEstudiantesSinAsignar(token);
-      _estudiantesDisponibles = grupoProvider.estudiantesSinAsignar;
+    // Cargar estudiantes asignados al grupo (paginated provider)
+    final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+    await sinAsignar.loadItems(token, page: 1, limit: 10);
+  // providers hold the items
 
     } catch (e) {
       if (mounted) {
@@ -61,15 +60,16 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {});
       }
     }
   }
-
+// Providers are looked up inside methods when needed.
   Future<void> _asignarEstudiante(User estudiante) async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+      
 
       final token = authProvider.accessToken;
       if (token == null) return;
@@ -81,10 +81,11 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success && mounted) {
-        setState(() {
-          _estudiantesAsignados.add(estudiante);
-          _estudiantesDisponibles.removeWhere((e) => e.id == estudiante.id);
-        });
+        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
+        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+        await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+        await sinAsignar.loadItems(token, page: 1, limit: 10);
+        setState(() {});
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -108,7 +109,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
   Future<void> _desasignarEstudiante(User estudiante) async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  // paginated providers used after success to refresh data
 
       final token = authProvider.accessToken;
       if (token == null) return;
@@ -120,10 +122,11 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success && mounted) {
-        setState(() {
-          _estudiantesDisponibles.add(estudiante);
-          _estudiantesAsignados.removeWhere((e) => e.id == estudiante.id);
-        });
+        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
+        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+        await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+        await sinAsignar.loadItems(token, page: 1, limit: 10);
+        setState(() {});
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,7 +151,6 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AsignarEstudianteDialog(
-        estudiantesDisponibles: _estudiantesDisponibles,
         onAsignar: (estudiantes) {
           for (final estudiante in estudiantes) {
             _asignarEstudiante(estudiante);
@@ -170,8 +172,14 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
       ),
-      body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
+      body: Builder(builder: (context) {
+        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context);
+        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
+        final isLoading = (byGrupo.isLoading || sinAsignar.isLoading) &&
+            (byGrupo.items.isEmpty && sinAsignar.items.isEmpty);
+
+        return isLoading
+            ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
             padding: EdgeInsets.all(spacing.lg),
             child: Column(
@@ -196,7 +204,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                       ),
                       SizedBox(height: spacing.sm),
                       Text(
-                        'Estudiantes: ${_estudiantesAsignados.length}',
+                        'Estudiantes: ${byGrupo.items.length}',
                         style: textStyles.bodyMedium,
                       ),
                       Text(
@@ -231,7 +239,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
 
                 SizedBox(height: spacing.lg),
 
-                _estudiantesAsignados.isEmpty
+                byGrupo.items.isEmpty
                   ? Center(
                       child: Padding(
                         padding: EdgeInsets.all(spacing.xl),
@@ -260,9 +268,9 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                   : ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: _estudiantesAsignados.length,
+                      itemCount: byGrupo.items.length,
                       itemBuilder: (context, index) {
-                        final estudiante = _estudiantesAsignados[index];
+                        final estudiante = byGrupo.items[index];
                         return Card(
                           margin: EdgeInsets.only(bottom: spacing.sm),
                           child: ListTile(
@@ -286,18 +294,17 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                     ),
               ],
             ),
-          ),
+      );
+    }),
     );
   }
 }
 
 class AsignarEstudianteDialog extends StatefulWidget {
-  final List<User> estudiantesDisponibles;
   final Function(List<User>) onAsignar;
 
   const AsignarEstudianteDialog({
     super.key,
-    required this.estudiantesDisponibles,
     required this.onAsignar,
   });
 
@@ -308,31 +315,59 @@ class AsignarEstudianteDialog extends StatefulWidget {
 class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   final TextEditingController _searchController = TextEditingController();
   List<User> _filteredEstudiantes = [];
+  Timer? _debounce;
+  final ScrollController _scrollController = ScrollController();
   // ignore: prefer_final_fields - Este campo se modifica en _toggleSeleccion
   Set<String> _selectedEstudiantes = {};
 
   @override
   void initState() {
     super.initState();
-    _filteredEstudiantes = widget.estudiantesDisponibles;
-    _searchController.addListener(_filterEstudiantes);
+    // Inicializa el listado desde el provider en el siguiente frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final token = authProvider.accessToken;
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      if (token != null) {
+        sinAsignar.loadItems(token, page: 1, limit: 10);
+      }
+      setState(() {
+        _filteredEstudiantes = sinAsignar.items;
+      });
+    });
+  _searchController.addListener(_filterEstudiantes);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _filterEstudiantes() {
     final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredEstudiantes = widget.estudiantesDisponibles.where((estudiante) {
-        return estudiante.nombreCompleto.toLowerCase().contains(query) ||
-               estudiante.email.toLowerCase().contains(query) ||
-               (estudiante.nombres.isNotEmpty && estudiante.nombres.toLowerCase().contains(query)) ||
-               estudiante.apellidos.toLowerCase().contains(query);
-      }).toList();
+    // Cuando hay un texto de búsqueda, delegamos al proveedor para búsqueda remota
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.accessToken;
+    // Cancel previous debounce
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (token == null) return;
+      if (query.isEmpty) {
+        // Reset search - load first page
+        sinAsignar.loadItems(token, page: 1, limit: 10);
+      } else {
+        sinAsignar.loadItems(token, page: 1, limit: 10, search: query);
+      }
+      setState(() {
+        // Rely on provider to update items - still keep local _filteredEstudiantes for UI filtering
+        _filteredEstudiantes = sinAsignar.items;
+      });
     });
   }
 
@@ -347,7 +382,8 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   }
 
   void _asignarSeleccionados() {
-    final estudiantesSeleccionados = widget.estudiantesDisponibles
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    final estudiantesSeleccionados = sinAsignar.items
         .where((estudiante) => _selectedEstudiantes.contains(estudiante.id))
         .toList();
 
@@ -369,7 +405,7 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
         width: double.maxFinite,
         height: 400,
         child: Column(
-          children: [
+            children: [
             // Campo de búsqueda
             TextField(
               controller: _searchController,
@@ -406,9 +442,16 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
 
             SizedBox(height: spacing.md),
 
-            // Lista de estudiantes
+            // Lista de estudiantes (usando provider para búsqueda remota y paginación)
             Expanded(
-              child: _filteredEstudiantes.isEmpty
+              child: Builder(builder: (context) {
+                final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
+                final items = _searchController.text.isEmpty ? sinAsignar.items : _filteredEstudiantes.isNotEmpty ? _filteredEstudiantes : sinAsignar.items;
+                if (sinAsignar.isLoading && items.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return items.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -430,9 +473,28 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _filteredEstudiantes.length,
+                    controller: _scrollController,
+                    itemCount: items.length + (sinAsignar.hasMoreData ? 1 : 0),
                     itemBuilder: (context, index) {
-                      final estudiante = _filteredEstudiantes[index];
+                      if (index >= items.length) {
+                        // Load more placeholder
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Center(
+                            child: ElevatedButton(
+                              onPressed: sinAsignar.isLoadingMore || !sinAsignar.hasMoreData
+                                  ? null
+                                  : () {
+                                      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+                                      if (token != null) sinAsignar.loadNextPage(token);
+                                    },
+                              child: Text(sinAsignar.isLoadingMore ? 'Cargando...' : 'Cargar más'),
+                            ),
+                          ),
+                        );
+                      }
+
+                      final estudiante = items[index];
                       final isSelected = _selectedEstudiantes.contains(estudiante.id);
 
                       return Card(
@@ -485,12 +547,13 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
                         ),
                       );
                     },
-                  ),
+        );
+      }),
             ),
           ],
         ),
       ),
-      actions: [
+        actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text('Cancelar'),
@@ -505,5 +568,16 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
         ),
       ],
     );
+  }
+
+  void _onScroll() {
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= (maxScroll - 100) && sinAsignar.hasMoreData && !sinAsignar.isLoadingMore) {
+      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+      if (token != null) sinAsignar.loadNextPage(token);
+    }
   }
 }

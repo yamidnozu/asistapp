@@ -8,7 +8,7 @@ import '../../theme/theme_extensions.dart';
 import '../../models/grupo.dart';
 import '../../models/materia.dart';
 import '../../models/user.dart';
-import '../../providers/grupo_provider.dart';
+import '../../providers/grupo_paginated_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/periodo_academico_provider.dart';
 import '../../providers/horario_provider.dart';
@@ -49,7 +49,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
   Future<void> _loadInitialData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
     final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
@@ -65,15 +65,15 @@ class _HorariosScreenState extends State<HorariosScreen> {
         if (periodoProvider.periodosActivos.isNotEmpty) {
           // Seleccionamos el primer periodo activo por defecto
           setState(() => _selectedPeriodo = periodoProvider.periodosActivos.first);
-          await grupoProvider.loadGruposByPeriodo(token, _selectedPeriodo!.id);
+          await grupoProvider.loadItems(token, filters: {'periodoId': _selectedPeriodo!.id});
           // Si hay grupos en este periodo, seleccionamos el primero y cargamos sus horarios
-          if (grupoProvider.grupos.isNotEmpty) {
-            setState(() => _selectedGrupo = grupoProvider.grupos.first);
+            if (grupoProvider.items.isNotEmpty) {
+            setState(() => _selectedGrupo = grupoProvider.items.first);
             await _loadHorariosForGrupo(_selectedGrupo!.id);
           }
         } else {
           // Si no hay periodos activos, cargar todos los grupos sin filtro
-          await grupoProvider.loadGrupos(token);
+          await grupoProvider.loadItems(token);
         }
 
         // Cargar materias y profesores (para el diálogo de creación/edición)
@@ -94,7 +94,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<PeriodoAcademicoProvider, GrupoProvider, HorarioProvider>(
+  return Consumer3<PeriodoAcademicoProvider, GrupoPaginatedProvider, HorarioProvider>(
       builder: (context, periodoProvider, grupoProvider, horarioProvider, child) {
         return ClarityManagementPage(
           title: 'Horarios',
@@ -206,7 +206,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
     );
   }
 
-  List<Widget> _buildFilterWidgets(BuildContext context, GrupoProvider grupoProvider) {
+  List<Widget> _buildFilterWidgets(BuildContext context, GrupoPaginatedProvider grupoProvider) {
   final spacing = context.spacing;
 
     return [
@@ -257,10 +257,10 @@ class _HorariosScreenState extends State<HorariosScreen> {
                     if (p != null) {
                       final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
                       if (token != null) {
-                        await grupoProvider.loadGruposByPeriodo(token, p.id);
+                        await grupoProvider.loadItems(token, filters: {'periodoId': p.id});
                         // Seleccionar primer grupo si existe y cargar horarios
-                        if (grupoProvider.grupos.isNotEmpty) {
-                          setState(() => _selectedGrupo = grupoProvider.grupos.first);
+                        if (grupoProvider.items.isNotEmpty) {
+                          setState(() => _selectedGrupo = grupoProvider.items.first);
                           await _loadHorariosForGrupo(_selectedGrupo!.id);
                         }
                       }
@@ -279,7 +279,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
               decoration: InputDecoration(labelText: 'Grupo'),
               items: (_selectedPeriodo == null
                   ? <DropdownMenuItem<Grupo>>[]
-                  : grupoProvider.grupos
+                  : grupoProvider.items
                       .where((g) => g.periodoId == _selectedPeriodo!.id)
                       .map<DropdownMenuItem<Grupo>>((g) => DropdownMenuItem<Grupo>(value: g, child: Text('${g.nombre} - ${g.grado}', overflow: TextOverflow.ellipsis, maxLines: 1)))
                       .toList()),

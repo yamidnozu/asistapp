@@ -8,6 +8,8 @@ import 'package:asistapp/models/institution.dart';
 import 'package:asistapp/providers/user_provider.dart';
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/institution_provider.dart';
+import 'package:asistapp/providers/paginated_data_provider.dart';
+import 'package:asistapp/providers/institution_admins_paginated_provider.dart';
 import 'package:asistapp/config/app_config.dart';
 
 class FakeAuthProvider extends AuthProvider {
@@ -48,6 +50,28 @@ class FakeInstitutionProvider extends InstitutionProvider {
   List<Institution> get institutions => _insts;
 }
 
+class FakeInstitutionAdminsPaginatedProvider extends InstitutionAdminsPaginatedProvider {
+  final List<User> fakeAdmins;
+
+  FakeInstitutionAdminsPaginatedProvider({this.fakeAdmins = const []});
+
+  @override
+  Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+    // Return a simple paginated response that wraps the fake users
+    return PaginatedResponse(
+      items: fakeAdmins,
+      pagination: PaginationInfo(page: page, limit: limit ?? 10, total: fakeAdmins.length, totalPages: 1, hasNext: false, hasPrev: false),
+    );
+  }
+
+  @override
+  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+    // Delay the actual load to avoid notifyListeners during the widget build phase
+    await Future.delayed(Duration.zero);
+    await super.loadItems(accessToken, page: page, limit: limit, search: search, filters: filters);
+  }
+}
+
 void main() {
   setUpAll(() async {
     // AppConfig requiere inicialización en tests que usan servicios http
@@ -68,6 +92,7 @@ void main() {
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
+          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(value: FakeInstitutionAdminsPaginatedProvider()),
           ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstProvider),
         ],
         child: MaterialApp.router(routerConfig: router),
@@ -99,6 +124,7 @@ void main() {
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
+          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(value: FakeInstitutionAdminsPaginatedProvider()),
           ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstProvider),
         ],
         child: const MaterialApp(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/horario_provider.dart';
-import 'package:asistapp/providers/grupo_provider.dart';
+import 'package:asistapp/providers/grupo_paginated_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
 import 'package:asistapp/providers/user_provider.dart';
 import '../../services/academic_service.dart' as academic_service;
@@ -29,7 +29,7 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
-      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
       final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
@@ -41,7 +41,7 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
         return;
       }
 
-      if (grupoProvider.grupos.isEmpty) {
+  if (grupoProvider.items.isEmpty) {
         setState(() => _testResult += '❌ No hay grupos disponibles\n');
         return;
       }
@@ -54,11 +54,17 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
       setState(() => _testResult += '✓ Providers configurados correctamente\n');
 
       // Seleccionar primer grupo disponible
-      final testGrupo = grupoProvider.grupos.first;
+  final testGrupo = grupoProvider.items.first;
       setState(() => _testResult += '✓ Grupo de prueba: ${testGrupo.nombre}\n');
 
       // Cargar horarios del grupo
-      await horarioProvider.loadHorariosByGrupo(authProvider.accessToken!, testGrupo.id);
+      final token = authProvider.accessToken;
+      if (token == null) {
+        setState(() => _testResult += '❌ No hay token de autenticación\n');
+        return;
+      }
+
+      await horarioProvider.loadHorariosByGrupo(token, testGrupo.id);
       setState(() => _testResult += '✓ Horarios cargados: ${horarioProvider.horarios.length}\n');
 
       // Verificar que podemos crear una clase de 2 horas
@@ -68,8 +74,14 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
       setState(() => _testResult += '✓ Preparando creación de clase multi-hora...\n');
 
       // Intentar crear clase de 2 horas (10:00-12:00)
+      final token2 = authProvider.accessToken;
+      if (token2 == null) {
+        setState(() => _testResult += '❌ No hay token de autenticación\n');
+        return;
+      }
+
       final success = await horarioProvider.createHorario(
-        authProvider.accessToken!,
+        token2,
         academic_service.CreateHorarioRequest(
           periodoId: testGrupo.periodoId,
           grupoId: testGrupo.id,
@@ -85,7 +97,7 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
         setState(() => _testResult += '✅ Clase multi-hora creada exitosamente\n');
 
         // Recargar horarios para verificar visualización
-        await horarioProvider.loadHorariosByGrupo(authProvider.accessToken!, testGrupo.id);
+  await horarioProvider.loadHorariosByGrupo(token2, testGrupo.id);
         final horariosDespues = horarioProvider.horarios;
 
         // Buscar la clase que acabamos de crear

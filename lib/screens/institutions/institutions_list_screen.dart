@@ -48,9 +48,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
 
-      if (authProvider.accessToken != null && institutionProvider.hasMoreData && !institutionProvider.isLoadingMore) {
+      final token = authProvider.accessToken;
+      if (token != null && institutionProvider.hasMoreData && !institutionProvider.isLoadingMore) {
         institutionProvider.loadMoreInstitutions(
-          authProvider.accessToken!,
+          token,
           search: _searchQuery.isNotEmpty ? _searchQuery : null,
           activa: _statusFilter,
         );
@@ -62,15 +63,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
 
-    if (authProvider.accessToken != null) {
-      debugPrint('Cargando instituciones con token: ${authProvider.accessToken!.substring(0, 20)}...');
+  final token = authProvider.accessToken;
+    if (token != null) {
+      debugPrint('Cargando instituciones con token: ${token.substring(0, 20)}...');
       await institutionProvider.loadInstitutions(
-        authProvider.accessToken!,
+        token,
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
         activa: _statusFilter,
       );
       debugPrint('Instituciones cargadas: ${institutionProvider.institutions.length}');
-      debugPrint('Estado del provider: ${institutionProvider.state}');
+  debugPrint('Estado del provider: isLoading=${institutionProvider.isLoading}, hasError=${institutionProvider.hasError}');
       if (institutionProvider.hasError) {
         debugPrint('Error del provider: ${institutionProvider.errorMessage}');
       }
@@ -393,7 +395,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 
   void _handleMenuAction(String action, Institution institution, InstitutionProvider provider) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  final token = authProvider.accessToken;
 
     switch (action) {
       case 'create_admin':
@@ -406,8 +409,13 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
       case 'toggle_status':
         final newStatus = !institution.activa;
+        if (token == null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para modificar la institución')));
+          return;
+        }
+
         final success = await provider.updateInstitution(
-          authProvider.accessToken!,
+          token,
           institution.id,
           activa: newStatus,
         );
@@ -465,9 +473,15 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
   Future<void> _deleteInstitution(Institution institution, InstitutionProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.accessToken;
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar la institución')));
+      return;
+    }
 
     final success = await provider.deleteInstitution(
-      authProvider.accessToken!,
+      token,
       institution.id,
     );
 

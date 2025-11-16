@@ -123,8 +123,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         
+        final token = authProvider.accessToken;
+        if (token == null) {
+          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
+          navigator.go('/users');
+          return;
+        }
+
         await userProvider.loadUserById(
-          authProvider.accessToken!,
+          token,
           userId,
         );
         
@@ -174,8 +181,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
       
       // Solo cargar si no hay instituciones ya cargadas
       if (institutionProvider.institutions.isEmpty) {
+        final token = authProvider.accessToken;
+        if (token == null) return;
+
         await institutionProvider.loadInstitutions(
-          authProvider.accessToken!,
+          token,
           page: 1,
           limit: 100, // Cargar todas para el dropdown
         );
@@ -314,8 +324,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
           especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
         );
 
+        final token = authProvider.accessToken;
+        if (token == null) {
+          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
+          return;
+        }
+
         final success = await userProvider.updateUser(
-          authProvider.accessToken!,
+          token,
           _user!.id,
           updateRequest,
         );
@@ -355,8 +371,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
           rolEnInstitucion: widget.userRole == 'admin_institucion' ? 'admin' : null,
         );
 
+        final token = authProvider.accessToken;
+        if (token == null) {
+          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear usuarios')));
+          return;
+        }
+
         final success = await userProvider.createUser(
-          authProvider.accessToken!,
+          token,
           createRequest,
         );
 

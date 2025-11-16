@@ -5,6 +5,10 @@ import 'config/app_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/user_paginated_provider.dart';
+import 'providers/estudiantes_by_grupo_paginated_provider.dart';
+import 'providers/estudiantes_sin_asignar_paginated_provider.dart';
+import 'providers/institution_admins_paginated_provider.dart';
 import 'providers/horario_provider.dart';
 import 'providers/asistencia_provider.dart';
 import 'providers/grupo_provider.dart';
@@ -84,7 +88,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider.value(value: _grupoProvider),
         ChangeNotifierProvider.value(value: _materiaProvider),
         ChangeNotifierProvider.value(value: _periodoAcademicoProvider),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+  ChangeNotifierProvider(create: (_) => UserProvider()),
+  ChangeNotifierProvider(create: (_) => UserPaginatedProvider()),
+  ChangeNotifierProvider(create: (_) => EstudiantesByGrupoPaginatedProvider()),
+  ChangeNotifierProvider(create: (_) => EstudiantesSinAsignarPaginatedProvider()),
+  ChangeNotifierProvider(create: (_) => InstitutionAdminsPaginatedProvider()),
         ChangeNotifierProvider.value(value: _lifecycleManager),
       ],
       child: Builder(

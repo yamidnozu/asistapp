@@ -2,152 +2,126 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../services/academic_service.dart' as academic_service;
 import '../models/grupo.dart'; // Para PeriodoAcademico
+import 'paginated_data_provider.dart';
 import '../models/user.dart'; // Para PaginationInfo
 
-enum PeriodoAcademicoState {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+// PeriodoAcademicoState removed: rely on PaginatedDataProvider state
 
-class PeriodoAcademicoProvider with ChangeNotifier {
+class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   final academic_service.AcademicService _academicService = academic_service.AcademicService();
 
-  PeriodoAcademicoState _state = PeriodoAcademicoState.initial;
-  String? _errorMessage;
-  List<PeriodoAcademico> _periodosAcademicos = [];
+  // Error handling delegated to PaginatedDataProvider
+  // Items are stored in PaginatedDataProvider._items
   PeriodoAcademico? _selectedPeriodo;
-  PaginationInfo? _paginationInfo;
 
   // Getters
-  PeriodoAcademicoState get state => _state;
-  String? get errorMessage => _errorMessage;
-  List<PeriodoAcademico> get periodosAcademicos => _periodosAcademicos;
+  // Use PaginatedDataProvider's errorMessage
+  List<PeriodoAcademico> get periodosAcademicos => items;
   PeriodoAcademico? get selectedPeriodo => _selectedPeriodo;
-  PaginationInfo? get paginationInfo => _paginationInfo;
+  // Use base paginationInfo from PaginatedDataProvider
 
-  bool get isLoading => _state == PeriodoAcademicoState.loading;
-  bool get hasError => _state == PeriodoAcademicoState.error;
-  bool get isLoaded => _state == PeriodoAcademicoState.loaded;
+  // Delegated to PaginatedDataProvider - use base implementation
 
   // Computed properties
-  List<PeriodoAcademico> get periodosActivos => _periodosAcademicos.where((periodo) => periodo.activo).toList();
-  List<PeriodoAcademico> get periodosInactivos => _periodosAcademicos.where((periodo) => !periodo.activo).toList();
+  List<PeriodoAcademico> get periodosActivos => items.where((periodo) => periodo.activo).toList();
+  List<PeriodoAcademico> get periodosInactivos => items.where((periodo) => !periodo.activo).toList();
 
   /// Número de períodos actualmente cargados en memoria
-  int get loadedPeriodosCount => _periodosAcademicos.length;
+  int get loadedPeriodosCount => items.length;
   int get periodosActivosCount => periodosActivos.length;
   int get periodosInactivosCount => periodosInactivos.length;
 
   /// Número total de períodos reportado por la paginación del backend
-  int get totalPeriodosFromPagination => _paginationInfo?.total ?? 0;
+  int get totalPeriodosFromPagination => paginationInfo?.total ?? 0;
 
-  void _setState(PeriodoAcademicoState newState, [String? error]) {
-    _state = newState;
-    _errorMessage = error;
-    notifyListeners();
-  }
+  // _setState removed; use base provider setError/notifyListeners
 
   /// Carga todos los períodos académicos con paginación
   Future<void> loadPeriodosAcademicos(String accessToken, {int? page, int? limit}) async {
-    if (_state == PeriodoAcademicoState.loading) return;
-
-    _setState(PeriodoAcademicoState.loading);
+  if (isLoading) return;
 
     try {
       debugPrint('PeriodoAcademicoProvider: Iniciando carga de períodos académicos...');
-      final response = await _academicService.getPeriodosAcademicos(
-        accessToken,
-        page: page ?? 1,
-        limit: limit,
-      );
-      if (response != null) {
-        debugPrint('PeriodoAcademicoProvider: Recibidos ${response.periodosAcademicos.length} períodos');
-        _periodosAcademicos = response.periodosAcademicos;
-        _paginationInfo = response.pagination;
-        _setState(PeriodoAcademicoState.loaded);
-        debugPrint('PeriodoAcademicoProvider: Estado cambiado a loaded');
-      } else {
-        _setState(PeriodoAcademicoState.error, 'Error al cargar períodos académicos');
-      }
+        await loadItems(accessToken, page: page ?? 1, limit: limit);
+  notifyListeners();
     } catch (e) {
       debugPrint('PeriodoAcademicoProvider: Error loading períodos académicos: $e');
-      _setState(PeriodoAcademicoState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Carga períodos académicos activos
   Future<void> loadPeriodosActivos(String accessToken) async {
-    _setState(PeriodoAcademicoState.loading);
+  if (isLoading) return;
 
     try {
       debugPrint('PeriodoAcademicoProvider: Iniciando carga de períodos activos...');
       final periodos = await _academicService.getPeriodosActivos(accessToken);
       if (periodos != null) {
         debugPrint('PeriodoAcademicoProvider: Recibidos ${periodos.length} períodos activos');
-        _periodosAcademicos = periodos;
-        _setState(PeriodoAcademicoState.loaded);
+  clearItems();
+  items.addAll(periodos);
+  notifyListeners();
       } else {
-        _setState(PeriodoAcademicoState.error, 'Error al cargar períodos activos');
+  setError('Error al cargar períodos activos');
       }
     } catch (e) {
       debugPrint('PeriodoAcademicoProvider: Error loading períodos activos: $e');
-      _setState(PeriodoAcademicoState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Carga un período académico específico por ID
   Future<void> loadPeriodoById(String accessToken, String periodoId) async {
-    _setState(PeriodoAcademicoState.loading);
+  if (isLoading) return;
 
     try {
       final periodo = await _academicService.getPeriodoAcademicoById(accessToken, periodoId);
       if (periodo != null) {
         _selectedPeriodo = periodo;
-        _setState(PeriodoAcademicoState.loaded);
+  notifyListeners();
       } else {
-        _setState(PeriodoAcademicoState.error, 'Período académico no encontrado');
+  setError('Período académico no encontrado');
       }
     } catch (e) {
       debugPrint('Error loading período académico: $e');
-      _setState(PeriodoAcademicoState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Crea un nuevo período académico
   Future<bool> createPeriodoAcademico(String accessToken, academic_service.CreatePeriodoAcademicoRequest periodoData) async {
-    _setState(PeriodoAcademicoState.loading);
+  if (isLoading) return false;
 
     try {
       final newPeriodo = await _academicService.createPeriodoAcademico(accessToken, periodoData);
       if (newPeriodo != null) {
-        // Agregar el nuevo período a la lista
-        _periodosAcademicos.insert(0, newPeriodo);
-        _setState(PeriodoAcademicoState.loaded);
+    // Agregar el nuevo período a la lista
+    items.insert(0, newPeriodo);
+  notifyListeners();
         return true;
       } else {
-        _setState(PeriodoAcademicoState.error, 'Error al crear período académico');
+  setError('Error al crear período académico');
         return false;
       }
     } catch (e) {
       debugPrint('Error creating período académico: $e');
-      _setState(PeriodoAcademicoState.error, e.toString());
+  setError(e.toString());
       return false;
     }
   }
 
   /// Actualiza un período académico existente
   Future<bool> updatePeriodoAcademico(String accessToken, String periodoId, academic_service.UpdatePeriodoAcademicoRequest periodoData) async {
-    _setState(PeriodoAcademicoState.loading);
+  if (isLoading) return false;
 
     try {
       final updatedPeriodo = await _academicService.updatePeriodoAcademico(accessToken, periodoId, periodoData);
       if (updatedPeriodo != null) {
         // Actualizar el período en la lista
-        final index = _periodosAcademicos.indexWhere((periodo) => periodo.id == periodoId);
+        final index = items.indexWhere((periodo) => periodo.id == periodoId);
         if (index != -1) {
-          _periodosAcademicos[index] = updatedPeriodo;
+          items[index] = updatedPeriodo;
         }
 
         // Actualizar el período seleccionado si es el mismo
@@ -155,15 +129,15 @@ class PeriodoAcademicoProvider with ChangeNotifier {
           _selectedPeriodo = updatedPeriodo;
         }
 
-        _setState(PeriodoAcademicoState.loaded);
+  notifyListeners();
         return true;
       } else {
-        _setState(PeriodoAcademicoState.error, 'Error al actualizar período académico');
+  setError('Error al actualizar período académico');
         return false;
       }
     } catch (e) {
       debugPrint('Error updating período académico: $e');
-      _setState(PeriodoAcademicoState.error, e.toString());
+  setError(e.toString());
       return false;
     }
   }
@@ -174,16 +148,16 @@ class PeriodoAcademicoProvider with ChangeNotifier {
       final success = await _academicService.deletePeriodoAcademico(accessToken, periodoId);
 
       if (!success) {
-        _errorMessage = 'Error al eliminar el período académico desde el servicio.';
+    setError('Error al eliminar el período académico desde el servicio.');
       } else {
         // Remover el período de la lista
-        _periodosAcademicos.removeWhere((periodo) => periodo.id == periodoId);
+  items.removeWhere((periodo) => periodo.id == periodoId);
         notifyListeners();
       }
       return success;
     } catch (e) {
       debugPrint('Error deleting período académico: $e');
-      _errorMessage = e.toString();
+  setError(e.toString());
       return false;
     }
   }
@@ -195,9 +169,9 @@ class PeriodoAcademicoProvider with ChangeNotifier {
 
       if (updatedPeriodo != null) {
         // Actualizar el período en la lista
-        final index = _periodosAcademicos.indexWhere((periodo) => periodo.id == periodoId);
+        final index = items.indexWhere((periodo) => periodo.id == periodoId);
         if (index != -1) {
-          _periodosAcademicos[index] = updatedPeriodo;
+          items[index] = updatedPeriodo;
         }
 
         // Actualizar el período seleccionado si es el mismo
@@ -208,12 +182,12 @@ class PeriodoAcademicoProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = 'Error al cambiar el status del período académico';
+  setError('Error al cambiar el status del período académico');
         return false;
       }
     } catch (e) {
       debugPrint('Error toggling período status: $e');
-      _errorMessage = e.toString();
+  setError(e.toString());
       return false;
     }
   }
@@ -232,10 +206,10 @@ class PeriodoAcademicoProvider with ChangeNotifier {
 
   /// Limpia todos los datos
   void clearData() {
-    _periodosAcademicos = [];
-    _selectedPeriodo = null;
-    _paginationInfo = null;
-    _setState(PeriodoAcademicoState.initial);
+  clearItems();
+  _selectedPeriodo = null;
+  // clearItems() above resets paginationInfo in base class
+  clearError();
   }
 
   /// Recarga los datos (útil después de operaciones)
@@ -245,47 +219,72 @@ class PeriodoAcademicoProvider with ChangeNotifier {
 
   /// Busca períodos académicos por nombre
   List<PeriodoAcademico> searchPeriodos(String query) {
-    if (query.isEmpty) return _periodosAcademicos;
+  if (query.isEmpty) return items;
 
     final lowercaseQuery = query.toLowerCase();
-    return _periodosAcademicos.where((periodo) {
+  return items.where((periodo) {
       return periodo.nombre.toLowerCase().contains(lowercaseQuery);
     }).toList();
   }
 
   /// Filtra períodos por estado (activo/inactivo)
   List<PeriodoAcademico> filterPeriodosByStatus({bool? activo}) {
-    if (activo == null) return _periodosAcademicos;
-    return _periodosAcademicos.where((periodo) => periodo.activo == activo).toList();
+  if (activo == null) return items;
+  return items.where((periodo) => periodo.activo == activo).toList();
   }
 
   /// Carga la siguiente página de períodos
-  Future<void> loadNextPage(String accessToken) async {
-    if (_paginationInfo == null || !_paginationInfo!.hasNext || _state == PeriodoAcademicoState.loading) return;
+  @override
+  Future<void> loadNextPage(String accessToken, {Map<String, String>? filters}) async {
+  if (paginationInfo == null || !paginationInfo!.hasNext || isLoading) return;
 
-    final nextPage = _paginationInfo!.page + 1;
-    await loadPeriodosAcademicos(accessToken, page: nextPage, limit: _paginationInfo!.limit);
+  final nextPage = paginationInfo!.page + 1;
+  await loadPeriodosAcademicos(accessToken, page: nextPage, limit: paginationInfo!.limit);
   }
 
   /// Carga la página anterior de períodos
   Future<void> loadPreviousPage(String accessToken) async {
-    if (_paginationInfo == null || !_paginationInfo!.hasPrev || _state == PeriodoAcademicoState.loading) return;
+  if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
 
-    final prevPage = _paginationInfo!.page - 1;
-    await loadPeriodosAcademicos(accessToken, page: prevPage, limit: _paginationInfo!.limit);
+  final prevPage = paginationInfo!.page - 1;
+  await loadPeriodosAcademicos(accessToken, page: prevPage, limit: paginationInfo!.limit);
   }
 
   /// Carga una página específica
   Future<void> loadPage(String accessToken, int page) async {
-    if (_state == PeriodoAcademicoState.loading) return;
+  if (isLoading) return;
 
-    await loadPeriodosAcademicos(accessToken, page: page, limit: _paginationInfo?.limit ?? 10);
+  await loadPeriodosAcademicos(accessToken, page: page, limit: paginationInfo?.limit ?? 10);
+  }
+
+  @override
+  Future<PaginatedResponse<PeriodoAcademico>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+    final response = await _academicService.getPeriodosAcademicos(accessToken, page: page, limit: limit);
+    if (response == null) return null;
+    return PaginatedResponse(items: response.periodosAcademicos, pagination: response.pagination);
+  }
+
+  @override
+  Future<PeriodoAcademico?> createItemApi(String accessToken, dynamic data) async {
+    final created = await _academicService.createPeriodoAcademico(accessToken, data as academic_service.CreatePeriodoAcademicoRequest);
+    return created;
+  }
+
+  @override
+  Future<bool> deleteItemApi(String accessToken, String id) async {
+    return await _academicService.deletePeriodoAcademico(accessToken, id);
+  }
+
+  @override
+  Future<PeriodoAcademico?> updateItemApi(String accessToken, String id, dynamic data) async {
+    final updated = await _academicService.updatePeriodoAcademico(accessToken, id, data as academic_service.UpdatePeriodoAcademicoRequest);
+    return updated;
   }
 
   /// Obtiene estadísticas de períodos
   Map<String, int> getPeriodosStatistics() {
     return {
-      'total': _paginationInfo?.total ?? 0,
+      'total': paginationInfo?.total ?? 0,
       'activos': periodosActivosCount,
       'inactivos': periodosInactivosCount,
     };

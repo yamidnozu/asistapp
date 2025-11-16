@@ -37,8 +37,14 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
     final colors = Theme.of(context).colorScheme;
 
     try {
+      final token = authProvider.accessToken;
+      if (token == null) {
+        messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear una materia')));
+        return false;
+      }
+
       final success = await materiaProvider.createMateria(
-        authProvider.accessToken!,
+        token,
         academic_service.CreateMateriaRequest(
           nombre: _nombreController.text.trim(),
           codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
@@ -179,8 +185,14 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
 
+      final token = authProvider.accessToken;
+      if (token == null) {
+        messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar una materia')));
+        return false;
+      }
+
       final success = await materiaProvider.updateMateria(
-        authProvider.accessToken!,
+        token,
         widget.materia.id,
         academic_service.UpdateMateriaRequest(
           nombre: _nombreController.text.trim(),

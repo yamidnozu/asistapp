@@ -6,7 +6,7 @@ import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/horario_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
 import 'package:asistapp/providers/user_provider.dart';
-import 'package:asistapp/providers/grupo_provider.dart';
+import 'package:asistapp/providers/grupo_paginated_provider.dart';
 import 'package:asistapp/providers/periodo_academico_provider.dart';
 import 'package:asistapp/models/grupo.dart';
 import 'package:asistapp/models/materia.dart';
@@ -35,15 +35,15 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
   }
 }
 
-class FakeGrupoProvider extends GrupoProvider {
+class FakeGrupoProvider extends GrupoPaginatedProvider {
   final List<Grupo> initialGrupos;
   FakeGrupoProvider({this.initialGrupos = const []});
 
   @override
-  List<Grupo> get grupos => initialGrupos;
+  List<Grupo> get items => initialGrupos;
 
   @override
-  Future<void> loadGruposByPeriodo(String accessToken, String periodoId, {int? page, int limit = 10, String? search}) async {
+  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
     // no-op
     notifyListeners();
   }
@@ -109,7 +109,7 @@ class FakeHorarioProvider extends HorarioProvider {
 
 class FakeHorarioConflictProvider extends FakeHorarioProvider {
   final ConflictError conflict;
-  FakeHorarioConflictProvider(this.conflict, {List<Horario> initialHorarios = const []}) : super(initialHorarios: initialHorarios);
+  FakeHorarioConflictProvider(this.conflict, {super.initialHorarios = const []});
 
   @override
   ConflictError? get conflictError => conflict;
@@ -144,7 +144,7 @@ void main() {
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<HorarioProvider>.value(value: fakeHorario),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: fakePeriodo),
-          ChangeNotifierProvider<GrupoProvider>.value(value: fakeGrupo),
+          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeGrupo),
           ChangeNotifierProvider<MateriaProvider>.value(value: fakeMateria),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUser),
         ],
@@ -204,7 +204,7 @@ void main() {
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<HorarioProvider>.value(value: fakeHorario),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: fakePeriodo),
-          ChangeNotifierProvider<GrupoProvider>.value(value: fakeGrupo),
+          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeGrupo),
           ChangeNotifierProvider<MateriaProvider>.value(value: fakeMateria),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUser),
         ],

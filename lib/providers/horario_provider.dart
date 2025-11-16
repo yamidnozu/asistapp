@@ -2,135 +2,137 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../services/academic_service.dart' as academic_service;
 import '../models/horario.dart';
+import 'paginated_data_provider.dart';
 import '../models/clase_del_dia.dart';
 import '../models/user.dart'; // Para PaginationInfo
 import '../models/conflict_error.dart';
 
-enum HorarioState {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+// HorarioState removed; rely on PaginatedDataProvider's isLoading/hasError/isLoaded
 
-class HorarioProvider with ChangeNotifier {
+class HorarioProvider extends PaginatedDataProvider<Horario> {
   final academic_service.AcademicService _academicService = academic_service.AcademicService();
 
-  HorarioState _state = HorarioState.initial;
-  String? _errorMessage;
+  // error and errorMessage delegated to PaginatedDataProvider
   ConflictError? _conflictError;
-  List<Horario> _horarios = [];
+  // Horarios list is stored in PaginatedDataProvider.items (base class)
   List<ClaseDelDia> _clasesDelDia = [];
   List<ClaseDelDia> _horarioSemanal = [];
   Horario? _selectedHorario;
   String? _selectedGrupoId;
   String? _selectedPeriodoId;
-  PaginationInfo? _paginationInfo;
-
-  // Scroll infinito
-  bool _isLoadingMore = false;
-  bool _hasMoreData = true;
+  // pagination handled by PaginatedDataProvider for paginated endpoints
+  // pagination handled by PaginatedDataProvider for paginated endpoints
+  // For endpoints that return all results (no pagination) we will use
+  // the base provider helpers setHasMoreData / setPaginationInfo.
 
   // Getters
-  HorarioState get state => _state;
-  String? get errorMessage => _errorMessage;
+  // Use PaginatedDataProvider's errorMessage
   ConflictError? get conflictError => _conflictError;
-  List<Horario> get horarios => _horarios;
+  List<Horario> get horarios => items;
   List<ClaseDelDia> get clasesDelDia => _clasesDelDia;
   List<ClaseDelDia> get horarioSemanal => _horarioSemanal;
   Horario? get selectedHorario => _selectedHorario;
   String? get selectedGrupoId => _selectedGrupoId;
   String? get selectedPeriodoId => _selectedPeriodoId;
-  PaginationInfo? get paginationInfo => _paginationInfo;
+  // Use base paginationInfo
 
-  bool get isLoading => _state == HorarioState.loading;
-  bool get hasError => _state == HorarioState.error;
-  bool get isLoaded => _state == HorarioState.loaded;
-  bool get isLoadingMore => _isLoadingMore;
-  bool get hasMoreData => _hasMoreData;
+  // Delegated to PaginatedDataProvider - use base implementation
+  // Use base isLoadingMore / hasMoreData
 
   // Computed properties
-  List<Horario> get horariosActivos => _horarios.where((horario) => horario.periodoAcademico.activo).toList();
+  List<Horario> get horariosActivos => items.where((horario) => horario.periodoAcademico.activo).toList();
 
   /// 🔧 NUEVO: Devuelve SOLO los horarios del grupo seleccionado
   /// Utilizado para renderizar la grilla (grid de horarios)
   /// Mientras que _horarios contiene TODOS los horarios del período (para detectar conflictos)
   List<Horario> get horariosDelGrupoSeleccionado {
-    if (_selectedGrupoId == null) return [];
-    return _horarios.where((h) => h.grupo.id == _selectedGrupoId).toList();
+  if (_selectedGrupoId == null) return [];
+  return items.where((h) => h.grupo.id == _selectedGrupoId).toList();
   }
 
   // Número de horarios actualmente cargados en memoria (página actual)
-  int get loadedHorariosCount => _horarios.length;
+  int get loadedHorariosCount => items.length;
   int get clasesDelDiaCount => _clasesDelDia.length;
   int get horarioSemanalCount => _horarioSemanal.length;
 
   /// Número total de horarios reportado por la paginación del backend
-  int get totalHorariosFromPagination => _paginationInfo?.total ?? 0;
+  int get totalHorariosFromPagination => paginationInfo?.total ?? 0;
 
-  void _setState(HorarioState newState, [String? error]) {
-    _state = newState;
-    _errorMessage = error;
-    // Limpiar el error de conflicto cuando cambie el estado
-    if (newState != HorarioState.error) {
-      _conflictError = null;
-    }
-    notifyListeners();
-  }
+  // Legacy state removed: rely on base isLoading/hasError/isLoaded
 
   /// Carga todos los horarios con paginación y filtros
   Future<void> loadHorarios(String accessToken, {int? page, int? limit, String? grupoId, String? periodoId}) async {
-    if (_state == HorarioState.loading) return;
-
-    _setState(HorarioState.loading);
+  if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
     try {
       debugPrint('HorarioProvider: Iniciando carga de horarios...');
-      final response = await _academicService.getHorarios(
-        accessToken,
-        page: page ?? 1,
-        limit: limit,
-        grupoId: grupoId,
-        periodoId: periodoId,
-      );
-      if (response != null) {
-        debugPrint('HorarioProvider: Recibidos ${response.horarios.length} horarios');
-        _horarios = response.horarios;
-        _paginationInfo = response.pagination;
-        _hasMoreData = response.pagination.hasNext;
-        _setState(HorarioState.loaded);
-        debugPrint('HorarioProvider: Estado cambiado a loaded');
+      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: {
+        if (grupoId != null) 'grupoId': grupoId,
+        if (periodoId != null) 'periodoId': periodoId,
+      });
+      if (hasError) {
+        setError(errorMessage ?? 'Error al cargar horarios');
       } else {
-        _setState(HorarioState.error, 'Error al cargar horarios');
+        debugPrint('HorarioProvider: Recibidos ${items.length} horarios');
+        notifyListeners();
+        debugPrint('HorarioProvider: Estado cambiado a loaded');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading horarios: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
+  }
+
+  @override
+  Future<PaginatedResponse<Horario>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+    final grupoId = filters?['grupoId'];
+    final periodoId = filters?['periodoId'];
+
+    final response = await _academicService.getHorarios(accessToken, page: page, limit: limit, grupoId: grupoId, periodoId: periodoId);
+    if (response == null) return null;
+    return PaginatedResponse(items: response.horarios, pagination: response.pagination);
+  }
+
+  @override
+  Future<Horario?> createItemApi(String accessToken, dynamic data) async {
+    final created = await _academicService.createHorario(accessToken, data as academic_service.CreateHorarioRequest);
+    return created;
+  }
+
+  @override
+  Future<bool> deleteItemApi(String accessToken, String id) async {
+    return await _academicService.deleteHorario(accessToken, id);
+  }
+
+  @override
+  Future<Horario?> updateItemApi(String accessToken, String id, dynamic data) async {
+    final updated = await _academicService.updateHorario(accessToken, id, data as academic_service.UpdateHorarioRequest);
+    return updated;
   }
 
   /// Carga horarios por grupo específico
   Future<void> loadHorariosByGrupo(String accessToken, String grupoId) async {
-    if (_state == HorarioState.loading) return;
-
-    _setState(HorarioState.loading);
+  if (isLoading) return;
     _selectedGrupoId = grupoId;
 
     try {
       debugPrint('HorarioProvider: Iniciando carga de horarios por grupo $grupoId...');
       final horarios = await _academicService.getHorariosPorGrupo(accessToken, grupoId);
       if (horarios != null) {
-        debugPrint('HorarioProvider: Recibidos ${horarios.length} horarios del grupo $grupoId');
-        _horarios = horarios;
-        _hasMoreData = false; // No hay paginación para este endpoint específico
-        _setState(HorarioState.loaded);
+        debugPrint('HorarioProvider: Recibidos ${horarios!.length} horarios del grupo $grupoId');
+  clearItems();
+  items.addAll(horarios);
+      // No hay paginación para este endpoint específico: señalamos
+      // al proveedor base que no hay más datos.
+      setHasMoreData(false);
+  notifyListeners();
       } else {
-        _setState(HorarioState.error, 'Error al cargar horarios del grupo');
+  setError('Error al cargar horarios del grupo');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading horarios by grupo: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
@@ -141,9 +143,7 @@ class HorarioProvider with ChangeNotifier {
     String grupoId,
     String periodoId,
   ) async {
-    if (_state == HorarioState.loading) return;
-
-    _setState(HorarioState.loading);
+  if (isLoading) return;
     _selectedGrupoId = grupoId;
     _selectedPeriodoId = periodoId;
 
@@ -162,59 +162,61 @@ class HorarioProvider with ChangeNotifier {
       final grupoHorarios = await grupoHorariosTask;
       final periodResponse = await periodHorariosTask;
 
-      if (grupoHorarios != null && periodResponse != null) {
-        debugPrint('HorarioProvider: Recibidos ${grupoHorarios.length} horarios del grupo');
+  if (periodResponse != null) {
+    debugPrint('HorarioProvider: Recibidos ${grupoHorarios?.length ?? 0} horarios del grupo');
         debugPrint('HorarioProvider: Recibidos ${periodResponse.horarios.length} horarios del período');
 
         // IMPORTANTE: Usar TODOS los horarios del período para detectar conflictos
         // Pero mantener una referencia al grupo para la pantalla
-        _horarios = periodResponse.horarios;
+    // Importante: mantener la paginación del período en el base provider
+    clearItems();
+    items.addAll(periodResponse.horarios);
+    setPaginationInfo(periodResponse.pagination);
         _selectedGrupoId = grupoId; // Guardar el grupo seleccionado
-        _paginationInfo = periodResponse.pagination;
-        _hasMoreData = false;
-        _setState(HorarioState.loaded);
+  // pagination info is set by loadItems() above when we loaded the period page
+  notifyListeners();
 
-        debugPrint('HorarioProvider: Total horarios en memoria: ${_horarios.length}');
+  debugPrint('HorarioProvider: Total horarios en memoria: ${items.length}');
       } else {
-        _setState(HorarioState.error, 'Error al cargar horarios');
+  setError('Error al cargar horarios');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading horarios with conflict detection: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Carga un horario específico por ID
   Future<void> loadHorarioById(String accessToken, String horarioId) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return;
 
     try {
       final horario = await _academicService.getHorarioById(accessToken, horarioId);
       if (horario != null) {
         _selectedHorario = horario;
-        _setState(HorarioState.loaded);
+  notifyListeners();
       } else {
-        _setState(HorarioState.error, 'Horario no encontrado');
+  setError('Horario no encontrado');
       }
     } catch (e) {
       debugPrint('Error loading horario: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Crea un nuevo horario
   Future<bool> createHorario(String accessToken, academic_service.CreateHorarioRequest horarioData) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return false;
 
     try {
       final newHorario = await _academicService.createHorario(accessToken, horarioData);
       if (newHorario != null) {
         // Agregar el nuevo horario a la lista
-        _horarios.insert(0, newHorario);
-        _setState(HorarioState.loaded);
+  items.insert(0, newHorario);
+  notifyListeners();
         return true;
       } else {
-        _setState(HorarioState.error, 'Error al crear horario');
+  setError('Error al crear horario');
         return false;
       }
     } catch (e) {
@@ -223,10 +225,10 @@ class HorarioProvider with ChangeNotifier {
 
       // Verificar si es un error de conflicto (HTTP 409)
       if (errorString.contains('409') || errorString.contains('Conflict')) {
-        _conflictError = ConflictError.fromBackendError(errorString);
-        _setState(HorarioState.error, _conflictError!.userFriendlyMessage);
+  _conflictError = ConflictError.fromBackendError(errorString);
+  setError(_conflictError!.userFriendlyMessage);
       } else {
-        _setState(HorarioState.error, errorString);
+  setError(errorString);
       }
       return false;
     }
@@ -234,15 +236,15 @@ class HorarioProvider with ChangeNotifier {
 
   /// Actualiza un horario existente
   Future<bool> updateHorario(String accessToken, String horarioId, academic_service.UpdateHorarioRequest horarioData) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return false;
 
     try {
       final updatedHorario = await _academicService.updateHorario(accessToken, horarioId, horarioData);
       if (updatedHorario != null) {
         // Actualizar el horario en la lista
-        final index = _horarios.indexWhere((horario) => horario.id == horarioId);
+  final index = items.indexWhere((horario) => horario.id == horarioId);
         if (index != -1) {
-          _horarios[index] = updatedHorario;
+          items[index] = updatedHorario;
         }
 
         // Actualizar el horario seleccionado si es el mismo
@@ -250,10 +252,10 @@ class HorarioProvider with ChangeNotifier {
           _selectedHorario = updatedHorario;
         }
 
-        _setState(HorarioState.loaded);
+  notifyListeners();
         return true;
       } else {
-        _setState(HorarioState.error, 'Error al actualizar horario');
+  setError('Error al actualizar horario');
         return false;
       }
     } catch (e) {
@@ -263,9 +265,9 @@ class HorarioProvider with ChangeNotifier {
       // Verificar si es un error de conflicto (HTTP 409)
       if (errorString.contains('409') || errorString.contains('Conflict')) {
         _conflictError = ConflictError.fromBackendError(errorString);
-        _setState(HorarioState.error, _conflictError!.userFriendlyMessage);
+        setError(_conflictError!.userFriendlyMessage);
       } else {
-        _setState(HorarioState.error, errorString);
+        setError(errorString);
       }
       return false;
     }
@@ -280,19 +282,19 @@ class HorarioProvider with ChangeNotifier {
 
       if (!success) {
         // Guardamos el mensaje de error para que la UI pueda mostrarlo.
-        _errorMessage = 'Error al eliminar el horario desde el servicio.';
+    setError('Error al eliminar el horario desde el servicio.');
       }
       return success;
     } catch (e) {
       debugPrint('Error deleting horario: $e');
-      _errorMessage = e.toString();
+  setError(e.toString());
       return false;
     }
   }
 
   /// MÉTODO CLAVE: Carga las clases del día actual para el profesor
   Future<void> cargarClasesDelDia(String accessToken) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return;
 
     try {
       debugPrint('HorarioProvider: Cargando clases del día para el profesor...');
@@ -300,19 +302,19 @@ class HorarioProvider with ChangeNotifier {
       if (clases != null) {
         debugPrint('HorarioProvider: Recibidas ${clases.length} clases del día');
         _clasesDelDia = clases;
-        _setState(HorarioState.loaded);
+  notifyListeners();
       } else {
-        _setState(HorarioState.error, 'Error al cargar clases del día');
+  setError('Error al cargar clases del día');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading clases del dia: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Carga las clases de un día específico para el profesor
   Future<void> cargarClasesPorDia(String accessToken, int diaSemana) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return;
 
     try {
       debugPrint('HorarioProvider: Cargando clases del día $diaSemana para el profesor...');
@@ -320,19 +322,19 @@ class HorarioProvider with ChangeNotifier {
       if (clases != null) {
         debugPrint('HorarioProvider: Recibidas ${clases.length} clases del día $diaSemana');
         _clasesDelDia = clases;
-        _setState(HorarioState.loaded);
+  notifyListeners();
       } else {
-        _setState(HorarioState.error, 'Error al cargar clases del día específico');
+  setError('Error al cargar clases del día específico');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading clases por dia: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
   /// Carga el horario semanal completo del profesor
   Future<void> cargarHorarioSemanal(String accessToken) async {
-    _setState(HorarioState.loading);
+  if (isLoading) return;
 
     try {
       debugPrint('HorarioProvider: Cargando horario semanal para el profesor...');
@@ -340,13 +342,13 @@ class HorarioProvider with ChangeNotifier {
       if (horario != null) {
         debugPrint('HorarioProvider: Recibido horario semanal con ${horario.length} clases');
         _horarioSemanal = horario;
-        _setState(HorarioState.loaded);
+  notifyListeners();
       } else {
-        _setState(HorarioState.error, 'Error al cargar horario semanal');
+    setError('Error al cargar horario semanal');
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading horario semanal: $e');
-      _setState(HorarioState.error, e.toString());
+  setError(e.toString());
     }
   }
 
@@ -364,14 +366,14 @@ class HorarioProvider with ChangeNotifier {
 
   /// Limpia todos los datos
   void clearData() {
-    _horarios = [];
+  clearItems();
     _clasesDelDia = [];
     _horarioSemanal = [];
     _selectedHorario = null;
     _selectedGrupoId = null;
     _selectedPeriodoId = null;
-    _paginationInfo = null;
-    _setState(HorarioState.initial);
+  // clearItems() resets paginationInfo in base class
+  clearError();
   }
 
   /// Recarga los datos (útil después de operaciones)
@@ -385,10 +387,10 @@ class HorarioProvider with ChangeNotifier {
 
   /// Busca horarios por materia o grupo
   List<Horario> searchHorarios(String query) {
-    if (query.isEmpty) return _horarios;
+  if (query.isEmpty) return items;
 
     final lowercaseQuery = query.toLowerCase();
-    return _horarios.where((horario) {
+  return items.where((horario) {
       return horario.materia.nombre.toLowerCase().contains(lowercaseQuery) ||
              horario.grupo.nombre.toLowerCase().contains(lowercaseQuery) ||
              horario.descripcion.toLowerCase().contains(lowercaseQuery);
@@ -397,7 +399,7 @@ class HorarioProvider with ChangeNotifier {
 
   /// Filtra horarios por día de la semana
   List<Horario> filterHorariosByDia(int diaSemana) {
-    return _horarios.where((horario) => horario.diaSemana == diaSemana).toList();
+  return items.where((horario) => horario.diaSemana == diaSemana).toList();
   }
 
   /// Filtra clases del día por hora
@@ -412,36 +414,37 @@ class HorarioProvider with ChangeNotifier {
   }
 
   /// Carga la siguiente página de horarios
-  Future<void> loadNextPage(String accessToken) async {
-    if (_paginationInfo == null || !_paginationInfo!.hasNext || _state == HorarioState.loading) return;
+  @override
+  Future<void> loadNextPage(String accessToken, {Map<String, String>? filters}) async {
+  if (paginationInfo == null || !paginationInfo!.hasNext || isLoading) return;
 
-    final nextPage = _paginationInfo!.page + 1;
+  final nextPage = paginationInfo!.page + 1;
     if (_selectedGrupoId != null) {
       await loadHorariosByGrupo(accessToken, _selectedGrupoId!);
     } else {
-      await loadHorarios(accessToken, page: nextPage, limit: _paginationInfo!.limit);
+  await loadHorarios(accessToken, page: nextPage, limit: paginationInfo!.limit);
     }
   }
 
   /// Carga la página anterior de horarios
   Future<void> loadPreviousPage(String accessToken) async {
-    if (_paginationInfo == null || !_paginationInfo!.hasPrev || _state == HorarioState.loading) return;
+  if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
 
-    final prevPage = _paginationInfo!.page - 1;
-    await loadHorarios(accessToken, page: prevPage, limit: _paginationInfo!.limit);
+  final prevPage = paginationInfo!.page - 1;
+  await loadHorarios(accessToken, page: prevPage, limit: paginationInfo!.limit);
   }
 
   /// Carga una página específica
   Future<void> loadPage(String accessToken, int page) async {
-    if (_state == HorarioState.loading) return;
+  if (isLoading) return;
 
-    await loadHorarios(accessToken, page: page, limit: _paginationInfo?.limit ?? 10);
+  await loadHorarios(accessToken, page: page, limit: paginationInfo?.limit ?? 10);
   }
 
   /// Obtiene estadísticas de horarios
   Map<String, int> getHorariosStatistics() {
     return {
-      'total': _paginationInfo?.total ?? 0,
+  'total': paginationInfo?.total ?? 0,
       'activos': horariosActivos.length,
       'clases_hoy': _clasesDelDia.length,
       'horario_semanal': _horarioSemanal.length,
@@ -450,42 +453,20 @@ class HorarioProvider with ChangeNotifier {
 
   /// Carga más horarios para scroll infinito (append)
   Future<void> loadMoreHorarios(String accessToken, {String? grupoId, String? periodoId}) async {
-    if (_isLoadingMore || !_hasMoreData || _paginationInfo == null) return;
+    if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
 
-    _isLoadingMore = true;
-    notifyListeners();
+    final filters = <String,String>{
+      if (grupoId != null) 'grupoId': grupoId,
+      if (periodoId != null) 'periodoId': periodoId,
+    };
 
-    try {
-      final nextPage = _paginationInfo!.page + 1;
-
-      final response = await _academicService.getHorarios(
-        accessToken,
-        page: nextPage,
-        limit: _paginationInfo!.limit,
-        grupoId: grupoId,
-        periodoId: periodoId,
-      );
-
-      if (response != null) {
-        _horarios.addAll(response.horarios); // Agregar al final de la lista
-        _paginationInfo = response.pagination;
-        _hasMoreData = response.pagination.hasNext;
-        debugPrint('HorarioProvider: Cargados ${response.horarios.length} horarios más. Total ahora: ${_horarios.length}');
-      } else {
-        _hasMoreData = false;
-      }
-    } catch (e) {
-      debugPrint('HorarioProvider: Error loading more horarios: $e');
-    } finally {
-      _isLoadingMore = false;
-      notifyListeners();
-    }
+    await super.loadNextPage(accessToken, filters: filters.isEmpty ? null : filters);
   }
 
   /// Reinicia la paginación para scroll infinito
+  @override
   void resetPagination() {
-    _hasMoreData = true;
-    _isLoadingMore = false;
+    super.resetPagination();
   }
 
   /// Obtiene profesores disponibles para un horario específico
@@ -503,7 +484,7 @@ class HorarioProvider with ChangeNotifier {
     final finMinutos = _timeToMinutes(horaFin);
 
     // Encontrar profesores con conflictos
-    for (final horario in _horarios) {
+  for (final horario in items) {
       if (horario.diaSemana == diaSemana && horario.profesor != null) {
         final hInicio = _timeToMinutes(horario.horaInicio);
         final hFin = _timeToMinutes(horario.horaFin);

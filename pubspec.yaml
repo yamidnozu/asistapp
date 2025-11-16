@@ -41,7 +41,7 @@ flutter:
   # Configuración de iconos de la app
   # Para generar iconos: flutter pub run flutter_launcher_icons:main
   # flutter_launcher_icons:
-  #   android: "launcher_icon"
+  #   android: "ic_launcher"
   #   ios: true
   #   image_path: "assets/icon/app_icon.png"
   #   min_sdk_android: 21

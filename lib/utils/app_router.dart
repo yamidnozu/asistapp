@@ -25,6 +25,8 @@ import '../models/user.dart';
 import '../models/grupo.dart';
 import '../screens/student_schedule_screen.dart';
 import '../screens/student_attendance_screen.dart';
+import '../screens/attendance_screen.dart';
+import '../models/clase_del_dia.dart';
 import '../screens/student_notifications_screen.dart';
 import '../screens/test_multi_hora_screen.dart';
 import '../screens/my_qr_code_screen.dart';
@@ -225,6 +227,18 @@ class AppRouter {
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const StudentAttendanceScreen(),
                 ),
+              ),
+              GoRoute(
+                path: '/teacher/attendance',
+                name: 'teacher-attendance',
+                pageBuilder: (context, state) {
+                  final clase = state.extra as ClaseDelDia;
+                  return MaterialPage(
+                    fullscreenDialog: false,
+                    name: 'Teacher Attendance',
+                    child: AttendanceScreen(clase: clase),
+                  );
+                },
               ),
               GoRoute(
                 path: '/student/notifications',

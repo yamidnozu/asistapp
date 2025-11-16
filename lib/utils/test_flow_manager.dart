@@ -10,7 +10,7 @@ import '../providers/auth_provider.dart';
 import '../providers/institution_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/materia_provider.dart';
-import '../providers/grupo_provider.dart';
+import '../providers/grupo_paginated_provider.dart';
 import '../providers/horario_provider.dart';
 import '../providers/asistencia_provider.dart';
 import '../models/user.dart';
@@ -73,7 +73,8 @@ class TestFlowManager {
     };
 
     // Crear institución
-    final token = authProvider.accessToken!;
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
     final success = await institutionProvider.createInstitution(token, institutionData);
 
     if (success) {
@@ -118,7 +119,8 @@ class TestFlowManager {
     );
 
     // Crear administrador
-    final token = authProvider.accessToken!;
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
     final success = await userProvider.createUser(token, adminData);
 
     if (success) {
@@ -175,7 +177,8 @@ class TestFlowManager {
       ),
     ];
 
-    final token = authProvider.accessToken!;
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final profesorData in profesoresData) {
@@ -237,7 +240,8 @@ class TestFlowManager {
       ),
     ];
 
-    final token = authProvider.accessToken!;
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final estudianteData in estudiantesData) {
@@ -287,7 +291,8 @@ class TestFlowManager {
       ),
     ];
 
-    final token = authProvider.accessToken!;
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final materiaData in materiasData) {
@@ -311,7 +316,7 @@ class TestFlowManager {
     debugPrint('🧪 PASO 7: Verificando sistema de grupos');
 
     final router = GoRouter.of(context);
-    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar a grupos
@@ -320,10 +325,11 @@ class TestFlowManager {
 
     // Por ahora solo verificamos que el provider está disponible
     // La creación de grupos requiere periodoId que no tenemos
-    final token = authProvider.accessToken!;
-    await grupoProvider.loadGrupos(token);
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
+  await grupoProvider.loadItems(token);
 
-    debugPrint('✅ Sistema de grupos verificado - ${grupoProvider.grupos.length} grupos disponibles');
+  debugPrint('✅ Sistema de grupos verificado - ${grupoProvider.items.length} grupos disponibles');
   }
 
   /// PASO 8: Crear Horarios (simplificado)
@@ -340,8 +346,9 @@ class TestFlowManager {
 
     // Por ahora solo verificamos que el provider está disponible
     // La creación de horarios requiere periodoId que no tenemos
-    final token = authProvider.accessToken!;
-    await horarioProvider.loadHorarios(token);
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
+  await horarioProvider.loadHorarios(token);
 
     debugPrint('✅ Sistema de horarios verificado - ${horarioProvider.horarios.length} horarios disponibles');
   }
@@ -362,8 +369,9 @@ class TestFlowManager {
     }
 
     // Intentar cargar asistencias para el primer horario
-    final token = authProvider.accessToken!;
-    await asistenciaProvider.fetchAsistencias(token, horarios.first.id);
+  final token = authProvider.accessToken;
+  if (token == null) throw Exception('No hay sesión activa');
+  await asistenciaProvider.fetchAsistencias(token, horarios.first.id);
 
     debugPrint('✅ Sistema de asistencias verificado - ${asistenciaProvider.asistencias.length} estudiantes listos');
   }
