@@ -71,10 +71,7 @@ if ! [[ -f "$REPO_ROOT/windows/runner/resources/app_icon.ico" ]]; then
       ICON_SRC="$REPO_ROOT/android/app/src/main/res/$p/ic_launcher.png"
       break
     fi
-    if [[ -f "$REPO_ROOT/android/app/src/main/res/$p/launcher_icon.png" ]]; then
-      ICON_SRC="$REPO_ROOT/android/app/src/main/res/$p/launcher_icon.png"
-      break
-    fi
+    # older naming 'launcher_icon.png' is deprecated; prefer ic_launcher
   done
   fi
 
