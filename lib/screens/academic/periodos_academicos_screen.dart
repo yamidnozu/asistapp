@@ -14,76 +14,53 @@ class PeriodosAcademicosScreen extends StatefulWidget {
   @override
   State<PeriodosAcademicosScreen> createState() => _PeriodosAcademicosScreenState();
 }
-
+  
 class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  Timer? _searchDebounceTimer;
-
-  // Estado centralizado de filtros
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_onScroll);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadPeriodos();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPeriodos());
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _searchController.dispose();
-    _searchDebounceTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged() {
+    final query = _searchController.text.trim();
+    setState(() => _isSearching = query.isNotEmpty);
+    _loadPeriodos(search: query.isEmpty ? null : query);
+  }
+
   void _onScroll() {
-    if (_isSearching) return;
-
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      _loadMorePeriodos(periodoProvider, authProvider.accessToken);
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 180) {
+      _loadMorePeriodos();
     }
   }
 
-  Future<void> _loadPeriodos() async {
+  Future<void> _loadPeriodos({String? search}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-
-    if (authProvider.accessToken == null) {
-      debugPrint('Error: No hay token de acceso para cargar períodos académicos.');
-      return;
+    if (authProvider.accessToken != null) {
+      await periodoProvider.loadPeriodosAcademicos(authProvider.accessToken!);
     }
-
-    await periodoProvider.loadPeriodosAcademicos(
-      authProvider.accessToken!,
-      page: 1,
-      limit: 10,
-    );
   }
 
-  Future<void> _loadMorePeriodos(PeriodoAcademicoProvider provider, String? accessToken) async {
-    if (accessToken == null || provider.isLoading) return;
-
-    await provider.loadNextPage(accessToken);
-  }
-
-  void _onSearchChanged(String query) {
-    _searchDebounceTimer?.cancel();
-
-    setState(() {
-      _isSearching = query.isNotEmpty;
-    });
-
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _loadPeriodos();
-    });
+  Future<void> _loadMorePeriodos() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+    if (authProvider.accessToken != null && (periodoProvider.paginationInfo?.hasNext ?? false)) {
+      await periodoProvider.loadNextPage(authProvider.accessToken!);
+    }
   }
 
   @override
@@ -91,7 +68,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     return Consumer2<AuthProvider, PeriodoAcademicoProvider>(
       builder: (context, authProvider, periodoProvider, child) {
         return ClarityManagementPage(
-          title: 'Gestión de Períodos Académicos',
+          title: 'Períodos Académicos',
           isLoading: periodoProvider.isLoading,
           hasError: periodoProvider.hasError,
           errorMessage: periodoProvider.errorMessage,
@@ -105,14 +82,11 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           onRefresh: _loadPeriodos,
           scrollController: _scrollController,
           hasMoreData: periodoProvider.paginationInfo?.hasNext ?? false,
+          isLoadingMore: periodoProvider.isLoading && (periodoProvider.paginationInfo?.hasNext ?? false),
           emptyStateWidget: ClarityEmptyState(
             icon: _isSearching ? Icons.search_off : Icons.calendar_today,
-            title: _isSearching
-              ? 'No se encontraron resultados'
-              : 'Aún no has creado ningún período académico',
-            subtitle: _isSearching
-              ? 'Intenta con otros términos de búsqueda'
-              : 'Comienza creando tu primer período académico',
+            title: _isSearching ? 'No se encontraron resultados' : 'Aún no has creado ningún período académico',
+            subtitle: _isSearching ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer período académico',
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCreatePeriodoDialog(context),
@@ -142,7 +116,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
                   icon: Icon(Icons.clear, color: colors.textSecondary),
                   onPressed: () {
                     _searchController.clear();
-                    _onSearchChanged('');
+                    _onSearchChanged();
                   },
                 )
               : null,
@@ -162,7 +136,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           fillColor: colors.surface,
           contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
         ),
-        onChanged: _onSearchChanged,
+        onChanged: (_) => _onSearchChanged(),
       ),
     ];
   }
@@ -198,101 +172,74 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.xs),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        periodo.nombre,
-                        style: textStyles.headlineSmall,
-                      ),
-                      SizedBox(height: spacing.xs),
-                      Text(
-                        'Del ${periodo.fechaInicio.day}/${periodo.fechaInicio.month}/${periodo.fechaInicio.year} al ${periodo.fechaFin.day}/${periodo.fechaFin.month}/${periodo.fechaFin.year}',
-                        style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                // Status badge
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                  decoration: BoxDecoration(
-                    color: periodo.activo ? colors.success.withValues(alpha: 0.1) : colors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  ),
-                  child: Text(
-                    periodo.activo ? 'Activo' : 'Inactivo',
-                    style: textStyles.bodySmall.copyWith(
-                      color: periodo.activo ? colors.success : colors.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: spacing.md),
-            Row(
-              children: [
-                Text(
-                  '${0} grupos asociados',
-                  style: textStyles.bodySmall.copyWith(color: colors.textMuted),
-                ),
-                const Spacer(),
-                // Toggle status button
-                IconButton(
-                  icon: Icon(
-                    periodo.activo ? Icons.visibility_off : Icons.visibility,
-                    color: periodo.activo ? colors.error : colors.success,
-                  ),
-                  onPressed: () => _togglePeriodoStatus(context, periodo, provider),
-                  tooltip: periodo.activo ? 'Desactivar período' : 'Activar período',
-                ),
-                // Edit button
-                IconButton(
-                  icon: Icon(Icons.edit, color: colors.primary),
-                  onPressed: () => _showEditPeriodoDialog(context, periodo),
-                  tooltip: 'Editar período',
-                ),
-                // Delete button
-                IconButton(
-                  icon: Icon(Icons.delete, color: colors.error),
-                  onPressed: () => _showDeletePeriodoDialog(context, periodo, provider),
-                  tooltip: 'Eliminar período',
-                ),
-              ],
-            ),
-          ],
+    return ClarityListItem(
+      leading: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(8),
         ),
+        child: Icon(Icons.calendar_today, color: colors.primary),
       ),
+      title: periodo.nombre,
+      subtitleWidget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Del ${periodo.fechaInicio.day}/${periodo.fechaInicio.month}/${periodo.fechaInicio.year} al ${periodo.fechaFin.day}/${periodo.fechaFin.month}/${periodo.fechaFin.year}',
+            style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+          ),
+          SizedBox(height: spacing.xs),
+          Text(
+            '${0} grupos asociados',
+            style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+          ),
+        ],
+      ),
+      badgeText: periodo.activo ? 'Activo' : 'Inactivo',
+      badgeColor: periodo.activo ? colors.success : colors.error,
+      contextActions: [
+        ClarityContextMenuAction(
+          label: periodo.activo ? 'Desactivar' : 'Activar',
+          icon: periodo.activo ? Icons.visibility_off : Icons.visibility,
+          color: periodo.activo ? colors.error : colors.success,
+          onPressed: () => _togglePeriodoStatus(context, periodo, provider),
+        ),
+        ClarityContextMenuAction(
+          label: 'Editar',
+          icon: Icons.edit,
+          color: colors.primary,
+          onPressed: () => _showEditPeriodoDialog(context, periodo),
+        ),
+        ClarityContextMenuAction(
+          label: 'Eliminar',
+          icon: Icons.delete,
+          color: colors.error,
+          onPressed: () => _showDeletePeriodoDialog(context, periodo, provider),
+        ),
+      ],
+      onTap: () => Navigator.of(context).pushNamed('/academic/periodos/${periodo.id}'),
     );
   }
 
   Future<void> _togglePeriodoStatus(BuildContext context, PeriodoAcademico periodo, PeriodoAcademicoProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final colors = Theme.of(context).colorScheme;
+  final colors = Theme.of(context).colorScheme;
+  final messenger = ScaffoldMessenger.of(context);
 
-    final success = await provider.togglePeriodoStatus(authProvider.accessToken!, periodo.id);
+  final success = await provider.togglePeriodoStatus(authProvider.accessToken!, periodo.id);
 
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
+  messenger.showSnackBar(
         SnackBar(
           content: Text('Período ${periodo.activo ? 'desactivado' : 'activado'} correctamente'),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
+  messenger.showSnackBar(
         SnackBar(
           content: Text(provider.errorMessage ?? 'Error al cambiar el status del período'),
           backgroundColor: colors.error,
@@ -306,9 +253,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       context: context,
       builder: (context) => const CreatePeriodoDialog(),
     ).then((result) {
-      if (result == true) {
-        _loadPeriodos(); // Recargar la lista
-      }
+      if (result == true) _loadPeriodos();
     });
   }
 
@@ -317,9 +262,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       context: context,
       builder: (context) => EditPeriodoDialog(periodo: periodo),
     ).then((result) {
-      if (result == true) {
-        _loadPeriodos(); // Recargar la lista
-      }
+      if (result == true) _loadPeriodos();
     });
   }
 
@@ -331,36 +274,22 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Eliminar Período Académico'),
         content: Text(
-          '¿Estás seguro de que quieres eliminar el período "${periodo.nombre}"? '
-          'Esta acción no se puede deshacer y eliminará todos los grupos asociados.',
+          '¿Estás seguro de que quieres eliminar el período "${periodo.nombre}"? Esta acción no se puede deshacer y eliminará todos los grupos asociados.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop(); // Cerrar diálogo
-
+              Navigator.of(context).pop();
               final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
+              final messenger = ScaffoldMessenger.of(context);
               final success = await provider.deletePeriodoAcademico(authProvider.accessToken!, periodo.id);
-
               if (!mounted) return;
-
               if (success) {
-                ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
-                  const SnackBar(content: Text('Período académico eliminado correctamente')),
-                );
-                _loadPeriodos(); // Recargar la lista
+                messenger.showSnackBar(const SnackBar(content: Text('Período académico eliminado correctamente')));
+                _loadPeriodos();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar( // ignore: use_build_context_synchronously
-                  SnackBar(
-                    content: Text(provider.errorMessage ?? 'Error al eliminar el período académico'),
-                    backgroundColor: colors.error,
-                  ),
-                );
+                messenger.showSnackBar(SnackBar(content: Text(provider.errorMessage ?? 'Error al eliminar período académico'), backgroundColor: colors.error));
               }
             },
             style: TextButton.styleFrom(foregroundColor: colors.error),
@@ -371,6 +300,8 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     );
   }
 }
+
+// (Lógica del widget continúa aquí)
 
 // Diálogo para crear período académico
 class CreatePeriodoDialog extends StatefulWidget {
@@ -386,7 +317,7 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
   DateTime? _fechaInicio;
   DateTime? _fechaFin;
 
-  bool _isLoading = false;
+  // _isLoading not needed: ClarityFormDialog shows its own progress when saving
 
   @override
   void dispose() {
@@ -398,105 +329,68 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
-
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Crear Período Académico', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del Período',
-                hintText: 'Ej: Año 2025, Semestre 2025-I',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            // Fecha de inicio
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaInicio = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Inicio',
-                ),
-                child: Text(
-                  _fechaInicio != null
-                      ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-            SizedBox(height: spacing.md),
-            // Fecha de fin
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaInicio ?? DateTime.now(),
-                  firstDate: _fechaInicio ?? DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaFin = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Fin',
-                ),
-                child: Text(
-                  _fechaFin != null
-                      ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _createPeriodo,
+      saveLabel: 'Crear',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre del Período',
+            hintText: 'Ej: Año 2025, Semestre 2025-I',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'El nombre es requerido';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+
+        SizedBox(height: spacing.md),
+
+        // Fecha de inicio
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaInicio = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
+            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+          ),
         ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createPeriodo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Crear'),
+
+        SizedBox(height: spacing.md),
+
+        // Fecha de fin
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaInicio ?? DateTime.now(),
+              firstDate: _fechaInicio ?? DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaFin = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Fin'),
+            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _createPeriodo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _createPeriodo() async {
+    if (!_formKey.currentState!.validate()) return false;
     if (_fechaInicio == null || _fechaFin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -504,10 +398,10 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           backgroundColor: Colors.orange,
         ),
       );
-      return;
+      return false;
     }
 
-    setState(() => _isLoading = true);
+  // dialog handles progress UI
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -524,10 +418,10 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Período académico creado correctamente')),
         );
+        return true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -545,11 +439,9 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+      return false;
+    } finally {}
+    return false;
   }
 }
 
@@ -569,7 +461,7 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
   DateTime? _fechaInicio;
   DateTime? _fechaFin;
 
-  bool _isLoading = false;
+  // no local loading flag required now - ClarityFormDialog handles saving state
 
   @override
   void initState() {
@@ -590,104 +482,68 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Período Académico', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del Período',
-                hintText: 'Ej: Año 2025, Semestre 2025-I',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            // Fecha de inicio
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaInicio ?? DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaInicio = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Inicio',
-                ),
-                child: Text(
-                  _fechaInicio != null
-                      ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-            SizedBox(height: spacing.md),
-            // Fecha de fin
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaFin ?? DateTime.now(),
-                  firstDate: _fechaInicio ?? DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaFin = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Fin',
-                ),
-                child: Text(
-                  _fechaFin != null
-                      ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _updatePeriodo,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre del Período',
+            hintText: 'Ej: Año 2025, Semestre 2025-I',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'El nombre es requerido';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+
+        SizedBox(height: spacing.md),
+
+        // Fecha de inicio
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaInicio ?? DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaInicio = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
+            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+          ),
         ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updatePeriodo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Actualizar'),
+
+        SizedBox(height: spacing.md),
+
+        // Fecha de fin
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaFin ?? DateTime.now(),
+              firstDate: _fechaInicio ?? DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaFin = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Fin'),
+            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _updatePeriodo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _updatePeriodo() async {
+    if (!_formKey.currentState!.validate()) return false;
     if (_fechaInicio == null || _fechaFin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -695,10 +551,10 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           backgroundColor: Colors.orange,
         ),
       );
-      return;
+          return false;
     }
 
-    setState(() => _isLoading = true);
+  // progress is handled by ClarityFormDialog
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -716,11 +572,11 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Período académico actualizado correctamente')),
         );
-      } else if (mounted) {
+        return true;
+          } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(periodoProvider.errorMessage ?? 'Error al actualizar período académico'),
@@ -737,10 +593,7 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    } finally {}
+    return false;
   }
 }

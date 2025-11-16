@@ -12,10 +12,12 @@ import 'form_steps/index.dart';
 
 class UserFormScreen extends StatefulWidget {
   final String userRole; // 'profesor', 'estudiante', 'admin_institucion', etc.
+  final String? initialInstitutionId; // Optional: preselect institution for admin creation
 
   const UserFormScreen({
     super.key, 
     required this.userRole,
+    this.initialInstitutionId,
   });
 
   @override
@@ -177,6 +179,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
           page: 1,
           limit: 100, // Cargar todas para el dropdown
         );
+      }
+
+      // Preselect institution if provided
+      if (widget.initialInstitutionId != null && _selectedInstitutionId == null) {
+        final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
+        if (exists) _selectedInstitutionId = widget.initialInstitutionId;
       }
     }
   }

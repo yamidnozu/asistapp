@@ -399,7 +399,7 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
   final _seccionController = TextEditingController();
 
   String? _selectedPeriodoId;
-  bool _isLoading = false;
+  // ClarityFormDialog manages the save-loading state internally so we don't need a local flag here.
 
   @override
   void initState() {
@@ -429,13 +429,13 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
 
     return Consumer<PeriodoAcademicoProvider>(
       builder: (context, periodoProvider, child) {
-        return AlertDialog(
+        return ClarityFormDialog(
           title: Text('Crear Grupo', style: textStyles.headlineMedium),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          formKey: _formKey,
+          onSave: _createGrupo,
+          saveLabel: 'Crear',
+          cancelLabel: 'Cancelar',
+          children: [
                 TextFormField(
                   controller: _nombreController,
                   decoration: InputDecoration(
@@ -497,33 +497,15 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                   },
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _createGrupo,
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text('Crear'),
-            ),
-          ],
-        );
+    );
       },
     );
   }
 
-  Future<void> _createGrupo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _createGrupo() async {
+    if (!_formKey.currentState!.validate()) return false;
 
-    setState(() => _isLoading = true);
+  // ClarityFormDialog handles visual loading; no local setState required.
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -540,10 +522,10 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Grupo creado correctamente')),
         );
+        return true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -562,10 +544,10 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      // no local loading state to reset; ClarityFormDialog will automatically handle it
     }
+
+    return false;
   }
 }
 
@@ -585,7 +567,7 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
   late final TextEditingController _gradoController;
   late final TextEditingController _seccionController;
 
-  bool _isLoading = false;
+  // ClarityFormDialog manages the save-loading state internally so we don't need a local flag here.
 
   @override
   void initState() {
@@ -608,84 +590,68 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Grupo', style: textStyles.headlineMedium),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: _nombreController,
-                  decoration: InputDecoration(
-                    labelText: 'Nombre del Grupo',
-                    hintText: 'Ej: Grupo A, 1ro Básico A',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'El nombre es requerido';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  controller: _gradoController,
-                  decoration: InputDecoration(
-                    labelText: 'Grado',
-                    hintText: 'Ej: 1ro, 2do, 3ro',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'El grado es requerido';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  controller: _seccionController,
-                  decoration: InputDecoration(
-                    labelText: 'Sección (opcional)',
-                    hintText: 'Ej: A, B, C',
-                  ),
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  initialValue: '${widget.grupo.periodoAcademico.nombre} (${widget.grupo.periodoAcademico.fechaInicio.year}-${widget.grupo.periodoAcademico.fechaFin.year})',
-                  decoration: InputDecoration(
-                    labelText: 'Período Académico',
-                    hintText: 'Período académico del grupo',
-                  ),
-                  readOnly: true,
-                  enabled: false,
-                ),
-              ],
-            ),
+      formKey: _formKey,
+      onSave: _updateGrupo,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: InputDecoration(
+            labelText: 'Nombre del Grupo',
+            hintText: 'Ej: Grupo A, 1ro Básico A',
           ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _updateGrupo,
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text('Actualizar'),
-            ),
-          ],
-        );
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El nombre es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _gradoController,
+          decoration: InputDecoration(
+            labelText: 'Grado',
+            hintText: 'Ej: 1ro, 2do, 3ro',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El grado es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _seccionController,
+          decoration: InputDecoration(
+            labelText: 'Sección (opcional)',
+            hintText: 'Ej: A, B, C',
+          ),
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          initialValue: '${widget.grupo.periodoAcademico.nombre} (${widget.grupo.periodoAcademico.fechaInicio.year}-${widget.grupo.periodoAcademico.fechaFin.year})',
+          decoration: InputDecoration(
+            labelText: 'Período Académico',
+            hintText: 'Período académico del grupo',
+          ),
+          readOnly: true,
+          enabled: false,
+        ),
+      ],
+    );
   }
 
-  Future<void> _updateGrupo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _updateGrupo() async {
+    if (!_formKey.currentState!.validate()) return false;
 
-    setState(() => _isLoading = true);
+    // Capture context before async operation
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -701,32 +667,28 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
         ),
       );
 
-      if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (success) {
+        messenger.showSnackBar(
           SnackBar(content: Text('Grupo actualizado correctamente')),
         );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        return true;
+      } else {
+        messenger.showSnackBar(
           SnackBar(
             content: Text(grupoProvider.errorMessage ?? 'Error al actualizar grupo'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: colors.error,
           ),
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: colors.error,
+        ),
+      );
     }
+
+    return false;
   }
 }

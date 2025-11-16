@@ -125,7 +125,7 @@ class ClarityKPICard extends StatelessWidget {
                     ),
                     SizedBox(width: spacing.md),
                   ],
-                  Expanded(
+                  Flexible(
                     child: Text(
                       value,
                       style: textStyles.kpiNumber,

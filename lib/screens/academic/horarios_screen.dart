@@ -2,19 +2,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/grupo_provider.dart';
-import '../../providers/materia_provider.dart';
-import '../../providers/horario_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/periodo_academico_provider.dart';
-import '../../services/academic_service.dart' as academic_service;
+
+import '../../widgets/components/index.dart';
 import '../../theme/theme_extensions.dart';
 import '../../models/grupo.dart';
 import '../../models/materia.dart';
 import '../../models/user.dart';
+import '../../providers/grupo_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/periodo_academico_provider.dart';
+import '../../providers/horario_provider.dart';
 import '../../models/horario.dart';
 import '../../models/conflict_error.dart';
+import '../../providers/materia_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../services/academic_service.dart' as academic_service;
 
 class HorariosScreen extends StatefulWidget {
   const HorariosScreen({super.key});
@@ -24,22 +26,21 @@ class HorariosScreen extends StatefulWidget {
 }
 
 class _HorariosScreenState extends State<HorariosScreen> {
-  PeriodoAcademico? _selectedPeriodo; // <-- AÑADIR ESTA LÍNEA
   Grupo? _selectedGrupo;
+  PeriodoAcademico? _selectedPeriodo;
 
-  // Horas del día para la grilla
   final List<String> _horas = [
     '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00',
   ];
 
-  // Días de la semana
-  final List<String> _diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-  final List<int> _diasSemanaValues = [1, 2, 3, 4, 5]; // Lunes=1, Domingo=7
+  final List<String> _diasSemana = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  final List<int> _diasSemanaValues = [1,2,3,4,5,6,7];
 
   @override
   void initState() {
     super.initState();
+    // Carga inicial: periodos, grupos, materias y profesores
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -47,35 +48,44 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   Future<void> _loadInitialData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
     final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
     final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-    final colors = context.colors;
 
     final token = authProvider.accessToken;
     final institutionId = authProvider.selectedInstitutionId;
 
-    if (token != null && institutionId != null) {
+    if (token != null) {
       try {
-        // Cargar periodos
+        // Cargar sólo los periodos activos para evitar mostrar periodos innecesarios
         await periodoProvider.loadPeriodosActivos(token);
 
-        // Cargar grupos
-        await grupoProvider.loadGrupos(token);
+        // Si hay periodos activos, seleccionar el primero por defecto
+        if (periodoProvider.periodosActivos.isNotEmpty) {
+          // Seleccionamos el primer periodo activo por defecto
+          setState(() => _selectedPeriodo = periodoProvider.periodosActivos.first);
+          await grupoProvider.loadGruposByPeriodo(token, _selectedPeriodo!.id);
+          // Si hay grupos en este periodo, seleccionamos el primero y cargamos sus horarios
+          if (grupoProvider.grupos.isNotEmpty) {
+            setState(() => _selectedGrupo = grupoProvider.grupos.first);
+            await _loadHorariosForGrupo(_selectedGrupo!.id);
+          }
+        } else {
+          // Si no hay periodos activos, cargar todos los grupos sin filtro
+          await grupoProvider.loadGrupos(token);
+        }
 
-        // Cargar materias
+        // Cargar materias y profesores (para el diálogo de creación/edición)
         await materiaProvider.loadMaterias(token);
-
-        // Cargar profesores (filtrar por rol 'profesor')
-        await userProvider.loadUsersByInstitution(token, institutionId);
-      } catch (e) {
+        if (institutionId != null) {
+          await userProvider.loadUsersByInstitution(token, institutionId);
+        }
+  } catch (e) {
         if (mounted) {
+          final colors = context.colors;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error cargando datos: $e'),
-              backgroundColor: colors.error,
-            ),
+            SnackBar(content: Text('Error cargando datos iniciales: $e'), backgroundColor: colors.error),
           );
         }
       }
@@ -84,256 +94,58 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final textStyles = context.textStyles;
-    final spacing = context.spacing;
-
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
-        elevation: 0,
-        title: Text(
-          'Gestión de Horarios',
-          style: textStyles.headlineMedium.copyWith(color: colors.white),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(spacing.screenPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // AÑADIR ESTE DROPDOWN PARA SELECCIONAR EL PERÍODO
-            Text(
-              'Seleccionar Período Académico',
-              style: textStyles.headlineSmall,
-            ),
-            SizedBox(height: spacing.md),
-            Consumer<PeriodoAcademicoProvider>(
-              builder: (context, periodoProvider, child) {
-                // Lógica para cargar periodos si no están
-                // ...
-                return SizedBox(
-                  width: double.maxFinite,
-                  child: DropdownButtonFormField<PeriodoAcademico>(
-                    value: _selectedPeriodo,
-                    hint: const Text('Selecciona un período activo'),
-                    decoration: InputDecoration(
-                      labelText: 'Período Académico',
-                      hintText: 'Selecciona un período',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    items: periodoProvider.periodosActivos.map((periodo) {
-                      return DropdownMenuItem<PeriodoAcademico>(
-                        value: periodo,
-                        child: Text(periodo.nombre),
-                      );
-                    }).toList(),
-                    onChanged: (periodo) {
-                      setState(() {
-                        _selectedPeriodo = periodo;
-                        _selectedGrupo = null; // Reinicia el grupo al cambiar de periodo
-                        // Aquí podrías cargar los grupos del período seleccionado si es necesario
-                      });
-                    },
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: spacing.lg),
-
-            // MODIFICAR EL DROPDOWN DE GRUPO
-            Text(
-              'Seleccionar Grupo',
-              style: textStyles.headlineSmall,
-            ),
-            SizedBox(height: spacing.md),
-            Consumer<GrupoProvider>(
-              builder: (context, grupoProvider, child) {
-                // Filtra los grupos para mostrar solo los del período seleccionado
-                final gruposFiltrados = _selectedPeriodo == null
-                    ? <Grupo>[]
-                    : grupoProvider.grupos
-                        .where((g) => g.periodoId == _selectedPeriodo!.id)
-                        .toList();
-
-                return SizedBox(
-                  width: double.maxFinite,
-                  child: DropdownButtonFormField<Grupo>(
-                    value: _selectedGrupo,
-                    hint: Text(_selectedPeriodo == null
-                        ? 'Selecciona un período primero'
-                        : 'Selecciona un grupo'),
-                    decoration: InputDecoration(
-                      labelText: 'Grupo',
-                      hintText: 'Selecciona un grupo',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    items: gruposFiltrados.map((grupo) { // <-- Usa la lista filtrada
-                      return DropdownMenuItem<Grupo>(
-                        value: grupo,
-                        child: Text('${grupo.nombre} - ${grupo.grado}'),
-                      );
-                    }).toList(),
-                    onChanged: _selectedPeriodo == null ? null : (grupo) {
-                      setState(() => _selectedGrupo = grupo);
-                      if (grupo != null) {
-                        _loadHorariosForGrupo(grupo.id);
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-
-            SizedBox(height: spacing.xl),
-
-            // Vista de Calendario Semanal
-            if (_selectedGrupo != null) ...[
-              Text(
-                'Horario Semanal - ${_selectedGrupo!.nombre}',
-                style: textStyles.headlineSmall,
-              ),
-              SizedBox(height: spacing.md),
-              Consumer<HorarioProvider>(
-                builder: (context, horarioProvider, child) {
-                  // Mostrar loader si está cargando
-                  if (horarioProvider.isLoading) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'Cargando horarios...',
-                              style: textStyles.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  // Mostrar error si existe
-                  if (horarioProvider.hasError) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 48,
-                              color: colors.error,
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'Error: ${horarioProvider.errorMessage}',
-                              style: textStyles.bodyMedium.copyWith(
-                                color: colors.error,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: spacing.md),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_selectedGrupo != null) {
-                                  _loadHorariosForGrupo(_selectedGrupo!.id);
-                                }
-                              },
-                              child: const Text('Reintentar'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  // Si no hay horarios después de cargar (en el grupo seleccionado)
-                  if (horarioProvider.horariosDelGrupoSeleccionado.isEmpty && horarioProvider.isLoaded) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 48,
-                              color: colors.textSecondary,
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'No hay horarios para este grupo',
-                              style: textStyles.bodyMedium.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  // Mostrar calendario si hay horarios
-                  return _buildWeeklyCalendar(horarioProvider);
-                },
-              ),
-            ] else ...[
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(spacing.xl),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 64,
-                        color: colors.textSecondary,
-                      ),
-                      SizedBox(height: spacing.md),
-                      Text(
-                        'Selecciona un grupo para ver su horario',
-                        style: textStyles.bodyLarge.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return Consumer3<PeriodoAcademicoProvider, GrupoProvider, HorarioProvider>(
+      builder: (context, periodoProvider, grupoProvider, horarioProvider, child) {
+        return ClarityManagementPage(
+          title: 'Horarios',
+          isLoading: horarioProvider.isLoading,
+          hasError: horarioProvider.hasError,
+          errorMessage: horarioProvider.errorMessage,
+          // Solo mostrar calendario cuando se haya seleccionado un grupo
+          itemCount: _selectedGrupo != null ? 1 : 0,
+          itemBuilder: (context, index) => _buildWeeklyCalendar(horarioProvider),
+          filterWidgets: _buildFilterWidgets(context, grupoProvider),
+          onRefresh: () async {
+            if (_selectedGrupo != null) _loadHorariosForGrupo(_selectedGrupo!.id);
+          },
+          scrollController: null,
+          emptyStateWidget: ClarityEmptyState(
+            icon: Icons.calendar_month,
+            title: _selectedGrupo == null ? 'Selecciona un grupo' : 'No hay clases en el grupo',
+            subtitle: _selectedGrupo == null ? 'Selecciona un grupo para ver el calendario semanal' : 'Crea la primera clase para este grupo',
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              if (_selectedGrupo == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecciona un grupo para crear una clase')));
+                return;
+              }
+              // Mostrar un diálogo para crear la clase en la primera hora disponible del día
+              final primeraHora = _horas.isNotEmpty ? _horas.first : '07:00';
+              _showCreateClassDialog(primeraHora, 1);
+            },
+            tooltip: 'Crear Clase',
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildWeeklyCalendar(HorarioProvider horarioProvider) {
     final colors = context.colors;
     final textStyles = context.textStyles;
-    final spacing = context.spacing;
+  final spacing = context.spacing;
+  // spacing preserved for consistency with other pages; used inside dropdown inputs
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calcular tamaños responsive
         final isMobile = constraints.maxWidth < 600;
         final hourColumnWidth = isMobile ? 60.0 : 80.0;
-        final cellHeight = isMobile ? 70.0 : 80.0; // Altura fija por hora para mejor alineación
+        final cellHeight = isMobile ? 70.0 : 80.0;
 
-        return Container(
+        return SingleChildScrollView(
+          child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -388,9 +200,102 @@ class _HorariosScreenState extends State<HorariosScreen> {
               )),
             ],
           ),
-        );
+        ),
+      );
       },
     );
+  }
+
+  List<Widget> _buildFilterWidgets(BuildContext context, GrupoProvider grupoProvider) {
+  final spacing = context.spacing;
+
+    return [
+      // Use a responsive Wrap so filters adapt to different screen sizes and
+      // avoid horizontal overflow on mobile (they will wrap to the next line).
+      LayoutBuilder(
+        builder: (context, constraints) {
+          // Use multiple columns on wider screens — this makes the filters
+          // responsive and prevents header overflow on small devices.
+          // - >= 1000px: 3 columns
+          // - >= 700px: 2 columns
+          // - else: 1 column
+          final width = constraints.maxWidth;
+          
+          // Breakpoints adjusted to common grid values:
+          // - >= 1024px: 3 columns
+          // - >= 600px: 2 columns
+          // - else: 1 column
+          final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
+          final double itemWidth = (width - ((columns - 1) * 12)) / columns;
+
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.start,
+            children: [
+              SizedBox(
+                width: itemWidth,
+                child: Consumer<PeriodoAcademicoProvider>(
+                  builder: (context, periodoProvider, child) {
+                    return DropdownButtonFormField<PeriodoAcademico>(
+                      isExpanded: true,
+                      value: _selectedPeriodo,
+                      decoration: InputDecoration(
+                        labelText: 'Período Académico',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      ),
+                      style: context.textStyles.bodyLarge,
+                      items: periodoProvider.periodosActivos
+                      .map<DropdownMenuItem<PeriodoAcademico>>((p) => DropdownMenuItem<PeriodoAcademico>(value: p, child: Text(p.nombre, overflow: TextOverflow.ellipsis, maxLines: 1)))
+                      .toList(),
+                  onChanged: (p) async {
+                    setState(() {
+                      _selectedPeriodo = p;
+                      _selectedGrupo = null;
+                    });
+                    if (p != null) {
+                      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+                      if (token != null) {
+                        await grupoProvider.loadGruposByPeriodo(token, p.id);
+                        // Seleccionar primer grupo si existe y cargar horarios
+                        if (grupoProvider.grupos.isNotEmpty) {
+                          setState(() => _selectedGrupo = grupoProvider.grupos.first);
+                          await _loadHorariosForGrupo(_selectedGrupo!.id);
+                        }
+                      }
+                    }
+                  },
+                );
+              },
+                ),
+              ),
+
+              SizedBox(
+                width: itemWidth,
+                child: DropdownButtonFormField<Grupo>(
+                  isExpanded: true,
+              value: _selectedGrupo,
+              decoration: InputDecoration(labelText: 'Grupo'),
+              items: (_selectedPeriodo == null
+                  ? <DropdownMenuItem<Grupo>>[]
+                  : grupoProvider.grupos
+                      .where((g) => g.periodoId == _selectedPeriodo!.id)
+                      .map<DropdownMenuItem<Grupo>>((g) => DropdownMenuItem<Grupo>(value: g, child: Text('${g.nombre} - ${g.grado}', overflow: TextOverflow.ellipsis, maxLines: 1)))
+                      .toList()),
+              onChanged: (_selectedPeriodo == null)
+                  ? null
+                  : (g) => setState(() {
+                        _selectedGrupo = g;
+                        if (g != null) _loadHorariosForGrupo(g.id);
+                      }),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ];
   }
 
   Widget _buildHourRow(
@@ -714,7 +619,6 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   Materia? _selectedMateria;
   User? _selectedProfesor;
   String? _selectedHoraFin;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -728,55 +632,48 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Crear Clase', style: textStyles.headlineMedium),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Información del horario
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                    border: Border.all(color: context.colors.borderLight),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? _getHoraFin(widget.horaInicio)}',
-                        style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        'Día: ${_getDiaNombre(widget.diaSemana)}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Grupo: ${widget.grupo.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
+      formKey: _formKey,
+      onSave: _createClass,
+      saveLabel: 'Crear Clase',
+      cancelLabel: 'Cancelar',
+      children: [
+        // Información del horario
+        Container(
+          padding: EdgeInsets.all(spacing.md),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            border: Border.all(color: context.colors.borderLight),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? _getHoraFin(widget.horaInicio)}',
+                style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text('Día: ${_getDiaNombre(widget.diaSemana)}', style: textStyles.bodyMedium),
+              Text('Grupo: ${widget.grupo.nombre}', style: textStyles.bodyMedium),
+            ],
+          ),
+        ),
+                // Información del horario (ya mostrado arriba)
 
                 SizedBox(height: spacing.lg),
 
                 // Selector de Hora Fin
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   value: _selectedHoraFin,
                   decoration: InputDecoration(
                     labelText: 'Hora de Fin',
                     hintText: 'Selecciona la hora de fin',
                   ),
-                  items: _getHorasFinDisponibles(widget.horaInicio).map((hora) {
+                      items: _getHorasFinDisponibles(widget.horaInicio).map((hora) {
                     return DropdownMenuItem<String>(
                       value: hora,
-                      child: Text(hora),
+                      child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1),
                     );
                   }).toList(),
                   validator: (value) {
@@ -790,12 +687,13 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                   },
                 ),
 
-                SizedBox(height: spacing.md),
+            SizedBox(height: spacing.md),
 
                 // Selector de Materia
                 Consumer<MateriaProvider>(
                   builder: (context, materiaProvider, child) {
                     return DropdownButtonFormField<Materia>(
+                      isExpanded: true,
                       value: _selectedMateria,
                       decoration: InputDecoration(
                         labelText: 'Materia',
@@ -804,7 +702,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                       items: materiaProvider.materias.map((materia) {
                         return DropdownMenuItem<Materia>(
                           value: materia,
-                          child: Text(materia.nombre),
+                          child: Text(materia.nombre, overflow: TextOverflow.ellipsis, maxLines: 1),
                         );
                       }).toList(),
                       validator: (value) {
@@ -843,6 +741,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                     }
 
                     return DropdownButtonFormField<User?>(
+                      isExpanded: true,
                       value: selectedProfesorFromList,
                       decoration: InputDecoration(
                         labelText: 'Profesor (opcional)',
@@ -859,7 +758,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                         ...profesoresDisponibles.map((profesor) {
                           return DropdownMenuItem<User?>(
                             value: profesor,
-                            child: Text('${profesor.nombres} ${profesor.apellidos}'),
+                            child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
                           );
                         }),
                       ],
@@ -869,35 +768,15 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                     );
                   },
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createClass,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Crear Clase'),
-        ),
-      ],
+  ],
+      
     );
   }
 
-  Future<void> _createClass() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedMateria == null) return;
+  Future<bool> _createClass() async {
+  if (!_formKey.currentState!.validate()) return false;
+  if (_selectedMateria == null) return false;
 
-    setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
@@ -905,7 +784,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
 
     try {
       final token = authProvider.accessToken;
-      if (token == null) return;
+  if (token == null) return false;
 
       // Obtener periodoId dinámicamente del grupo seleccionado
       final periodoId = widget.grupo.periodoId;
@@ -924,10 +803,10 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Clase creada correctamente')),
         );
+        return true;
       } else if (mounted) {
         final errorMessage = horarioProvider.errorMessage ?? 'Error al crear clase';
         
@@ -952,11 +831,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    } finally {}
+    return false;
   }
 
   String _getHoraFin(String horaInicio) {
@@ -1075,10 +951,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
 class EditClassDialog extends StatefulWidget {
   final Horario horario;
 
-  const EditClassDialog({
-    super.key,
-    required this.horario,
-  });
+  const EditClassDialog({super.key, required this.horario});
 
   @override
   State<EditClassDialog> createState() => _EditClassDialogState();
@@ -1088,7 +961,6 @@ class _EditClassDialogState extends State<EditClassDialog> {
   final _formKey = GlobalKey<FormState>();
   User? _selectedProfesor;
   String? _selectedHoraFin;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -1101,164 +973,116 @@ class _EditClassDialogState extends State<EditClassDialog> {
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
+    final colors = context.colors;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Clase', style: textStyles.headlineMedium),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Información del horario (solo lectura)
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                    border: Border.all(color: context.colors.borderLight),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? widget.horario.horaFin}',
-                        style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        'Día: ${widget.horario.diaSemanaNombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Grupo: ${widget.horario.grupo.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Materia: ${widget.horario.materia.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
+      formKey: _formKey,
+      onSave: _updateClass,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        // ClarityFormDialog already wraps children in a [Form]; avoid nesting
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+              // Información del horario (solo lectura)
+              Container(
+                padding: EdgeInsets.all(spacing.md),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                  border: Border.all(color: colors.borderLight),
+                ),
+                child: Column(
+                  children: [
+                    Text('Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? widget.horario.horaFin}', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Día: ${widget.horario.diaSemanaNombre}', style: textStyles.bodyMedium),
+                    Text('Grupo: ${widget.horario.grupo.nombre}', style: textStyles.bodyMedium),
+                    Text('Materia: ${widget.horario.materia.nombre}', style: textStyles.bodyMedium),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: spacing.lg),
+
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: _selectedHoraFin,
+                decoration: InputDecoration(labelText: 'Hora de Fin', hintText: 'Selecciona la hora de fin'),
+                items: _getHorasFinDisponibles(widget.horario.horaInicio).map((hora) => DropdownMenuItem<String>(value: hora, child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1))).toList(),
+                validator: (value) => (value == null || value.isEmpty) ? 'La hora de fin es requerida' : null,
+                onChanged: (hora) => setState(() => _selectedHoraFin = hora),
+              ),
+
+              SizedBox(height: spacing.md),
+
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  User? selectedProfesorFromList;
+                  if (_selectedProfesor != null) {
+                    selectedProfesorFromList = userProvider.professors.firstWhere((p) => p.id == _selectedProfesor!.id, orElse: () => _selectedProfesor!);
+                  }
+
+                  return DropdownButtonFormField<User?>(
+                    isExpanded: true,
+                    value: selectedProfesorFromList,
+                    decoration: InputDecoration(labelText: 'Profesor', hintText: 'Selecciona un profesor'),
+                    items: [
+                      const DropdownMenuItem<User?>(value: null, child: Text('Sin profesor')),
+                      ...userProvider.professors.map((profesor) => DropdownMenuItem<User?>(value: profesor, child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1))),
                     ],
-                  ),
-                ),
+                    onChanged: (profesor) => setState(() => _selectedProfesor = profesor),
+                  );
+                },
+              ),
 
-                SizedBox(height: spacing.lg),
+              SizedBox(height: spacing.md),
 
-                // Selector de Hora Fin
-                DropdownButtonFormField<String>(
-                  value: _selectedHoraFin,
-                  decoration: InputDecoration(
-                    labelText: 'Hora de Fin',
-                    hintText: 'Selecciona la hora de fin',
-                  ),
-                  items: _getHorasFinDisponibles(widget.horario.horaInicio).map((hora) {
-                    return DropdownMenuItem<String>(
-                      value: hora,
-                      child: Text(hora),
-                    );
-                  }).toList(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'La hora de fin es requerida';
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final nav = Navigator.of(context);
+                    final confirmed = await _showDeleteConfirmationDialog();
+                    if (confirmed != true) return;
+                    final success = await _deleteClass();
+                    if (success) {
+                      if (mounted) messenger.showSnackBar(const SnackBar(content: Text('Clase eliminada correctamente')));
+                      nav.pop(true);
                     }
-                    return null;
                   },
-                  onChanged: (hora) {
-                    setState(() => _selectedHoraFin = hora);
-                  },
+                  style: TextButton.styleFrom(foregroundColor: colors.error),
+                  child: const Text('Eliminar'),
                 ),
-
-                SizedBox(height: spacing.md),
-
-                // Selector de Profesor
-                Consumer<UserProvider>(
-                  builder: (context, userProvider, child) {
-                    // Encontrar el profesor en la lista actual (por referencia)
-                    User? selectedProfesorFromList;
-                    if (_selectedProfesor != null) {
-                      selectedProfesorFromList = userProvider.professors.firstWhere(
-                        (p) => p.id == _selectedProfesor!.id,
-                        orElse: () => _selectedProfesor!,
-                      );
-                    }
-
-                    return DropdownButtonFormField<User?>(
-                      value: selectedProfesorFromList,
-                      decoration: InputDecoration(
-                        labelText: 'Profesor',
-                        hintText: 'Selecciona un profesor',
-                      ),
-                      items: [
-                        const DropdownMenuItem<User?>(
-                          value: null,
-                          child: Text('Sin profesor'),
-                        ),
-                        ...userProvider.professors.map((profesor) {
-                          return DropdownMenuItem<User?>(
-                            value: profesor,
-                            child: Text('${profesor.nombres} ${profesor.apellidos}'),
-                          );
-                        }),
-                      ],
-                      onChanged: (profesor) {
-                        setState(() => _selectedProfesor = profesor);
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-          child: Text('Cancelar'),
-        ),
-        TextButton(
-          onPressed: _isLoading ? null : _deleteClass,
-          style: TextButton.styleFrom(foregroundColor: context.colors.error),
-          child: Text('Eliminar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updateClass,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Actualizar'),
-        ),
       ],
     );
   }
 
   List<String> _getHorasFinDisponibles(String horaInicio) {
-    // Parsear horaInicio
     final parts = horaInicio.split(':');
     final hourInicio = int.parse(parts[0]);
-
-    // Generar horas disponibles (desde 1 hora después hasta el final del día)
     final horasDisponibles = <String>[];
     for (int hour = hourInicio + 1; hour <= 18; hour++) {
       horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
     }
-
     return horasDisponibles;
   }
 
-  Future<void> _updateClass() async {
-    setState(() => _isLoading = true);
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+  Future<bool> _updateClass() async {
+    if (!_formKey.currentState!.validate()) return false;
+    final messenger = ScaffoldMessenger.of(context);
     final colors = context.colors;
-
+  // progress handled by ClarityFormDialog
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
-      if (token == null) return;
+      if (token == null) return false;
 
       final success = await horarioProvider.updateHorario(
         token,
@@ -1271,186 +1095,58 @@ class _EditClassDialogState extends State<EditClassDialog> {
         ),
       );
 
-      if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Clase actualizada correctamente')),
-        );
-      } else if (mounted) {
-        final errorMessage = horarioProvider.errorMessage ?? 'Error al actualizar clase';
-        
-        // Verificar si es un error de conflicto usando el ConflictError del provider
-        if (horarioProvider.conflictError != null) {
-          _showConflictDialog(horarioProvider.conflictError!, 'actualizar');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: colors.error,
-            ),
-          );
-        }
+      if (success) {
+        messenger.showSnackBar(SnackBar(content: Text('Clase actualizada correctamente')));
+        return true;
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: colors.error,
-          ),
-        );
-      }
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
     }
+    return false;
   }
 
   Future<bool?> _showDeleteConfirmationDialog() async {
-    const errorColor = Colors.red;
-
     return showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text('Confirmar eliminación'),
         content: Text('¿Estás seguro de que quieres eliminar esta clase?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: TextButton.styleFrom(foregroundColor: errorColor),
-            child: Text('Eliminar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text('Eliminar')),
         ],
       ),
     );
   }
 
-  Future<void> _deleteClass() async {
+  Future<bool> _deleteClass() async {
     final confirmed = await _showDeleteConfirmationDialog();
-
-    if (confirmed != true) return;
-
-    setState(() => _isLoading = true);
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    if (confirmed != true) return false;
+    final messenger = ScaffoldMessenger.of(context);
     final colors = context.colors;
-
+  // progress handled by ClarityFormDialog
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
-      if (token == null) return;
+      if (token == null) return false;
 
       final success = await horarioProvider.deleteHorario(token, widget.horario.id);
-
-      if (!mounted) return;
-
+      if (!mounted) return false;
       if (success) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Clase eliminada correctamente')),
-        );
+        messenger.showSnackBar(SnackBar(content: Text('Clase eliminada correctamente')));
+        return true;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'),
-            backgroundColor: colors.error,
-          ),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'), backgroundColor: colors.error));
       }
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: colors.error,
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
     }
+    return false;
   }
 
-  void _showConflictDialog(ConflictError conflictError, String operation) {
-    final colors = context.colors;
-    final textStyles = context.textStyles;
-    final spacing = context.spacing;
+  // _showConflictDialog is defined above inside dialogs (Create/Edit) and used there; duplicate removed.
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: colors.warning),
-            SizedBox(width: spacing.sm),
-            Text('Conflicto de Horario', style: textStyles.headlineMedium),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'No se puede $operation la clase debido a un conflicto de horario.',
-              style: textStyles.bodyMedium,
-            ),
-            SizedBox(height: spacing.md),
-            Container(
-              padding: EdgeInsets.all(spacing.sm),
-              decoration: BoxDecoration(
-                color: colors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.error.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                conflictError.userFriendlyMessage,
-                style: textStyles.bodySmall.copyWith(
-                  color: colors.error,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            // Mostrar IDs de horarios en conflicto si están disponibles
-            if (conflictError.conflictingHorarioIds.isNotEmpty) ...[
-              SizedBox(height: spacing.md),
-              Text('Horarios en conflicto:', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-              SizedBox(height: spacing.sm),
-              ...conflictError.conflictingHorarioIds.map((id) => Text('- $id', style: textStyles.bodySmall.copyWith(color: colors.textSecondary))),
-            ],
-            SizedBox(height: spacing.md),
-            Text(
-              'Sugerencias para resolver el conflicto:',
-              style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: spacing.sm),
-            ...conflictError.suggestions.map((suggestion) => Text(
-              '• $suggestion',
-              style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
-            )),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Revisar Horarios'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
-            ),
-            child: Text('Entendido'),
-          ),
-        ],
-      ),
-    );
-  }
 }

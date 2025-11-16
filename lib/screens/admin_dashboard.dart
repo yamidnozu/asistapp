@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/institution_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/components/index.dart';
 
@@ -75,6 +76,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 _buildCompactStatsBar(context, stats, userProvider, constraints),
 
                 SizedBox(height: spacing.xl),
+                // 3. Nueva fila: KPIs + Actividad reciente
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 800;
+                    return isNarrow
+                        ? Column(
+                            children: [
+                              _buildKpiRow(context, userProvider),
+                              SizedBox(height: spacing.md),
+                              _buildRecentActivity(context, userProvider),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: _buildKpiRow(context, userProvider)),
+                              SizedBox(width: spacing.md),
+                              SizedBox(width: 420, child: _buildRecentActivity(context, userProvider)),
+                            ],
+                          );
+                  },
+                ),
 
                 // 3. Acciones Principales - Menú Elegante Vertical
                 Text('Acciones Principales', style: textStyles.headlineSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -275,6 +298,108 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildKpiRow(BuildContext context, UserProvider userProvider) {
+    final institutionProvider = Provider.of<InstitutionProvider>(context);
+    final colors = context.colors;
+    final spacing = context.spacing;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Métricas Rápidas', style: context.textStyles.headlineSmall),
+          SizedBox(height: spacing.md),
+          LayoutBuilder(builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            // Standard breakpoints: >=1024 (3 col), >=600 (2 col), else 1 col
+            final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
+            final itemWidth = (width - ((columns - 1) * spacing.md)) / columns;
+
+            return Wrap(
+              spacing: spacing.md,
+              runSpacing: spacing.md,
+              alignment: WrapAlignment.start,
+              children: [
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: institutionProvider.totalInstitutions.toString(),
+                    label: 'Instituciones',
+                    icon: Icons.apartment,
+                    iconColor: colors.primary,
+                    backgroundColor: colors.primary.withValues(alpha: 0.05),
+                  ),
+                ),
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: (userProvider.paginationInfo?.total ?? userProvider.loadedUsersCount).toString(),
+                    label: 'Usuarios',
+                    icon: Icons.people,
+                    iconColor: colors.info,
+                    backgroundColor: colors.info.withValues(alpha: 0.05),
+                  ),
+                ),
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: userProvider.professorsCount.toString(),
+                    label: 'Profesores',
+                    icon: Icons.school,
+                    iconColor: colors.warning,
+                    backgroundColor: colors.warning.withValues(alpha: 0.05),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentActivity(BuildContext context, UserProvider userProvider) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    final recent = userProvider.users.take(6).toList();
+
+    return Container(
+      padding: EdgeInsets.all(spacing.lg),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        border: Border.all(color: colors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Actividad reciente', style: textStyles.headlineSmall),
+          SizedBox(height: spacing.md),
+          if (recent.isEmpty)
+            Center(
+              child: Text('No hay actividad reciente', style: textStyles.bodyMedium.copyWith(color: colors.textSecondary)),
+            )
+          else
+            Column(
+              children: recent.map((u) {
+                return ListTile(
+                  onTap: () => context.go('/users?edit=true&userId=${u.id}'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(backgroundColor: colors.primary.withValues(alpha: 0.12), child: Text(u.inicial, style: textStyles.bodyMedium.withColor(colors.primary))),
+                  title: Text(u.nombreCompleto, style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                  subtitle: Text(u.email, style: textStyles.bodySmall.copyWith(color: colors.textSecondary)),
+                  trailing: Chip(label: Text(u.rol, style: textStyles.labelSmall)),
+                );
+              }).toList(),
+            ),
+        ],
       ),
     );
   }

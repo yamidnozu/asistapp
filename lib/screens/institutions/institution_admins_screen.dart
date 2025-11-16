@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
-import '../../widgets/components/clarity_components.dart';
+import '../../widgets/components/index.dart';
 import '../../theme/theme_extensions.dart';
 import '../../models/user.dart';
 import '../../services/user_service.dart';
@@ -28,6 +28,59 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAdmins();
     });
+  }
+
+  void _showAssignExistingUserDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
+        await _loadAdmins();
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return ClarityManagementPage(
+      title: 'Administradores de Institución',
+      isLoading: userProvider.isLoading,
+      hasError: userProvider.hasError,
+      errorMessage: userProvider.errorMessage,
+      itemCount: userProvider.users.length,
+      itemBuilder: (context, index) {
+        if (index >= userProvider.users.length) {
+          return userProvider.isLoadingMore
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : const SizedBox.shrink();
+        }
+
+        final user = userProvider.users[index];
+        return _buildAdminCard(user, context);
+      },
+      onRefresh: _loadAdmins,
+      scrollController: _scrollController,
+      hasMoreData: userProvider.hasMoreData,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddAdminSheet,
+        backgroundColor: context.colors.primary,
+        child: Icon(
+          Icons.add,
+          color: context.colors.getTextColorForBackground(context.colors.primary),
+        ),
+      ),
+      emptyStateWidget: ClarityEmptyState(
+        icon: Icons.group_off,
+        title: 'No hay administradores',
+        subtitle: 'Agrega administradores a esta institución',
+      ),
+    );
   }
 
   Future<void> _loadAdmins() async {
@@ -80,7 +133,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
                 title: const Text('Crear Nuevo Administrador'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  // Obtener institución para pasar al formulario
                   final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
                   final institution = institutionProvider.institutions.firstWhere((i) => i.id == widget.institutionId);
                   Navigator.push(
@@ -101,113 +153,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
           ),
         );
       },
-    );
-  }
-
-  void _showAssignExistingUserDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
-        await _loadAdmins();
-      }),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: AppBar(
-        backgroundColor: context.colors.surface,
-        elevation: 0,
-        title: Text(
-          'Administradores de Institución',
-          style: context.textStyles.headlineMedium,
-        ),
-        centerTitle: false,
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadAdmins,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Lista de administradores
-            if (userProvider.isLoading && userProvider.users.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (userProvider.hasError)
-              SliverFillRemaining(
-                child: ClarityEmptyState(
-                  icon: Icons.error_outline,
-                  title: 'Error al cargar administradores',
-                  subtitle: userProvider.errorMessage ?? 'Error desconocido',
-                  action: ElevatedButton.icon(
-                    onPressed: _loadAdmins,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Reintentar'),
-                  ),
-                ),
-              )
-            else if (userProvider.users.isEmpty)
-              SliverFillRemaining(
-                child: ClarityEmptyState(
-                  icon: Icons.group_off,
-                  title: 'No hay administradores',
-                  subtitle: 'Agrega administradores a esta institución',
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.all(context.spacing.screenPadding),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= userProvider.users.length) {
-                        if (userProvider.hasMoreData && !userProvider.isLoadingMore) {
-                          // Trigger load more when reaching the end
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                            if (authProvider.accessToken != null && userProvider.hasMoreData && !userProvider.isLoadingMore) {
-                              userProvider.loadUsersByInstitution(authProvider.accessToken!, widget.institutionId);
-                            }
-                          });
-                        }
-                        return userProvider.isLoadingMore
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : const SizedBox.shrink();
-                      }
-
-                      final user = userProvider.users[index];
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: context.spacing.md),
-                        child: _buildAdminCard(user, context),
-                      );
-                    },
-                    childCount: userProvider.users.length + (userProvider.hasMoreData ? 1 : 0),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-
-      // Floating Action Button
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddAdminSheet,
-        backgroundColor: context.colors.primary,
-        child: Icon(
-          Icons.add,
-          color: context.colors.getTextColorForBackground(context.colors.primary),
-        ),
-      ),
     );
   }
 
@@ -251,8 +196,9 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               ),
             ],
           ),
-          if (user.telefono != null) ...[
+          if (user.telefono != null)
             SizedBox(height: spacing.xs),
+          if (user.telefono != null)
             Row(
               children: [
                 Icon(Icons.phone, size: 16, color: colors.textSecondary),
@@ -267,7 +213,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               ],
             ),
           ],
-        ],
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -317,7 +262,6 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -326,10 +270,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSaving = true);
+  Future<bool> _save() async {
+    // ClarityFormDialog validates before calling onSave, keep guard
+    if (!_formKey.currentState!.validate()) return false;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -344,63 +287,49 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña de ${widget.user.nombreCompleto} cambiada correctamente')));
         widget.onSaved?.call();
-      } else {
-        if (mounted) {
-          setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al cambiar la contraseña')));
-        }
+        return true;
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     }
+
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al cambiar la contraseña')));
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Cambiar contraseña - ${widget.user.nombreCompleto}'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Nueva contraseña'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'La contraseña es requerida';
-                if (value.trim().length < 8) return 'La contraseña debe tener al menos 8 caracteres';
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'La confirmación es requerida';
-                if (value.trim() != _newPasswordController.text.trim()) return 'Las contraseñas no coinciden';
-                return null;
-              },
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _save,
+      saveLabel: 'Guardar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _newPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Nueva contraseña'),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return 'La contraseña es requerida';
+            if (value.trim().length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(onPressed: _isSaving ? null : () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2,)) : const Text('Guardar'),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return 'La confirmación es requerida';
+            if (value.trim() != _newPasswordController.text.trim()) return 'Las contraseñas no coinciden';
+            return null;
+          },
         ),
       ],
     );

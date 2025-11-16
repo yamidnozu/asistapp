@@ -17,6 +17,7 @@ import '../screens/academic/gestion_academica_screen.dart';
 import '../screens/academic/grupos_screen.dart';
 import '../screens/academic/materias_screen.dart';
 import '../screens/academic/horarios_screen.dart';
+import '../screens/academic/periodos_academicos_screen.dart';
 import '../screens/academic/grupo_detail_screen.dart';
 import '../models/institution.dart';
 import '../screens/app_shell.dart';
@@ -169,6 +170,13 @@ class AppRouter {
                 name: 'academic-materias',
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const MateriasScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/periodos',
+                name: 'academic-periodos',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const PeriodosAcademicosScreen(),
                 ),
               ),
               GoRoute(

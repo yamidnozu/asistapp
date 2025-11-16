@@ -27,23 +27,24 @@
 ├── 📂 screens
 │   ├── 📂 academic
 │   │   ├── gestion_academica_screen.dart [153]
-│   │   ├── grupos_screen.dart [723]
+│   │   ├── grupos_screen.dart [677]
 │   │   ├── grupo_detail_screen.dart [496]
-│   │   ├── horarios_screen.dart [1355]
-│   │   ├── materias_screen.dart [566]
-│   │   └── periodos_academicos_screen.dart [732]
-│   ├── admin_dashboard.dart [259]
+│   │   ├── horarios_screen.dart [1058]
+│   │   ├── materias_screen.dart [312]
+│   │   ├── materia_dialogs.dart [202]
+│   │   └── periodos_academicos_screen.dart [577]
+│   ├── admin_dashboard.dart [382]
 │   ├── app_shell.dart [323]
 │   ├── attendance_screen.dart [562]
 │   ├── 📂 institutions
-│   │   ├── create_institution_admin_screen.dart [330]
+│   │   ├── create_institution_admin_screen.dart [20]
 │   │   ├── 📂 form_steps
 │   │   │   ├── index.dart [5]
 │   │   │   ├── institution_basic_info_step.dart [73]
 │   │   │   ├── institution_config_step.dart [127]
 │   │   │   └── institution_contact_step.dart [90]
 │   │   ├── institutions_list_screen.dart [491]
-│   │   ├── institution_admins_screen.dart [784]
+│   │   ├── institution_admins_screen.dart [717]
 │   │   └── institution_form_screen.dart [278]
 │   ├── institution_selection_screen.dart [173]
 │   ├── login_screen.dart [386]
@@ -65,7 +66,7 @@
 │       │   └── user_personal_info_step.dart [263]
 │       ├── users_list_screen.dart [750]
 │       ├── user_detail_screen.dart [160]
-│       └── user_form_screen.dart [759]
+│       └── user_form_screen.dart [765]
 ├── 📂 services
 │   ├── academic_service.dart [1371]
 │   ├── asistencia_service.dart [181]
@@ -82,7 +83,7 @@
 │   ├── index.dart [5]
 │   └── theme_extensions.dart [42]
 ├── 📂 utils
-│   ├── app_router.dart [312]
+│   ├── app_router.dart [320]
 │   ├── responsive_utils.dart [166]
 │   ├── role_enum.dart [53]
 │   └── test_flow_manager.dart [395]
@@ -94,9 +95,10 @@
     │   └── shimmer_list_widget.dart [32]
     ├── 📂 components
     │   ├── clarity_components.dart [715]
+    │   ├── clarity_form_dialog.dart [80]
     │   ├── clarity_management_page.dart [154]
     │   ├── command_palette.dart [282]
-    │   └── index.dart [4]
+    │   └── index.dart [5]
     ├── dashboard_widgets.dart [287]
     ├── form_widgets.dart [317]
     ├── index.dart [11]
@@ -249,9 +251,9 @@
 └── verify-schema.js [43]
 
 
-Total de líneas resumidas: 54534
-Total de archivos: 207
-Promedio de líneas por archivo: 263
+Total de líneas resumidas: 53825
+Total de archivos: 209
+Promedio de líneas por archivo: 258
 Archivo más grande: academic_service.dart (1371 líneas)
 
 
@@ -4615,8 +4617,7 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
   final _gradoController = TextEditingController();
   final _seccionController = TextEditingController();
 
-  String? _selectedPeriodoId;
-  bool _isLoading = false;
+  String? _selectedPeriodoId;
 
   @override
   void initState() {
@@ -4645,13 +4646,13 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
 
     return Consumer<PeriodoAcademicoProvider>(
       builder: (context, periodoProvider, child) {
-        return AlertDialog(
+        return ClarityFormDialog(
           title: Text('Crear Grupo', style: textStyles.headlineMedium),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          formKey: _formKey,
+          onSave: _createGrupo,
+          saveLabel: 'Crear',
+          cancelLabel: 'Cancelar',
+          children: [
                 TextFormField(
                   controller: _nombreController,
                   decoration: InputDecoration(
@@ -4713,33 +4714,13 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                   },
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _createGrupo,
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text('Crear'),
-            ),
-          ],
-        );
+    );
       },
     );
   }
 
-  Future<void> _createGrupo() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
+  Future<bool> _createGrupo() async {
+    if (!_formKey.currentState!.validate()) return false;
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -4756,10 +4737,10 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Grupo creado correctamente')),
         );
+        return true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4777,11 +4758,10 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } finally {
     }
+
+    return false;
   }
 }
 class EditGrupoDialog extends StatefulWidget {
@@ -4797,9 +4777,7 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreController;
   late final TextEditingController _gradoController;
-  late final TextEditingController _seccionController;
-
-  bool _isLoading = false;
+  late final TextEditingController _seccionController;
 
   @override
   void initState() {
@@ -4822,84 +4800,66 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Grupo', style: textStyles.headlineMedium),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: _nombreController,
-                  decoration: InputDecoration(
-                    labelText: 'Nombre del Grupo',
-                    hintText: 'Ej: Grupo A, 1ro Básico A',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'El nombre es requerido';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  controller: _gradoController,
-                  decoration: InputDecoration(
-                    labelText: 'Grado',
-                    hintText: 'Ej: 1ro, 2do, 3ro',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'El grado es requerido';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  controller: _seccionController,
-                  decoration: InputDecoration(
-                    labelText: 'Sección (opcional)',
-                    hintText: 'Ej: A, B, C',
-                  ),
-                ),
-                SizedBox(height: spacing.md),
-                TextFormField(
-                  initialValue: '${widget.grupo.periodoAcademico.nombre} (${widget.grupo.periodoAcademico.fechaInicio.year}-${widget.grupo.periodoAcademico.fechaFin.year})',
-                  decoration: InputDecoration(
-                    labelText: 'Período Académico',
-                    hintText: 'Período académico del grupo',
-                  ),
-                  readOnly: true,
-                  enabled: false,
-                ),
-              ],
-            ),
+      formKey: _formKey,
+      onSave: _updateGrupo,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: InputDecoration(
+            labelText: 'Nombre del Grupo',
+            hintText: 'Ej: Grupo A, 1ro Básico A',
           ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _updateGrupo,
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text('Actualizar'),
-            ),
-          ],
-        );
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El nombre es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _gradoController,
+          decoration: InputDecoration(
+            labelText: 'Grado',
+            hintText: 'Ej: 1ro, 2do, 3ro',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El grado es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _seccionController,
+          decoration: InputDecoration(
+            labelText: 'Sección (opcional)',
+            hintText: 'Ej: A, B, C',
+          ),
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          initialValue: '${widget.grupo.periodoAcademico.nombre} (${widget.grupo.periodoAcademico.fechaInicio.year}-${widget.grupo.periodoAcademico.fechaFin.year})',
+          decoration: InputDecoration(
+            labelText: 'Período Académico',
+            hintText: 'Período académico del grupo',
+          ),
+          readOnly: true,
+          enabled: false,
+        ),
+      ],
+    );
   }
 
-  Future<void> _updateGrupo() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
+  Future<bool> _updateGrupo() async {
+    if (!_formKey.currentState!.validate()) return false;
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -4915,33 +4875,29 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
         ),
       );
 
-      if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (success) {
+        messenger.showSnackBar(
           SnackBar(content: Text('Grupo actualizado correctamente')),
         );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        return true;
+      } else {
+        messenger.showSnackBar(
           SnackBar(
             content: Text(grupoProvider.errorMessage ?? 'Error al actualizar grupo'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: colors.error,
           ),
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: colors.error,
+        ),
+      );
     }
+
+    return false;
   }
 }
 /* Fin lib\screens\academic\grupos_screen.dart */
@@ -5450,19 +5406,21 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/grupo_provider.dart';
-import '../../providers/materia_provider.dart';
-import '../../providers/horario_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/periodo_academico_provider.dart';
-import '../../services/academic_service.dart' as academic_service;
+
+import '../../widgets/components/index.dart';
 import '../../theme/theme_extensions.dart';
 import '../../models/grupo.dart';
 import '../../models/materia.dart';
 import '../../models/user.dart';
+import '../../providers/grupo_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/periodo_academico_provider.dart';
+import '../../providers/horario_provider.dart';
 import '../../models/horario.dart';
 import '../../models/conflict_error.dart';
+import '../../providers/materia_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../services/academic_service.dart' as academic_service;
 
 class HorariosScreen extends StatefulWidget {
   const HorariosScreen({super.key});
@@ -5472,18 +5430,20 @@ class HorariosScreen extends StatefulWidget {
 }
 
 class _HorariosScreenState extends State<HorariosScreen> {
-  PeriodoAcademico? _selectedPeriodo
-  Grupo? _selectedGrupo;
+  Grupo? _selectedGrupo;
+  PeriodoAcademico? _selectedPeriodo;
+
   final List<String> _horas = [
     '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
-  final List<String> _diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-  final List<int> _diasSemanaValues = [1, 2, 3, 4, 5]
+    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00',
+  ];
+
+  final List<String> _diasSemana = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  final List<int> _diasSemanaValues = [1,2,3,4,5,6,7];
 
   @override
   void initState() {
-    super.initState();
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -5491,28 +5451,36 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   Future<void> _loadInitialData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
     final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
     final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-    final colors = context.colors;
 
     final token = authProvider.accessToken;
     final institutionId = authProvider.selectedInstitutionId;
 
-    if (token != null && institutionId != null) {
+    if (token != null) {
       try {
         await periodoProvider.loadPeriodosActivos(token);
-        await grupoProvider.loadGrupos(token);
-        await materiaProvider.loadMaterias(token);
-        await userProvider.loadUsersByInstitution(token, institutionId);
-      } catch (e) {
+        if (periodoProvider.periodosActivos.isNotEmpty) {
+          setState(() => _selectedPeriodo = periodoProvider.periodosActivos.first);
+          await grupoProvider.loadGruposByPeriodo(token, _selectedPeriodo!.id);
+          if (grupoProvider.grupos.isNotEmpty) {
+            setState(() => _selectedGrupo = grupoProvider.grupos.first);
+            await _loadHorariosForGrupo(_selectedGrupo!.id);
+          }
+        } else {
+          await grupoProvider.loadGrupos(token);
+        }
+        await materiaProvider.loadMaterias(token);
+        if (institutionId != null) {
+          await userProvider.loadUsersByInstitution(token, institutionId);
+        }
+  } catch (e) {
         if (mounted) {
+          final colors = context.colors;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error cargando datos: $e'),
-              backgroundColor: colors.error,
-            ),
+            SnackBar(content: Text('Error cargando datos iniciales: $e'), backgroundColor: colors.error),
           );
         }
       }
@@ -5521,239 +5489,55 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final textStyles = context.textStyles;
-    final spacing = context.spacing;
-
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
-        elevation: 0,
-        title: Text(
-          'Gestión de Horarios',
-          style: textStyles.headlineMedium.copyWith(color: colors.white),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(spacing.screenPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Seleccionar Período Académico',
-              style: textStyles.headlineSmall,
-            ),
-            SizedBox(height: spacing.md),
-            Consumer<PeriodoAcademicoProvider>(
-              builder: (context, periodoProvider, child) {
-                return SizedBox(
-                  width: double.maxFinite,
-                  child: DropdownButtonFormField<PeriodoAcademico>(
-                    value: _selectedPeriodo,
-                    hint: const Text('Selecciona un período activo'),
-                    decoration: InputDecoration(
-                      labelText: 'Período Académico',
-                      hintText: 'Selecciona un período',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    items: periodoProvider.periodosActivos.map((periodo) {
-                      return DropdownMenuItem<PeriodoAcademico>(
-                        value: periodo,
-                        child: Text(periodo.nombre),
-                      );
-                    }).toList(),
-                    onChanged: (periodo) {
-                      setState(() {
-                        _selectedPeriodo = periodo;
-                        _selectedGrupo = null
-                      });
-                    },
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: spacing.lg),
-            Text(
-              'Seleccionar Grupo',
-              style: textStyles.headlineSmall,
-            ),
-            SizedBox(height: spacing.md),
-            Consumer<GrupoProvider>(
-              builder: (context, grupoProvider, child) {
-                final gruposFiltrados = _selectedPeriodo == null
-                    ? <Grupo>[]
-                    : grupoProvider.grupos
-                        .where((g) => g.periodoId == _selectedPeriodo!.id)
-                        .toList();
-
-                return SizedBox(
-                  width: double.maxFinite,
-                  child: DropdownButtonFormField<Grupo>(
-                    value: _selectedGrupo,
-                    hint: Text(_selectedPeriodo == null
-                        ? 'Selecciona un período primero'
-                        : 'Selecciona un grupo'),
-                    decoration: InputDecoration(
-                      labelText: 'Grupo',
-                      hintText: 'Selecciona un grupo',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
-                      ),
-                    ),
-                    items: gruposFiltrados.map((grupo)
-                      return DropdownMenuItem<Grupo>(
-                        value: grupo,
-                        child: Text('${grupo.nombre} - ${grupo.grado}'),
-                      );
-                    }).toList(),
-                    onChanged: _selectedPeriodo == null ? null : (grupo) {
-                      setState(() => _selectedGrupo = grupo);
-                      if (grupo != null) {
-                        _loadHorariosForGrupo(grupo.id);
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-
-            SizedBox(height: spacing.xl),
-            if (_selectedGrupo != null) ...[
-              Text(
-                'Horario Semanal - ${_selectedGrupo!.nombre}',
-                style: textStyles.headlineSmall,
-              ),
-              SizedBox(height: spacing.md),
-              Consumer<HorarioProvider>(
-                builder: (context, horarioProvider, child) {
-                  if (horarioProvider.isLoading) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'Cargando horarios...',
-                              style: textStyles.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (horarioProvider.hasError) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 48,
-                              color: colors.error,
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'Error: ${horarioProvider.errorMessage}',
-                              style: textStyles.bodyMedium.copyWith(
-                                color: colors.error,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: spacing.md),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_selectedGrupo != null) {
-                                  _loadHorariosForGrupo(_selectedGrupo!.id);
-                                }
-                              },
-                              child: const Text('Reintentar'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (horarioProvider.horariosDelGrupoSeleccionado.isEmpty && horarioProvider.isLoaded) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 48,
-                              color: colors.textSecondary,
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'No hay horarios para este grupo',
-                              style: textStyles.bodyMedium.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return _buildWeeklyCalendar(horarioProvider);
-                },
-              ),
-            ] else ...[
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(spacing.xl),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 64,
-                        color: colors.textSecondary,
-                      ),
-                      SizedBox(height: spacing.md),
-                      Text(
-                        'Selecciona un grupo para ver su horario',
-                        style: textStyles.bodyLarge.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return Consumer3<PeriodoAcademicoProvider, GrupoProvider, HorarioProvider>(
+      builder: (context, periodoProvider, grupoProvider, horarioProvider, child) {
+        return ClarityManagementPage(
+          title: 'Horarios',
+          isLoading: horarioProvider.isLoading,
+          hasError: horarioProvider.hasError,
+          errorMessage: horarioProvider.errorMessage,
+          itemCount: _selectedGrupo != null ? 1 : 0,
+          itemBuilder: (context, index) => _buildWeeklyCalendar(horarioProvider),
+          filterWidgets: _buildFilterWidgets(context, grupoProvider),
+          onRefresh: () async {
+            if (_selectedGrupo != null) _loadHorariosForGrupo(_selectedGrupo!.id);
+          },
+          scrollController: null,
+          emptyStateWidget: ClarityEmptyState(
+            icon: Icons.calendar_month,
+            title: _selectedGrupo == null ? 'Selecciona un grupo' : 'No hay clases en el grupo',
+            subtitle: _selectedGrupo == null ? 'Selecciona un grupo para ver el calendario semanal' : 'Crea la primera clase para este grupo',
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              if (_selectedGrupo == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecciona un grupo para crear una clase')));
+                return;
+              }
+              final primeraHora = _horas.isNotEmpty ? _horas.first : '07:00';
+              _showCreateClassDialog(primeraHora, 1);
+            },
+            tooltip: 'Crear Clase',
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildWeeklyCalendar(HorarioProvider horarioProvider) {
     final colors = context.colors;
     final textStyles = context.textStyles;
-    final spacing = context.spacing;
+  final spacing = context.spacing;
 
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
         final hourColumnWidth = isMobile ? 60.0 : 80.0;
-        final cellHeight = isMobile ? 70.0 : 80.0
+        final cellHeight = isMobile ? 70.0 : 80.0;
 
-        return Container(
+        return SingleChildScrollView(
+          child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -5803,9 +5587,89 @@ class _HorariosScreenState extends State<HorariosScreen> {
               )),
             ],
           ),
-        );
+        ),
+      );
       },
     );
+  }
+
+  List<Widget> _buildFilterWidgets(BuildContext context, GrupoProvider grupoProvider) {
+  final spacing = context.spacing;
+
+    return [
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
+          final double itemWidth = (width - ((columns - 1) * 12)) / columns;
+
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.start,
+            children: [
+              SizedBox(
+                width: itemWidth,
+                child: Consumer<PeriodoAcademicoProvider>(
+                  builder: (context, periodoProvider, child) {
+                    return DropdownButtonFormField<PeriodoAcademico>(
+                      isExpanded: true,
+                      value: _selectedPeriodo,
+                      decoration: InputDecoration(
+                        labelText: 'Período Académico',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      ),
+                      style: context.textStyles.bodyLarge,
+                      items: periodoProvider.periodosActivos
+                      .map<DropdownMenuItem<PeriodoAcademico>>((p) => DropdownMenuItem<PeriodoAcademico>(value: p, child: Text(p.nombre, overflow: TextOverflow.ellipsis, maxLines: 1)))
+                      .toList(),
+                  onChanged: (p) async {
+                    setState(() {
+                      _selectedPeriodo = p;
+                      _selectedGrupo = null;
+                    });
+                    if (p != null) {
+                      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+                      if (token != null) {
+                        await grupoProvider.loadGruposByPeriodo(token, p.id);
+                        if (grupoProvider.grupos.isNotEmpty) {
+                          setState(() => _selectedGrupo = grupoProvider.grupos.first);
+                          await _loadHorariosForGrupo(_selectedGrupo!.id);
+                        }
+                      }
+                    }
+                  },
+                );
+              },
+                ),
+              ),
+
+              SizedBox(
+                width: itemWidth,
+                child: DropdownButtonFormField<Grupo>(
+                  isExpanded: true,
+              value: _selectedGrupo,
+              decoration: InputDecoration(labelText: 'Grupo'),
+              items: (_selectedPeriodo == null
+                  ? <DropdownMenuItem<Grupo>>[]
+                  : grupoProvider.grupos
+                      .where((g) => g.periodoId == _selectedPeriodo!.id)
+                      .map<DropdownMenuItem<Grupo>>((g) => DropdownMenuItem<Grupo>(value: g, child: Text('${g.nombre} - ${g.grado}', overflow: TextOverflow.ellipsis, maxLines: 1)))
+                      .toList()),
+              onChanged: (_selectedPeriodo == null)
+                  ? null
+                  : (g) => setState(() {
+                        _selectedGrupo = g;
+                        if (g != null) _loadHorariosForGrupo(g.id);
+                      }),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ];
   }
 
   Widget _buildHourRow(
@@ -6095,7 +5959,6 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   Materia? _selectedMateria;
   User? _selectedProfesor;
   String? _selectedHoraFin;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -6108,52 +5971,44 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Crear Clase', style: textStyles.headlineMedium),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                    border: Border.all(color: context.colors.borderLight),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? _getHoraFin(widget.horaInicio)}',
-                        style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        'Día: ${_getDiaNombre(widget.diaSemana)}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Grupo: ${widget.grupo.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
+      formKey: _formKey,
+      onSave: _createClass,
+      saveLabel: 'Crear Clase',
+      cancelLabel: 'Cancelar',
+      children: [
+        Container(
+          padding: EdgeInsets.all(spacing.md),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            border: Border.all(color: context.colors.borderLight),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? _getHoraFin(widget.horaInicio)}',
+                style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text('Día: ${_getDiaNombre(widget.diaSemana)}', style: textStyles.bodyMedium),
+              Text('Grupo: ${widget.grupo.nombre}', style: textStyles.bodyMedium),
+            ],
+          ),
+        ),
 
                 SizedBox(height: spacing.lg),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   value: _selectedHoraFin,
                   decoration: InputDecoration(
                     labelText: 'Hora de Fin',
                     hintText: 'Selecciona la hora de fin',
                   ),
-                  items: _getHorasFinDisponibles(widget.horaInicio).map((hora) {
+                      items: _getHorasFinDisponibles(widget.horaInicio).map((hora) {
                     return DropdownMenuItem<String>(
                       value: hora,
-                      child: Text(hora),
+                      child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1),
                     );
                   }).toList(),
                   validator: (value) {
@@ -6167,10 +6022,11 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                   },
                 ),
 
-                SizedBox(height: spacing.md),
+            SizedBox(height: spacing.md),
                 Consumer<MateriaProvider>(
                   builder: (context, materiaProvider, child) {
                     return DropdownButtonFormField<Materia>(
+                      isExpanded: true,
                       value: _selectedMateria,
                       decoration: InputDecoration(
                         labelText: 'Materia',
@@ -6179,7 +6035,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                       items: materiaProvider.materias.map((materia) {
                         return DropdownMenuItem<Materia>(
                           value: materia,
-                          child: Text(materia.nombre),
+                          child: Text(materia.nombre, overflow: TextOverflow.ellipsis, maxLines: 1),
                         );
                       }).toList(),
                       validator: (value) {
@@ -6213,6 +6069,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                     }
 
                     return DropdownButtonFormField<User?>(
+                      isExpanded: true,
                       value: selectedProfesorFromList,
                       decoration: InputDecoration(
                         labelText: 'Profesor (opcional)',
@@ -6229,7 +6086,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                         ...profesoresDisponibles.map((profesor) {
                           return DropdownMenuItem<User?>(
                             value: profesor,
-                            child: Text('${profesor.nombres} ${profesor.apellidos}'),
+                            child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
                           );
                         }),
                       ],
@@ -6239,35 +6096,14 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                     );
                   },
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createClass,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Crear Clase'),
-        ),
-      ],
+  ],
+
     );
   }
 
-  Future<void> _createClass() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedMateria == null) return;
-
-    setState(() => _isLoading = true);
+  Future<bool> _createClass() async {
+  if (!_formKey.currentState!.validate()) return false;
+  if (_selectedMateria == null) return false;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
@@ -6275,7 +6111,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
 
     try {
       final token = authProvider.accessToken;
-      if (token == null) return;
+  if (token == null) return false;
       final periodoId = widget.grupo.periodoId;
 
       final success = await horarioProvider.createHorario(
@@ -6292,10 +6128,10 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Clase creada correctamente')),
         );
+        return true;
       } else if (mounted) {
         final errorMessage = horarioProvider.errorMessage ?? 'Error al crear clase';
         if (horarioProvider.conflictError != null) {
@@ -6318,11 +6154,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    } finally {}
+    return false;
   }
 
   String _getHoraFin(String horaInicio) {
@@ -6434,10 +6267,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
 class EditClassDialog extends StatefulWidget {
   final Horario horario;
 
-  const EditClassDialog({
-    super.key,
-    required this.horario,
-  });
+  const EditClassDialog({super.key, required this.horario});
 
   @override
   State<EditClassDialog> createState() => _EditClassDialogState();
@@ -6447,7 +6277,6 @@ class _EditClassDialogState extends State<EditClassDialog> {
   final _formKey = GlobalKey<FormState>();
   User? _selectedProfesor;
   String? _selectedHoraFin;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -6460,155 +6289,113 @@ class _EditClassDialogState extends State<EditClassDialog> {
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
+    final colors = context.colors;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Clase', style: textStyles.headlineMedium),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                    border: Border.all(color: context.colors.borderLight),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? widget.horario.horaFin}',
-                        style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        'Día: ${widget.horario.diaSemanaNombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Grupo: ${widget.horario.grupo.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Materia: ${widget.horario.materia.nombre}',
-                        style: textStyles.bodyMedium,
-                      ),
+      formKey: _formKey,
+      onSave: _updateClass,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+              Container(
+                padding: EdgeInsets.all(spacing.md),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
+                  border: Border.all(color: colors.borderLight),
+                ),
+                child: Column(
+                  children: [
+                    Text('Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? widget.horario.horaFin}', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Día: ${widget.horario.diaSemanaNombre}', style: textStyles.bodyMedium),
+                    Text('Grupo: ${widget.horario.grupo.nombre}', style: textStyles.bodyMedium),
+                    Text('Materia: ${widget.horario.materia.nombre}', style: textStyles.bodyMedium),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: spacing.lg),
+
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: _selectedHoraFin,
+                decoration: InputDecoration(labelText: 'Hora de Fin', hintText: 'Selecciona la hora de fin'),
+                items: _getHorasFinDisponibles(widget.horario.horaInicio).map((hora) => DropdownMenuItem<String>(value: hora, child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1))).toList(),
+                validator: (value) => (value == null || value.isEmpty) ? 'La hora de fin es requerida' : null,
+                onChanged: (hora) => setState(() => _selectedHoraFin = hora),
+              ),
+
+              SizedBox(height: spacing.md),
+
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  User? selectedProfesorFromList;
+                  if (_selectedProfesor != null) {
+                    selectedProfesorFromList = userProvider.professors.firstWhere((p) => p.id == _selectedProfesor!.id, orElse: () => _selectedProfesor!);
+                  }
+
+                  return DropdownButtonFormField<User?>(
+                    isExpanded: true,
+                    value: selectedProfesorFromList,
+                    decoration: InputDecoration(labelText: 'Profesor', hintText: 'Selecciona un profesor'),
+                    items: [
+                      const DropdownMenuItem<User?>(value: null, child: Text('Sin profesor')),
+                      ...userProvider.professors.map((profesor) => DropdownMenuItem<User?>(value: profesor, child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1))),
                     ],
-                  ),
-                ),
+                    onChanged: (profesor) => setState(() => _selectedProfesor = profesor),
+                  );
+                },
+              ),
 
-                SizedBox(height: spacing.lg),
-                DropdownButtonFormField<String>(
-                  value: _selectedHoraFin,
-                  decoration: InputDecoration(
-                    labelText: 'Hora de Fin',
-                    hintText: 'Selecciona la hora de fin',
-                  ),
-                  items: _getHorasFinDisponibles(widget.horario.horaInicio).map((hora) {
-                    return DropdownMenuItem<String>(
-                      value: hora,
-                      child: Text(hora),
-                    );
-                  }).toList(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'La hora de fin es requerida';
+              SizedBox(height: spacing.md),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final nav = Navigator.of(context);
+                    final confirmed = await _showDeleteConfirmationDialog();
+                    if (confirmed != true) return;
+                    final success = await _deleteClass();
+                    if (success) {
+                      if (mounted) messenger.showSnackBar(const SnackBar(content: Text('Clase eliminada correctamente')));
+                      nav.pop(true);
                     }
-                    return null;
                   },
-                  onChanged: (hora) {
-                    setState(() => _selectedHoraFin = hora);
-                  },
+                  style: TextButton.styleFrom(foregroundColor: colors.error),
+                  child: const Text('Eliminar'),
                 ),
-
-                SizedBox(height: spacing.md),
-                Consumer<UserProvider>(
-                  builder: (context, userProvider, child) {
-                    User? selectedProfesorFromList;
-                    if (_selectedProfesor != null) {
-                      selectedProfesorFromList = userProvider.professors.firstWhere(
-                        (p) => p.id == _selectedProfesor!.id,
-                        orElse: () => _selectedProfesor!,
-                      );
-                    }
-
-                    return DropdownButtonFormField<User?>(
-                      value: selectedProfesorFromList,
-                      decoration: InputDecoration(
-                        labelText: 'Profesor',
-                        hintText: 'Selecciona un profesor',
-                      ),
-                      items: [
-                        const DropdownMenuItem<User?>(
-                          value: null,
-                          child: Text('Sin profesor'),
-                        ),
-                        ...userProvider.professors.map((profesor) {
-                          return DropdownMenuItem<User?>(
-                            value: profesor,
-                            child: Text('${profesor.nombres} ${profesor.apellidos}'),
-                          );
-                        }),
-                      ],
-                      onChanged: (profesor) {
-                        setState(() => _selectedProfesor = profesor);
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-          child: Text('Cancelar'),
-        ),
-        TextButton(
-          onPressed: _isLoading ? null : _deleteClass,
-          style: TextButton.styleFrom(foregroundColor: context.colors.error),
-          child: Text('Eliminar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updateClass,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Actualizar'),
-        ),
       ],
     );
   }
 
-  List<String> _getHorasFinDisponibles(String horaInicio) {
+  List<String> _getHorasFinDisponibles(String horaInicio) {
     final parts = horaInicio.split(':');
-    final hourInicio = int.parse(parts[0]);
+    final hourInicio = int.parse(parts[0]);
     final horasDisponibles = <String>[];
     for (int hour = hourInicio + 1; hour <= 18; hour++) {
       horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
     }
-
     return horasDisponibles;
   }
 
-  Future<void> _updateClass() async {
-    setState(() => _isLoading = true);
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
-    final colors = context.colors;
-
+  Future<bool> _updateClass() async {
+    if (!_formKey.currentState!.validate()) return false;
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = context.colors;
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
-      if (token == null) return;
+      if (token == null) return false;
 
       final success = await horarioProvider.updateHorario(
         token,
@@ -6621,185 +6408,57 @@ class _EditClassDialogState extends State<EditClassDialog> {
         ),
       );
 
-      if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Clase actualizada correctamente')),
-        );
-      } else if (mounted) {
-        final errorMessage = horarioProvider.errorMessage ?? 'Error al actualizar clase';
-        if (horarioProvider.conflictError != null) {
-          _showConflictDialog(horarioProvider.conflictError!, 'actualizar');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: colors.error,
-            ),
-          );
-        }
+      if (success) {
+        messenger.showSnackBar(SnackBar(content: Text('Clase actualizada correctamente')));
+        return true;
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: colors.error,
-          ),
-        );
-      }
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
     }
+    return false;
   }
 
   Future<bool?> _showDeleteConfirmationDialog() async {
-    const errorColor = Colors.red;
-
     return showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text('Confirmar eliminación'),
         content: Text('¿Estás seguro de que quieres eliminar esta clase?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: TextButton.styleFrom(foregroundColor: errorColor),
-            child: Text('Eliminar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text('Eliminar')),
         ],
       ),
     );
   }
 
-  Future<void> _deleteClass() async {
+  Future<bool> _deleteClass() async {
     final confirmed = await _showDeleteConfirmationDialog();
-
-    if (confirmed != true) return;
-
-    setState(() => _isLoading = true);
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
-    final colors = context.colors;
-
+    if (confirmed != true) return false;
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = context.colors;
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
-      if (token == null) return;
+      if (token == null) return false;
 
       final success = await horarioProvider.deleteHorario(token, widget.horario.id);
-
-      if (!mounted) return;
-
+      if (!mounted) return false;
       if (success) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Clase eliminada correctamente')),
-        );
+        messenger.showSnackBar(SnackBar(content: Text('Clase eliminada correctamente')));
+        return true;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'),
-            backgroundColor: colors.error,
-          ),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'), backgroundColor: colors.error));
       }
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: colors.error,
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
     }
-  }
+    return false;
+  }
 
-  void _showConflictDialog(ConflictError conflictError, String operation) {
-    final colors = context.colors;
-    final textStyles = context.textStyles;
-    final spacing = context.spacing;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: colors.warning),
-            SizedBox(width: spacing.sm),
-            Text('Conflicto de Horario', style: textStyles.headlineMedium),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'No se puede $operation la clase debido a un conflicto de horario.',
-              style: textStyles.bodyMedium,
-            ),
-            SizedBox(height: spacing.md),
-            Container(
-              padding: EdgeInsets.all(spacing.sm),
-              decoration: BoxDecoration(
-                color: colors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.error.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                conflictError.userFriendlyMessage,
-                style: textStyles.bodySmall.copyWith(
-                  color: colors.error,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (conflictError.conflictingHorarioIds.isNotEmpty) ...[
-              SizedBox(height: spacing.md),
-              Text('Horarios en conflicto:', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-              SizedBox(height: spacing.sm),
-              ...conflictError.conflictingHorarioIds.map((id) => Text('- $id', style: textStyles.bodySmall.copyWith(color: colors.textSecondary))),
-            ],
-            SizedBox(height: spacing.md),
-            Text(
-              'Sugerencias para resolver el conflicto:',
-              style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: spacing.sm),
-            ...conflictError.suggestions.map((suggestion) => Text(
-              '• $suggestion',
-              style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
-            )),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Revisar Horarios'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
-            ),
-            child: Text('Entendido'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 /* Fin lib\screens\academic\horarios_screen.dart */
 
@@ -6810,10 +6469,10 @@ import 'package:provider/provider.dart';
 import '../../widgets/components/clarity_management_page.dart';
 import '../../widgets/components/clarity_components.dart';
 import '../../theme/theme_extensions.dart';
-import '../../services/academic_service.dart' as academic_service;
 import '../../providers/materia_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/materia.dart';
+import 'materia_dialogs.dart';
 
 class MateriasScreen extends StatefulWidget {
   const MateriasScreen({super.key});
@@ -7115,7 +6774,18 @@ class _MateriasScreenState extends State<MateriasScreen> {
       SnackBar(content: Text('Detalle de materia: ${materia.nombre}')),
     );
   }
-}
+}
+/* Fin lib\screens\academic\materias_screen.dart */
+
+/* Inicio lib\screens\academic\materia_dialogs.dart */
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/materia.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/materia_provider.dart';
+import '../../services/academic_service.dart' as academic_service;
+import '../../theme/theme_extensions.dart';
+import '../../widgets/components/index.dart';
 class CreateMateriaDialog extends StatefulWidget {
   const CreateMateriaDialog({super.key});
 
@@ -7126,9 +6796,7 @@ class CreateMateriaDialog extends StatefulWidget {
 class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
-  final _codigoController = TextEditingController();
-
-  bool _isLoading = false;
+  final _codigoController = TextEditingController();
 
   @override
   void dispose() {
@@ -7137,18 +6805,46 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
     super.dispose();
   }
 
+  Future<bool> _createMateria() async {
+    if (!_formKey.currentState!.validate()) return false;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = Theme.of(context).colorScheme;
+
+    try {
+      final success = await materiaProvider.createMateria(
+        authProvider.accessToken!,
+        academic_service.CreateMateriaRequest(
+          nombre: _nombreController.text.trim(),
+          codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
+        ),
+      );
+
+      if (success && mounted) {
+        messenger.showSnackBar(const SnackBar(content: Text('Materia creada correctamente')));
+        return true;
+      } else if (mounted) {
+        messenger.showSnackBar(SnackBar(content: Text(materiaProvider.errorMessage ?? 'Error al crear materia'), backgroundColor: colors.error));
+      }
+    } catch (e) {
+      if (mounted) messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Crear Materia', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      formKey: _formKey,
+      onSave: _createMateria,
+      saveLabel: 'Crear',
+      cancelLabel: 'Cancelar',
+      children: [
             TextFormField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -7170,72 +6866,8 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
                 hintText: 'Ej: MAT101, LEN201',
               ),
             ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createMateria,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Crear'),
-        ),
       ],
     );
-  }
-
-  Future<void> _createMateria() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
-
-      final success = await materiaProvider.createMateria(
-        authProvider.accessToken!,
-        academic_service.CreateMateriaRequest(
-          nombre: _nombreController.text.trim(),
-          codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
-        ),
-      );
-
-      if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Materia creada correctamente')),
-        );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(materiaProvider.errorMessage ?? 'Error al crear materia'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
   }
 }
 class EditMateriaDialog extends StatefulWidget {
@@ -7250,9 +6882,7 @@ class EditMateriaDialog extends StatefulWidget {
 class _EditMateriaDialogState extends State<EditMateriaDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreController;
-  late final TextEditingController _codigoController;
-
-  bool _isLoading = false;
+  late final TextEditingController _codigoController;
 
   @override
   void initState() {
@@ -7273,13 +6903,13 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Materia', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      formKey: _formKey,
+      onSave: _updateMateria,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+  children: [
             TextFormField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -7301,32 +6931,14 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
                 hintText: 'Ej: MAT101, LEN201',
               ),
             ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updateMateria,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Actualizar'),
-        ),
       ],
     );
-  }
+  }
 
-  Future<void> _updateMateria() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
+  Future<bool> _updateMateria() async {
+    if (!_formKey.currentState!.validate()) return false;
+    final messenger = ScaffoldMessenger.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -7342,35 +6954,33 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(content: Text('Materia actualizada correctamente')),
         );
+        return true;
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text(materiaProvider.errorMessage ?? 'Error al actualizar materia'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: colors.error,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: colors.error,
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    } finally {}
+    return false;
   }
 }
-/* Fin lib\screens\academic\materias_screen.dart */
+
+/* Fin lib\screens\academic\materia_dialogs.dart */
 
 /* Inicio lib\screens\academic\periodos_academicos_screen.dart */
 import 'dart:async';
@@ -7393,70 +7003,49 @@ class PeriodosAcademicosScreen extends StatefulWidget {
 class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  Timer? _searchDebounceTimer;
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_onScroll);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadPeriodos();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPeriodos());
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _searchController.dispose();
-    _searchDebounceTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged() {
+    final query = _searchController.text.trim();
+    setState(() => _isSearching = query.isNotEmpty);
+    _loadPeriodos(search: query.isEmpty ? null : query);
+  }
+
   void _onScroll() {
-    if (_isSearching) return;
-
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      _loadMorePeriodos(periodoProvider, authProvider.accessToken);
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 180) {
+      _loadMorePeriodos();
     }
   }
 
-  Future<void> _loadPeriodos() async {
+  Future<void> _loadPeriodos({String? search}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-
-    if (authProvider.accessToken == null) {
-      debugPrint('Error: No hay token de acceso para cargar períodos académicos.');
-      return;
+    if (authProvider.accessToken != null) {
+      await periodoProvider.loadPeriodosAcademicos(authProvider.accessToken!);
     }
-
-    await periodoProvider.loadPeriodosAcademicos(
-      authProvider.accessToken!,
-      page: 1,
-      limit: 10,
-    );
   }
 
-  Future<void> _loadMorePeriodos(PeriodoAcademicoProvider provider, String? accessToken) async {
-    if (accessToken == null || provider.isLoading) return;
-
-    await provider.loadNextPage(accessToken);
-  }
-
-  void _onSearchChanged(String query) {
-    _searchDebounceTimer?.cancel();
-
-    setState(() {
-      _isSearching = query.isNotEmpty;
-    });
-
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _loadPeriodos();
-    });
+  Future<void> _loadMorePeriodos() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+    if (authProvider.accessToken != null && (periodoProvider.paginationInfo?.hasNext ?? false)) {
+      await periodoProvider.loadNextPage(authProvider.accessToken!);
+    }
   }
 
   @override
@@ -7464,7 +7053,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     return Consumer2<AuthProvider, PeriodoAcademicoProvider>(
       builder: (context, authProvider, periodoProvider, child) {
         return ClarityManagementPage(
-          title: 'Gestión de Períodos Académicos',
+          title: 'Períodos Académicos',
           isLoading: periodoProvider.isLoading,
           hasError: periodoProvider.hasError,
           errorMessage: periodoProvider.errorMessage,
@@ -7478,14 +7067,11 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           onRefresh: _loadPeriodos,
           scrollController: _scrollController,
           hasMoreData: periodoProvider.paginationInfo?.hasNext ?? false,
+          isLoadingMore: periodoProvider.isLoading && (periodoProvider.paginationInfo?.hasNext ?? false),
           emptyStateWidget: ClarityEmptyState(
             icon: _isSearching ? Icons.search_off : Icons.calendar_today,
-            title: _isSearching
-              ? 'No se encontraron resultados'
-              : 'Aún no has creado ningún período académico',
-            subtitle: _isSearching
-              ? 'Intenta con otros términos de búsqueda'
-              : 'Comienza creando tu primer período académico',
+            title: _isSearching ? 'No se encontraron resultados' : 'Aún no has creado ningún período académico',
+            subtitle: _isSearching ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer período académico',
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCreatePeriodoDialog(context),
@@ -7515,7 +7101,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
                   icon: Icon(Icons.clear, color: colors.textSecondary),
                   onPressed: () {
                     _searchController.clear();
-                    _onSearchChanged('');
+                    _onSearchChanged();
                   },
                 )
               : null,
@@ -7535,7 +7121,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           fillColor: colors.surface,
           contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
         ),
-        onChanged: _onSearchChanged,
+        onChanged: (_) => _onSearchChanged(),
       ),
     ];
   }
@@ -7571,97 +7157,74 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.xs),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        periodo.nombre,
-                        style: textStyles.headlineSmall,
-                      ),
-                      SizedBox(height: spacing.xs),
-                      Text(
-                        'Del ${periodo.fechaInicio.day}/${periodo.fechaInicio.month}/${periodo.fechaInicio.year} al ${periodo.fechaFin.day}/${periodo.fechaFin.month}/${periodo.fechaFin.year}',
-                        style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                  decoration: BoxDecoration(
-                    color: periodo.activo ? colors.success.withValues(alpha: 0.1) : colors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  ),
-                  child: Text(
-                    periodo.activo ? 'Activo' : 'Inactivo',
-                    style: textStyles.bodySmall.copyWith(
-                      color: periodo.activo ? colors.success : colors.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: spacing.md),
-            Row(
-              children: [
-                Text(
-                  '${0} grupos asociados',
-                  style: textStyles.bodySmall.copyWith(color: colors.textMuted),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    periodo.activo ? Icons.visibility_off : Icons.visibility,
-                    color: periodo.activo ? colors.error : colors.success,
-                  ),
-                  onPressed: () => _togglePeriodoStatus(context, periodo, provider),
-                  tooltip: periodo.activo ? 'Desactivar período' : 'Activar período',
-                ),
-                IconButton(
-                  icon: Icon(Icons.edit, color: colors.primary),
-                  onPressed: () => _showEditPeriodoDialog(context, periodo),
-                  tooltip: 'Editar período',
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: colors.error),
-                  onPressed: () => _showDeletePeriodoDialog(context, periodo, provider),
-                  tooltip: 'Eliminar período',
-                ),
-              ],
-            ),
-          ],
+    return ClarityListItem(
+      leading: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(8),
         ),
+        child: Icon(Icons.calendar_today, color: colors.primary),
       ),
+      title: periodo.nombre,
+      subtitleWidget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Del ${periodo.fechaInicio.day}/${periodo.fechaInicio.month}/${periodo.fechaInicio.year} al ${periodo.fechaFin.day}/${periodo.fechaFin.month}/${periodo.fechaFin.year}',
+            style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+          ),
+          SizedBox(height: spacing.xs),
+          Text(
+            '${0} grupos asociados',
+            style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+          ),
+        ],
+      ),
+      badgeText: periodo.activo ? 'Activo' : 'Inactivo',
+      badgeColor: periodo.activo ? colors.success : colors.error,
+      contextActions: [
+        ClarityContextMenuAction(
+          label: periodo.activo ? 'Desactivar' : 'Activar',
+          icon: periodo.activo ? Icons.visibility_off : Icons.visibility,
+          color: periodo.activo ? colors.error : colors.success,
+          onPressed: () => _togglePeriodoStatus(context, periodo, provider),
+        ),
+        ClarityContextMenuAction(
+          label: 'Editar',
+          icon: Icons.edit,
+          color: colors.primary,
+          onPressed: () => _showEditPeriodoDialog(context, periodo),
+        ),
+        ClarityContextMenuAction(
+          label: 'Eliminar',
+          icon: Icons.delete,
+          color: colors.error,
+          onPressed: () => _showDeletePeriodoDialog(context, periodo, provider),
+        ),
+      ],
+      onTap: () => Navigator.of(context).pushNamed('/academic/periodos/${periodo.id}'),
     );
   }
 
   Future<void> _togglePeriodoStatus(BuildContext context, PeriodoAcademico periodo, PeriodoAcademicoProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final colors = Theme.of(context).colorScheme;
+  final colors = Theme.of(context).colorScheme;
+  final messenger = ScaffoldMessenger.of(context);
 
-    final success = await provider.togglePeriodoStatus(authProvider.accessToken!, periodo.id);
+  final success = await provider.togglePeriodoStatus(authProvider.accessToken!, periodo.id);
 
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar
+  messenger.showSnackBar(
         SnackBar(
           content: Text('Período ${periodo.activo ? 'desactivado' : 'activado'} correctamente'),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar
+  messenger.showSnackBar(
         SnackBar(
           content: Text(provider.errorMessage ?? 'Error al cambiar el status del período'),
           backgroundColor: colors.error,
@@ -7675,9 +7238,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       context: context,
       builder: (context) => const CreatePeriodoDialog(),
     ).then((result) {
-      if (result == true) {
-        _loadPeriodos()
-      }
+      if (result == true) _loadPeriodos();
     });
   }
 
@@ -7686,9 +7247,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       context: context,
       builder: (context) => EditPeriodoDialog(periodo: periodo),
     ).then((result) {
-      if (result == true) {
-        _loadPeriodos()
-      }
+      if (result == true) _loadPeriodos();
     });
   }
 
@@ -7700,36 +7259,22 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Eliminar Período Académico'),
         content: Text(
-          '¿Estás seguro de que quieres eliminar el período "${periodo.nombre}"? '
-          'Esta acción no se puede deshacer y eliminará todos los grupos asociados.',
+          '¿Estás seguro de que quieres eliminar el período "${periodo.nombre}"? Esta acción no se puede deshacer y eliminará todos los grupos asociados.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop()
-
+              Navigator.of(context).pop();
               final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
+              final messenger = ScaffoldMessenger.of(context);
               final success = await provider.deletePeriodoAcademico(authProvider.accessToken!, periodo.id);
-
               if (!mounted) return;
-
               if (success) {
-                ScaffoldMessenger.of(context).showSnackBar
-                  const SnackBar(content: Text('Período académico eliminado correctamente')),
-                );
-                _loadPeriodos()
+                messenger.showSnackBar(const SnackBar(content: Text('Período académico eliminado correctamente')));
+                _loadPeriodos();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar
-                  SnackBar(
-                    content: Text(provider.errorMessage ?? 'Error al eliminar el período académico'),
-                    backgroundColor: colors.error,
-                  ),
-                );
+                messenger.showSnackBar(SnackBar(content: Text(provider.errorMessage ?? 'Error al eliminar período académico'), backgroundColor: colors.error));
               }
             },
             style: TextButton.styleFrom(foregroundColor: colors.error),
@@ -7739,7 +7284,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       ),
     );
   }
-}
+}
 class CreatePeriodoDialog extends StatefulWidget {
   const CreatePeriodoDialog({super.key});
 
@@ -7751,9 +7296,7 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   DateTime? _fechaInicio;
-  DateTime? _fechaFin;
-
-  bool _isLoading = false;
+  DateTime? _fechaFin;
 
   @override
   void dispose() {
@@ -7765,103 +7308,64 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
-
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Crear Período Académico', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del Período',
-                hintText: 'Ej: Año 2025, Semestre 2025-I',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaInicio = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Inicio',
-                ),
-                child: Text(
-                  _fechaInicio != null
-                      ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-            SizedBox(height: spacing.md),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaInicio ?? DateTime.now(),
-                  firstDate: _fechaInicio ?? DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaFin = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Fin',
-                ),
-                child: Text(
-                  _fechaFin != null
-                      ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _createPeriodo,
+      saveLabel: 'Crear',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre del Período',
+            hintText: 'Ej: Año 2025, Semestre 2025-I',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'El nombre es requerido';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+
+        SizedBox(height: spacing.md),
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaInicio = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
+            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+          ),
         ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createPeriodo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Crear'),
+
+        SizedBox(height: spacing.md),
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaInicio ?? DateTime.now(),
+              firstDate: _fechaInicio ?? DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaFin = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Fin'),
+            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _createPeriodo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _createPeriodo() async {
+    if (!_formKey.currentState!.validate()) return false;
     if (_fechaInicio == null || _fechaFin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -7869,10 +7373,8 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           backgroundColor: Colors.orange,
         ),
       );
-      return;
-    }
-
-    setState(() => _isLoading = true);
+      return false;
+    }
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -7889,10 +7391,10 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Período académico creado correctamente')),
         );
+        return true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -7910,11 +7412,9 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+      return false;
+    } finally {}
+    return false;
   }
 }
 class EditPeriodoDialog extends StatefulWidget {
@@ -7930,9 +7430,7 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreController;
   DateTime? _fechaInicio;
-  DateTime? _fechaFin;
-
-  bool _isLoading = false;
+  DateTime? _fechaFin;
 
   @override
   void initState() {
@@ -7953,102 +7451,64 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Editar Período Académico', style: textStyles.headlineMedium),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del Período',
-                hintText: 'Ej: Año 2025, Semestre 2025-I',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaInicio ?? DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaInicio = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Inicio',
-                ),
-                child: Text(
-                  _fechaInicio != null
-                      ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-            SizedBox(height: spacing.md),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _fechaFin ?? DateTime.now(),
-                  firstDate: _fechaInicio ?? DateTime(2020),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _fechaFin = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Fin',
-                ),
-                child: Text(
-                  _fechaFin != null
-                      ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
-                      : 'Seleccionar fecha',
-                ),
-              ),
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _updatePeriodo,
+      saveLabel: 'Actualizar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre del Período',
+            hintText: 'Ej: Año 2025, Semestre 2025-I',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'El nombre es requerido';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+
+        SizedBox(height: spacing.md),
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaInicio ?? DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaInicio = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
+            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+          ),
         ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _updatePeriodo,
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Actualizar'),
+
+        SizedBox(height: spacing.md),
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _fechaFin ?? DateTime.now(),
+              firstDate: _fechaInicio ?? DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (picked != null) setState(() => _fechaFin = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(labelText: 'Fecha de Fin'),
+            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _updatePeriodo() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<bool> _updatePeriodo() async {
+    if (!_formKey.currentState!.validate()) return false;
     if (_fechaInicio == null || _fechaFin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -8056,10 +7516,8 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           backgroundColor: Colors.orange,
         ),
       );
-      return;
-    }
-
-    setState(() => _isLoading = true);
+          return false;
+    }
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -8077,11 +7535,11 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Período académico actualizado correctamente')),
         );
-      } else if (mounted) {
+        return true;
+          } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(periodoProvider.errorMessage ?? 'Error al actualizar período académico'),
@@ -8098,11 +7556,8 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    } finally {}
+    return false;
   }
 }
 /* Fin lib\screens\academic\periodos_academicos_screen.dart */
@@ -8113,6 +7568,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/institution_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/components/index.dart';
 
@@ -8177,6 +7633,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 _buildCompactStatsBar(context, stats, userProvider, constraints),
 
                 SizedBox(height: spacing.xl),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 800;
+                    return isNarrow
+                        ? Column(
+                            children: [
+                              _buildKpiRow(context, userProvider),
+                              SizedBox(height: spacing.md),
+                              _buildRecentActivity(context, userProvider),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: _buildKpiRow(context, userProvider)),
+                              SizedBox(width: spacing.md),
+                              SizedBox(width: 420, child: _buildRecentActivity(context, userProvider)),
+                            ],
+                          );
+                  },
+                ),
                 Text('Acciones Principales', style: textStyles.headlineSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                 SizedBox(height: spacing.md),
                 Container(
@@ -8363,6 +7840,107 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildKpiRow(BuildContext context, UserProvider userProvider) {
+    final institutionProvider = Provider.of<InstitutionProvider>(context);
+    final colors = context.colors;
+    final spacing = context.spacing;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Métricas Rápidas', style: context.textStyles.headlineSmall),
+          SizedBox(height: spacing.md),
+          LayoutBuilder(builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
+            final itemWidth = (width - ((columns - 1) * spacing.md)) / columns;
+
+            return Wrap(
+              spacing: spacing.md,
+              runSpacing: spacing.md,
+              alignment: WrapAlignment.start,
+              children: [
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: institutionProvider.totalInstitutions.toString(),
+                    label: 'Instituciones',
+                    icon: Icons.apartment,
+                    iconColor: colors.primary,
+                    backgroundColor: colors.primary.withValues(alpha: 0.05),
+                  ),
+                ),
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: (userProvider.paginationInfo?.total ?? userProvider.loadedUsersCount).toString(),
+                    label: 'Usuarios',
+                    icon: Icons.people,
+                    iconColor: colors.info,
+                    backgroundColor: colors.info.withValues(alpha: 0.05),
+                  ),
+                ),
+                SizedBox(
+                  width: itemWidth,
+                  child: ClarityKPICard(
+                    value: userProvider.professorsCount.toString(),
+                    label: 'Profesores',
+                    icon: Icons.school,
+                    iconColor: colors.warning,
+                    backgroundColor: colors.warning.withValues(alpha: 0.05),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentActivity(BuildContext context, UserProvider userProvider) {
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
+
+    final recent = userProvider.users.take(6).toList();
+
+    return Container(
+      padding: EdgeInsets.all(spacing.lg),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(spacing.borderRadius),
+        border: Border.all(color: colors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Actividad reciente', style: textStyles.headlineSmall),
+          SizedBox(height: spacing.md),
+          if (recent.isEmpty)
+            Center(
+              child: Text('No hay actividad reciente', style: textStyles.bodyMedium.copyWith(color: colors.textSecondary)),
+            )
+          else
+            Column(
+              children: recent.map((u) {
+                return ListTile(
+                  onTap: () => context.go('/users?edit=true&userId=${u.id}'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(backgroundColor: colors.primary.withValues(alpha: 0.12), child: Text(u.inicial, style: textStyles.bodyMedium.withColor(colors.primary))),
+                  title: Text(u.nombreCompleto, style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                  subtitle: Text(u.email, style: textStyles.bodySmall.copyWith(color: colors.textSecondary)),
+                  trailing: Chip(label: Text(u.rol, style: textStyles.labelSmall)),
+                );
+              }).toList(),
+            ),
+        ],
       ),
     );
   }
@@ -9261,18 +8839,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 /* Fin lib\screens\attendance_screen.dart */
 
 /* Inicio lib\screens\institutions\create_institution_admin_screen.dart */
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import '../../models/institution.dart';
-import '../../models/user.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../theme/theme_extensions.dart';
-import '../../widgets/form_widgets.dart';
-import '../../widgets/components/clarity_components.dart';
+import 'package:flutter/material.dart';
+import '../../models/institution.dart';
+import '../users/user_form_screen.dart';
 
-class CreateInstitutionAdminScreen extends StatefulWidget {
+class CreateInstitutionAdminScreen extends StatelessWidget {
   final Institution institution;
 
   const CreateInstitutionAdminScreen({
@@ -9281,313 +8852,10 @@ class CreateInstitutionAdminScreen extends StatefulWidget {
   });
 
   @override
-  State<CreateInstitutionAdminScreen> createState() => _CreateInstitutionAdminScreenState();
-}
-
-class _CreateInstitutionAdminScreenState extends State<CreateInstitutionAdminScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nombresController = TextEditingController();
-  final _apellidosController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _telefonoController = TextEditingController();
-
-  bool _isLoading = false;
-  bool _activo = true;
-
-  @override
-  void dispose() {
-    _nombresController.dispose();
-    _apellidosController.dispose();
-    _emailController.dispose();
-    _telefonoController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveAdmin() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-      final createRequest = CreateUserRequest(
-        email: _emailController.text.trim(),
-        password: 'TempPass123!', // Contraseña temporal que debe ser cambiada por el usuario
-        nombres: _nombresController.text.trim(),
-        apellidos: _apellidosController.text.trim(),
-        telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-        rol: 'admin_institucion',
-        institucionId: widget.institution.id,
-        rolEnInstitucion: 'admin', // Rol específico dentro de la institución
-      );
-
-      final success = await userProvider.createUser(
-        authProvider.accessToken!,
-        createRequest,
-      );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Administrador de institución creado exitosamente',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-        context.go('/institutions');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error al crear administrador: ${e.toString()}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onError,
-              ),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final spacing = context.spacing;
-    final textStyles = context.textStyles;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Crear Administrador - ${widget.institution.nombre}'),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.getTextColorForBackground(colors.primary),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(spacing.lg),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: spacing.lg),
-
-              Text(
-                'Información Personal',
-                style: textStyles.headlineMedium.bold,
-              ),
-              SizedBox(height: spacing.lg),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth > 600;
-                  return isWide
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: CustomTextFormField(
-                              controller: _nombresController,
-                              labelText: 'Nombres',
-                              hintText: 'Ingrese los nombres',
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Los nombres son requeridos';
-                                }
-                                if (value.trim().length < 2) {
-                                  return 'Los nombres deben tener al menos 2 caracteres';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          SizedBox(width: spacing.md),
-                          Expanded(
-                            child: CustomTextFormField(
-                              controller: _apellidosController,
-                              labelText: 'Apellidos',
-                              hintText: 'Ingrese los apellidos',
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Los apellidos son requeridos';
-                                }
-                                if (value.trim().length < 2) {
-                                  return 'Los apellidos deben tener al menos 2 caracteres';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          CustomTextFormField(
-                            controller: _nombresController,
-                            labelText: 'Nombres',
-                            hintText: 'Ingrese los nombres',
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Los nombres son requeridos';
-                              }
-                              if (value.trim().length < 2) {
-                                return 'Los nombres deben tener al menos 2 caracteres';
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: spacing.md),
-                          CustomTextFormField(
-                            controller: _apellidosController,
-                            labelText: 'Apellidos',
-                            hintText: 'Ingrese los apellidos',
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Los apellidos son requeridos';
-                              }
-                              if (value.trim().length < 2) {
-                                return 'Los apellidos deben tener al menos 2 caracteres';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      );
-                },
-              ),
-              SizedBox(height: spacing.md),
-              CustomTextFormField(
-                controller: _emailController,
-                labelText: 'Email',
-                hintText: 'admin@ejemplo.com',
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El email es requerido';
-                  }
-                  final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                  if (!emailRegex.hasMatch(value.trim())) {
-                    return 'Ingrese un email válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.md),
-              CustomTextFormField(
-                controller: _telefonoController,
-                labelText: 'Teléfono',
-                hintText: '+57 300 123 4567',
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
-                    if (!phoneRegex.hasMatch(value.trim())) {
-                      return 'Ingrese un teléfono válido';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.lg),
-              ClarityCard(
-                title: Text(
-                  'Institución Asignada',
-                  style: textStyles.titleMedium.bold,
-                ),
-                leading: Icon(
-                  Icons.business,
-                  color: colors.primary,
-                ),
-                subtitle: Text(
-                  widget.institution.nombre,
-                  style: textStyles.bodyLarge,
-                ),
-              ),
-              SizedBox(height: spacing.lg),
-              ClarityCard(
-                title: Text(
-                  'Estado del Usuario',
-                  style: textStyles.bodyLarge.semiBold,
-                ),
-                trailing: Switch(
-                  value: _activo,
-                  onChanged: (value) {
-                    setState(() => _activo = value);
-                  },
-                  activeColor: colors.primary,
-                ),
-                leading: Icon(
-                  _activo ? Icons.check_circle : Icons.cancel,
-                  color: _activo ? colors.success : colors.error,
-                ),
-                subtitle: Text(
-                  _activo ? 'Usuario activo en el sistema' : 'Usuario inactivo',
-                  style: textStyles.bodyMedium.withColor(
-                    _activo ? colors.success : colors.error,
-                  ),
-                ),
-              ),
-              SizedBox(height: spacing.xl),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _isLoading ? null : () => context.pop(),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: spacing.md),
-                        side: BorderSide(color: colors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancelar',
-                        style: textStyles.button.withColor(colors.primary),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: spacing.md),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveAdmin,
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: spacing.md),
-                        backgroundColor: colors.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
-                        ),
-                      ),
-                      child: _isLoading
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          )
-                        : Text('Crear Administrador', style: textStyles.button),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget build(BuildContext context) {
+    return UserFormScreen(
+      userRole: 'admin_institucion',
+      initialInstitutionId: institution.id,
     );
   }
 }
@@ -10400,7 +9668,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
-import '../../widgets/components/clarity_components.dart';
+import '../../widgets/components/index.dart';
 import '../../theme/theme_extensions.dart';
 import '../../models/user.dart';
 import '../../services/user_service.dart';
@@ -10424,6 +9692,59 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAdmins();
     });
+  }
+
+  void _showAssignExistingUserDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
+        await _loadAdmins();
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return ClarityManagementPage(
+      title: 'Administradores de Institución',
+      isLoading: userProvider.isLoading,
+      hasError: userProvider.hasError,
+      errorMessage: userProvider.errorMessage,
+      itemCount: userProvider.users.length,
+      itemBuilder: (context, index) {
+        if (index >= userProvider.users.length) {
+          return userProvider.isLoadingMore
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : const SizedBox.shrink();
+        }
+
+        final user = userProvider.users[index];
+        return _buildAdminCard(user, context);
+      },
+      onRefresh: _loadAdmins,
+      scrollController: _scrollController,
+      hasMoreData: userProvider.hasMoreData,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddAdminSheet,
+        backgroundColor: context.colors.primary,
+        child: Icon(
+          Icons.add,
+          color: context.colors.getTextColorForBackground(context.colors.primary),
+        ),
+      ),
+      emptyStateWidget: ClarityEmptyState(
+        icon: Icons.group_off,
+        title: 'No hay administradores',
+        subtitle: 'Agrega administradores a esta institución',
+      ),
+    );
   }
 
   Future<void> _loadAdmins() async {
@@ -10475,7 +9796,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
                 leading: Icon(Icons.person_add, color: colors.primary),
                 title: const Text('Crear Nuevo Administrador'),
                 onTap: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
                   final institution = institutionProvider.institutions.firstWhere((i) => i.id == widget.institutionId);
                   Navigator.push(
@@ -10496,109 +9817,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
           ),
         );
       },
-    );
-  }
-
-  void _showAssignExistingUserDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
-        await _loadAdmins();
-      }),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: AppBar(
-        backgroundColor: context.colors.surface,
-        elevation: 0,
-        title: Text(
-          'Administradores de Institución',
-          style: context.textStyles.headlineMedium,
-        ),
-        centerTitle: false,
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadAdmins,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            if (userProvider.isLoading && userProvider.users.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (userProvider.hasError)
-              SliverFillRemaining(
-                child: ClarityEmptyState(
-                  icon: Icons.error_outline,
-                  title: 'Error al cargar administradores',
-                  subtitle: userProvider.errorMessage ?? 'Error desconocido',
-                  action: ElevatedButton.icon(
-                    onPressed: _loadAdmins,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Reintentar'),
-                  ),
-                ),
-              )
-            else if (userProvider.users.isEmpty)
-              SliverFillRemaining(
-                child: ClarityEmptyState(
-                  icon: Icons.group_off,
-                  title: 'No hay administradores',
-                  subtitle: 'Agrega administradores a esta institución',
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.all(context.spacing.screenPadding),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= userProvider.users.length) {
-                        if (userProvider.hasMoreData && !userProvider.isLoadingMore) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                            if (authProvider.accessToken != null && userProvider.hasMoreData && !userProvider.isLoadingMore) {
-                              userProvider.loadUsersByInstitution(authProvider.accessToken!, widget.institutionId);
-                            }
-                          });
-                        }
-                        return userProvider.isLoadingMore
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : const SizedBox.shrink();
-                      }
-
-                      final user = userProvider.users[index];
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: context.spacing.md),
-                        child: _buildAdminCard(user, context),
-                      );
-                    },
-                    childCount: userProvider.users.length + (userProvider.hasMoreData ? 1 : 0),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddAdminSheet,
-        backgroundColor: context.colors.primary,
-        child: Icon(
-          Icons.add,
-          color: context.colors.getTextColorForBackground(context.colors.primary),
-        ),
-      ),
     );
   }
 
@@ -10642,8 +9860,9 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               ),
             ],
           ),
-          if (user.telefono != null) ...[
+          if (user.telefono != null)
             SizedBox(height: spacing.xs),
+          if (user.telefono != null)
             Row(
               children: [
                 Icon(Icons.phone, size: 16, color: colors.textSecondary),
@@ -10658,7 +9877,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               ],
             ),
           ],
-        ],
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -10707,7 +9925,6 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -10716,10 +9933,8 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSaving = true);
+  Future<bool> _save() async {
+    if (!_formKey.currentState!.validate()) return false;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -10734,63 +9949,49 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña de ${widget.user.nombreCompleto} cambiada correctamente')));
         widget.onSaved?.call();
-      } else {
-        if (mounted) {
-          setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al cambiar la contraseña')));
-        }
+        return true;
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     }
+
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al cambiar la contraseña')));
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
 
-    return AlertDialog(
+    return ClarityFormDialog(
       title: Text('Cambiar contraseña - ${widget.user.nombreCompleto}'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Nueva contraseña'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'La contraseña es requerida';
-                if (value.trim().length < 8) return 'La contraseña debe tener al menos 8 caracteres';
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'La confirmación es requerida';
-                if (value.trim() != _newPasswordController.text.trim()) return 'Las contraseñas no coinciden';
-                return null;
-              },
-            ),
-          ],
+      formKey: _formKey,
+      onSave: _save,
+      saveLabel: 'Guardar',
+      cancelLabel: 'Cancelar',
+      children: [
+        TextFormField(
+          controller: _newPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Nueva contraseña'),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return 'La contraseña es requerida';
+            if (value.trim().length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+            return null;
+          },
         ),
-      ),
-      actions: [
-        TextButton(onPressed: _isSaving ? null : () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2,)) : const Text('Guardar'),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return 'La confirmación es requerida';
+            if (value.trim() != _newPasswordController.text.trim()) return 'Las contraseñas no coinciden';
+            return null;
+          },
         ),
       ],
     );
@@ -17057,10 +16258,12 @@ import 'form_steps/index.dart';
 
 class UserFormScreen extends StatefulWidget {
   final String userRole
+  final String? initialInstitutionId
 
   const UserFormScreen({
     super.key,
     required this.userRole,
+    this.initialInstitutionId,
   });
 
   @override
@@ -17201,6 +16404,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
           page: 1,
           limit: 100, // Cargar todas para el dropdown
         );
+      }
+      if (widget.initialInstitutionId != null && _selectedInstitutionId == null) {
+        final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
+        if (exists) _selectedInstitutionId = widget.initialInstitutionId;
       }
     }
   }
@@ -21225,6 +20432,7 @@ import '../screens/academic/gestion_academica_screen.dart';
 import '../screens/academic/grupos_screen.dart';
 import '../screens/academic/materias_screen.dart';
 import '../screens/academic/horarios_screen.dart';
+import '../screens/academic/periodos_academicos_screen.dart';
 import '../screens/academic/grupo_detail_screen.dart';
 import '../models/institution.dart';
 import '../screens/app_shell.dart';
@@ -21346,6 +20554,13 @@ class AppRouter {
                 name: 'academic-materias',
                 pageBuilder: (context, state) => NoTransitionPage(
                   child: const MateriasScreen(),
+                ),
+              ),
+              GoRoute(
+                path: '/academic/periodos',
+                name: 'academic-periodos',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  child: const PeriodosAcademicosScreen(),
                 ),
               ),
               GoRoute(
@@ -22580,7 +21795,7 @@ class ClarityKPICard extends StatelessWidget {
                     ),
                     SizedBox(width: spacing.md),
                   ],
-                  Expanded(
+                  Flexible(
                     child: Text(
                       value,
                       style: textStyles.kpiNumber,
@@ -23174,6 +22389,89 @@ class ClarityAccessibilityIndicator extends StatelessWidget {
 }
 /* Fin lib\widgets\components\clarity_components.dart */
 
+/* Inicio lib\widgets\components\clarity_form_dialog.dart */
+import 'package:flutter/material.dart';
+class ClarityFormDialog extends StatefulWidget {
+  final Widget title;
+  final GlobalKey<FormState>? formKey;
+  final List<Widget> children;
+  final Future<bool> Function()? onSave;
+  final String saveLabel;
+  final String cancelLabel;
+
+  const ClarityFormDialog({
+    super.key,
+    required this.title,
+    this.formKey,
+  this.onSave,
+  this.saveLabel = 'Guardar',
+  this.cancelLabel = 'Cancelar',
+  required this.children,
+  });
+
+  @override
+  State<ClarityFormDialog> createState() => _ClarityFormDialogState();
+}
+
+class _ClarityFormDialogState extends State<ClarityFormDialog> {
+  late final GlobalKey<FormState> _formKey;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _formKey = widget.formKey ?? GlobalKey<FormState>();
+  }
+
+  Future<void> _handleSave() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (widget.onSave == null) return;
+
+    setState(() => _isSaving = true);
+    try {
+      final success = await widget.onSave!();
+      if (success && mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return AlertDialog(
+      title: widget.title,
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: widget.children,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+          child: Text(widget.cancelLabel),
+        ),
+        ElevatedButton(
+          onPressed: _isSaving ? null : _handleSave,
+          child: _isSaving
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : Text(widget.saveLabel),
+        ),
+      ],
+    );
+  }
+}
+
+/* Fin lib\widgets\components\clarity_form_dialog.dart */
+
 /* Inicio lib\widgets\components\clarity_management_page.dart */
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
@@ -23621,6 +22919,7 @@ mixin CommandPaletteMixin {
 
 export 'clarity_components.dart';
 export 'clarity_management_page.dart';
+export 'clarity_form_dialog.dart';
 /* Fin lib\widgets\components\index.dart */
 
 /* Inicio lib\widgets\dashboard_widgets.dart */
