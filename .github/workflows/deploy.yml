@@ -12,6 +12,18 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Non-secret configuration (set defaults here). Modify these if needed.
+      DB_HOST: 'db'
+      DB_PORT: '5433'
+      DB_USER: 'arroz'
+      DB_NAME: 'asistapp'
+      API_BASE_URL: 'http://31.220.104.130:3002'
+      PORT: '3002'
+      HOST: '0.0.0.0'
+      LOG_LEVEL: 'info'
+      JWT_EXPIRES_IN: '24h'
+      FIREBASE_PROJECT_ID: ''
 
     steps:
     - name: Checkout code
@@ -33,19 +45,20 @@ jobs:
           fi
 
           # Create backend/.env from secrets passed by GitHub Actions (use printf to avoid heredoc issues)
-          printf '%s=%s\n' "DB_HOST" "${{ secrets.DB_HOST }}" > /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_PORT" "${{ secrets.DB_PORT }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_USER" "${{ secrets.DB_USER }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_HOST" "${{ env.DB_HOST }}" > /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_PORT" "${{ env.DB_PORT }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_USER" "${{ env.DB_USER }}" >> /opt/asistapp/backend/.env
           printf '%s=%s\n' "DB_PASS" "${{ secrets.DB_PASS }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_NAME" "${{ secrets.DB_NAME }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DATABASE_URL" "postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}?schema=public" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_NAME" "${{ env.DB_NAME }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DATABASE_URL" "postgresql://${{ env.DB_USER }}:${{ secrets.DB_PASS }}@${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }}?schema=public" >> /opt/asistapp/backend/.env
           printf '%s=%s\n' "JWT_SECRET" "${{ secrets.JWT_SECRET }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "JWT_EXPIRES_IN" "${{ secrets.JWT_EXPIRES_IN }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "PORT" "${{ secrets.PORT }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "HOST" "${{ secrets.HOST }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "JWT_EXPIRES_IN" "${{ env.JWT_EXPIRES_IN }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "PORT" "${{ env.PORT }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "HOST" "${{ env.HOST }}" >> /opt/asistapp/backend/.env
           printf '%s=%s\n' "NODE_ENV" "production" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "LOG_LEVEL" "${{ secrets.LOG_LEVEL }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "FIREBASE_PROJECT_ID" "${{ secrets.FIREBASE_PROJECT_ID }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "LOG_LEVEL" "${{ env.LOG_LEVEL }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "FIREBASE_PROJECT_ID" "${{ env.FIREBASE_PROJECT_ID }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "API_BASE_URL" "${{ env.API_BASE_URL }}" >> /opt/asistapp/backend/.env
 
           # ensure permissions
           chown root:root /opt/asistapp/backend/.env

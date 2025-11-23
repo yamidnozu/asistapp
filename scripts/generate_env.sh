@@ -43,6 +43,7 @@ LOG_LEVEL="${LOG_LEVEL:-info}"
 
 # Firebase (optional)
 FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID:-}"
+API_BASE_URL="${API_BASE_URL:-http://localhost:${PORT:-3000}}"
 EOF
 
 echo "Generated $TARGET"
