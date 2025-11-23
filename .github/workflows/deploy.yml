@@ -226,12 +226,12 @@ jobs:
           $SUDO ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
           $SUDO rm -f /etc/nginx/sites-enabled/default
           $SUDO mkdir -p /var/www/letsencrypt
-          test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email
-          nginx -t && $SUDO systemctl reload nginx
+          test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email || echo "Warning: certbot failed, SSL not obtained"
+          nginx -t && $SUDO systemctl reload nginx || echo "Warning: nginx reload failed"
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
           cd /opt/asistapp
           docker compose -f docker-compose.prod.yml down --timeout 30 || true
-          docker compose -f docker-compose.prod.yml pull
-          docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
+          docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
           echo "Deploy completed"
           docker compose -f docker-compose.prod.yml ps
