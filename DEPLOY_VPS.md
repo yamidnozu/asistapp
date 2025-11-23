@@ -37,6 +37,7 @@ docker-compose logs -f app
 5. `GHCR_PAT` - Personal Access Token (PAT) con permisos `packages:write` y `packages:read`
 6. Variables DB/JWT para automatización del `.env` (si quieres que el workflow cree el env en la VPS):
 	- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `JWT_SECRET`
+		- `API_BASE_URL` (por ejemplo: http://31.220.104.130:3002 o https://example.com)
 	- Opcionales: `JWT_EXPIRES_IN`, `PORT`, `HOST`, `LOG_LEVEL`, `FIREBASE_PROJECT_ID`
 
 ## Notas de seguridad
