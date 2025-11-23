@@ -10,15 +10,43 @@ git clone https://github.com/TU_USUARIO/TU_REPO.git /path/to/project
 # 3. Ir al directorio
 cd /path/to/project
 
-# 4. Login a GitHub Container Registry (opcional, si necesitas pull manual)
-# echo $GITHUB_TOKEN | docker login ghcr.io -u TU_USUARIO --password-stdin
+# 4. Login a GitHub Container Registry (recomendado si la imagen es privada)
+#  - Genera un 'Personal Access Token' (PAT) en GitHub con scope: 'write:packages' y 'read:packages'.
+#  - En la VPS: echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
 
 # 5. Copiar .env (crea uno con las variables de producción)
 cp backend/.env.example backend/.env
 # Edita backend/.env con tus valores de producción
 
-# 6. Ejecutar docker-compose (la imagen se descargará automáticamente desde GitHub)
-docker-compose up -d
+# 6. Ejecutar docker-compose de producción (usando la imagen GHCR):
+#     docker-compose -f docker-compose.prod.yml up -d
+
+# Si prefieres realizar el pull manualmente, ejecuta:
+#  echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
+#  docker pull ghcr.io/<GHCR_OWNER>/<GHCR_REPO>/asistapp_backend:latest
+#  docker-compose -f docker-compose.prod.yml up -d
 
 # Para logs
 docker-compose logs -f app
+
+## Secrets / Variables que debes configurar en GitHub
+1. `VPS_HOST` - IP o dominio de tu VPS
+2. `VPS_USER` - Usuario SSH que usará Actions (ej. 'ubuntu' o 'root')
+3. `SSH_PRIVATE_KEY` - Clave privada SSH que tenga su pareja pública en `~/.ssh/authorized_keys` del VPS
+4. `GHCR_USER` - Usuario de GitHub (owner) que publicará la imagen
+5. `GHCR_PAT` - Personal Access Token (PAT) con permisos `packages:write` y `packages:read`
+
+## Notas de seguridad
+- No subas tu `.env` al repo. Manténlo en el VPS o usa un secreto de configuración en el servicio de despliegue.
+- Asegúrate de que la clave privada SSH es segura y está en GitHub Secrets.
+
+## En la VPS una vez configurado
+1. Coloca tu `backend/.env` con las variables `DB_*`, `JWT_SECRET`, etc. en el directorio del repositorio clonado.
+2. Si la imagen GHCR es privada, realiza docker login:
+	- echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
+3. Levanta el stack producción:
+	- docker-compose -f docker-compose.prod.yml up -d
+
+## Firewall / Reverse Proxy
+- Si quieres exponer el servidor por HTTP/HTTPS, usa un reverse proxy (nginx) y certificados TLS.
+- Abre los puertos necesarios en tu VPS (80, 443 o el puerto 3002) según tu arquitectura.
