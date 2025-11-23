@@ -27,6 +27,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - show repo structure
+        run: |
+          echo "Working dir: $(pwd)"
+          echo "List root files:" && ls -la
+          echo "List android folder:" && ls -la android || true
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -65,7 +71,9 @@ jobs:
           printf "storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=keystore.jks\n" "${{ secrets.KEYSTORE_PASSWORD }}" "${{ secrets.KEY_PASSWORD }}" "${{ secrets.KEY_ALIAS }}" > android/key.properties
 
       - name: Make Gradle wrapper executable
-        run: chmod +x android/gradlew
+        run: |
+          echo "Listing before chmod:" && ls -la android || true
+          chmod +x android/gradlew
 
       - name: Build App Bundle (AAB)
         env:
