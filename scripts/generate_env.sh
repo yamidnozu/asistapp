@@ -33,6 +33,13 @@ LOG_LEVEL="${LOG_LEVEL:-info}"
 FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID:-}"
 API_BASE_URL="${API_BASE_URL:-http://localhost:${PORT}}"
 
+# If DB_HOST is a container service name (like 'db'), use the internal Postgres port 5432 for DATABASE_URL
+if [ "${DB_HOST}" = "db" ] || [ -z "${DB_PORT}" ]; then
+  DB_INTERNAL_PORT=5432
+else
+  DB_INTERNAL_PORT=${DB_PORT}
+fi
+
 write_env() {
   local path="$1"
   cat > "$path" <<EOF
@@ -43,7 +50,7 @@ DB_USER="${DB_USER}"
 DB_PASS="${DB_PASS}"
 DB_NAME="${DB_NAME}"
 
-DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
+  DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_INTERNAL_PORT}/${DB_NAME}?schema=public"
 
 JWT_SECRET="${JWT_SECRET}"
 JWT_EXPIRES_IN="${JWT_EXPIRES_IN}"
