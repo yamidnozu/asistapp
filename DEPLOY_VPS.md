@@ -66,3 +66,20 @@ docker-compose logs -f app
 ## Firewall / Reverse Proxy
 - Si quieres exponer el servidor por HTTP/HTTPS, usa un reverse proxy (nginx) y certificados TLS.
 - Abre los puertos necesarios en tu VPS (80, 443 o el puerto 3002) según tu arquitectura.
+ - Para instalar nginx + certbot sin duplicar configuraciones, ejecuta el script del repo (idempotente):
+	 ```bash
+	 sudo /opt/asistapp/scripts/install_nginx_certbot.sh
+	 ```
+ - Si ya ejecutaste comandos manuales que insertaron la línea de include varias veces y ves errores en `nginx -t` como `duplicate location "/.well-known/acme-challenge/"`, ejecuta el script de limpieza:
+	 ```bash
+	 sudo /opt/asistapp/scripts/nginx_cleanup_letsencrypt.sh
+	 sudo nginx -t && sudo systemctl reload nginx
+	 ```
+ - Verifica que el webroot esté disponible desde la VPS y desde fuera (el siguiente comando hace ambas comprobaciones):
+	 ```bash
+	 # En VPS (Host header importante):
+	 curl -I -H "Host: mi-dominio.com" http://127.0.0.1/.well-known/acme-challenge/test.txt
+	 # Desde tu máquina (público):
+	 curl -I http://mi-dominio.com/.well-known/acme-challenge/test.txt
+	 ```
+ - Si el dominio resuelve también a un IPv6, asegúrate de permitir el tráfico en IPv6 para 80/443 en `ufw` y que `nginx` escuche en IPv6: `[[::]:80]` muestra que sí está escuchando.

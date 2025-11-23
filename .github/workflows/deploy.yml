@@ -44,26 +44,28 @@ jobs:
             exit 0
           fi
           PORT='${{ env.PORT }}'
-          if ! command -v nginx >/dev/null 2>&1; then
-            apt-get update
-            apt-get install -y nginx certbot python3-certbot-nginx
+          # Use the idempotent installer script from the repo if present
+          if [ -f /opt/asistapp/scripts/install_nginx_certbot.sh ]; then
+            sudo bash /opt/asistapp/scripts/install_nginx_certbot.sh
+          else
+            # fallback: install with apt (may be missing snippet and logic)
+            sudo apt-get update
+            sudo apt-get install -y nginx certbot python3-certbot-nginx
           fi
-          cat > /etc/nginx/sites-available/asistapp <<NGINX
-          server {
-            listen 80;
-            server_name ${DOMAIN} www.${DOMAIN};
-            location / {
-              proxy_pass http://127.0.0.1:${PORT};
-              proxy_set_header Host \$host;
-              proxy_set_header X-Real-IP \$remote_addr;
-              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto \$scheme;
-            }
-          }
-          NGINX
-          ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/asistapp
-          nginx -t && systemctl reload nginx
-          certbot --nginx -n --agree-tos -m ${EMAIL} -d ${DOMAIN} -d www.${DOMAIN} || true
+
+          # Write the server block only if it doesn't already exist (avoid overwrites)
+          SITE_CONF="/etc/nginx/sites-available/asistapp"
+          if [ ! -f "$SITE_CONF" ]; then
+            # Write the server block safely using printf to avoid YAML heredoc parsing pitfalls
+            sudo bash -lc "printf '%s\n' 'server {' '  listen 80 default_server;' '  listen [::]:80 default_server;' '  server_name ${DOMAIN} www.${DOMAIN};' '  location /.well-known/acme-challenge/ {' '    alias /var/www/letsencrypt/.well-known/acme-challenge/;' '    try_files \$uri =404;' '  }' '  location / {' '    proxy_pass http://127.0.0.1:${PORT};' '    proxy_set_header Host \$host;' '    proxy_set_header X-Real-IP \$remote_addr;' '    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' '    proxy_set_header X-Forwarded-Proto \$scheme;' '  }' '}' > $SITE_CONF"
+            sudo ln -sf "$SITE_CONF" /etc/nginx/sites-enabled/asistapp
+          else
+            echo "$SITE_CONF already exists. Skipping overwriting; ensure it contains the ACME include or run scripts/nginx_cleanup_letsencrypt.sh"
+          fi
+
+          sudo nginx -t && sudo systemctl reload nginx
+          # Prefer the webroot method to avoid plugin auto-mutation and to be reproducible
+          sudo certbot certonly --webroot -w /var/www/letsencrypt -n --agree-tos -m ${EMAIL} -d ${DOMAIN} -d www.${DOMAIN} || true
 
     - name: Fail if required secrets are missing
       run: |
