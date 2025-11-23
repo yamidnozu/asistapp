@@ -3,91 +3,191 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main  # Cambia a 'master' si usas master
+      - main
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/asistapp_backend
+
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    env:
-      # Non-secret configuration (set defaults here). Modify these if needed.
-      DB_HOST: 'db'
-      DB_PORT: '5433'
-      DB_USER: 'arroz'
-      DB_NAME: 'asistapp'
-      API_BASE_URL: 'http://31.220.104.130:3002'
-      PORT: '3002'
-      HOST: '0.0.0.0'
-      LOG_LEVEL: 'info'
-      JWT_EXPIRES_IN: '24h'
-      FIREBASE_PROJECT_ID: ''
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Complete VPS Setup (nginx, SSL, backend)
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN,EMAIL,PORT,DB_HOST,DB_PORT,DB_USER,DB_PASS,DB_NAME,JWT_SECRET,JWT_EXPIRES_IN,LOG_LEVEL,API_BASE_URL
         script: |
           set -euo pipefail
           
-          echo "=== Iniciando despliegue en VPS ==="
-          echo "Fecha: $(date)"
-          echo "Usuario: $(whoami)"
-          echo "Directorio actual: $(pwd)"
+          echo "=== Desplegando imagen pre-construida ==="
           
-          # Clone/update repository
-          echo "→ Clonando/actualizando repositorio..."
-          if [ ! -d "/opt/asistapp" ]; then
-            git clone https://github.com/${{ github.repository }} /opt/asistapp
-          else
-            cd /opt/asistapp
-            # Reset any local changes to ensure clean state
-            git reset --hard HEAD
-            git pull origin main
-          fi
+          # Crear directorio para docker-compose si no existe
+          mkdir -p /opt/asistapp
           
-          # Export all variables for the setup script
-          echo "→ Configurando variables de entorno..."
-          export DOMAIN='${{ secrets.DOMAIN }}'
-          export EMAIL='${{ secrets.EMAIL }}'
-          export DB_HOST='${{ env.DB_HOST }}'
-          export DB_PORT='${{ env.DB_PORT }}'
-          export DB_USER='${{ env.DB_USER }}'
-          export DB_PASS='${{ secrets.DB_PASS }}'
-          export DB_NAME='${{ env.DB_NAME }}'
-          export JWT_SECRET='${{ secrets.JWT_SECRET }}'
-          export JWT_EXPIRES_IN='${{ env.JWT_EXPIRES_IN }}'
-          export LOG_LEVEL='${{ env.LOG_LEVEL }}'
-          export REPO_PATH='/opt/asistapp'
-          
-          echo "✓ Variables configuradas"
-          echo "DOMAIN: '$DOMAIN'"
-          echo "EMAIL: '$EMAIL'"
-          echo "DB_PASS: '[REDACTED]'"
-          echo "JWT_SECRET: '[REDACTED]'"
-          
-          # Verify script exists and is executable
-          echo "→ Verificando script de setup..."
-          if [ ! -f "/opt/asistapp/scripts/setup_vps_complete.sh" ]; then
-            echo "ERROR: Script setup_vps_complete.sh no encontrado" >&2
-            exit 1
-          fi
-          
-          chmod +x /opt/asistapp/scripts/setup_vps_complete.sh
-          echo "✓ Script verificado y ejecutable"
-          
-          # Run complete setup script
-          echo "→ Ejecutando script de setup completo..."
-          cd /opt/asistapp
-          bash -x /opt/asistapp/scripts/setup_vps_complete.sh
+          # Crear docker-compose.prod.yml optimizado
+          cat > /opt/asistapp/docker-compose.prod.yml << 'EOF'
+version: '3.8'
 
-    # Note: El script setup_vps_complete.sh ahora maneja todo el proceso de setup y deployment
+services:
+  db:
+    image: postgres:15
+    container_name: asistapp_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${{ secrets.DB_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.DB_PASS }}
+      POSTGRES_DB: ${{ secrets.DB_NAME }}
+    ports:
+      - "${{ secrets.DB_PORT }}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - asistapp-network
+
+  app:
+    image: ${{ needs.build-and-push.outputs.image }}
+    container_name: backend-app-v3
+    restart: always
+    ports:
+      - "127.0.0.1:3002:3000"
+    environment:
+      DATABASE_URL: "postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@db:5432/${{ secrets.DB_NAME }}?schema=public"
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      LOG_LEVEL: info
+      API_BASE_URL: https://${{ secrets.DOMAIN }}
+    depends_on:
+      - db
+    networks:
+      - asistapp-network
+
+volumes:
+  postgres_data:
+
+networks:
+  asistapp-network:
+    driver: bridge
+EOF
+
+          # Setup básico del VPS (nginx, SSL, firewall)
+          echo "=== Setup básico del VPS ==="
+          
+          # Instalar nginx si no está
+          if ! command -v nginx >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y nginx certbot python3-certbot-nginx
+            systemctl enable nginx
+            systemctl start nginx
+          fi
+          
+          # Configurar firewall
+          if command -v ufw >/dev/null 2>&1; then
+            ufw --force allow OpenSSH
+            ufw --force allow 'Nginx Full'
+            ufw --force enable
+          fi
+          
+          # Configurar nginx con SSL
+          cat > /etc/nginx/sites-available/asistapp << EOF
+server {
+  listen 80;
+  listen [::]:80;
+  server_name ${{ secrets.DOMAIN }} www.${{ secrets.DOMAIN }};
+  
+  location /.well-known/acme-challenge/ {
+    root /var/www/letsencrypt;
+  }
+  
+  return 301 https://\$server_name\$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name ${{ secrets.DOMAIN }} www.${{ secrets.DOMAIN }};
+  
+  ssl_certificate /etc/letsencrypt/live/${{ secrets.DOMAIN }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/${{ secrets.DOMAIN }}/privkey.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  
+  location / {
+    proxy_pass http://127.0.0.1:3002;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+  }
+}
+EOF
+
+          ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
+          rm -f /etc/nginx/sites-enabled/default
+          
+          # Obtener certificados SSL si no existen
+          mkdir -p /var/www/letsencrypt/.well-known/acme-challenge
+          chown -R www-data:www-data /var/www/letsencrypt
+          
+          if [ ! -d "/etc/letsencrypt/live/${{ secrets.DOMAIN }}" ]; then
+            certbot certonly --webroot -w /var/www/letsencrypt \
+              -d ${{ secrets.DOMAIN }} -d www.${{ secrets.DOMAIN }} \
+              -m ${{ secrets.EMAIL }} --agree-tos --non-interactive --no-eff-email
+          fi
+          
+          nginx -t && systemctl reload nginx
+          
+          # Desplegar contenedores
+          cd /opt/asistapp
+          docker compose -f docker-compose.prod.yml down --remove-orphans || true
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
+          
+          echo "✅ Despliegue completado"
+          echo "🌐 URL: https://${{ secrets.DOMAIN }}"
