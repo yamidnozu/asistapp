@@ -1,8 +1,28 @@
-# ✅ ICONOS GENERADOS EXITOSAMENTE
+# 🎨 Iconos de la Aplicación - AsistApp
 
-## 🎯 Estado: COMPLETADO
+## 📁 Logo Fuente
 
-Los iconos han sido generados automáticamente para todas las plataformas:
+**logo.jpg** - Logo fuente de alta resolución usado para generar todos los iconos de la aplicación
+
+## 🚀 Generar Iconos
+
+Para regenerar todos los iconos a partir de `logo.jpg`, ejecuta desde la raíz del proyecto:
+
+### Windows:
+```bash
+generate_icons.bat
+```
+
+### Linux/Mac:
+```bash
+bash generate_icons.sh
+```
+
+---
+
+## 🎯 Estado: ICONOS CONFIGURADOS
+
+Los iconos se generarán automáticamente para todas las plataformas:
 
 ### � Android (5 densidades)
 - ✅ `mipmap-mdpi`: 48×48 px - Generado

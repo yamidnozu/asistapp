@@ -1,1 +1,0 @@
-INSTRUCCIONES: Convierte app_icon.svg a PNG usando convert_icon.bat o un conversor online
