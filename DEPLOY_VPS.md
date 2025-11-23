@@ -1,85 +1,251 @@
-# Setup inicial en VPS
-# Ejecutar estos comandos en tu VPS (con Docker instalado)
+# Despliegue Automatizado a VPS
 
-# 1. Instalar Docker si no está (en Ubuntu/Debian):
-# sudo apt update && sudo apt install docker.io docker-compose
+Este proyecto incluye un workflow de GitHub Actions que **automatiza completamente** el despliegue a una VPS nueva desde cero.
 
-# 2. Clonar el repositorio
-git clone https://github.com/TU_USUARIO/TU_REPO.git /path/to/project
+## 🚀 Setup Automático (Recomendado)
 
-# 3. Ir al directorio
-cd /path/to/project
+El workflow hace TODO por ti al hacer push a `main`:
+- ✅ Instala Docker (si no está)
+- ✅ Instala nginx + certbot
+- ✅ Configura firewall (UFW)
+- ✅ Obtiene certificados SSL automáticamente
+- ✅ Configura HTTPS con redirect de HTTP
+- ✅ Genera archivos `.env` desde secrets
+- ✅ Construye y levanta el backend con Docker Compose
 
-# 4. Login a GitHub Container Registry (recomendado si la imagen es privada)
-#  - Genera un 'Personal Access Token' (PAT) en GitHub con scope: 'write:packages' y 'read:packages'.
-#  - En la VPS: echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
+### Requisitos previos
 
-# 5. Copiar .env (crea uno con las variables de producción)
-cp backend/.env.example backend/.env
-# Edita backend/.env con tus valores de producción
+1. **VPS Ubuntu 24.04** con acceso root por SSH
+2. **Dominio o subdominio** apuntando a la IP de tu VPS (registro A en DNS)
+3. **GitHub Secrets** configurados (ver abajo)
+4. **SSH Key** configurada en la VPS
 
-# 6. Ejecutar docker-compose de producción (usando la imagen GHCR):
-#     docker-compose -f docker-compose.prod.yml up -d
+### Paso 1: Generar y agregar SSH Key
 
-# Si prefieres realizar el pull manualmente, ejecuta:
-#  echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
-#  docker pull ghcr.io/<GHCR_OWNER>/<GHCR_REPO>/asistapp_backend:latest
-#  docker-compose -f docker-compose.prod.yml up -d
+En tu máquina local:
 
-# Para logs
-docker-compose logs -f app
+```bash
+# Genera una nueva clave SSH (si no tienes una)
+ssh-keygen -t ed25519 -C "deploy-asistapp" -f ~/.ssh/asistapp_deploy
 
-## Secrets / Variables que debes configurar en GitHub
-1. `VPS_HOST` - IP o dominio de tu VPS
-2. `VPS_USER` - Usuario SSH que usará Actions (ej. 'ubuntu' o 'root')
-3. `SSH_PRIVATE_KEY` - Clave privada SSH que tenga su pareja pública en `~/.ssh/authorized_keys` del VPS
-4. `GHCR_USER` - Usuario de GitHub (owner) que publicará la imagen
-5. `GHCR_PAT` - Personal Access Token (PAT) con permisos `packages:write` y `packages:read`
-6. Variables DB/JWT para automatización del `.env` (si quieres que el workflow cree el env en la VPS):
-	- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `JWT_SECRET`
-		- `API_BASE_URL` (por ejemplo: http://31.220.104.130:3002 o https://example.com)
-	- Opcionales: `JWT_EXPIRES_IN`, `PORT`, `HOST`, `LOG_LEVEL`, `FIREBASE_PROJECT_ID`
+# Copia la clave pública a tu VPS
+ssh-copy-id -i ~/.ssh/asistapp_deploy.pub root@TU_VPS_IP
 
-## Notas de seguridad
-- No subas tu `.env` al repo. Manténlo en el VPS o usa un secreto de configuración en el servicio de despliegue.
-- Asegúrate de que la clave privada SSH es segura y está en GitHub Secrets.
+# Verifica que funciona
+ssh -i ~/.ssh/asistapp_deploy root@TU_VPS_IP
+```
 
-## En la VPS una vez configurado
-1. Coloca tu `backend/.env` con las variables `DB_*`, `JWT_SECRET`, etc. en el directorio del repositorio clonado.
-	 - O, en la VPS, exporta las variables de entorno (DB_HOST, DB_USER, DB_PASS, DB_NAME, JWT_SECRET) y ejecuta `./scripts/generate_env.sh` para crear `backend/.env` automáticamente.
-	 - Ejemplo en la VPS:
-		 ```bash
-		 export DB_HOST=db
-		 export DB_PORT=5432
-		 export DB_USER=myuser
-		 export DB_PASS=mypass
-		 export DB_NAME=asistapp
-		 export JWT_SECRET=$(openssl rand -hex 32)
-		 cd /opt/asistapp
-		 ./scripts/generate_env.sh
-		 ```
-2. Si la imagen GHCR es privada, realiza docker login:
-	- echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
-3. Levanta el stack producción:
-	- docker-compose -f docker-compose.prod.yml up -d
+### Paso 2: Configurar Secrets en GitHub
 
-## Firewall / Reverse Proxy
-- Si quieres exponer el servidor por HTTP/HTTPS, usa un reverse proxy (nginx) y certificados TLS.
-- Abre los puertos necesarios en tu VPS (80, 443 o el puerto 3002) según tu arquitectura.
- - Para instalar nginx + certbot sin duplicar configuraciones, ejecuta el script del repo (idempotente):
-	 ```bash
-	 sudo /opt/asistapp/scripts/install_nginx_certbot.sh
-	 ```
- - Si ya ejecutaste comandos manuales que insertaron la línea de include varias veces y ves errores en `nginx -t` como `duplicate location "/.well-known/acme-challenge/"`, ejecuta el script de limpieza:
-	 ```bash
-	 sudo /opt/asistapp/scripts/nginx_cleanup_letsencrypt.sh
-	 sudo nginx -t && sudo systemctl reload nginx
-	 ```
- - Verifica que el webroot esté disponible desde la VPS y desde fuera (el siguiente comando hace ambas comprobaciones):
-	 ```bash
-	 # En VPS (Host header importante):
-	 curl -I -H "Host: mi-dominio.com" http://127.0.0.1/.well-known/acme-challenge/test.txt
-	 # Desde tu máquina (público):
-	 curl -I http://mi-dominio.com/.well-known/acme-challenge/test.txt
-	 ```
- - Si el dominio resuelve también a un IPv6, asegúrate de permitir el tráfico en IPv6 para 80/443 en `ufw` y que `nginx` escuche en IPv6: `[[::]:80]` muestra que sí está escuchando.
+Ve a tu repo → Settings → Secrets and variables → Actions → New repository secret
+
+**Secrets requeridos:**
+
+| Secret | Descripción | Ejemplo |
+|--------|-------------|---------|
+| `VPS_HOST` | IP o dominio de tu VPS | `31.220.104.130` |
+| `VPS_USER` | Usuario SSH (generalmente `root`) | `root` |
+| `SSH_PRIVATE_KEY` | Contenido completo de `~/.ssh/asistapp_deploy` | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
+| `DB_PASS` | Contraseña de PostgreSQL | `tu_password_seguro_123` |
+| `JWT_SECRET` | Secret para JWT | `openssl rand -hex 32` |
+| `DOMAIN` | Tu dominio completo | `srv974201.hstgr.cloud` |
+| `EMAIL` | Email para Let's Encrypt | `tu@email.com` |
+
+**Secrets opcionales (tienen valores por defecto):**
+
+- `API_BASE_URL` - Se genera automáticamente como `https://${DOMAIN}`
+- Los demás tienen valores por defecto en el workflow
+
+### Paso 3: Hacer Push
+
+```bash
+git add .
+git commit -m "Deploy to production"
+git push origin main
+```
+
+El workflow se ejecuta automáticamente y en ~5 minutos tu app estará en:
+- **https://tu-dominio.com** ✅
+
+### Ver logs del deployment
+
+Ve a tu repo → Actions → último workflow ejecutado
+
+### Verificar en la VPS
+
+```bash
+ssh -i ~/.ssh/asistapp_deploy root@TU_VPS_IP
+
+# Ver contenedores
+docker ps
+
+# Ver logs del backend
+cd /opt/asistapp
+docker compose -f docker-compose.prod.yml logs -f app
+
+# Verificar certificados
+sudo certbot certificates
+
+# Test local
+curl -I http://localhost:3002
+curl -I https://tu-dominio.com
+```
+
+---
+
+## 📋 Setup Manual (Alternativa)
+
+Si prefieres configurar todo manualmente sin el workflow automático:
+
+### 1. Instalar dependencias base
+
+```bash
+# Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Instalar nginx + certbot
+sudo apt install -y nginx certbot python3-certbot-nginx
+
+# Configurar firewall
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+```
+
+### 2. Clonar repositorio
+
+```bash
+sudo mkdir -p /opt
+cd /opt
+sudo git clone https://github.com/yamidnozu/asistapp.git asistapp
+cd asistapp
+```
+
+### 3. Crear archivo .env
+
+```bash
+cat > backend/.env <<EOF
+DB_HOST=db
+DB_PORT=5432
+DB_USER=arroz
+DB_PASS=TU_PASSWORD_AQUI
+DB_NAME=asistapp
+DATABASE_URL=postgresql://arroz:TU_PASSWORD_AQUI@db:5432/asistapp?schema=public
+JWT_SECRET=$(openssl rand -hex 32)
+JWT_EXPIRES_IN=24h
+PORT=3002
+HOST=0.0.0.0
+NODE_ENV=production
+LOG_LEVEL=info
+API_BASE_URL=https://tu-dominio.com
+EOF
+
+cp backend/.env .env
+```
+
+### 4. Ejecutar script de setup
+
+```bash
+# Exportar variables requeridas
+export DOMAIN="tu-dominio.com"
+export EMAIL="tu@email.com"
+export DB_PASS="tu_password"
+export JWT_SECRET=$(openssl rand -hex 32)
+export REPO_PATH="/opt/asistapp"
+
+# Ejecutar setup completo
+sudo bash scripts/setup_vps_complete.sh
+```
+
+Este script hace:
+- Instala todo lo necesario
+- Configura nginx
+- Obtiene certificados SSL
+- Levanta el backend
+
+---
+
+## 🔧 Troubleshooting
+
+### El workflow falla con "secrets missing"
+
+Verifica que todos los secrets requeridos están configurados:
+
+```bash
+# Desde tu máquina local
+gh secret list
+
+# Debe mostrar:
+# VPS_HOST
+# VPS_USER
+# SSH_PRIVATE_KEY
+# DB_PASS
+# JWT_SECRET
+# DOMAIN
+# EMAIL
+```
+
+### Error "Could not resolve host" en IPv6
+
+El dominio de Hostinger (`srv974201.hstgr.cloud`) no resuelve por IPv6 desde la VPS. Esto es normal y el script lo maneja. Si quieres usar tu propio dominio, asegúrate de tener un registro A apuntando a tu VPS.
+
+### Backend devuelve 502
+
+```bash
+# Verifica que el backend está corriendo
+docker ps
+
+# Si no está, levántalo manualmente
+cd /opt/asistapp
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Ver logs
+docker compose -f docker-compose.prod.yml logs -f app
+```
+
+### Renovación de certificados
+
+Los certificados se renuevan automáticamente con un timer de systemd que certbot configura. Para verificar:
+
+```bash
+# Ver timer de renovación
+sudo systemctl list-timers | grep certbot
+
+# Renovar manualmente (test)
+sudo certbot renew --dry-run
+```
+
+---
+
+## 📚 Archivos importantes
+
+- `.github/workflows/deploy.yml` - Workflow de CI/CD
+- `scripts/setup_vps_complete.sh` - Script de setup automático
+- `docker-compose.prod.yml` - Configuración Docker para producción
+- `backend/.env.example` - Template de variables de entorno
+
+---
+
+## 🔐 Notas de Seguridad
+
+1. **Nunca** subas el archivo `.env` al repositorio
+2. Usa secrets de GitHub para información sensible
+3. La clave SSH privada debe estar **solo** en GitHub Secrets
+4. Rota `JWT_SECRET` periódicamente
+5. Usa contraseñas fuertes para `DB_PASS`
+6. Considera usar fail2ban para proteger SSH
+7. Mantén el sistema actualizado: `apt update && apt upgrade`
+
+---
+
+## 📞 Soporte
+
+Si tienes problemas:
+1. Revisa los logs del workflow en GitHub Actions
+2. Revisa los logs en la VPS: `docker compose -f docker-compose.prod.yml logs`
+3. Verifica que el dominio apunta correctamente: `dig +short tu-dominio.com`
+4. Verifica que puertos 80/443 están abiertos: `sudo ufw status`
