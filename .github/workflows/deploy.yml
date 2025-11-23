@@ -49,7 +49,10 @@ jobs:
           if [ ! -d "/opt/asistapp" ]; then
             git clone https://github.com/${{ github.repository }} /opt/asistapp
           else
-            cd /opt/asistapp && git pull origin main
+            cd /opt/asistapp
+            # Reset any local changes to ensure clean state
+            git reset --hard HEAD
+            git pull origin main
           fi
           
           # Export all variables for the setup script
