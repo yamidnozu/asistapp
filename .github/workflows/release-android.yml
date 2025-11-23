@@ -166,10 +166,15 @@ jobs:
       - name: List artifacts
         run: ls -R artifacts
 
+      - name: Create Service Account JSON
+        env:
+          PLAY_STORE_SERVICE_ACCOUNT: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
+        run: echo "$PLAY_STORE_SERVICE_ACCOUNT" > service_account.json
+
       - name: Upload to Google Play Store
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
+          serviceAccountJson: service_account.json
           packageName: com.edevcore.asistapp
           releaseFiles: artifacts/bundle/release/app-release.aab
           track: ${{ github.event.inputs.track }}
