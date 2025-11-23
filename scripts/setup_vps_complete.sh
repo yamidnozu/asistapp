@@ -85,8 +85,8 @@ if ! command -v ufw >/dev/null 2>&1; then
 fi
 
 echo "→ Configurando firewall UFW..."
-run_cmd ufw --force allow OpenSSH
-run_cmd ufw --force allow 'Nginx Full'
+run_cmd ufw allow OpenSSH
+run_cmd ufw allow 'Nginx Full'
 run_cmd ufw --force enable
 echo "✓ Firewall configurado"
 
