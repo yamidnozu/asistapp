@@ -143,6 +143,23 @@ jobs:
           echo "Using API_BASE_URL: $API_BASE_URL"
           flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=ENVIRONMENT=production
 
+      - name: Dump AAB manifest and validate package name
+        run: |
+          set -e
+          echo "Downloading bundletool to inspect the AAB"
+          curl -sSL -o bundletool.jar https://github.com/google/bundletool/releases/download/1.14.0/bundletool-all-1.14.0.jar
+          java -jar bundletool.jar dump manifest --bundle build/app/outputs/bundle/release/app-release.aab --output manifest.txt || true
+          echo "Manifest extract (first 30 lines):"
+          head -n 30 manifest.txt || true
+          package=$(grep -Eo 'packageName: [^[:space:]]+' manifest.txt | head -n1 | awk '{print $2}')
+          echo "AAB packageName: $package"
+          expected=com.edevcore.asistapp
+          if [ "$package" != "$expected" ]; then
+            echo "ERROR: AAB packageName '$package' does not match expected '$expected'."
+            echo "Check android/app/build.gradle applicationId and rebuild, or change the destination Play app package to match the AAB."
+            exit 1
+          fi
+
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
         with:
