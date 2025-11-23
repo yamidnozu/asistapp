@@ -178,7 +178,8 @@ echo "✓ HTTPS configurado"
 
 # 8. Generar .env del backend
 echo "→ Generando .env..."
-DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
+# Para Docker Compose, usar puerto interno del contenedor PostgreSQL (5432), no el puerto del host
+DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:5432/${DB_NAME}?schema=public"
 
 cat > "${REPO_PATH}/backend/.env" <<ENV
 DB_HOST=${DB_HOST}
