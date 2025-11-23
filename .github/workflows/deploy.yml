@@ -57,7 +57,6 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
     - name: Validate secrets
@@ -94,28 +93,25 @@ jobs:
         DB_PORT: ${{ secrets.DB_PORT }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         IMAGE_TAG: ${{ needs.build-and-push.outputs.image }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG
+        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN
         script_stop: true
         command_timeout: 30m
         script: |
           set -e
           echo "Deploy start: $(date)"
           echo "Image: $IMAGE_TAG"
+          SUDO=""
+          if [ "$(id -u)" -ne 0 ]; then
+            if command -v sudo >/dev/null 2>&1; then SUDO=sudo; else echo "Error: need root or sudo"; exit 1; fi
+          fi
           mkdir -p /opt/asistapp
           test -f /opt/asistapp/docker-compose.prod.yml && cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/backup-$(date +%Y%m%d%H%M%S).yml
-          cat > /opt/asistapp/.env << EOF
-          DB_USER=$DB_USER
-          DB_PASS=$DB_PASS
-          DB_NAME=$DB_NAME
-          DB_PORT=$DB_PORT
-          JWT_SECRET=$JWT_SECRET
-          DOMAIN=$DOMAIN
-          IMAGE_TAG=$IMAGE_TAG
-          EOF
+          printf "DB_USER=%s\nDB_PASS=%s\nDB_NAME=%s\nDB_PORT=%s\nJWT_SECRET=%s\nDOMAIN=%s\nIMAGE_TAG=%s\n" "$DB_USER" "$DB_PASS" "$DB_NAME" "$DB_PORT" "$JWT_SECRET" "$DOMAIN" "$IMAGE_TAG" > /opt/asistapp/.env
           cat > /opt/asistapp/docker-compose.prod.yml << 'EOF'
           version: '3.8'
           services:
@@ -171,9 +167,32 @@ jobs:
             asistapp-network:
               driver: bridge
           EOF
-          command -v docker || (apt-get update && apt-get install -y ca-certificates curl && install -m 0755 -d /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && chmod a+r /etc/apt/keyrings/docker.asc && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list && apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && systemctl enable docker && systemctl start docker)
-          command -v nginx || (apt-get update && apt-get install -y nginx certbot python3-certbot-nginx && systemctl enable nginx && systemctl start nginx)
-          command -v ufw && (ufw --force allow OpenSSH && ufw --force allow 'Nginx Full' && ufw --force enable)
+          command -v docker || ($SUDO apt-get update && $SUDO apt-get install -y ca-certificates curl && $SUDO install -m 0755 -d /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && $SUDO chmod a+r /etc/apt/keyrings/docker.asc && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | $SUDO tee /etc/apt/sources.list.d/docker.list && $SUDO apt-get update && $SUDO apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && $SUDO systemctl enable docker && $SUDO systemctl start docker)
+          command -v nginx || ($SUDO apt-get update && $SUDO apt-get install -y nginx certbot python3-certbot-nginx && $SUDO systemctl enable nginx && $SUDO systemctl start nginx)
+          command -v ufw || ($SUDO apt-get update && $SUDO apt-get install -y ufw)
+          if command -v ufw >/dev/null 2>&1; then
+            echo "ufw found — configuring firewall rules"
+            # Always allow SSH
+            if ufw --version >/dev/null 2>&1; then
+              ufw --force allow OpenSSH || echo "Warning: ufw allow OpenSSH failed" >&2
+            fi
+            # Prefer the "Nginx Full" profile if available, otherwise open ports 80/443
+            if ufw app list 2>/dev/null | grep -q "Nginx Full"; then
+              ufw --force allow "Nginx Full" || echo "Warning: ufw allow 'Nginx Full' failed" >&2
+            else
+              echo "ufw profile 'Nginx Full' not found — allowing ports 80 and 443"
+              ufw --force allow 80/tcp || echo "Warning: ufw allow 80 failed" >&2
+              ufw --force allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
+            fi
+            # Enable ufw if not already enabled
+            if ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
+              ufw --force enable || echo "Warning: ufw enable failed" >&2
+            else
+              echo "ufw already active"
+            fi
+          else
+            echo "ufw not present"
+          fi
           cat > /etc/nginx/sites-available/asistapp << 'NGINX'
           server {
             listen 80;
@@ -203,12 +222,13 @@ jobs:
             }
           }
           NGINX
-          sed -i "s/DVAR/$DOMAIN/g" /etc/nginx/sites-available/asistapp
-          ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
-          rm -f /etc/nginx/sites-enabled/default
-          mkdir -p /var/www/letsencrypt
-          test -d /etc/letsencrypt/live/$DOMAIN || certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email
-          nginx -t && systemctl reload nginx
+          $SUDO sed -i "s/DVAR/$DOMAIN/g" /etc/nginx/sites-available/asistapp
+          $SUDO ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
+          $SUDO rm -f /etc/nginx/sites-enabled/default
+          $SUDO mkdir -p /var/www/letsencrypt
+          test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email
+          nginx -t && $SUDO systemctl reload nginx
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
           cd /opt/asistapp
           docker compose -f docker-compose.prod.yml down --timeout 30 || true
           docker compose -f docker-compose.prod.yml pull
