@@ -194,6 +194,20 @@ jobs:
           PLAY_STORE_SERVICE_ACCOUNT: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
         run: echo "$PLAY_STORE_SERVICE_ACCOUNT" > service_account.json
 
+      - name: Show service account email for verification
+        run: |
+          set -e
+          # Ensure jq is available
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y && sudo apt-get install -y jq
+          fi
+          client_email=$(jq -r .client_email service_account.json || true)
+          if [ -z "$client_email" ]; then
+            echo "Could not extract client_email from service account file. Confirm secret format is correct."
+            exit 1
+          fi
+          echo "SERVICE ACCOUNT CLIENT EMAIL: $client_email"
+
       - name: Upload to Google Play Store
         uses: r0adkll/upload-google-play@v1
         with:
