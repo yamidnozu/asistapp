@@ -103,6 +103,7 @@ jobs:
         command_timeout: 30m
         script: |
           set -e
+          set -x
           echo "Deploy start: $(date)"
           echo "Image: $IMAGE_TAG"
           SUDO=""
