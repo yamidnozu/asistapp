@@ -208,6 +208,33 @@ jobs:
           fi
           echo "SERVICE ACCOUNT CLIENT EMAIL: $client_email"
 
+      - name: Verify Play Console app exists via API
+        env:
+          SERVICE_ACCOUNT_JSON: service_account.json
+        run: |
+          set -e
+          # Install gcloud and authenticate using the service account so we can acquire a token
+          echo "Setting up gcloud auth (this installs gcloud CLI temporarily on the runner)"
+          curl -sSL https://sdk.cloud.google.com | bash >/dev/null 2>&1 || true
+          export PATH="$HOME/google-cloud-sdk/bin:$PATH"
+          gcloud --version || true
+          gcloud auth activate-service-account --key-file=service_account.json
+          ACCESS_TOKEN=$(gcloud auth print-access-token)
+          echo "Checking app via Android Publisher API"
+          STATUS=$(curl -s -o /tmp/edit.json -w "%{http_code}" -H "Authorization: Bearer $ACCESS_TOKEN" "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.edevcore.asistapp/edits")
+          echo "API http status: $STATUS"
+          if [ "$STATUS" -eq 404 ]; then
+            echo "ERROR: 404 - The app 'com.edevcore.asistapp' does not exist for this Play Console account."
+            echo "If this is the correct account, create the app in Play Console > Create app and ensure the service account is Active and has Admin or Release permissions."
+            echo "Check the console via: https://play.google.com/console/u/0/developers"
+            echo "Also ensure the package name matches the AAB you built."
+            echo "--- API response body (first 200 chars): ---"
+            head -c 200 /tmp/edit.json || true
+            exit 1
+          else
+            echo "Play API returned $STATUS (OK). The app exists or the service account has access."
+          fi
+
       - name: Upload to Google Play Store
         uses: r0adkll/upload-google-play@v1
         with:
