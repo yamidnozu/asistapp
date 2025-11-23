@@ -60,6 +60,11 @@ jobs:
           printf '%s=%s\n' "FIREBASE_PROJECT_ID" "${{ env.FIREBASE_PROJECT_ID }}" >> /opt/asistapp/backend/.env
           printf '%s=%s\n' "API_BASE_URL" "${{ env.API_BASE_URL }}" >> /opt/asistapp/backend/.env
 
+          # Also create project-root .env so that docker-compose picks up variables
+          cp /opt/asistapp/backend/.env /opt/asistapp/.env
+          chown root:root /opt/asistapp/.env
+          chmod 600 /opt/asistapp/.env
+
           # ensure permissions
           chown root:root /opt/asistapp/backend/.env
           chmod 600 /opt/asistapp/backend/.env
