@@ -92,7 +92,7 @@ jobs:
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_PORT: ${{ secrets.DB_PORT }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        IMAGE_TAG: ${{ needs.build-and-push.outputs.image }}
+        IMAGE_TAG: ghcr.io/${{ github.repository }}/asistapp_backend:main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -174,15 +174,15 @@ jobs:
             echo "ufw found — configuring firewall rules"
             # Always allow SSH
             if ufw --version >/dev/null 2>&1; then
-              ufw --force allow OpenSSH || echo "Warning: ufw allow OpenSSH failed" >&2
+              ufw allow OpenSSH || echo "Warning: ufw allow OpenSSH failed" >&2
             fi
             # Prefer the "Nginx Full" profile if available, otherwise open ports 80/443
             if ufw app list 2>/dev/null | grep -q "Nginx Full"; then
-              ufw --force allow "Nginx Full" || echo "Warning: ufw allow 'Nginx Full' failed" >&2
+              ufw allow "Nginx Full" || echo "Warning: ufw allow 'Nginx Full' failed" >&2
             else
               echo "ufw profile 'Nginx Full' not found — allowing ports 80 and 443"
-              ufw --force allow 80/tcp || echo "Warning: ufw allow 80 failed" >&2
-              ufw --force allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
+              ufw allow 80/tcp || echo "Warning: ufw allow 80 failed" >&2
+              ufw allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
             fi
             # Enable ufw if not already enabled
             if ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
