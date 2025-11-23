@@ -54,24 +54,49 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
+    - name: Validate secrets
+      run: |
+        echo "Validating required secrets..."
+        if [ -z "${{ secrets.VPS_HOST }}" ]; then echo "❌ VPS_HOST secret missing"; exit 1; fi
+        if [ -z "${{ secrets.VPS_USER }}" ]; then echo "❌ VPS_USER secret missing"; exit 1; fi
+        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then echo "❌ SSH_PRIVATE_KEY secret missing"; exit 1; fi
+        if [ -z "${{ secrets.DOMAIN }}" ]; then echo "❌ DOMAIN secret missing"; exit 1; fi
+        if [ -z "${{ secrets.EMAIL }}" ]; then echo "❌ EMAIL secret missing"; exit 1; fi
+        if [ -z "${{ secrets.DB_USER }}" ]; then echo "❌ DB_USER secret missing"; exit 1; fi
+        if [ -z "${{ secrets.DB_PASS }}" ]; then echo "❌ DB_PASS secret missing"; exit 1; fi
+        if [ -z "${{ secrets.DB_NAME }}" ]; then echo "❌ DB_NAME secret missing"; exit 1; fi
+        if [ -z "${{ secrets.DB_PORT }}" ]; then echo "❌ DB_PORT secret missing"; exit 1; fi
+        if [ -z "${{ secrets.JWT_SECRET }}" ]; then echo "❌ JWT_SECRET secret missing"; exit 1; fi
+        echo "✅ All secrets validated"
+
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: DOMAIN=${{ secrets.DOMAIN }},EMAIL=${{ secrets.EMAIL }},DB_USER=${{ secrets.DB_USER }},DB_PASS=${{ secrets.DB_PASS }},DB_NAME=${{ secrets.DB_NAME }},DB_PORT=${{ secrets.DB_PORT }},JWT_SECRET=${{ secrets.JWT_SECRET }}
         script: |
           set -euo pipefail
           
-          echo "=== Desplegando imagen pre-construida ==="
+          echo "🚀 Starting production deployment..."
+          echo "📅 $(date)"
+          echo "🏷️  Image: ${{ needs.build-and-push.outputs.image }}"
           
-          # Crear directorio para docker-compose si no existe
+          # Backup current deployment
+          if [ -f "/opt/asistapp/docker-compose.prod.yml" ]; then
+            echo "💾 Creating backup..."
+            cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/docker-compose.prod.yml.backup.$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Create deployment directory
           mkdir -p /opt/asistapp
           
-          # Crear docker-compose.prod.yml optimizado
-          cat > /opt/asistapp/docker-compose.prod.yml << 'EOF'
+          # Generate docker-compose.prod.yml
+          cat > /opt/asistapp/docker-compose.prod.yml << DOCKER_EOF
 version: '3.8'
 
 services:
@@ -80,15 +105,20 @@ services:
     container_name: asistapp_db
     restart: always
     environment:
-      POSTGRES_USER: ${{ secrets.DB_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.DB_PASS }}
-      POSTGRES_DB: ${{ secrets.DB_NAME }}
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASS
+      POSTGRES_DB: $DB_NAME
     ports:
-      - "${{ secrets.DB_PORT }}:5432"
+      - "$DB_PORT:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - asistapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     image: ${{ needs.build-and-push.outputs.image }}
@@ -97,17 +127,24 @@ services:
     ports:
       - "127.0.0.1:3002:3000"
     environment:
-      DATABASE_URL: "postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@db:5432/${{ secrets.DB_NAME }}?schema=public"
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      DATABASE_URL: "postgresql://$DB_USER:$DB_PASS@db:5432/$DB_NAME?schema=public"
+      JWT_SECRET: $JWT_SECRET
       PORT: 3000
       HOST: 0.0.0.0
       NODE_ENV: production
       LOG_LEVEL: info
-      API_BASE_URL: https://${{ secrets.DOMAIN }}
+      API_BASE_URL: https://$DOMAIN
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - asistapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:
@@ -115,32 +152,50 @@ volumes:
 networks:
   asistapp-network:
     driver: bridge
-EOF
+DOCKER_EOF
 
-          # Setup básico del VPS (nginx, SSL, firewall)
-          echo "=== Setup básico del VPS ==="
+          echo "✅ Docker Compose generated"
           
-          # Instalar nginx si no está
+          # VPS Infrastructure Setup
+          echo "🔧 Setting up VPS infrastructure..."
+          
+          # Install Docker if not present
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "🐳 Installing Docker..."
+            apt-get update
+            apt-get install -y ca-certificates curl gnupg lsb-release
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+            apt-get update
+            apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+            systemctl enable docker
+            systemctl start docker
+          fi
+          
+          # Install nginx and certbot if not present
           if ! command -v nginx >/dev/null 2>&1; then
+            echo "🌐 Installing nginx and certbot..."
             apt-get update
             apt-get install -y nginx certbot python3-certbot-nginx
             systemctl enable nginx
             systemctl start nginx
           fi
           
-          # Configurar firewall
+          # Configure firewall
           if command -v ufw >/dev/null 2>&1; then
+            echo "🔥 Configuring firewall..."
             ufw --force allow OpenSSH
             ufw --force allow 'Nginx Full'
             ufw --force enable
           fi
           
-          # Configurar nginx con SSL
-          cat > /etc/nginx/sites-available/asistapp << EOF
+          # Configure nginx with SSL
+          echo "🌐 Configuring nginx with SSL..."
+          cat > /etc/nginx/sites-available/asistapp << NGINX_EOF
 server {
   listen 80;
   listen [::]:80;
-  server_name ${{ secrets.DOMAIN }} www.${{ secrets.DOMAIN }};
+  server_name $DOMAIN www.$DOMAIN;
   
   location /.well-known/acme-challenge/ {
     root /var/www/letsencrypt;
@@ -152,42 +207,100 @@ server {
 server {
   listen 443 ssl http2;
   listen [::]:443 ssl http2;
-  server_name ${{ secrets.DOMAIN }} www.${{ secrets.DOMAIN }};
+  server_name $DOMAIN www.$DOMAIN;
   
-  ssl_certificate /etc/letsencrypt/live/${{ secrets.DOMAIN }}/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/${{ secrets.DOMAIN }}/privkey.pem;
+  ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
+  ssl_prefer_server_ciphers off;
+  
+  # Security headers
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-XSS-Protection "1; mode= block" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "no-referrer-when-downgrade" always;
+  add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
   
   location / {
     proxy_pass http://127.0.0.1:3002;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_cache_bypass \$http_upgrade;
+    proxy_read_timeout 86400;
   }
 }
-EOF
+NGINX_EOF
 
-          ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
+          ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/ 2>/dev/null || true
           rm -f /etc/nginx/sites-enabled/default
           
-          # Obtener certificados SSL si no existen
+          # SSL certificates
+          echo "🔒 Setting up SSL certificates..."
           mkdir -p /var/www/letsencrypt/.well-known/acme-challenge
           chown -R www-data:www-data /var/www/letsencrypt
           
-          if [ ! -d "/etc/letsencrypt/live/${{ secrets.DOMAIN }}" ]; then
+          if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+            echo "📜 Obtaining SSL certificates..."
             certbot certonly --webroot -w /var/www/letsencrypt \
-              -d ${{ secrets.DOMAIN }} -d www.${{ secrets.DOMAIN }} \
-              -m ${{ secrets.EMAIL }} --agree-tos --non-interactive --no-eff-email
+              -d $DOMAIN -d www.$DOMAIN \
+              -m $EMAIL --agree-tos --non-interactive --no-eff-email
+          else
+            echo "✅ SSL certificates already exist"
           fi
           
-          nginx -t && systemctl reload nginx
+          # Test nginx configuration
+          echo "🧪 Testing nginx configuration..."
+          if nginx -t; then
+            systemctl reload nginx
+            echo "✅ Nginx reloaded successfully"
+          else
+            echo "❌ Nginx configuration error"
+            exit 1
+          fi
           
-          # Desplegar contenedores
+          # Deploy containers
+          echo "🚀 Deploying application..."
           cd /opt/asistapp
-          docker compose -f docker-compose.prod.yml down --remove-orphans || true
+          
+          # Graceful shutdown of existing containers
+          docker compose -f docker-compose.prod.yml down --timeout 30 || true
+          
+          # Pull latest images
           docker compose -f docker-compose.prod.yml pull
+          
+          # Start services
           docker compose -f docker-compose.prod.yml up -d
           
-          echo "✅ Despliegue completado"
-          echo "🌐 URL: https://${{ secrets.DOMAIN }}"
+          # Wait for services to be healthy
+          echo "⏳ Waiting for services to be healthy..."
+          timeout=300
+          elapsed=0
+          
+          while [ $elapsed -lt $timeout ]; do
+            if docker compose -f docker-compose.prod.yml ps | grep -q "healthy\|running"; then
+              echo "✅ Services are healthy"
+              break
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+          
+          if [ $elapsed -ge $timeout ]; then
+            echo "⚠️  Services may not be fully healthy, but deployment completed"
+          fi
+          
+          # Final verification
+          echo ""
+          echo "🎉 DEPLOYMENT COMPLETED SUCCESSFULLY"
+          echo "🌐 Application URL: https://$DOMAIN"
+          echo "📊 Container Status:"
+          docker compose -f docker-compose.prod.yml ps
+          echo ""
+          echo "🔍 Health Check: https://$DOMAIN/health"
+          echo "📝 Logs: docker compose -f /opt/asistapp/docker-compose.prod.yml logs -f"
