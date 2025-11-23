@@ -36,7 +36,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
@@ -53,10 +53,10 @@ jobs:
 
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "Decoding keystore from secret"
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/keystore.jks
           elif [ -f "keystore.jks" ]; then
             echo "Using keystore.jks from repo root"
-            cp keystore.jks android/app/keystore.jks
+            cp keystore.jks android/keystore.jks
           else
             echo "Error: Keystore not found. Provide KEYSTORE_BASE64 or include keystore.jks in repo root"
             exit 1
@@ -68,7 +68,17 @@ jobs:
         run: chmod +x android/gradlew
 
       - name: Build App Bundle (AAB)
-        run: flutter build appbundle --release
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          set -e
+          # Use API_BASE_URL from secrets if provided; fall back to a sane default
+          if [ -z "$API_BASE_URL" ]; then
+            echo "Warning: API_BASE_URL secret is empty - falling back to default (https://api.asistapp.com)"
+            API_BASE_URL="https://api.asistapp.com"
+          fi
+          echo "Using API_BASE_URL: $API_BASE_URL"
+          flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=ENVIRONMENT=production
 
       - name: Upload AAB as artifact (optional - QA)
         uses: actions/upload-artifact@v4
