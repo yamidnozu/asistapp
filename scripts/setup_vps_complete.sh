@@ -59,13 +59,17 @@ else
 fi
 
 # 3. Configurar firewall UFW
-if command -v ufw >/dev/null 2>&1; then
-  echo "→ Configurando firewall UFW..."
-  ufw --force allow OpenSSH
-  ufw --force allow 'Nginx Full'
-  ufw --force enable
-  echo "✓ Firewall configurado"
+if ! command -v ufw >/dev/null 2>&1; then
+  echo "→ Instalando UFW..."
+  apt-get update
+  apt-get install -y ufw
 fi
+
+echo "→ Configurando firewall UFW..."
+sudo ufw --force allow OpenSSH
+sudo ufw --force allow 'Nginx Full'
+sudo ufw --force enable
+echo "✓ Firewall configurado"
 
 # 4. Crear webroot para Let's Encrypt
 echo "→ Preparando webroot para certificados..."
