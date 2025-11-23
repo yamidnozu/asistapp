@@ -171,10 +171,10 @@ jobs:
         with:
           serviceAccountJson: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
           packageName: com.edevcore.asistapp
-          releaseFile: artifacts/build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: artifacts/bundle/release/app-release.aab
           track: ${{ github.event.inputs.track }}
           status: completed
-          mappingFile: artifacts/build/app/outputs/mapping/release/mapping.txt
+          mappingFile: artifacts/mapping/release/mapping.txt
           inAppUpdatePriority: 1
           # You can set release notes via release JSON or configure metadata separately in Play Console.
 
