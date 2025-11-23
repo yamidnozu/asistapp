@@ -73,7 +73,14 @@ jobs:
       - name: Make Gradle wrapper executable
         run: |
           echo "Listing before chmod:" && ls -la android || true
-          chmod +x android/gradlew
+          if [ -f android/gradlew ]; then
+            chmod +x android/gradlew
+          else
+            echo "gradlew not found - installing gradle and creating gradle wrapper"
+            sudo apt-get update -y && sudo apt-get install -y gradle
+            (cd android && gradle wrapper)
+            chmod +x android/gradlew
+          fi
 
       - name: Build App Bundle (AAB)
         env:
