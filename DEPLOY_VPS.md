@@ -42,6 +42,18 @@ docker-compose logs -f app
 
 ## En la VPS una vez configurado
 1. Coloca tu `backend/.env` con las variables `DB_*`, `JWT_SECRET`, etc. en el directorio del repositorio clonado.
+	 - O, en la VPS, exporta las variables de entorno (DB_HOST, DB_USER, DB_PASS, DB_NAME, JWT_SECRET) y ejecuta `./scripts/generate_env.sh` para crear `backend/.env` automáticamente.
+	 - Ejemplo en la VPS:
+		 ```bash
+		 export DB_HOST=db
+		 export DB_PORT=5432
+		 export DB_USER=myuser
+		 export DB_PASS=mypass
+		 export DB_NAME=asistapp
+		 export JWT_SECRET=$(openssl rand -hex 32)
+		 cd /opt/asistapp
+		 ./scripts/generate_env.sh
+		 ```
 2. Si la imagen GHCR es privada, realiza docker login:
 	- echo "<GHCR_PAT>" | docker login ghcr.io -u "<GHCR_USER>" --password-stdin
 3. Levanta el stack producción:

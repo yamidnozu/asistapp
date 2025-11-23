@@ -62,6 +62,18 @@ if [ "$MODE" = "build" ]; then
   ${COMPOSE} build --no-cache --progress=plain
 fi
 
+# If backend/.env does not exist, try to generate it from environment variables using the helper script
+if [ ! -f "$WORKDIR/backend/.env" ]; then
+  print "No encontré backend/.env. Intentando generarlo desde variables de entorno..."
+  if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ] && [ -n "${DB_PASS:-}" ] && [ -n "${DB_NAME:-}" ] && [ -n "${JWT_SECRET:-}" ]; then
+    print "Variables detectadas, generando backend/.env desde scripts/generate_env.sh"
+    /bin/bash "$WORKDIR/scripts/generate_env.sh"
+  else
+    print "No se detectaron variables necesarias; asegúrate de crear backend/.env (puede copiar backend/.env.example)"
+    exit 1
+  fi
+fi
+
 print "Deteniendo contenedores actuales si existen"
 ${COMPOSE} down --remove-orphans
 
