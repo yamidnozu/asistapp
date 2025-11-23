@@ -74,86 +74,83 @@ jobs:
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v1.0.3
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
+        EMAIL: ${{ secrets.EMAIL }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASS: ${{ secrets.DB_PASS }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        IMAGE_TAG: ${{ needs.build-and-push.outputs.image }}
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN=${{ secrets.DOMAIN }},EMAIL=${{ secrets.EMAIL }},DB_USER=${{ secrets.DB_USER }},DB_PASS=${{ secrets.DB_PASS }},DB_NAME=${{ secrets.DB_NAME }},DB_PORT=${{ secrets.DB_PORT }},JWT_SECRET=${{ secrets.JWT_SECRET }}
+        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG
         script: |
           set -euo pipefail
-          
           echo "🚀 Starting production deployment..."
           echo "📅 $(date)"
-          echo "🏷️  Image: ${{ needs.build-and-push.outputs.image }}"
-          
-          # Backup current deployment
+          echo "🏷️  Image: $IMAGE_TAG"
           if [ -f "/opt/asistapp/docker-compose.prod.yml" ]; then
             echo "💾 Creating backup..."
             cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/docker-compose.prod.yml.backup.$(date +%Y%m%d_%H%M%S)
           fi
-          
-          # Create deployment directory
           mkdir -p /opt/asistapp
-          
-          # Generate docker-compose.prod.yml
-          cat > /opt/asistapp/docker-compose.prod.yml << DOCKER_EOF
-version: '3.8'
-
-services:
-  db:
-    image: postgres:15
-    container_name: asistapp_db
-    restart: always
-    environment:
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASS
-      POSTGRES_DB: $DB_NAME
-    ports:
-      - "$DB_PORT:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - asistapp-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $DB_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  app:
-    image: ${{ needs.build-and-push.outputs.image }}
-    container_name: backend-app-v3
-    restart: always
-    ports:
-      - "127.0.0.1:3002:3000"
-    environment:
-      DATABASE_URL: "postgresql://$DB_USER:$DB_PASS@db:5432/$DB_NAME?schema=public"
-      JWT_SECRET: $JWT_SECRET
-      PORT: 3000
-      HOST: 0.0.0.0
-      NODE_ENV: production
-      LOG_LEVEL: info
-      API_BASE_URL: https://$DOMAIN
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - asistapp-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-volumes:
-  postgres_data:
-
-networks:
-  asistapp-network:
-    driver: bridge
-DOCKER_EOF
-
+          cat > /opt/asistapp/docker-compose.prod.yml <<EOF
+          version: '3.8'
+          services:
+            db:
+              image: postgres:15
+              container_name: asistapp_db
+              restart: always
+              environment:
+                POSTGRES_USER: $DB_USER
+                POSTGRES_PASSWORD: $DB_PASS
+                POSTGRES_DB: $DB_NAME
+              ports:
+                - "$DB_PORT:5432"
+              volumes:
+                - postgres_data:/var/lib/postgresql/data
+              networks:
+                - asistapp-network
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U $DB_USER"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+            app:
+              image: $IMAGE_TAG
+              container_name: backend-app-v3
+              restart: always
+              ports:
+                - "127.0.0.1:3002:3000"
+              environment:
+                DATABASE_URL: "postgresql://$DB_USER:$DB_PASS@db:5432/$DB_NAME?schema=public"
+                JWT_SECRET: $JWT_SECRET
+                PORT: 3000
+                HOST: 0.0.0.0
+                NODE_ENV: production
+                LOG_LEVEL: info
+                API_BASE_URL: https://$DOMAIN
+              depends_on:
+                db:
+                  condition: service_healthy
+              networks:
+                - asistapp-network
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+                start_period: 40s
+          volumes:
+            postgres_data:
+          networks:
+            asistapp-network:
+              driver: bridge
+          EOF
           echo "✅ Docker Compose generated"
           
           # VPS Infrastructure Setup
