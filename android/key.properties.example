@@ -1,0 +1,15 @@
+# Configuración de firma para Play Store
+# Copia este archivo como `android/key.properties` localmente para desarrollo
+# IMPORTANTE: No subas `android/key.properties` a control de versiones
+
+# Ubicación del keystore relativo a la carpeta `android/`
+storeFile=keystore.jks
+
+# Contraseña del keystore
+storePassword=replace_with_store_password
+
+# Alias de la clave
+keyAlias=replace_with_alias
+
+# Contraseña de la clave
+keyPassword=replace_with_key_password
