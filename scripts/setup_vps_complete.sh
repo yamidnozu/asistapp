@@ -27,32 +27,51 @@ REPO_PATH="${REPO_PATH:-/opt/asistapp}"
 # Validar variables críticas
 if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ] || [ -z "$DB_PASS" ] || [ -z "$JWT_SECRET" ]; then
   echo "ERROR: Faltan variables requeridas (DOMAIN, EMAIL, DB_PASS, JWT_SECRET)" >&2
+  echo "Variables actuales:" >&2
+  echo "  DOMAIN: '$DOMAIN'" >&2
+  echo "  EMAIL: '$EMAIL'" >&2
+  echo "  DB_PASS: '[REDACTED]'" >&2
+  echo "  JWT_SECRET: '[REDACTED]'" >&2
   exit 1
 fi
 
 echo "✓ Variables validadas"
 
+# Función para ejecutar comandos con logging
+run_cmd() {
+  echo "→ Ejecutando: $*"
+  if ! "$@"; then
+    echo "ERROR: Comando falló: $*" >&2
+    return 1
+  fi
+}
+
 # 1. Instalar Docker si no está
 if ! command -v docker >/dev/null 2>&1; then
   echo "→ Instalando Docker..."
-  apt-get update
-  apt-get install -y ca-certificates curl gnupg lsb-release
-  mkdir -p /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-  apt-get update
-  apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  run_cmd apt-get update
+  run_cmd apt-get install -y ca-certificates curl gnupg lsb-release
+  run_cmd mkdir -p /etc/apt/keyrings
+  run_cmd curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.gpg
+  run_cmd gpg --dearmor -o /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/docker.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | run_cmd tee /etc/apt/sources.list.d/docker.list > /dev/null
+  run_cmd apt-get update
+  run_cmd apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
   echo "✓ Docker instalado"
 else
   echo "✓ Docker ya está instalado"
 fi
 
+# Verificar que Docker funciona
+run_cmd docker --version
+
 # 2. Instalar nginx + certbot
 if ! command -v nginx >/dev/null 2>&1; then
   echo "→ Instalando nginx + certbot..."
-  apt-get update
-  apt-get install -y nginx certbot python3-certbot-nginx
-  systemctl enable --now nginx
+  run_cmd apt-get update
+  run_cmd apt-get install -y nginx certbot python3-certbot-nginx
+  run_cmd systemctl enable nginx
+  run_cmd systemctl start nginx
   echo "✓ Nginx + certbot instalados"
 else
   echo "✓ Nginx ya está instalado"
@@ -61,14 +80,14 @@ fi
 # 3. Configurar firewall UFW
 if ! command -v ufw >/dev/null 2>&1; then
   echo "→ Instalando UFW..."
-  apt-get update
-  apt-get install -y ufw
+  run_cmd apt-get update
+  run_cmd apt-get install -y ufw
 fi
 
 echo "→ Configurando firewall UFW..."
-sudo ufw --force allow OpenSSH
-sudo ufw --force allow 'Nginx Full'
-sudo ufw --force enable
+run_cmd ufw --force allow OpenSSH
+run_cmd ufw --force allow 'Nginx Full'
+run_cmd ufw --force enable
 echo "✓ Firewall configurado"
 
 # 4. Crear webroot para Let's Encrypt
@@ -102,7 +121,8 @@ NGINX_HTTP
 
 ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/asistapp
 rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
+run_cmd nginx -t
+run_cmd systemctl reload nginx
 echo "✓ Nginx configurado (HTTP)"
 
 # 6. Obtener certificados SSL
@@ -152,7 +172,8 @@ server {
 }
 NGINX_HTTPS
 
-nginx -t && systemctl reload nginx
+run_cmd nginx -t
+run_cmd systemctl reload nginx
 echo "✓ HTTPS configurado"
 
 # 8. Generar .env del backend
@@ -183,7 +204,7 @@ echo "✓ .env generado"
 echo "→ Construyendo y levantando backend..."
 cd "${REPO_PATH}"
 docker compose -f docker-compose.prod.yml down --remove-orphans || true
-docker compose -f docker-compose.prod.yml up -d --build
+run_cmd docker compose -f docker-compose.prod.yml up -d --build
 
 echo "→ Esperando a que el backend inicie..."
 sleep 10
@@ -192,15 +213,15 @@ sleep 10
 echo ""
 echo "=== Verificación final ==="
 echo "→ Contenedores Docker:"
-docker ps --filter "name=backend" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+run_cmd docker ps --filter "name=backend" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 echo ""
 echo "→ Test HTTP → HTTPS redirect:"
-curl -sI http://${DOMAIN} | head -n 2
+curl -sI http://${DOMAIN} || echo "⚠️  HTTP test falló (posiblemente dominio no apunta aún al VPS)"
 
 echo ""
 echo "→ Test HTTPS:"
-curl -sI https://${DOMAIN} | head -n 2
+curl -sI https://${DOMAIN} || echo "⚠️  HTTPS test falló (posiblemente dominio no apunta aún al VPS)"
 
 echo ""
 echo "✅ Setup completado exitosamente"
