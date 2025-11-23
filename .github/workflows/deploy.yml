@@ -99,11 +99,9 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN
-        script_stop: true
         command_timeout: 30m
         script: |
           set -e
-          set -x
           echo "Deploy start: $(date)"
           echo "Image: $IMAGE_TAG"
           SUDO=""
