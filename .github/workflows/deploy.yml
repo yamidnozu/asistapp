@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      run_seed:
+        description: 'Run database seed (WARNING: This wipes the database!)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -95,11 +101,12 @@ jobs:
         IMAGE_TAG: ghcr.io/${{ github.repository }}/asistapp_backend:main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
+        RUN_SEED: ${{ github.event.inputs.run_seed || 'false' }}
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR
+        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR,RUN_SEED
         command_timeout: 30m
         script: |
           set -e
@@ -243,5 +250,14 @@ jobs:
           $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
           $SUDO docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
           $SUDO docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
+
+          echo "🔄 Running database migrations..."
+          $SUDO docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy || echo "Warning: migrations failed"
+
+          if [ "$RUN_SEED" = "true" ]; then
+            echo "🌱 Seeding database..."
+            $SUDO docker compose -f docker-compose.prod.yml run --rm app npx prisma db seed || echo "Warning: seed failed"
+          fi
+
           echo "Deploy completed"
           $SUDO docker compose -f docker-compose.prod.yml ps
