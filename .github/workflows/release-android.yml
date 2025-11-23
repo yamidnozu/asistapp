@@ -148,15 +148,21 @@ jobs:
           set -e
           echo "Downloading bundletool to inspect the AAB"
           curl -sSL -o bundletool.jar https://github.com/google/bundletool/releases/download/1.14.0/bundletool-all-1.14.0.jar
-          java -jar bundletool.jar dump manifest --bundle build/app/outputs/bundle/release/app-release.aab --output manifest.txt || true
+          # Capture manifest output reliably by redirecting stdout
+          java -jar bundletool.jar dump manifest --bundle build/app/outputs/bundle/release/app-release.aab > manifest.txt || true
           echo "Manifest extract (first 30 lines):"
           head -n 30 manifest.txt || true
-          package=$(grep -Eo 'packageName: [^[:space:]]+' manifest.txt | head -n1 | awk '{print $2}')
+          # The dump manifest shows: <manifest ... package="com.foo.bar" ...>
+          package=$(grep -Eo 'package="[^"]+"' manifest.txt | head -n1 | sed -E 's/package="([^"]+)"/\1/')
           echo "AAB packageName: $package"
           expected=com.edevcore.asistapp
+          if [ -z "$package" ]; then
+            echo "ERROR: Could not parse packageName from AAB. Confirm the AAB is valid and contains a manifest."
+            exit 1
+          fi
           if [ "$package" != "$expected" ]; then
             echo "ERROR: AAB packageName '$package' does not match expected '$expected'."
-            echo "Check android/app/build.gradle applicationId and rebuild, or change the destination Play app package to match the AAB."
+            echo "To fix: update android/app/build.gradle applicationId to '$expected' or change the Play app package to '$package'."
             exit 1
           fi
 
