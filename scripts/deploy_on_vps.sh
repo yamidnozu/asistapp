@@ -38,10 +38,16 @@ fi
 check_commands
 print "Directorio de trabajo: $WORKDIR"
 
-# Ensure .env exists
-if [ ! -f "$WORKDIR/backend/.env" ]; then
-  echo "ERROR: falta backend/.env. Copia backend/.env.example y rellénalo con valores de producción." >&2
-  exit 1
+# Ensure .env exists in either project root or backend; if not, try to generate it from env vars
+if [ ! -f "$WORKDIR/backend/.env" ] && [ ! -f "$WORKDIR/.env" ]; then
+  print "No se encontró backend/.env ni .env en la raíz del proyecto. Intentando generarlo desde variables de entorno..."
+  if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ] && [ -n "${DB_PASS:-}" ] && [ -n "${DB_NAME:-}" ] && [ -n "${JWT_SECRET:-}" ]; then
+    print "Variables detectadas, generando envs desde scripts/generate_env.sh"
+    /bin/bash "$WORKDIR/scripts/generate_env.sh"
+  else
+    print "No se detectaron variables necesarias; asegúrate de crear backend/.env (puede copiar backend/.env.example) o exportar las variables." >&2
+    exit 1
+  fi
 fi
 
 cd "$WORKDIR"
