@@ -17,34 +17,42 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ secrets.GHCR_USER }}
-        password: ${{ secrets.GHCR_PAT }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}/asistapp_backend:latest
-          ghcr.io/${{ github.repository }}/asistapp_backend:${{ github.sha }}
-
-    - name: Deploy to VPS
+    - name: Prepare .env and deploy on VPS (build-on-vps)
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          cd /path/to/your/project  # Cambia esto al path en tu VPS
-          git pull origin main
-          # Log in to GHCR in the VPS (use the PAT set as a secret)
-          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
-          docker pull ghcr.io/${{ github.repository }}/asistapp_backend:latest
-          docker logout ghcr.io
-          docker-compose -f docker-compose.prod.yml down
-          docker-compose -f docker-compose.prod.yml up -d
+          set -euo pipefail
+          # Clone or pull the repository
+          if [ ! -d "/opt/asistapp" ]; then
+            git clone https://github.com/${{ github.repository }} /opt/asistapp
+          else
+            cd /opt/asistapp && git pull origin main || true
+          fi
+
+          # Create backend/.env from secrets passed by GitHub Actions (use printf to avoid heredoc issues)
+          printf '%s=%s\n' "DB_HOST" "${{ secrets.DB_HOST }}" > /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_PORT" "${{ secrets.DB_PORT }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_USER" "${{ secrets.DB_USER }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_PASS" "${{ secrets.DB_PASS }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DB_NAME" "${{ secrets.DB_NAME }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "DATABASE_URL" "postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}?schema=public" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "JWT_SECRET" "${{ secrets.JWT_SECRET }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "JWT_EXPIRES_IN" "${{ secrets.JWT_EXPIRES_IN }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "PORT" "${{ secrets.PORT }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "HOST" "${{ secrets.HOST }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "NODE_ENV" "production" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "LOG_LEVEL" "${{ secrets.LOG_LEVEL }}" >> /opt/asistapp/backend/.env
+          printf '%s=%s\n' "FIREBASE_PROJECT_ID" "${{ secrets.FIREBASE_PROJECT_ID }}" >> /opt/asistapp/backend/.env
+
+          # ensure permissions
+          chown root:root /opt/asistapp/backend/.env
+          chmod 600 /opt/asistapp/backend/.env
+
+          # Run deployment script on the VPS (build and up)
+          cd /opt/asistapp
+          ./scripts/deploy_on_vps.sh --build
+
+    # (All deploy steps are handled in the 'Prepare .env and deploy on VPS' step above.)

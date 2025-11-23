@@ -35,6 +35,9 @@ docker-compose logs -f app
 3. `SSH_PRIVATE_KEY` - Clave privada SSH que tenga su pareja pública en `~/.ssh/authorized_keys` del VPS
 4. `GHCR_USER` - Usuario de GitHub (owner) que publicará la imagen
 5. `GHCR_PAT` - Personal Access Token (PAT) con permisos `packages:write` y `packages:read`
+6. Variables DB/JWT para automatización del `.env` (si quieres que el workflow cree el env en la VPS):
+	- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `JWT_SECRET`
+	- Opcionales: `JWT_EXPIRES_IN`, `PORT`, `HOST`, `LOG_LEVEL`, `FIREBASE_PROJECT_ID`
 
 ## Notas de seguridad
 - No subas tu `.env` al repo. Manténlo en el VPS o usa un secreto de configuración en el servicio de despliegue.
