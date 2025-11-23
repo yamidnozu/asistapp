@@ -62,18 +62,26 @@ jobs:
     steps:
     - name: Validate secrets
       run: |
-        echo "Validating required secrets"
-        test -n "${{ secrets.VPS_HOST }}" || exit 1
-        test -n "${{ secrets.VPS_USER }}" || exit 1
-        test -n "${{ secrets.SSH_PRIVATE_KEY }}" || exit 1
-        test -n "${{ secrets.DOMAIN }}" || exit 1
-        test -n "${{ secrets.EMAIL }}" || exit 1
-        test -n "${{ secrets.DB_USER }}" || exit 1
-        test -n "${{ secrets.DB_PASS }}" || exit 1
-        test -n "${{ secrets.DB_NAME }}" || exit 1
-        test -n "${{ secrets.DB_PORT }}" || exit 1
-        test -n "${{ secrets.JWT_SECRET }}" || exit 1
-        echo "All secrets OK"
+        echo "Validating required secrets..."
+        missing=0
+        if [ -z "${{ secrets.VPS_HOST }}" ]; then echo "❌ Missing: VPS_HOST"; missing=1; fi
+        if [ -z "${{ secrets.VPS_USER }}" ]; then echo "❌ Missing: VPS_USER"; missing=1; fi
+        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then echo "❌ Missing: SSH_PRIVATE_KEY"; missing=1; fi
+        if [ -z "${{ secrets.DOMAIN }}" ]; then echo "❌ Missing: DOMAIN"; missing=1; fi
+        if [ -z "${{ secrets.EMAIL }}" ]; then echo "❌ Missing: EMAIL"; missing=1; fi
+        if [ -z "${{ secrets.DB_USER }}" ]; then echo "❌ Missing: DB_USER"; missing=1; fi
+        if [ -z "${{ secrets.DB_PASS }}" ]; then echo "❌ Missing: DB_PASS"; missing=1; fi
+        if [ -z "${{ secrets.DB_NAME }}" ]; then echo "❌ Missing: DB_NAME"; missing=1; fi
+        if [ -z "${{ secrets.DB_PORT }}" ]; then echo "❌ Missing: DB_PORT"; missing=1; fi
+        if [ -z "${{ secrets.JWT_SECRET }}" ]; then echo "❌ Missing: JWT_SECRET"; missing=1; fi
+        if [ "$missing" -eq 1 ]; then
+          echo ""
+          echo "⚠️  One or more required secrets are missing."
+          echo "📝 Add them in: Settings → Secrets and variables → Actions"
+          echo "    OR under the 'production' environment if using environment-level secrets"
+          exit 1
+        fi
+        echo "✅ All secrets validated successfully"
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v1.0.3
