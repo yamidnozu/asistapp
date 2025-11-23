@@ -39,7 +39,13 @@ jobs:
         script: |
           set -euo pipefail
           
+          echo "=== Iniciando despliegue en VPS ==="
+          echo "Fecha: $(date)"
+          echo "Usuario: $(whoami)"
+          echo "Directorio actual: $(pwd)"
+          
           # Clone/update repository
+          echo "→ Clonando/actualizando repositorio..."
           if [ ! -d "/opt/asistapp" ]; then
             git clone https://github.com/${{ github.repository }} /opt/asistapp
           else
@@ -47,6 +53,7 @@ jobs:
           fi
           
           # Export all variables for the setup script
+          echo "→ Configurando variables de entorno..."
           export DOMAIN='${{ secrets.DOMAIN }}'
           export EMAIL='${{ secrets.EMAIL }}'
           export PORT='${{ env.PORT }}'
@@ -60,7 +67,25 @@ jobs:
           export LOG_LEVEL='${{ env.LOG_LEVEL }}'
           export REPO_PATH='/opt/asistapp'
           
+          echo "✓ Variables configuradas"
+          echo "DOMAIN: '$DOMAIN'"
+          echo "EMAIL: '$EMAIL'"
+          echo "DB_PASS: '[REDACTED]'"
+          echo "JWT_SECRET: '[REDACTED]'"
+          
+          # Verify script exists and is executable
+          echo "→ Verificando script de setup..."
+          if [ ! -f "/opt/asistapp/scripts/setup_vps_complete.sh" ]; then
+            echo "ERROR: Script setup_vps_complete.sh no encontrado" >&2
+            exit 1
+          fi
+          
+          chmod +x /opt/asistapp/scripts/setup_vps_complete.sh
+          echo "✓ Script verificado y ejecutable"
+          
           # Run complete setup script
-          bash /opt/asistapp/scripts/setup_vps_complete.sh
+          echo "→ Ejecutando script de setup completo..."
+          cd /opt/asistapp
+          bash -x /opt/asistapp/scripts/setup_vps_complete.sh
 
     # Note: El script setup_vps_complete.sh ahora maneja todo el proceso de setup y deployment
