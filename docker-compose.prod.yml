@@ -17,9 +17,9 @@ services:
       - asistapp-network
 
   app:
-    # Usar la imagen publicada en GHCR (REEMPLAZA esto por tu ghcr path)
-    # Por ejemplo: ghcr.io/miusuario/DemoLife/asistapp_backend:latest
-    image: ghcr.io/<GHCR_OWNER>/<GHCR_REPO>/asistapp_backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend-app-v3
     restart: always
     ports:
