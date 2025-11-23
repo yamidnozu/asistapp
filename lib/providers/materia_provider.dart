@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/academic_service.dart' as academic_service;
+import '../models/pagination_types.dart';
+import '../services/academic/materia_service.dart';
 import '../models/materia.dart';
-// PaginationInfo is provided by PaginatedDataProvider
-import 'paginated_data_provider.dart';
+import 'paginated_data_mixin.dart';
 
-// MateriaState removed: rely on PaginatedDataProvider state
+// MateriaState removed: rely on PaginatedDataMixin state
 
-class MateriaProvider extends PaginatedDataProvider<Materia> {
-  final academic_service.AcademicService _academicService = academic_service.AcademicService();
+class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
+  final MateriaService _materiaService;
+
+  MateriaProvider({MateriaService? materiaService})
+      : _materiaService = materiaService ?? MateriaService();
 
   // Error message delegated to PaginatedDataProvider
   Materia? _selectedMateria;
+
 
   // Getters
   // Use PaginatedDataProvider's errorMessage
@@ -28,25 +32,25 @@ class MateriaProvider extends PaginatedDataProvider<Materia> {
 
   @override
   Future<PaginatedResponse<Materia>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final response = await _academicService.getMaterias(accessToken, page: page, limit: limit, search: search);
+    final response = await _materiaService.getMaterias(accessToken, page: page, limit: limit, search: search);
     if (response == null) return null;
     return PaginatedResponse(items: response.materias, pagination: response.pagination);
   }
 
   @override
   Future<Materia?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _academicService.createMateria(accessToken, data as academic_service.CreateMateriaRequest);
+    final created = await _materiaService.createMateria(accessToken, data as CreateMateriaRequest);
     return created;
   }
 
   @override
   Future<bool> deleteItemApi(String accessToken, String id) async {
-    return await _academicService.deleteMateria(accessToken, id);
+    return await _materiaService.deleteMateria(accessToken, id);
   }
 
   @override
   Future<Materia?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _academicService.updateMateria(accessToken, id, data as academic_service.UpdateMateriaRequest);
+    final updated = await _materiaService.updateMateria(accessToken, id, data as UpdateMateriaRequest);
     return updated;
   }
 
@@ -64,7 +68,7 @@ class MateriaProvider extends PaginatedDataProvider<Materia> {
   Future<void> loadMateriaById(String accessToken, String materiaId) async {
   if (isLoading) return;
     try {
-      final materia = await _academicService.getMateriaById(accessToken, materiaId);
+      final materia = await _materiaService.getMateriaById(accessToken, materiaId);
       if (materia != null) {
         _selectedMateria = materia;
   notifyListeners();
@@ -76,7 +80,7 @@ class MateriaProvider extends PaginatedDataProvider<Materia> {
     }
   }
 
-  Future<bool> createMateria(String accessToken, academic_service.CreateMateriaRequest materiaData) async {
+  Future<bool> createMateria(String accessToken, CreateMateriaRequest materiaData) async {
   if (isLoading) return false;
     try {
       final success = await createItem(accessToken, materiaData);
@@ -92,7 +96,7 @@ class MateriaProvider extends PaginatedDataProvider<Materia> {
     }
   }
 
-  Future<bool> updateMateria(String accessToken, String materiaId, academic_service.UpdateMateriaRequest materiaData) async {
+  Future<bool> updateMateria(String accessToken, String materiaId, UpdateMateriaRequest materiaData) async {
   if (isLoading) return false;
     try {
       final success = await updateItem(accessToken, materiaId, materiaData);
@@ -184,7 +188,7 @@ class MateriaProvider extends PaginatedDataProvider<Materia> {
 
   Future<List<Materia>?> searchMateriasRemote(String accessToken, {String? search, int limit = 10}) async {
     try {
-      final response = await _academicService.getMaterias(accessToken, page: 1, limit: limit, search: search);
+      final response = await _materiaService.getMaterias(accessToken, page: 1, limit: limit, search: search);
       return response?.materias;
     } catch (e) {
       debugPrint('Error searchMateriasRemote: $e');

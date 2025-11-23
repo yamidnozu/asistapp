@@ -2,6 +2,8 @@ echo "cd /c/Proyectos/DemoLife && ./scripts/reset-db-simple.bat"
 @echo off
 REM Simple batch script to reset database, apply Prisma schema, seed and start backend
 setlocal enabledelayedexpansion
+REM Force a consistent Docker Compose project name to avoid duplicate stacks
+set COMPOSE_PROJECT_NAME=demolife
 
 echo ==================================================================
 echo DemoLife - Reset DB and Seed
@@ -33,7 +35,7 @@ if errorlevel 1 (
     ping -n 6 127.0.0.1 >nul
 )
 cd backend
-call npx prisma db push --accept-data-loss
+docker compose run --rm app npx prisma db push --accept-data-loss
 cd ..
 echo Done.
 
@@ -43,9 +45,7 @@ if errorlevel 1 (
     echo Database not ready for seed, waiting...
     ping -n 6 127.0.0.1 >nul
 )
-cd backend
-call npm run prisma:seed:host
-cd ..
+docker compose run --rm app npx prisma db seed
 echo Done.
 
 echo [6/6] Starting backend and database...

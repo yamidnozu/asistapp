@@ -1,5 +1,8 @@
+import { config } from '../config/app';
 import { prisma } from '../config/database';
 import { ConflictError, NotFoundError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import logger from '../utils/logger';
+import { validateTimeFormat } from '../utils/time-validation';
 
 export interface HorarioFilters {
   grupoId?: string;
@@ -239,7 +242,7 @@ export class HorarioService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener horarios:', error);
+      logger.error('Error al obtener horarios', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -357,7 +360,7 @@ export class HorarioService {
         _count: horario._count,
       }));
     } catch (error) {
-      console.error('Error al obtener horarios del grupo:', error);
+      logger.error('Error al obtener horarios del grupo:', error);
       throw new Error('Error al obtener los horarios del grupo');
     }
   }
@@ -462,21 +465,21 @@ export class HorarioService {
         _count: horario._count,
       };
     } catch (error) {
-      console.error('Error al obtener horario:', error);
+      logger.error('Error al obtener horario:', error);
       throw new Error('Error al obtener el horario');
     }
   }
 
   /**
-   * Convierte HH:MM a minutos desde medianoche
-   */
-  private static timeToMinutes(time: string): number {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  }
-
-  /**
-   * Valida que no haya conflictos de horario
+   * ✅ OPTIMIZADO: Valida conflictos de horario DIRECTAMENTE en la base de datos
+   * Usa $queryRaw con comparación de TIME en PostgreSQL para máxima eficiencia
+   * 
+   * Lógica de solapamiento:
+   * Dos horarios se solapan si:
+   * - El nuevo empieza ANTES de que termine el existente Y
+   * - El nuevo termina DESPUÉS de que empiece el existente
+   * 
+   * En SQL: horaInicio < existente.horaFin AND horaFin > existente.horaInicio
    */
   private static async validateHorarioConflict(
     grupoId: string,
@@ -492,12 +495,13 @@ export class HorarioService {
       throw new ValidationError('El formato de hora debe ser HH:MM');
     }
 
-    // Convertir horas a minutos para comparación numérica
-    const inicioMinutos = this.timeToMinutes(horaInicio);
-    const finMinutos = this.timeToMinutes(horaFin);
-
-    // Validar que horaInicio < horaFin
-    if (inicioMinutos >= finMinutos) {
+    // Validar que horaInicio < horaFin (conversión simple a minutos)
+    const [inicioHoras, inicioMinutos] = horaInicio.split(':').map(Number);
+    const [finHoras, finMinutos] = horaFin.split(':').map(Number);
+    const inicioTotalMinutos = inicioHoras * 60 + inicioMinutos;
+    const finTotalMinutos = finHoras * 60 + finMinutos;
+    
+    if (inicioTotalMinutos >= finTotalMinutos) {
       throw new ValidationError('La hora de inicio debe ser anterior a la hora de fin');
     }
 
@@ -506,86 +510,103 @@ export class HorarioService {
       throw new ValidationError('El día de la semana debe estar entre 1 (Lunes) y 7 (Domingo)');
     }
 
-    console.log(`🔍 Validando conflictos para ${diaSemana} ${horaInicio}-${horaFin} (${inicioMinutos}-${finMinutos} min)`);
-
-    // Buscar conflictos de horario para el grupo
-    const horariosGrupo = await prisma.horario.findMany({
-      where: {
-        grupoId: grupoId,
-        diaSemana: diaSemana,
-        ...(excludeId && { id: { not: excludeId } })
-      },
-      select: {
-        id: true,
-        horaInicio: true,
-        horaFin: true,
-      }
-    });
-
-    const grupoConflicts = horariosGrupo.filter(h => {
-      const hInicio = this.timeToMinutes(h.horaInicio);
-      const hFin = this.timeToMinutes(h.horaFin);
-      
-      // Hay conflicto si:
-      // 1. La nueva clase empieza ANTES de que termine la existente Y
-      // 2. La nueva clase termina DESPUÉS de que empiece la existente
-      const hayConflicto = inicioMinutos < hFin && finMinutos > hInicio;
-      
-      if (hayConflicto) {
-        console.log(`  ⚠️ CONFLICTO DETECTADO: Horario ${h.horaInicio}-${h.horaFin} (${hInicio}-${hFin} min) se solapa`);
-      }
-      
-      return hayConflicto;
-    });
-
-    if (grupoConflicts.length > 0) {
-      console.log(`❌ El grupo tiene ${grupoConflicts.length} conflicto(s)`);
-      throw new ConflictError('El grupo ya tiene una clase programada en este horario', 'grupo_conflict', {
-        conflictingHorarioIds: grupoConflicts.map((h: any) => h.id),
-      });
+    // ✅ OPTIMIZACIÓN: Query única con comparación de TIME en PostgreSQL
+    // La base de datos hace toda la lógica de solapamiento
+    interface ConflictoHorario {
+      id: string;
+      horaInicio: string;
+      horaFin: string;
+      grupoId: string;
+      profesorId: string | null;
+      tipo: 'grupo' | 'profesor';
     }
-    console.log(`✅ No hay conflictos para el grupo`);
 
-    // Si hay profesor asignado, validar conflictos para el profesor
-    if (profesorId) {
-      console.log(`🔍 Validando conflictos para profesor ${profesorId}`);
-      
-      const horariosProfesor = await prisma.horario.findMany({
-        where: {
-          profesorId: profesorId,
-          diaSemana: diaSemana,
-          ...(excludeId && { id: { not: excludeId } })
-        },
-        select: {
-          id: true,
-          horaInicio: true,
-          horaFin: true,
+    // Construir query SQL con UNION para grupo y profesor
+    const grupoQuery = excludeId
+      ? `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'grupo' as tipo
+         FROM "Horario"
+         WHERE "grupoId" = $1
+           AND "diaSemana" = $2
+           AND id != $3
+           AND "horaInicio"::TIME < $5::TIME
+           AND "horaFin"::TIME > $4::TIME`
+      : `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'grupo' as tipo
+         FROM "Horario"
+         WHERE "grupoId" = $1
+           AND "diaSemana" = $2
+           AND "horaInicio"::TIME < $4::TIME
+           AND "horaFin"::TIME > $3::TIME`;
+
+    const profesorQuery = profesorId
+      ? excludeId
+        ? `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'profesor' as tipo
+           FROM "Horario"
+           WHERE "profesorId" = $6
+             AND "diaSemana" = $2
+             AND id != $3
+             AND "horaInicio"::TIME < $5::TIME
+             AND "horaFin"::TIME > $4::TIME`
+        : `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'profesor' as tipo
+           FROM "Horario"
+           WHERE "profesorId" = $5
+             AND "diaSemana" = $2
+             AND "horaInicio"::TIME < $4::TIME
+             AND "horaFin"::TIME > $3::TIME`
+      : '';
+
+    const fullQuery = profesorQuery
+      ? `${grupoQuery} UNION ${profesorQuery}`
+      : grupoQuery;
+
+    // Preparar parámetros según el caso
+    let params: any[];
+    if (excludeId) {
+      params = profesorId
+        ? [grupoId, diaSemana, excludeId, horaInicio, horaFin, profesorId]
+        : [grupoId, diaSemana, excludeId, horaInicio, horaFin];
+    } else {
+      params = profesorId
+        ? [grupoId, diaSemana, horaInicio, horaFin, profesorId]
+        : [grupoId, diaSemana, horaInicio, horaFin];
+    }
+
+    // Ejecutar query optimizada
+    const conflictos = await prisma.$queryRawUnsafe(
+      fullQuery,
+      ...params
+    ) as ConflictoHorario[];
+
+    // Clasificar conflictos por tipo
+    const grupoConflicts = conflictos.filter((c: ConflictoHorario) => c.tipo === 'grupo');
+    const profesorConflicts = conflictos.filter((c: ConflictoHorario) => c.tipo === 'profesor');
+
+    // Lanzar error si hay conflictos (priorizar grupo sobre profesor)
+    if (grupoConflicts.length > 0) {
+      throw new ConflictError(
+        'El grupo ya tiene una clase programada en este horario',
+        'grupo_conflict',
+        {
+          conflictingHorarioIds: grupoConflicts.map((c: ConflictoHorario) => c.id),
+          detalles: grupoConflicts.map((c: ConflictoHorario) => ({
+            id: c.id,
+            horario: `${c.horaInicio} - ${c.horaFin}`,
+          })),
         }
-      });
+      );
+    }
 
-      const profesorConflicts = horariosProfesor.filter(h => {
-        const hInicio = this.timeToMinutes(h.horaInicio);
-        const hFin = this.timeToMinutes(h.horaFin);
-        
-        // Hay conflicto si:
-        // 1. La nueva clase empieza ANTES de que termine la existente Y
-        // 2. La nueva clase termina DESPUÉS de que empiece la existente
-        const hayConflicto = inicioMinutos < hFin && finMinutos > hInicio;
-        
-        if (hayConflicto) {
-          console.log(`  ⚠️ CONFLICTO DETECTADO: Horario ${h.horaInicio}-${h.horaFin} (${hInicio}-${hFin} min) se solapa`);
+    if (profesorConflicts.length > 0) {
+      throw new ConflictError(
+        'El profesor ya tiene una clase programada en este horario',
+        'profesor_conflict',
+        {
+          conflictingHorarioIds: profesorConflicts.map((c: ConflictoHorario) => c.id),
+          detalles: profesorConflicts.map((c: ConflictoHorario) => ({
+            id: c.id,
+            horario: `${c.horaInicio} - ${c.horaFin}`,
+          })),
         }
-        
-        return hayConflicto;
-      });
-
-      if (profesorConflicts.length > 0) {
-        console.log(`❌ El profesor tiene ${profesorConflicts.length} conflicto(s)`);
-        throw new ConflictError('El profesor ya tiene una clase programada en este horario', 'profesor_conflict', {
-          conflictingHorarioIds: profesorConflicts.map((h: any) => h.id),
-        });
-      }
-      console.log(`✅ No hay conflictos para el profesor`);
+      );
     }
   }
 
@@ -594,10 +615,16 @@ export class HorarioService {
    */
   public static async createHorario(data: CreateHorarioRequest): Promise<HorarioResponse> {
     try {
-      console.log('🔍 DEBUG: Iniciando createHorario con data:', JSON.stringify(data, null, 2));
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 DEBUG: Iniciando createHorario con data:', JSON.stringify(data, null, 2));
+      }
+
+      validateTimeFormat(data.horaInicio, data.horaFin);
 
       // Validar que el periodo académico existe y pertenece a la institución
-      console.log('🔍 DEBUG: Validando periodo académico...');
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 DEBUG: Validando periodo académico...');
+      }
       const periodo = await prisma.periodoAcademico.findFirst({
         where: {
           id: data.periodoId,
@@ -606,13 +633,19 @@ export class HorarioService {
       });
 
       if (!periodo) {
-        console.log('❌ DEBUG: Periodo no encontrado o no pertenece a institución');
+        if (config.nodeEnv === 'development') {
+          logger.debug('❌ DEBUG: Periodo no encontrado o no pertenece a institución');
+        }
         throw new ValidationError('El periodo académico no existe o no pertenece a esta institución');
       }
-      console.log('✅ DEBUG: Periodo válido:', periodo.nombre);
+      if (config.nodeEnv === 'development') {
+        logger.debug('✅ DEBUG: Periodo válido:', periodo.nombre);
+      }
 
       // Validar que el grupo existe y pertenece a la institución y periodo
-      console.log('🔍 DEBUG: Validando grupo...');
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 DEBUG: Validando grupo...');
+      }
       const grupo = await prisma.grupo.findFirst({
         where: {
           id: data.grupoId,
@@ -621,16 +654,22 @@ export class HorarioService {
       });
 
       if (!grupo) {
-        console.log('❌ DEBUG: Grupo no encontrado o no pertenece a institución');
+        if (config.nodeEnv === 'development') {
+          logger.debug('❌ DEBUG: Grupo no encontrado o no pertenece a institución');
+        }
         throw new ValidationError('El grupo seleccionado no existe o no pertenece a esta institución');
       }
       if (grupo.periodoId !== data.periodoId) { // <-- Validación clave
         throw new ValidationError('El grupo no pertenece al período académico seleccionado.');
       }
-      console.log('✅ DEBUG: Grupo válido:', grupo.nombre);
+      if (config.nodeEnv === 'development') {
+        logger.debug('✅ DEBUG: Grupo válido:', grupo.nombre);
+      }
 
       // Validar que la materia existe y pertenece a la institución
-      console.log('🔍 DEBUG: Validando materia...');
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 DEBUG: Validando materia...');
+      }
       const materia = await prisma.materia.findFirst({
         where: {
           id: data.materiaId,
@@ -639,14 +678,20 @@ export class HorarioService {
       });
 
       if (!materia) {
-        console.log('❌ DEBUG: Materia no encontrada o no pertenece a institución');
+        if (config.nodeEnv === 'development') {
+          logger.debug('❌ DEBUG: Materia no encontrada o no pertenece a institución');
+        }
         throw new ValidationError('La materia no existe o no pertenece a esta institución');
       }
-      console.log('✅ DEBUG: Materia válida:', materia.nombre);
+      if (config.nodeEnv === 'development') {
+        logger.debug('✅ DEBUG: Materia válida:', materia.nombre);
+      }
 
       // Si hay profesor asignado, validar que existe y es profesor
       if (data.profesorId) {
-        console.log('🔍 DEBUG: Validando profesor...');
+        if (config.nodeEnv === 'development') {
+          logger.debug('🔍 DEBUG: Validando profesor...');
+        }
         const profesor = await prisma.usuario.findFirst({
           where: {
             id: data.profesorId,
@@ -661,16 +706,24 @@ export class HorarioService {
         });
 
         if (!profesor) {
-          console.log('❌ DEBUG: Profesor no encontrado o no pertenece a institución');
+          if (config.nodeEnv === 'development') {
+            logger.debug('❌ DEBUG: Profesor no encontrado o no pertenece a institución');
+          }
           throw new ValidationError('El profesor no existe o no pertenece a esta institución');
         }
-        console.log('✅ DEBUG: Profesor válido:', profesor.nombres, profesor.apellidos);
+        if (config.nodeEnv === 'development') {
+          logger.debug('✅ DEBUG: Profesor válido:', { nombres: profesor.nombres, apellidos: profesor.apellidos });
+        }
       } else {
-        console.log('ℹ️ DEBUG: No hay profesor asignado (permitido)');
+        if (config.nodeEnv === 'development') {
+          logger.debug('ℹ️ DEBUG: No hay profesor asignado (permitido)');
+        }
       }
 
       // Validar conflictos de horario
-      console.log('🔍 DEBUG: Validando conflictos de horario...');
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 DEBUG: Validando conflictos de horario...');
+      }
       await this.validateHorarioConflict(
         data.grupoId,
         data.profesorId || null,
@@ -678,9 +731,10 @@ export class HorarioService {
         data.horaInicio,
         data.horaFin
       );
-      console.log('✅ DEBUG: No hay conflictos de horario');
-
-      console.log('🔍 DEBUG: Creando horario en base de datos...');
+      if (config.nodeEnv === 'development') {
+        logger.debug('✅ DEBUG: No hay conflictos de horario');
+        logger.debug('🔍 DEBUG: Creando horario en base de datos...');
+      }
       const horario = await prisma.horario.create({
         data: {
           periodoId: data.periodoId,
@@ -731,7 +785,9 @@ export class HorarioService {
           },
         },
       });
-      console.log('✅ DEBUG: Horario creado exitosamente en BD');
+      if (config.nodeEnv === 'development') {
+        logger.debug('✅ DEBUG: Horario creado exitosamente en BD');
+      }
 
       return {
         id: horario.id,
@@ -770,8 +826,8 @@ export class HorarioService {
         _count: horario._count,
       };
     } catch (error) {
-      console.error('❌ Error al crear horario:', error);
-      console.error('❌ Stack trace:', (error as Error).stack);
+      logger.error('❌ Error al crear horario:', error);
+      logger.error('❌ Stack trace:', (error as Error).stack);
       if (error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -852,6 +908,7 @@ export class HorarioService {
       }
 
       // Validar conflictos de horario
+      validateTimeFormat(horaInicio, horaFin);
       await this.validateHorarioConflict(
         grupoId,
         profesorId,
@@ -948,7 +1005,7 @@ export class HorarioService {
         _count: horario._count,
       };
     } catch (error) {
-      console.error('Error al actualizar horario:', error);
+      logger.error('Error al actualizar horario:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -988,7 +1045,7 @@ export class HorarioService {
 
       return true;
     } catch (error) {
-      console.error('Error al eliminar horario:', error);
+      logger.error('Error al eliminar horario:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
@@ -998,3 +1055,5 @@ export class HorarioService {
 }
 
 export default HorarioService;
+
+

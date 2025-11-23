@@ -11,7 +11,10 @@ enum AsistenciaState {
 }
 
 class AsistenciaProvider with ChangeNotifier {
-  final AsistenciaService _asistenciaService = AsistenciaService();
+  final AsistenciaService _asistenciaService;
+
+  AsistenciaProvider({AsistenciaService? asistenciaService})
+      : _asistenciaService = asistenciaService ?? AsistenciaService();
 
   AsistenciaState _state = AsistenciaState.initial;
   String? _errorMessage;
@@ -36,29 +39,22 @@ class AsistenciaProvider with ChangeNotifier {
   int get justificados => _asistencias.where((a) => a.estaJustificado).length;
   int get sinRegistrar => _asistencias.where((a) => a.sinRegistrar).length;
 
-  void _setState(AsistenciaState newState, [String? error]) {
-    _state = newState;
-    _errorMessage = error;
-    notifyListeners();
-  }
-
-  /// Carga la lista de asistencias para un horario específico
-  Future<void> fetchAsistencias(String accessToken, String horarioId) async {
-    if (_state == AsistenciaState.loading) return;
-
-    _setState(AsistenciaState.loading);
-    _selectedHorarioId = horarioId;
-
+  /// Carga las asistencias para un horario específico
+  Future<void> fetchAsistencias(String accessToken, String horarioId, {DateTime? date}) async {
     try {
-      debugPrint('AsistenciaProvider: Cargando asistencias para horario $horarioId...');
-      final asistencias = await _asistenciaService.fetchAsistencias(
+      debugPrint('AsistenciaProvider: Loading asistencias for horario: $horarioId');
+      _setState(AsistenciaState.loading);
+
+      final asistencias = await _asistenciaService.getAsistencias(
         accessToken: accessToken,
         horarioId: horarioId,
+        date: date,
       );
 
-      debugPrint('AsistenciaProvider: Recibidas ${asistencias.length} asistencias');
       _asistencias = asistencias;
+      _selectedHorarioId = horarioId;
       _setState(AsistenciaState.loaded);
+      debugPrint('AsistenciaProvider: Loaded ${asistencias.length} asistencias');
     } catch (e) {
       debugPrint('AsistenciaProvider: Error loading asistencias: $e');
       _setState(AsistenciaState.error, e.toString());
@@ -83,18 +79,13 @@ class AsistenciaProvider with ChangeNotifier {
 
       return success;
     } catch (e) {
-      debugPrint('AsistenciaProvider: Error registrando asistencia: $e');
-      // No cambiamos el estado general, solo retornamos false
+      debugPrint('AsistenciaProvider: Error registrando asistencia con QR: $e');
       return false;
     }
   }
 
-  /// Registra la asistencia manualmente (sin QR) y refresca la lista
-  Future<bool> registrarAsistenciaManual(
-    String accessToken,
-    String horarioId,
-    String estudianteId,
-  ) async {
+  /// Registra asistencia manual para un estudiante
+  Future<bool> registrarAsistenciaManual(String accessToken, String horarioId, String estudianteId) async {
     try {
       debugPrint('AsistenciaProvider: Registrando asistencia manual para estudiante: $estudianteId');
       final success = await _asistenciaService.registrarAsistenciaManual(
@@ -112,6 +103,37 @@ class AsistenciaProvider with ChangeNotifier {
       return success;
     } catch (e) {
       debugPrint('AsistenciaProvider: Error registrando asistencia manual: $e');
+      return false;
+    }
+  }
+
+  /// Actualiza una asistencia existente
+  Future<bool> updateAsistencia({
+    required String accessToken,
+    required String asistenciaId,
+    required String estado,
+    String? observacion,
+    bool? justificada,
+  }) async {
+    try {
+      debugPrint('AsistenciaProvider: Actualizando asistencia: $asistenciaId');
+      final success = await _asistenciaService.updateAsistencia(
+        accessToken: accessToken,
+        asistenciaId: asistenciaId,
+        estado: estado,
+        observacion: observacion,
+        justificada: justificada,
+      );
+
+      if (success && _selectedHorarioId != null) {
+        // Refrescar la lista de asistencias
+        debugPrint('AsistenciaProvider: Refrescando lista de asistencias...');
+        await fetchAsistencias(accessToken, _selectedHorarioId!);
+      }
+
+      return success;
+    } catch (e) {
+      debugPrint('AsistenciaProvider: Error actualizando asistencia: $e');
       return false;
     }
   }
@@ -162,6 +184,13 @@ class AsistenciaProvider with ChangeNotifier {
   /// Selecciona un horario para trabajar con él
   void selectHorario(String horarioId) {
     _selectedHorarioId = horarioId;
+    notifyListeners();
+  }
+
+  /// Método helper para cambiar el estado
+  void _setState(AsistenciaState newState, [String? errorMessage]) {
+    _state = newState;
+    _errorMessage = errorMessage;
     notifyListeners();
   }
 }

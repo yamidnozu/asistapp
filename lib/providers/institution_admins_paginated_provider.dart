@@ -1,9 +1,14 @@
-import 'paginated_data_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'paginated_data_mixin.dart';
+import '../models/pagination_types.dart';
 import '../services/user_service.dart' as user_service;
 import '../models/user.dart';
 
-class InstitutionAdminsPaginatedProvider extends PaginatedDataProvider<User> {
-  final user_service.UserService _userService = user_service.UserService();
+class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<User> {
+  final user_service.UserService _userService;
+
+  InstitutionAdminsPaginatedProvider({user_service.UserService? userService})
+      : _userService = userService ?? user_service.UserService();
 
   /// Expected filters: 'institutionId'
   @override

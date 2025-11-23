@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
 import { ConflictError, NotFoundError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export interface CreatePeriodoAcademicoRequest {
   nombre: string;
@@ -91,7 +92,7 @@ export class PeriodoAcademicoService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener períodos académicos:', error);
+      logger.error('Error al obtener períodos académicos:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -130,7 +131,7 @@ export class PeriodoAcademicoService {
         _count: periodo._count,
       };
     } catch (error) {
-      console.error('Error al obtener período académico:', error);
+      logger.error('Error al obtener período académico:', error);
       throw new Error('Error al obtener el período académico');
     }
   }
@@ -198,7 +199,7 @@ export class PeriodoAcademicoService {
         _count: periodo._count,
       };
     } catch (error) {
-      console.error('Error al crear período académico:', error);
+      logger.error('Error al crear período académico:', error);
       if (error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -270,7 +271,7 @@ export class PeriodoAcademicoService {
         _count: periodo._count,
       };
     } catch (error) {
-      console.error('Error al actualizar período académico:', error);
+      logger.error('Error al actualizar período académico:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -311,7 +312,7 @@ export class PeriodoAcademicoService {
 
       return true;
     } catch (error) {
-      console.error('Error al eliminar período académico:', error);
+      logger.error('Error al eliminar período académico:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
@@ -392,7 +393,7 @@ export class PeriodoAcademicoService {
         _count: periodoActualizado._count,
       };
     } catch (error) {
-      console.error('Error al cambiar status del período académico:', error);
+      logger.error('Error al cambiar status del período académico:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
@@ -433,7 +434,7 @@ export class PeriodoAcademicoService {
         _count: periodo._count,
       }));
     } catch (error) {
-      console.error('Error al obtener períodos activos:', error);
+      logger.error('Error al obtener períodos activos:', error);
       throw new Error('Error al obtener los períodos activos');
     }
   }

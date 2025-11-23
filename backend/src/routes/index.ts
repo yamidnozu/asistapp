@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import adminInstitucionRoutes from './admin-institucion.routes';
+import { config } from '../config/app';
 import asistenciaRoutes from './asistencia.routes';
 import authRoutes from './auth.routes';
 import estudianteRoutes from './estudiante.routes';
@@ -10,14 +10,18 @@ import institutionAdminRoutes from './institution-admin.routes';
 import materiaRoutes from './materia.routes';
 import periodoAcademicoRoutes from './periodo-academico.routes';
 import profesorRoutes from './profesor.routes';
-import userRoutes from './user.routes';
+import userRoutes from './usuario.routes';
 
 
 
-console.log('🔄 Iniciando registro de rutas...');
+if (config.nodeEnv === 'development') {
+  console.log('🔄 Iniciando registro de rutas...');
+}
 
 export default async function routes(fastify: FastifyInstance) {
-  console.log('📋 Registrando rutas básicas...');
+  if (config.nodeEnv === 'development') {
+    console.log('📋 Registrando rutas básicas...');
+  }
 
   fastify.get('/', async (request, reply) => {
     return {
@@ -39,11 +43,14 @@ export default async function routes(fastify: FastifyInstance) {
     });
   });
 
-  console.log('🔐 Registrando rutas de autenticación...');
+  if (config.nodeEnv === 'development') {
+    console.log('🔐 Registrando rutas de autenticación...');
+  }
   await fastify.register(authRoutes, { prefix: '/auth' });
-  console.log('✅ Rutas de autenticación registradas exitosamente');
+  if (config.nodeEnv === 'development') {
+    console.log('✅ Rutas de autenticación registradas exitosamente');
+  }
   await fastify.register(userRoutes, { prefix: '/usuarios' });
-  await fastify.register(adminInstitucionRoutes, { prefix: '/admin-institucion' });
   await fastify.register(institutionAdminRoutes, { prefix: '/institution-admin' });
   await fastify.register(institucionRoutes, { prefix: '/instituciones' });
   await fastify.register(grupoRoutes, { prefix: '/grupos' });
@@ -53,9 +60,12 @@ export default async function routes(fastify: FastifyInstance) {
   await fastify.register(profesorRoutes, { prefix: '/profesores' });
   await fastify.register(asistenciaRoutes, { prefix: '/asistencias' });
 
-  console.log('🎓 Registrando rutas del estudiante...');
+  if (config.nodeEnv === 'development') {
+    console.log('🎓 Registrando rutas del estudiante...');
+  }
   await fastify.register(estudianteRoutes, { prefix: '/estudiantes' });
-  console.log('✅ Rutas del estudiante registradas');
-
-  console.log('🎉 Todas las rutas registradas exitosamente');
+  if (config.nodeEnv === 'development') {
+    console.log('✅ Rutas del estudiante registradas');
+    console.log('🎉 Todas las rutas registradas exitosamente');
+  }
 }

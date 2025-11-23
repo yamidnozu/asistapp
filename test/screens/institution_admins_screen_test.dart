@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:asistapp/models/pagination_types.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asistapp/screens/institutions/institution_admins_screen.dart';
@@ -8,7 +9,6 @@ import 'package:asistapp/models/institution.dart';
 import 'package:asistapp/providers/user_provider.dart';
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/institution_provider.dart';
-import 'package:asistapp/providers/paginated_data_provider.dart';
 import 'package:asistapp/providers/institution_admins_paginated_provider.dart';
 import 'package:asistapp/config/app_config.dart';
 

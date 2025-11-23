@@ -1,16 +1,21 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/pagination_types.dart';
 import '../services/institution_service.dart';
 import '../models/institution.dart';
-import 'paginated_data_provider.dart';
+import 'paginated_data_mixin.dart';
 // import '../models/user.dart'; // unused
 
-// InstitutionState removed: rely on PaginatedDataProvider state
+// InstitutionState removed: rely on PaginatedDataMixin state
 
-class InstitutionProvider extends PaginatedDataProvider<Institution> {
-  final InstitutionService _institutionService = InstitutionService();
+class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institution> {
+  final InstitutionService _institutionService;
+
+  InstitutionProvider({InstitutionService? institutionService})
+      : _institutionService = institutionService ?? InstitutionService();
 
   // Error delegated to PaginatedDataProvider
+
   // Items are stored in PaginatedDataProvider._items
   Institution? _selectedInstitution;
   // Pagination managed by PaginatedDataProvider

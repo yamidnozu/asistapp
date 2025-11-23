@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import AsistenciaController from '../controllers/asistencia.controller';
 import { authenticate, authorize } from '../middleware/auth';
+import { UserRole } from '../types';
 
 /**
  * Rutas para gestión de Asistencias
@@ -14,7 +15,7 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   fastify.post('/registrar', {
     preHandler: [
       authenticate,
-      authorize(['profesor', 'admin_institucion']),
+      authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
     ],
     schema: {
       description: 'Registra la asistencia de un estudiante mediante código QR',
@@ -123,7 +124,7 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   fastify.get('/estadisticas/:horarioId', {
     preHandler: [
       authenticate,
-      authorize(['profesor', 'admin_institucion']),
+      authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
     ],
     schema: {
       description: 'Obtiene las estadísticas de asistencia para un horario específico',
@@ -168,7 +169,7 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   fastify.post('/registrar-manual', {
     preHandler: [
       authenticate,
-      authorize(['profesor', 'admin_institucion']),
+      authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
     ],
     schema: {
       description: 'Registra la asistencia de un estudiante manualmente (sin código QR)',
@@ -245,7 +246,7 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   fastify.get('/', {
     preHandler: [
       authenticate,
-      authorize(['admin_institucion', 'profesor']),
+      authorize([UserRole.ADMIN_INSTITUCION, UserRole.PROFESOR]),
     ],
     handler: AsistenciaController.getAllAsistencias as any,
   });
@@ -256,9 +257,49 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
   fastify.get('/estudiante', {
     preHandler: [
       authenticate,
-      authorize(['estudiante']),
+      authorize([UserRole.ESTUDIANTE]),
     ],
     handler: AsistenciaController.getAsistenciasEstudiante as any,
+  });
+
+  // ============================================
+  // ACTUALIZAR ASISTENCIA (Editar pasado)
+  // ============================================
+  fastify.put('/:id', {
+    preHandler: [
+      authenticate,
+      authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
+    ],
+    schema: {
+      description: 'Actualiza una asistencia existente (estado, observación)',
+      tags: ['Asistencias'],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string' },
+        },
+      },
+      body: {
+        type: 'object',
+        properties: {
+          estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'] },
+          observacion: { type: 'string' },
+          justificada: { type: 'boolean' },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' }, // Simplificado para evitar duplicar esquema completo
+          },
+        },
+      },
+    },
+    handler: AsistenciaController.updateAsistencia as any,
   });
 }
 

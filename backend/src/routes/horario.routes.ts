@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import AsistenciaController from '../controllers/asistencia.controller';
 import HorarioController from '../controllers/horario.controller';
 import { authenticate, AuthenticatedRequest, authorize } from '../middleware/auth';
@@ -18,7 +19,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
       preHandler: authenticate,
       handler: async (request: AuthenticatedRequest, reply) => {
         console.log('🔍 GET /horarios - Verificando usuario:', request.user?.rol);
-        
+
         if (!request.user) {
           console.log('❌ No hay usuario autenticado');
           return reply.code(401).send({
@@ -167,7 +168,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Obtiene todos los horarios de un grupo específico
      */
     horarioRoutes.get('/grupo/:grupoId', {
-      preHandler: [authenticate, authorize(['admin_institucion'])],
+      preHandler: [authenticate, authorize([UserRole.ADMIN_INSTITUCION])],
       handler: HorarioController.getByGrupo as any,
       schema: {
         description: 'Obtener todos los horarios de un grupo específico',
@@ -265,7 +266,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Obtiene un horario por ID
      */
     horarioRoutes.get('/:id', {
-      preHandler: [authenticate, authorize(['admin_institucion'])],
+      preHandler: [authenticate, authorize([UserRole.ADMIN_INSTITUCION])],
       handler: HorarioController.getById as any,
       schema: {
         description: 'Obtener un horario por ID',
@@ -350,7 +351,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Crea un nuevo horario
      */
     horarioRoutes.post('/', {
-      preHandler: [authenticate, authorize(['admin_institucion'])],
+      preHandler: [authenticate, authorize([UserRole.ADMIN_INSTITUCION])],
       handler: HorarioController.create as any,
       schema: {
         description: 'Crear un nuevo horario',
@@ -442,7 +443,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Actualiza un horario
      */
     horarioRoutes.put('/:id', {
-      preHandler: [authenticate, authorize(['admin_institucion'])],
+      preHandler: [authenticate, authorize([UserRole.ADMIN_INSTITUCION])],
       handler: HorarioController.update as any,
       schema: {
         description: 'Actualizar un horario',
@@ -539,7 +540,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
      * Elimina un horario
      */
     horarioRoutes.delete('/:id', {
-      preHandler: [authenticate, authorize(['admin_institucion'])],
+      preHandler: [authenticate, authorize([UserRole.ADMIN_INSTITUCION])],
       handler: HorarioController.delete as any,
       schema: {
         description: 'Eliminar un horario',
@@ -564,71 +565,6 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
     });
 
     /**
-     * GET /horarios/:horarioId/asistencias
-     * Obtiene la lista de asistencias para un horario específico
-     */
-    horarioRoutes.get('/:horarioId/asistencias', {
-      preHandler: [
-        authenticate,
-        authorize(['profesor', 'admin_institucion']),
-      ],
-      handler: AsistenciaController.getAsistenciasPorHorario as any,
-      schema: {
-        description: 'Obtiene la lista de asistencias para un horario específico en la fecha actual',
-        tags: ['Horarios', 'Asistencias'],
-        params: {
-          type: 'object',
-          required: ['horarioId'],
-          properties: {
-            horarioId: {
-              type: 'string',
-              description: 'ID del horario/clase',
-            },
-          },
-        },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-              data: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    estudiante: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        nombres: { type: 'string' },
-                        apellidos: { type: 'string' },
-                        identificacion: { type: 'string' },
-                      },
-                    },
-                    estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'], nullable: true },
-                    fechaRegistro: { type: 'string', format: 'date-time', nullable: true },
-                  },
-                },
-              },
-            },
-          },
-          404: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-              error: { type: 'string' },
-            },
-          },
-        },
-      },
-    });
-
-    // ========== ENDPOINT DE PRUEBA ==========
-
-    /**
-     * GET /horarios/test
      * Endpoint de prueba para verificar funcionamiento
      */
     horarioRoutes.get('/test', async (request, reply) => {

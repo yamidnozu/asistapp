@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/grupo.dart'; // Para PeriodoAcademico
 import '../../providers/auth_provider.dart';
 import '../../providers/periodo_academico_provider.dart';
-import '../../services/academic_service.dart' as academic_service;
+import '../../services/academic/periodo_service.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
 
@@ -430,7 +430,7 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
 
       final success = await periodoProvider.createPeriodoAcademico(
         token,
-        academic_service.CreatePeriodoAcademicoRequest(
+        CreatePeriodoAcademicoRequest(
           nombre: _nombreController.text.trim(),
           fechaInicio: _fechaInicio!.toIso8601String(),
           fechaFin: _fechaFin!.toIso8601String(),
@@ -590,7 +590,7 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
       final success = await periodoProvider.updatePeriodoAcademico(
         token,
         widget.periodo.id,
-        academic_service.UpdatePeriodoAcademicoRequest(
+        UpdatePeriodoAcademicoRequest(
           nombre: _nombreController.text.trim(),
           fechaInicio: _fechaInicio!.toIso8601String(),
           fechaFin: _fechaFin!.toIso8601String(),

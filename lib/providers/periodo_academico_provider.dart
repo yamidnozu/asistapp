@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/academic_service.dart' as academic_service;
+import '../models/pagination_types.dart';
+import '../services/academic/periodo_service.dart';
 import '../models/grupo.dart'; // Para PeriodoAcademico
-import 'paginated_data_provider.dart';
-import '../models/user.dart'; // Para PaginationInfo
+import 'paginated_data_mixin.dart';
 
-// PeriodoAcademicoState removed: rely on PaginatedDataProvider state
+// PeriodoAcademicoState removed: rely on PaginatedDataMixin state
 
-class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
-  final academic_service.AcademicService _academicService = academic_service.AcademicService();
+class PeriodoAcademicoProvider extends ChangeNotifier with PaginatedDataMixin<PeriodoAcademico> {
+  final PeriodoService _periodoService;
+
+  PeriodoAcademicoProvider({PeriodoService? periodoService})
+      : _periodoService = periodoService ?? PeriodoService();
 
   // Error handling delegated to PaginatedDataProvider
+
   // Items are stored in PaginatedDataProvider._items
   PeriodoAcademico? _selectedPeriodo;
 
@@ -56,7 +60,7 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
 
     try {
       debugPrint('PeriodoAcademicoProvider: Iniciando carga de períodos activos...');
-      final periodos = await _academicService.getPeriodosActivos(accessToken);
+      final periodos = await _periodoService.getPeriodosActivos(accessToken);
       if (periodos != null) {
         debugPrint('PeriodoAcademicoProvider: Recibidos ${periodos.length} períodos activos');
   clearItems();
@@ -76,7 +80,7 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   if (isLoading) return;
 
     try {
-      final periodo = await _academicService.getPeriodoAcademicoById(accessToken, periodoId);
+      final periodo = await _periodoService.getPeriodoAcademicoById(accessToken, periodoId);
       if (periodo != null) {
         _selectedPeriodo = periodo;
   notifyListeners();
@@ -90,11 +94,11 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   }
 
   /// Crea un nuevo período académico
-  Future<bool> createPeriodoAcademico(String accessToken, academic_service.CreatePeriodoAcademicoRequest periodoData) async {
+  Future<bool> createPeriodoAcademico(String accessToken, CreatePeriodoAcademicoRequest periodoData) async {
   if (isLoading) return false;
 
     try {
-      final newPeriodo = await _academicService.createPeriodoAcademico(accessToken, periodoData);
+      final newPeriodo = await _periodoService.createPeriodoAcademico(accessToken, periodoData);
       if (newPeriodo != null) {
     // Agregar el nuevo período a la lista
     items.insert(0, newPeriodo);
@@ -112,11 +116,11 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   }
 
   /// Actualiza un período académico existente
-  Future<bool> updatePeriodoAcademico(String accessToken, String periodoId, academic_service.UpdatePeriodoAcademicoRequest periodoData) async {
+  Future<bool> updatePeriodoAcademico(String accessToken, String periodoId, UpdatePeriodoAcademicoRequest periodoData) async {
   if (isLoading) return false;
 
     try {
-      final updatedPeriodo = await _academicService.updatePeriodoAcademico(accessToken, periodoId, periodoData);
+      final updatedPeriodo = await _periodoService.updatePeriodoAcademico(accessToken, periodoId, periodoData);
       if (updatedPeriodo != null) {
         // Actualizar el período en la lista
         final index = items.indexWhere((periodo) => periodo.id == periodoId);
@@ -145,7 +149,7 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   /// Elimina un período académico
   Future<bool> deletePeriodoAcademico(String accessToken, String periodoId) async {
     try {
-      final success = await _academicService.deletePeriodoAcademico(accessToken, periodoId);
+      final success = await _periodoService.deletePeriodoAcademico(accessToken, periodoId);
 
       if (!success) {
     setError('Error al eliminar el período académico desde el servicio.');
@@ -165,7 +169,7 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
   /// Activa/desactiva un período académico
   Future<bool> togglePeriodoStatus(String accessToken, String periodoId) async {
     try {
-      final updatedPeriodo = await _academicService.togglePeriodoStatus(accessToken, periodoId);
+      final updatedPeriodo = await _periodoService.togglePeriodoStatus(accessToken, periodoId);
 
       if (updatedPeriodo != null) {
         // Actualizar el período en la lista
@@ -259,25 +263,25 @@ class PeriodoAcademicoProvider extends PaginatedDataProvider<PeriodoAcademico> {
 
   @override
   Future<PaginatedResponse<PeriodoAcademico>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final response = await _academicService.getPeriodosAcademicos(accessToken, page: page, limit: limit);
+    final response = await _periodoService.getPeriodosAcademicos(accessToken, page: page, limit: limit);
     if (response == null) return null;
     return PaginatedResponse(items: response.periodosAcademicos, pagination: response.pagination);
   }
 
   @override
   Future<PeriodoAcademico?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _academicService.createPeriodoAcademico(accessToken, data as academic_service.CreatePeriodoAcademicoRequest);
+    final created = await _periodoService.createPeriodoAcademico(accessToken, data as CreatePeriodoAcademicoRequest);
     return created;
   }
 
   @override
   Future<bool> deleteItemApi(String accessToken, String id) async {
-    return await _academicService.deletePeriodoAcademico(accessToken, id);
+    return await _periodoService.deletePeriodoAcademico(accessToken, id);
   }
 
   @override
   Future<PeriodoAcademico?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _academicService.updatePeriodoAcademico(accessToken, id, data as academic_service.UpdatePeriodoAcademicoRequest);
+    final updated = await _periodoService.updatePeriodoAcademico(accessToken, id, data as UpdatePeriodoAcademicoRequest);
     return updated;
   }
 

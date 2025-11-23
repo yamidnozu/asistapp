@@ -141,17 +141,19 @@ class AsistenciaService {
       rethrow;
     }
   }
-
-  /// Obtiene la lista de asistencias para un horario específico
-  Future<List<AsistenciaEstudiante>> fetchAsistencias({
+  Future<List<AsistenciaEstudiante>> getAsistencias({
     required String accessToken,
     required String horarioId,
+    DateTime? date,
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
+      final url = date != null
+          ? '$baseUrlValue/horarios/$horarioId/asistencias?date=${date.toIso8601String().split('T')[0]}'
+          : '$baseUrlValue/horarios/$horarioId/asistencias';
 
       final response = await http.get(
-        Uri.parse('$baseUrlValue/horarios/$horarioId/asistencias'),
+        Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $accessToken',
         },
@@ -183,6 +185,57 @@ class AsistenciaService {
       }
     } catch (e) {
       debugPrint('❌ Error al obtener asistencias: $e');
+      rethrow;
+    }
+  }
+  /// Actualiza una asistencia existente (estado, observación, justificación)
+  Future<bool> updateAsistencia({
+    required String accessToken,
+    required String asistenciaId,
+    required String estado,
+    String? observacion,
+    bool? justificada,
+  }) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+
+      final response = await http.put(
+        Uri.parse('$baseUrlValue/asistencias/$asistenciaId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'estado': estado,
+          'observacion': observacion,
+          'justificada': justificada,
+        }),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('PUT /asistencias/$asistenciaId - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          debugPrint('✅ Asistencia actualizada exitosamente');
+          return true;
+        } else {
+          throw Exception(responseData['message'] ?? 'Error al actualizar asistencia');
+        }
+      } else {
+        final responseData = jsonDecode(response.body);
+        final errorMsg = responseData['message'] ?? 
+                        responseData['error'] ?? 
+                        'Error al actualizar asistencia';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      debugPrint('❌ Error al actualizar asistencia: $e');
       rethrow;
     }
   }

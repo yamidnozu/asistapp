@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
 import { ConflictError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export interface InstitutionFilters {
   activa?: boolean;
@@ -102,7 +103,7 @@ export class InstitucionService {
 
       return result;
     } catch (error) {
-      console.error('Error al obtener todas las instituciones:', error);
+      logger.error('Error al obtener todas las instituciones:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -142,7 +143,7 @@ export class InstitucionService {
 
       return admins;
     } catch (error) {
-      console.error(`Error al obtener admins de la institución ${institutionId}:`, error);
+      logger.error(`Error al obtener admins de la institución ${institutionId}:`, error);
       throw error;
     }
   }
@@ -188,7 +189,7 @@ export class InstitucionService {
       const updatedUser = await prisma.usuario.findUnique({ where: { id: userId } });
       return updatedUser;
     } catch (error) {
-      console.error(`Error al asignar admin ${userId} a institución ${institutionId}:`, error);
+      logger.error(`Error al asignar admin ${userId} a institución ${institutionId}:`, error);
       throw error;
     }
   }
@@ -229,7 +230,7 @@ export class InstitucionService {
 
   return { usuarioId: userId, institutionId, removed: true };
     } catch (error) {
-      console.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
+      logger.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
       throw error;
     }
   }
@@ -262,7 +263,7 @@ export class InstitucionService {
         updatedAt: institution.updatedAt.toISOString(),
       };
     } catch (error) {
-      console.error(`Error al obtener institución con ID ${id}:`, error);
+      logger.error(`Error al obtener institución con ID ${id}:`, error);
       throw error;
     }
   }
@@ -297,7 +298,7 @@ export class InstitucionService {
         updatedAt: institution.updatedAt.toISOString(),
       };
     } catch (error) {
-      console.error('Error al crear institución:', error);
+      logger.error('Error al crear institución:', error);
       throw error;
     }
   }
@@ -339,7 +340,7 @@ export class InstitucionService {
         updatedAt: institution.updatedAt.toISOString(),
       };
     } catch (error) {
-      console.error(`Error al actualizar institución con ID ${id}:`, error);
+      logger.error(`Error al actualizar institución con ID ${id}:`, error);
       throw error;
     }
   }
@@ -374,7 +375,7 @@ export class InstitucionService {
 
       return true;
     } catch (error) {
-      console.error(`Error al eliminar institución con ID ${id}:`, error);
+      logger.error(`Error al eliminar institución con ID ${id}:`, error);
       throw error;
     }
   }

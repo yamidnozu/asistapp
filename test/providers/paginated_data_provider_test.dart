@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:asistapp/models/pagination_types.dart';
 import 'package:asistapp/providers/paginated_data_provider.dart';
 import 'package:asistapp/models/user.dart';
 

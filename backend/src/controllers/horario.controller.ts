@@ -1,8 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { config } from '../config/app';
 import { prisma } from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import HorarioService from '../services/horario.service';
 import { NotFoundError, ValidationError } from '../types';
+import logger from '../utils/logger';
+import { validateTimeFormat } from '../utils/time-validation';
 
 interface GetHorariosQuery {
   page?: string;
@@ -46,11 +49,15 @@ export class HorarioController {
    */
   public static async getAll(request: AuthenticatedRequest & FastifyRequest<{ Querystring: GetHorariosQuery }>, reply: FastifyReply) {
     try {
-      console.log('🔍 Verificando usuario en getAll horarios:', request.user);
+      if (config.nodeEnv === 'development') {
+        console.log('🔍 Verificando usuario en getAll horarios:', request.user);
+      }
 
       // Verificar autorización manualmente
       if (!request.user) {
-        console.log('❌ No hay usuario autenticado');
+        if (config.nodeEnv === 'development') {
+          console.log('❌ No hay usuario autenticado');
+        }
         return reply.code(401).send({
           success: false,
           error: 'Usuario no autenticado',
@@ -59,7 +66,9 @@ export class HorarioController {
       }
 
       if (request.user.rol !== 'admin_institucion') {
-        console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a horarios`);
+        if (config.nodeEnv === 'development') {
+          console.log(`❌ Usuario con rol '${request.user.rol}' intentando acceder a horarios`);
+        }
         return reply.code(403).send({
           success: false,
           error: 'Acceso denegado: se requiere rol de administrador de institución',
@@ -67,7 +76,9 @@ export class HorarioController {
         });
       }
 
-      console.log('✅ Autorización exitosa para admin_institucion');
+      if (config.nodeEnv === 'development') {
+        console.log('✅ Autorización exitosa para admin_institucion');
+      }
 
       // Obtener la institución del admin autenticado
       const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
@@ -116,7 +127,7 @@ export class HorarioController {
         pagination: result.pagination,
       });
     } catch (error) {
-      console.error('Error en getAll horarios:', error);
+      logger.error('Error en getAll horarios:', error);
       throw error;
     }
   }
@@ -155,7 +166,7 @@ export class HorarioController {
         data: horarios,
       });
     } catch (error) {
-      console.error('Error en getByGrupo horarios:', error);
+      logger.error('Error en getByGrupo horarios:', error);
       throw error;
     }
   }
@@ -190,7 +201,7 @@ export class HorarioController {
         data: horario,
       });
     } catch (error) {
-      console.error('Error en getById horario:', error);
+      logger.error('Error en getById horario:', error);
       throw error;
     }
   }
@@ -200,9 +211,11 @@ export class HorarioController {
    */
   public static async create(request: AuthenticatedRequest & FastifyRequest<{ Body: CreateHorarioBody }>, reply: FastifyReply) {
     try {
-      console.log('🔍 CONTROLLER: Iniciando create horario');
-      console.log('🔍 CONTROLLER: Body recibido:', JSON.stringify(request.body, null, 2));
-      console.log('🔍 CONTROLLER: Usuario:', request.user?.id);
+      if (config.nodeEnv === 'development') {
+        console.log('🔍 CONTROLLER: Iniciando create horario');
+        console.log('🔍 CONTROLLER: Body recibido:', JSON.stringify(request.body, null, 2));
+        console.log('🔍 CONTROLLER: Usuario:', request.user?.id);
+      }
 
       const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
         where: { usuarioId: request.user!.id, activo: true },
@@ -215,7 +228,9 @@ export class HorarioController {
         });
       }
 
-      console.log('🔍 CONTROLLER: Institución del usuario:', usuarioInstitucion.institucionId);
+      if (config.nodeEnv === 'development') {
+        console.log('🔍 CONTROLLER: Institución del usuario:', usuarioInstitucion.institucionId);
+      }
 
       // Validar formato de UUIDs antes de consultar la base de datos
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -237,23 +252,37 @@ export class HorarioController {
         });
       }
 
+      // Validar formato de horas
+      try {
+        validateTimeFormat(request.body.horaInicio, request.body.horaFin);
+      } catch (error) {
+        return reply.code(400).send({
+          success: false,
+          error: (error as Error).message,
+          code: 'VALIDATION_ERROR'
+        });
+      }
+
       const data = {
         ...request.body,
         institucionId: usuarioInstitucion.institucionId,
       };
 
-      console.log('🔍 CONTROLLER: Llamando al servicio con data:', JSON.stringify(data, null, 2));
-      
-      // Validar que todos los campos requeridos estén presentes y sean válidos
-      console.log('🔍 CONTROLLER: Validando campos...');
-      console.log('periodoId:', data.periodoId, 'tipo:', typeof data.periodoId, 'longitud:', data.periodoId?.length);
-      console.log('grupoId:', data.grupoId, 'tipo:', typeof data.grupoId, 'longitud:', data.grupoId?.length);
-      console.log('materiaId:', data.materiaId, 'tipo:', typeof data.materiaId, 'longitud:', data.materiaId?.length);
-      console.log('profesorId:', data.profesorId, 'tipo:', typeof data.profesorId, 'longitud:', data.profesorId?.length);
-      console.log('diaSemana:', data.diaSemana, 'tipo:', typeof data.diaSemana);
-      console.log('horaInicio:', data.horaInicio, 'tipo:', typeof data.horaInicio);
-      console.log('horaFin:', data.horaFin, 'tipo:', typeof data.horaFin);
-      console.log('institucionId:', data.institucionId, 'tipo:', typeof data.institucionId, 'longitud:', data.institucionId?.length);
+      if (config.nodeEnv === 'development') {
+        logger.debug('🔍 CONTROLLER: Llamando al servicio con data', data);
+        
+        // Validar que todos los campos requeridos estén presentes y sean válidos
+        logger.debug('🔍 CONTROLLER: Validando campos', {
+          periodoId: { valor: data.periodoId, tipo: typeof data.periodoId, longitud: data.periodoId?.length },
+          grupoId: { valor: data.grupoId, tipo: typeof data.grupoId, longitud: data.grupoId?.length },
+          materiaId: { valor: data.materiaId, tipo: typeof data.materiaId, longitud: data.materiaId?.length },
+          profesorId: { valor: data.profesorId, tipo: typeof data.profesorId, longitud: data.profesorId?.length },
+          diaSemana: { valor: data.diaSemana, tipo: typeof data.diaSemana },
+          horaInicio: { valor: data.horaInicio, tipo: typeof data.horaInicio },
+          horaFin: { valor: data.horaFin, tipo: typeof data.horaFin },
+          institucionId: { valor: data.institucionId, tipo: typeof data.institucionId, longitud: data.institucionId?.length }
+        });
+      }
 
       const horario = await HorarioService.createHorario(data);
 
@@ -263,8 +292,8 @@ export class HorarioController {
         message: 'Horario creado exitosamente',
       });
     } catch (error) {
-      console.error('❌ CONTROLLER: Error en create horario:', error);
-      console.error('❌ CONTROLLER: Stack trace:', (error as Error).stack);
+      logger.error('❌ CONTROLLER: Error en create horario:', error);
+      logger.error('❌ CONTROLLER: Stack trace:', (error as Error).stack);
       
       // Si es un error de validación de Prisma (IDs inválidos), devolver 400
       if ((error as any).code === 'P2025' || (error as any).code === 'P2003') {
@@ -304,6 +333,21 @@ export class HorarioController {
         });
       }
 
+      // Validar formato de horas si se proporcionan
+      if (data.horaInicio || data.horaFin) {
+        const horaInicio = data.horaInicio || existingHorario.horaInicio;
+        const horaFin = data.horaFin || existingHorario.horaFin;
+        try {
+          validateTimeFormat(horaInicio, horaFin);
+        } catch (error) {
+          return reply.code(400).send({
+            success: false,
+            error: (error as Error).message,
+            code: 'VALIDATION_ERROR'
+          });
+        }
+      }
+
       const horario = await HorarioService.updateHorario(id, data);
 
       if (!horario) {
@@ -316,7 +360,7 @@ export class HorarioController {
         message: 'Horario actualizado exitosamente',
       });
     } catch (error) {
-      console.error('Error en update horario:', error);
+      logger.error('Error en update horario:', error);
       throw error;
     }
   }
@@ -352,7 +396,7 @@ export class HorarioController {
         message: 'Horario eliminado exitosamente',
       });
     } catch (error) {
-      console.error('Error en delete horario:', error);
+      logger.error('Error en delete horario:', error);
       throw error;
     }
   }

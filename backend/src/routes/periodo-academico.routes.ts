@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import PeriodoAcademicoController from '../controllers/periodo-academico.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -7,7 +8,7 @@ export default async function periodoAcademicoRoutes(fastify: FastifyInstance) {
   fastify.register(async function (periodoAcademicoRoutes) {
 
     periodoAcademicoRoutes.addHook('preHandler', authenticate);
-    periodoAcademicoRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    periodoAcademicoRoutes.addHook('preHandler', authorize([UserRole.ADMIN_INSTITUCION]));
 
     /**
      * GET /periodos-academicos

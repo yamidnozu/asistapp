@@ -10,11 +10,11 @@ import '../providers/auth_provider.dart';
 import '../providers/institution_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/materia_provider.dart';
-import '../providers/grupo_paginated_provider.dart';
+import '../providers/grupo_provider.dart';
 import '../providers/horario_provider.dart';
 import '../providers/asistencia_provider.dart';
 import '../models/user.dart';
-import '../services/academic_service.dart';
+import '../services/academic/materia_service.dart';
 
 /// Flujo completo de pruebas para la aplicación de asistencia estudiantil
 /// Este archivo contiene funciones para probar todas las funcionalidades
@@ -316,7 +316,7 @@ class TestFlowManager {
     debugPrint('🧪 PASO 7: Verificando sistema de grupos');
 
     final router = GoRouter.of(context);
-  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar a grupos

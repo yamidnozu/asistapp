@@ -1,49 +1,37 @@
+import 'package:json_annotation/json_annotation.dart';
+import '../constants/attendance.dart';
+
+part 'asistencia_estudiante.g.dart';
+
 /// Modelo que representa la información de asistencia de un estudiante
 /// Corresponde a la respuesta del endpoint GET /horarios/:horarioId/asistencias
+@JsonSerializable()
 class AsistenciaEstudiante {
+  final String? id; // ID de la asistencia específica (puede ser null si no registrada)
   final String estudianteId;
   final String nombres;
   final String apellidos;
   final String identificacion;
   final String? estado; // null si no ha registrado asistencia
+  final String? observacion; // Comentarios adicionales sobre la asistencia
   final DateTime? fechaRegistro;
 
   AsistenciaEstudiante({
+    this.id,
     required this.estudianteId,
     required this.nombres,
     required this.apellidos,
     required this.identificacion,
     this.estado,
+    this.observacion,
     this.fechaRegistro,
   });
 
   /// Crea una instancia desde un JSON del backend
-  factory AsistenciaEstudiante.fromJson(Map<String, dynamic> json) {
-    return AsistenciaEstudiante(
-      estudianteId: json['estudiante']['id'] as String,
-      nombres: json['estudiante']['nombres'] as String,
-      apellidos: json['estudiante']['apellidos'] as String,
-      identificacion: json['estudiante']['identificacion'] as String,
-      estado: json['estado'] as String?,
-      fechaRegistro: json['fechaRegistro'] != null
-          ? DateTime.parse(json['fechaRegistro'] as String)
-          : null,
-    );
-  }
+  factory AsistenciaEstudiante.fromJson(Map<String, dynamic> json) => _$AsistenciaEstudianteFromJson(json);
 
   /// Convierte la instancia a JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'estudiante': {
-        'id': estudianteId,
-        'nombres': nombres,
-        'apellidos': apellidos,
-        'identificacion': identificacion,
-      },
-      'estado': estado,
-      'fechaRegistro': fechaRegistro?.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$AsistenciaEstudianteToJson(this);
 
   /// Obtiene el nombre completo del estudiante
   String get nombreCompleto => '$nombres $apellidos';
@@ -65,50 +53,30 @@ class AsistenciaEstudiante {
   }
 
   /// Verifica si el estudiante está presente
-  bool get estaPresente => estado == 'PRESENTE';
+  bool get estaPresente => estado == AttendanceStatus.presente;
 
   /// Verifica si el estudiante está ausente
-  bool get estaAusente => estado == 'AUSENTE';
+  bool get estaAusente => estado == AttendanceStatus.ausente;
 
   /// Verifica si el estudiante tiene tardanza
-  bool get tieneTardanza => estado == 'TARDANZA';
+  bool get tieneTardanza => estado == AttendanceStatus.tardanza;
 
   /// Verifica si el estudiante está justificado
-  bool get estaJustificado => estado == 'JUSTIFICADO';
+  bool get estaJustificado => estado == AttendanceStatus.justificado;
 
   /// Verifica si el estudiante no ha registrado asistencia
   bool get sinRegistrar => estado == null;
 
   /// Obtiene el color correspondiente al estado de asistencia
   String getEstadoColor() {
-    switch (estado) {
-      case 'PRESENTE':
-        return '#4CAF50'; // Verde
-      case 'AUSENTE':
-        return '#F44336'; // Rojo
-      case 'TARDANZA':
-        return '#FF9800'; // Naranja
-      case 'JUSTIFICADO':
-        return '#2196F3'; // Azul
-      default:
-        return '#9E9E9E'; // Gris para sin registrar
-    }
+    if (estado == null) return '#9E9E9E'; // Gris para sin registrar
+    return AttendanceStatus.getColor(estado!);
   }
 
   /// Obtiene el texto descriptivo del estado
   String getEstadoTexto() {
-    switch (estado) {
-      case 'PRESENTE':
-        return 'Presente';
-      case 'AUSENTE':
-        return 'Ausente';
-      case 'TARDANZA':
-        return 'Tardanza';
-      case 'JUSTIFICADO':
-        return 'Justificado';
-      default:
-        return 'Sin registrar';
-    }
+    if (estado == null) return 'Sin registrar';
+    return AttendanceStatus.getName(estado!);
   }
 
   @override

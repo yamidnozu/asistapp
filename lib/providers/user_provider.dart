@@ -1,15 +1,20 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/pagination_types.dart';
 import '../services/user_service.dart' as user_service;
 import '../models/user.dart';
-import 'paginated_data_provider.dart';
+import 'paginated_data_mixin.dart';
 
-// UserState removed; rely on base PaginatedDataProvider methods
+// UserState removed; rely on base PaginatedDataMixin methods
 
-class UserProvider extends PaginatedDataProvider<User> {
-  final user_service.UserService _userService = user_service.UserService();
+class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
+  final user_service.UserService _userService;
+
+  UserProvider({user_service.UserService? userService})
+      : _userService = userService ?? user_service.UserService();
 
   // Error handling delegated to PaginatedDataProvider
+
   // Items are stored in PaginatedDataProvider._items. Retain _state for UI-specific flags.
   User? _selectedUser;
   String? _selectedInstitutionId;

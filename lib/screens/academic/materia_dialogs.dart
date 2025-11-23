@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/materia.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/materia_provider.dart';
-import '../../services/academic_service.dart' as academic_service;
+import '../../services/academic/materia_service.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
 
@@ -45,7 +45,7 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
 
       final success = await materiaProvider.createMateria(
         token,
-        academic_service.CreateMateriaRequest(
+        CreateMateriaRequest(
           nombre: _nombreController.text.trim(),
           codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
         ),
@@ -194,7 +194,7 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
       final success = await materiaProvider.updateMateria(
         token,
         widget.materia.id,
-        academic_service.UpdateMateriaRequest(
+        UpdateMateriaRequest(
           nombre: _nombreController.text.trim(),
           codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
         ),

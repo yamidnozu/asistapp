@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../config/app_config.dart';
+import '../utils/http_client.dart';
 
 class LoginResponse {
   final String accessToken;
@@ -49,27 +49,28 @@ class RefreshResponse {
 }
 
 class AuthService {
+  final BuildContext? context;
+  late final AppHttpClient _httpClient;
 
-  // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
+  AuthService({this.context}) {
+    _httpClient = AppHttpClient(context: context);
+  }
 
   Future<LoginResponse?> login(String email, String password) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final url = '$baseUrlValue/auth/login';
 
-      
       final requestBody = jsonEncode({
         'email': email,
         'password': password,
       });
-      
-      
-      debugPrint('AuthService.login - URL: $url');
-      debugPrint('AuthService.login - Request body: $requestBody');
 
-      final response = await http.post(
+      debugPrint('AuthService.login - URL: $url');
+      debugPrint('AuthService.login - Config Base URL: $baseUrlValue');
+
+      final response = await _httpClient.post(
         Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
         body: requestBody,
       ).timeout(
         const Duration(seconds: 10),
@@ -97,34 +98,34 @@ class AuthService {
         return LoginResponse.fromJson(responseData);
       } else {
         debugPrint('   Response: ${response.body}');
-        // Intentar extraer mensaje claro del servidor y lanzarlo para que la UI lo muestre
         try {
           final Map<String, dynamic> errorData = jsonDecode(response.body);
-          final serverMessage = errorData['message'] ?? errorData['error'] ?? (errorData['data'] is Map ? errorData['data']['message'] : null) ?? response.body;
+          final serverMessage = errorData['message'] ?? 
+                                errorData['error'] ?? 
+                                (errorData['data'] is Map ? errorData['data']['message'] : null) ?? 
+                                response.body;
           throw Exception(serverMessage);
         } catch (parseError) {
-          // Si no es JSON válido, lanzar el body crudo
           throw Exception(response.body);
         }
       }
+    } on UnauthorizedException {
+      // El interceptor ya manejó el 401
+      debugPrint('Sesión expirada durante login');
+      return null;
     } catch (e, stackTrace) {
       debugPrint('Error: $e');
       debugPrint('StackTrace: $stackTrace');
-      debugPrint('====================================');
-      // Propagar la excepción para que el caller (AuthProvider / UI) pueda mostrarla
       rethrow;
     }
   }
 
   Future<RefreshResponse?> refreshToken(String refreshToken) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await _httpClient.post(
         Uri.parse('$baseUrlValue/auth/refresh'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'refreshToken': refreshToken,
-        }),
+        body: jsonEncode({'refreshToken': refreshToken}),
       );
 
       if (response.statusCode == 200) {
@@ -134,6 +135,9 @@ class AuthService {
         debugPrint('Refresh failed: ${response.statusCode} - ${response.body}');
         return null;
       }
+    } on UnauthorizedException {
+      debugPrint('Refresh token expirado');
+      return null;
     } catch (e) {
       debugPrint('Refresh error: $e');
       return null;
@@ -142,16 +146,16 @@ class AuthService {
 
   Future<bool> logout(String refreshToken) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await _httpClient.post(
         Uri.parse('$baseUrlValue/auth/logout'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'refreshToken': refreshToken,
-        }),
+        body: jsonEncode({'refreshToken': refreshToken}),
       );
 
       return response.statusCode == 200;
+    } on UnauthorizedException {
+      // Ya cerró sesión de todas formas
+      return true;
     } catch (e) {
       debugPrint('Logout error: $e');
       return false;
@@ -160,13 +164,10 @@ class AuthService {
 
   Future<List<Map<String, dynamic>>?> getUserInstitutions(String accessToken) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.get(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await _httpClient.get(
         Uri.parse('$baseUrlValue/auth/institutions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
+        headers: {'Authorization': 'Bearer $accessToken'},
       );
 
       if (response.statusCode == 200) {
@@ -179,10 +180,17 @@ class AuthService {
         debugPrint('Get user institutions failed: ${response.statusCode} - ${response.body}');
         return null;
       }
+    } on UnauthorizedException {
+      // El interceptor ya manejó el 401
+      return null;
     } catch (e) {
       debugPrint('Get user institutions error: $e');
       return null;
     }
     return null;
+  }
+
+  void dispose() {
+    _httpClient.close();
   }
 }

@@ -33,6 +33,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('🏗️ InstitutionFormScreen: initState called (isEditing: $isEditing)');
     if (widget.institution != null) {
       _loadInstitutionData();
     }
@@ -111,7 +112,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
-        context.pop();
+        context.pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -134,6 +135,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   Widget build(BuildContext context) {
   // spacing intentionally unused; MultiStepFormScaffold handles button spacing
     final title = isEditing ? 'Editar Institución' : 'Nueva Institución';
+    debugPrint('🏗️ InstitutionFormScreen: Building form with title: $title');
 
     return MultiStepFormScaffold(
       title: title,

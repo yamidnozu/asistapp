@@ -38,23 +38,29 @@ fastify.register(routes);
 
 const start = async () => {
   try {
-    console.log('🚀 Iniciando AsistApp Backend v2.0...');
+    if (config.nodeEnv === 'development') {
+      console.log('🚀 Iniciando AsistApp Backend v2.0...');
+    }
 
     await databaseService.connect();
 
     await AuthService.ensureAdminUser();
 
-    console.log('🌐 Iniciando servidor...');
+    if (config.nodeEnv === 'development') {
+      console.log('🌐 Iniciando servidor...');
+    }
     await fastify.listen({
       port: config.port,
       host: config.host
     });
 
-    console.log('✅ Servidor corriendo en:');
-    console.log(`   - Local:   http://localhost:${config.port}`);
-    console.log(`   - Red:     http://192.168.20.22:${config.port}`);
-    console.log('🎯 API lista para recibir conexiones');
-    console.log('📚 Documentación disponible en las URLs anteriores');
+    if (config.nodeEnv === 'development') {
+      console.log('✅ Servidor corriendo en:');
+      console.log(`   - Local:   http://localhost:${config.port}`);
+      console.log(`   - Red:     http://192.168.20.22:${config.port}`);
+      console.log('🎯 API lista para recibir conexiones');
+      console.log('📚 Documentación disponible en las URLs anteriores');
+    }
 
     if (config.nodeEnv === 'production') {
       setInterval(() => {

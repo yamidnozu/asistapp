@@ -26,6 +26,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   
   // Estado para tracking del estudiante seleccionado (primer toque)
   String? _estudianteSeleccionadoId;
+  DateTime _selectedDate = DateTime.now();
 
   // Función helper para mostrar SnackBars en la parte superior
   void _showTopSnackBar({
@@ -83,7 +84,34 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     final token = authProvider.accessToken;
     if (token != null) {
-      await asistenciaProvider.fetchAsistencias(token, widget.clase.id);
+      await asistenciaProvider.fetchAsistencias(token, widget.clase.id, date: _selectedDate);
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: colors.primary,
+              onPrimary: colors.white,
+              onSurface: colors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      _loadAsistencias();
     }
   }
 
@@ -112,9 +140,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         builder: (context, constraints) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Tomar Asistencia'),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Tomar Asistencia'),
+                  Text(
+                    '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                  ),
+                ],
+              ),
               backgroundColor: colors.primary,
               foregroundColor: colors.white,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: _pickDate,
+                  tooltip: 'Cambiar fecha',
+                ),
+              ],
             ),
             body: Consumer<AsistenciaProvider>(
               builder: (context, asistenciaProvider, child) {
@@ -462,6 +506,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     size: 24,
                   ),
                 ],
+                // Botón de edición
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  color: colors.primary,
+                  onPressed: () => _showEditDialog(estudiante),
+                  tooltip: 'Editar asistencia',
+                ),
               ],
             ),
           ),
@@ -550,6 +601,155 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showEditDialog(AsistenciaEstudiante estudiante) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final token = authProvider.accessToken;
+
+    if (token == null) return;
+
+    String estado = estudiante.estado ?? 'PRESENTE';
+    // Si el estado es vacío, por defecto PRESENTE
+    if (estado.isEmpty) estado = 'PRESENTE';
+    
+    String observacion = estudiante.observacion ?? '';
+    bool justificada = estudiante.estaJustificado;
+    
+    // Controlador para el campo de texto
+    final observacionController = TextEditingController(text: observacion);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text('Editar Asistencia: ${estudiante.nombreCompleto}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: estado,
+                      decoration: const InputDecoration(labelText: 'Estado'),
+                      items: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setStateDialog(() {
+                            estado = value;
+                            if (estado == 'JUSTIFICADO') {
+                              justificada = true;
+                            } else {
+                              justificada = false;
+                            }
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: observacionController,
+                      decoration: const InputDecoration(labelText: 'Observación'),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    CheckboxListTile(
+                      title: const Text('Justificada'),
+                      value: justificada,
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          justificada = value ?? false;
+                          if (justificada && estado != 'JUSTIFICADO') {
+                            // Opcional: cambiar estado a justificado si se marca el check
+                            // estado = 'JUSTIFICADO';
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context); // Cerrar diálogo
+                    
+                    // Mostrar loading
+                    _showTopSnackBar(
+                      message: 'Actualizando asistencia...',
+                      leading: const CircularProgressIndicator(color: Colors.white),
+                    );
+
+                    try {
+                      // Si la asistencia no tiene ID (sin registrar), primero hay que registrarla?
+                      // No, el backend updateAsistencia requiere ID.
+                      // Si está "sin registrar", AsistenciaEstudiante tiene id?
+                      // Revisar modelo. Si es null, no se puede actualizar.
+                      // Pero si está en la lista, viene del backend.
+                      // Si es "sin registrar" (mock o placeholder), tal vez no tenga ID de asistencia real.
+                      // Pero fetchAsistencias devuelve registros de asistencia.
+                      // Si no existe, no se puede hacer PUT.
+                      // Se debe hacer POST si no existe.
+                      // Pero el endpoint GET devuelve solo las existentes?
+                      // Si es así, la lista solo muestra los que tienen asistencia.
+                      // Si queremos mostrar todos los estudiantes, el backend debe hacer un left join con estudiantes.
+                      // Asumo que el backend ya hace eso y devuelve objetos con o sin ID de asistencia.
+                      
+                      // Si estudiante.id (de asistencia) es null o vacío, usar registrarAsistenciaManual primero o usar endpoint update que maneje upsert?
+                      // El endpoint PUT /asistencias/:id requiere ID.
+                      
+                      if (estudiante.id == null || estudiante.id!.isEmpty) {
+                         _showTopSnackBar(
+                          message: 'Error: Primero registre la asistencia (toque el estudiante)',
+                          backgroundColor: colors.error,
+                        );
+                        return;
+                      }
+
+                      final success = await asistenciaProvider.updateAsistencia(
+                        accessToken: token,
+                        asistenciaId: estudiante.id!,
+                        estado: estado,
+                        observacion: observacionController.text,
+                        justificada: justificada,
+                      );
+
+                      if (success) {
+                        _showTopSnackBar(
+                          message: 'Asistencia actualizada',
+                          backgroundColor: colors.success,
+                        );
+                        // Recargar
+                        _loadAsistencias();
+                      } else {
+                        _showTopSnackBar(
+                          message: 'Error al actualizar',
+                          backgroundColor: colors.error,
+                        );
+                      }
+                    } catch (e) {
+                      _showTopSnackBar(
+                        message: 'Error: $e',
+                        backgroundColor: colors.error,
+                      );
+                    }
+                  },
+                  child: const Text('Guardar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildStatusChip(AsistenciaEstudiante estudiante) {

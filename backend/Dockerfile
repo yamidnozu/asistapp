@@ -8,6 +8,8 @@ RUN npm install --include=dev
 COPY . .
 # Compila el código de TypeScript a JavaScript
 RUN npm run build
+# Compila el archivo seed.ts a JavaScript
+RUN npx tsc prisma/seed.ts --outDir dist --module commonjs --target es2020 --esModuleInterop
 
 # 2. Etapa de producción
 FROM node:18-alpine
@@ -18,6 +20,8 @@ COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules ./node_modules
 # Copia el schema de Prisma para que esté disponible en producción
 COPY --from=builder /app/prisma ./prisma
+# Copia el archivo seed compilado
+COPY --from=builder /app/dist/seed.js ./dist/seed.js
 
 # Generar cliente Prisma en producción
 RUN npx prisma generate

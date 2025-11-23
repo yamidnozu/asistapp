@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../config/database';
 import { ConflictError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import { UserRole } from '../constants/roles';
+import logger from '../utils/logger';
 
 export interface CreateAdminInstitucionRequest {
   email: string;
@@ -46,12 +48,12 @@ export class AdminInstitucionService {
 
       // Get total count
       const total = await prisma.usuario.count({
-        where: { rol: 'admin_institucion' },
+        where: { rol: UserRole.ADMIN_INSTITUCION },
       });
 
       // Get paginated admins
       const admins = await prisma.usuario.findMany({
-        where: { rol: 'admin_institucion' },
+        where: { rol: UserRole.ADMIN_INSTITUCION },
         include: {
           usuarioInstituciones: {
             where: { activo: true },
@@ -96,7 +98,7 @@ export class AdminInstitucionService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener admins de institución:', error);
+      logger.error('Error al obtener admins de institución:', error);
       throw error;
     }
   }
@@ -109,7 +111,7 @@ export class AdminInstitucionService {
       const admin = await prisma.usuario.findFirst({
         where: {
           id,
-          rol: 'admin_institucion',
+          rol: UserRole.ADMIN_INSTITUCION,
         },
         include: {
           usuarioInstituciones: {
@@ -140,7 +142,7 @@ export class AdminInstitucionService {
         updatedAt: admin.updatedAt.toISOString(),
       };
     } catch (error) {
-      console.error(`Error al obtener admin de institución ${id}:`, error);
+      logger.error(`Error al obtener admin de institución ${id}:`, error);
       throw error;
     }
   }
@@ -197,7 +199,7 @@ export class AdminInstitucionService {
             passwordHash: hashedPassword,
             nombres: data.nombres,
             apellidos: data.apellidos,
-            rol: 'admin_institucion',
+            rol: UserRole.ADMIN_INSTITUCION,
             telefono: data.telefono,
           },
         });
@@ -216,7 +218,7 @@ export class AdminInstitucionService {
       // Obtener admin completo
       return await this.getById(result.id) as AdminInstitucionResponse;
     } catch (error) {
-      console.error('Error al crear admin de institución:', error);
+      logger.error('Error al crear admin de institución:', error);
       throw error;
     }
   }
@@ -257,7 +259,7 @@ export class AdminInstitucionService {
 
       return await this.getById(id);
     } catch (error) {
-      console.error(`Error al actualizar admin de institución ${id}:`, error);
+      logger.error(`Error al actualizar admin de institución ${id}:`, error);
       throw error;
     }
   }
@@ -279,7 +281,7 @@ export class AdminInstitucionService {
 
       return true;
     } catch (error) {
-      console.error(`Error al eliminar admin de institución ${id}:`, error);
+      logger.error(`Error al eliminar admin de institución ${id}:`, error);
       throw error;
     }
   }
@@ -300,7 +302,7 @@ export class AdminInstitucionService {
 
       return !!relacion;
     } catch (error) {
-      console.error(`Error al verificar admin de institución ${userId}:`, error);
+      logger.error(`Error al verificar admin de institución ${userId}:`, error);
       return false;
     }
   }

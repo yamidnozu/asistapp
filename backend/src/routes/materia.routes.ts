@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import MateriaController from '../controllers/materia.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -7,7 +8,7 @@ export default async function materiaRoutes(fastify: FastifyInstance) {
   fastify.register(async function (materiaRoutes) {
 
     materiaRoutes.addHook('preHandler', authenticate);
-    materiaRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    materiaRoutes.addHook('preHandler', authorize([UserRole.ADMIN_INSTITUCION]));
 
     /**
      * GET /materias

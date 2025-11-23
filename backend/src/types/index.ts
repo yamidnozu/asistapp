@@ -6,7 +6,11 @@ import { FastifyRequest } from 'fastify';
 export type Institucion = any;
 export type Usuario = any;
 
-export type UserRole = 'super_admin' | 'admin_institucion' | 'profesor' | 'estudiante';
+import { UserRole } from '../constants/roles';
+export { UserRole };
+
+import { AttendanceStatus, AttendanceType } from '../constants/attendance';
+export { AttendanceStatus, AttendanceType };
 
 export interface LoginRequest {
   email: string;

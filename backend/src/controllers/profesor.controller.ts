@@ -1,6 +1,7 @@
 import { FastifyReply } from 'fastify';
 import { ProfesorService } from '../services/profesor.service';
 import { AuthenticatedRequest } from '../types';
+import logger from '../utils/logger';
 
 export class ProfesorController {
   /**
@@ -22,7 +23,7 @@ export class ProfesorController {
         message: 'Clases del día obtenidas exitosamente',
       });
     } catch (error) {
-      console.error('Error en getClasesDelDia:', error);
+      logger.error('Error en getClasesDelDia:', error);
       return reply.status(500).send({
         success: false,
         message: 'Error interno del servidor',
@@ -58,7 +59,7 @@ export class ProfesorController {
         message: `Clases del día ${diaSemana} obtenidas exitosamente`,
       });
     } catch (error) {
-      console.error('Error en getClasesPorDia:', error);
+      logger.error('Error en getClasesPorDia:', error);
       return reply.status(500).send({
         success: false,
         message: 'Error interno del servidor',
@@ -85,7 +86,7 @@ export class ProfesorController {
         message: 'Horario semanal obtenido exitosamente',
       });
     } catch (error) {
-      console.error('Error en getHorarioSemanal:', error);
+      logger.error('Error en getHorarioSemanal:', error);
       return reply.status(500).send({
         success: false,
         message: 'Error interno del servidor',

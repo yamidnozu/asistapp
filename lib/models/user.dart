@@ -1,5 +1,9 @@
-import '../config/app_constants.dart';
+import 'package:json_annotation/json_annotation.dart';
+import '../constants/roles.dart';
 
+part 'user.g.dart';
+
+@JsonSerializable()
 class User {
   final String id;
   final String email;
@@ -9,7 +13,7 @@ class User {
   final String? telefono;
   final String? identificacion;
   final bool activo;
-  final List<UserInstitution> instituciones;
+  final List<UserInstitution>? instituciones;
   final StudentDetails? estudiante;
   // Campos específicos para profesores
   final String? titulo;
@@ -24,18 +28,18 @@ class User {
     this.telefono,
     this.identificacion,
     required this.activo,
-    required this.instituciones,
+    List<UserInstitution>? instituciones,
     this.estudiante,
     this.titulo,
     this.especialidad,
-  });
+  }) : instituciones = instituciones ?? [];
 
   String get nombreCompleto => '$nombres $apellidos';
 
-  bool get esProfesor => rol == 'profesor';
-  bool get esEstudiante => rol == 'estudiante';
-  bool get esAdminInstitucion => rol == 'admin_institucion';
-  bool get esSuperAdmin => rol == 'super_admin';
+  bool get esProfesor => rol == UserRoles.profesor;
+  bool get esEstudiante => rol == UserRoles.estudiante;
+  bool get esAdminInstitucion => rol == UserRoles.adminInstitucion;
+  bool get esSuperAdmin => rol == UserRoles.superAdmin;
 
   /// Obtiene la inicial del usuario para mostrar en avatares
   String get inicial {
@@ -58,43 +62,9 @@ class User {
     return '?';
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-  nombres: (json['nombres'] as String?) ?? (json['usuario']?['nombres'] as String?) ?? (json['nombre'] as String?) ?? '',
-  apellidos: (json['apellidos'] as String?) ?? (json['usuario']?['apellidos'] as String?) ?? (json['apellido'] as String?) ?? '',
-      rol: json['rol'] as String? ?? 'profesor', // Default to profesor for institution-admin context
-      telefono: json['telefono'] as String?,
-      identificacion: json['identificacion'] as String?,
-      activo: json['activo'] as bool? ?? true,
-      instituciones: (json['usuarioInstituciones'] as List<dynamic>?)
-          ?.map((e) => UserInstitution.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
-      estudiante: json['estudiante'] != null
-          ? StudentDetails.fromJson(json['estudiante'] as Map<String, dynamic>)
-          : null,
-  titulo: json['titulo'] as String?,
-  especialidad: json['especialidad'] as String?,
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'nombres': nombres,
-      'apellidos': apellidos,
-      'rol': rol,
-      'telefono': telefono,
-      'identificacion': identificacion,
-      'activo': activo,
-      'usuarioInstituciones': instituciones.map((e) => e.toJson()).toList(),
-      if (estudiante != null) 'estudiante': estudiante!.toJson(),
-      if (titulo != null) 'titulo': titulo,
-      if (especialidad != null) 'especialidad': especialidad,
-    };
-  }
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 
   User copyWith({
     String? id,
@@ -127,6 +97,7 @@ class User {
   }
 }
 
+@JsonSerializable()
 class UserInstitution {
   final String id;
   final String nombre;
@@ -140,27 +111,12 @@ class UserInstitution {
     required this.activo,
   });
 
-  factory UserInstitution.fromJson(Map<String, dynamic> json) {
-    return UserInstitution(
-      id: json['institucion']?['id'] as String? ?? '',
-      nombre: json['institucion']?['nombre'] as String? ?? '',
-      rolEnInstitucion: json['rolEnInstitucion'] as String?,
-      activo: json['activo'] as bool? ?? true,
-    );
-  }
+  factory UserInstitution.fromJson(Map<String, dynamic> json) => _$UserInstitutionFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'institucion': {
-        'id': id,
-        'nombre': nombre,
-      },
-      'rolEnInstitucion': rolEnInstitucion,
-      'activo': activo,
-    };
-  }
+  Map<String, dynamic> toJson() => _$UserInstitutionToJson(this);
 }
 
+@JsonSerializable()
 class StudentDetails {
   final String id;
   final String identificacion;
@@ -176,25 +132,9 @@ class StudentDetails {
     this.telefonoResponsable,
   });
 
-  factory StudentDetails.fromJson(Map<String, dynamic> json) {
-    return StudentDetails(
-      id: json['id'] as String? ?? '',
-      identificacion: json['identificacion'] as String? ?? '',
-      codigoQr: json['codigoQr'] as String? ?? '',
-      nombreResponsable: json['nombreResponsable'] as String?,
-      telefonoResponsable: json['telefonoResponsable'] as String?,
-    );
-  }
+  factory StudentDetails.fromJson(Map<String, dynamic> json) => _$StudentDetailsFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'identificacion': identificacion,
-      'codigoQr': codigoQr,
-      'nombreResponsable': nombreResponsable,
-      'telefonoResponsable': telefonoResponsable,
-    };
-  }
+  Map<String, dynamic> toJson() => _$StudentDetailsToJson(this);
 }
 
 // Request models for API calls
@@ -244,14 +184,14 @@ class CreateUserRequest {
     };
 
     // Campos específicos para estudiantes
-    if (rol == 'estudiante') {
+    if (rol == UserRoles.estudiante) {
       if (identificacion != null) data['identificacion'] = identificacion;
       if (nombreResponsable != null) data['nombreResponsable'] = nombreResponsable;
       if (telefonoResponsable != null) data['telefonoResponsable'] = telefonoResponsable;
     }
 
     // Campos específicos para profesores
-    if (rol == 'profesor') {
+    if (rol == UserRoles.profesor) {
       if (titulo != null) data['titulo'] = titulo;
       if (especialidad != null) data['especialidad'] = especialidad;
     }
@@ -298,13 +238,14 @@ class UpdateUserRequest {
     if (identificacion != null) data['identificacion'] = identificacion;
     if (nombreResponsable != null) data['nombreResponsable'] = nombreResponsable;
     if (telefonoResponsable != null) data['telefonoResponsable'] = telefonoResponsable;
-  if (titulo != null) data['titulo'] = titulo;
-  if (especialidad != null) data['especialidad'] = especialidad;
+    if (titulo != null) data['titulo'] = titulo;
+    if (especialidad != null) data['especialidad'] = especialidad;
 
     return data;
   }
 }
 
+@JsonSerializable()
 class PaginationInfo {
   final int page;
   final int limit;
@@ -322,25 +263,7 @@ class PaginationInfo {
     required this.hasPrev,
   });
 
-  factory PaginationInfo.fromJson(Map<String, dynamic> json) {
-    return PaginationInfo(
-      page: json['page'] as int? ?? 1,
-      limit: json['limit'] as int? ?? AppConstants.itemsPerPage,
-      total: json['total'] as int? ?? 0,
-      totalPages: json['totalPages'] as int? ?? 1,
-      hasNext: json['hasNext'] as bool? ?? false,
-      hasPrev: json['hasPrev'] as bool? ?? false,
-    );
-  }
+  factory PaginationInfo.fromJson(Map<String, dynamic> json) => _$PaginationInfoFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'page': page,
-      'limit': limit,
-      'total': total,
-      'totalPages': totalPages,
-      'hasNext': hasNext,
-      'hasPrev': hasPrev,
-    };
-  }
+  Map<String, dynamic> toJson() => _$PaginationInfoToJson(this);
 }

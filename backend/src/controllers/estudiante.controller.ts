@@ -2,6 +2,7 @@ import { FastifyReply } from 'fastify';
 import { prisma } from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { NotFoundError, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export class EstudianteController {
   /**
@@ -354,7 +355,7 @@ export class EstudianteController {
         data: response,
       });
     } catch (error: any) {
-      console.error('Error en getMyInfo:', error);
+      logger.error('Error en getMyInfo:', error);
 
       if (error.message?.includes('NotFoundError')) {
         reply.code(404).send({

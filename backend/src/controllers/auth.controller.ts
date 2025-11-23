@@ -3,6 +3,7 @@ import { prisma } from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import AuthService from '../services/auth.service';
 import { ApiResponse, AuthenticationError, LoginRequest, NotFoundError, RefreshTokenResponse, UsuarioConInstituciones, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export class AuthController {
   /**
@@ -10,11 +11,11 @@ export class AuthController {
    */
   public static async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
-      console.log('🔐 LOGIN: Request received', request.body);
+      logger.debug('🔐 LOGIN: Request received', request.body);
       const credentials = request.body;
 
   // Debug: registrar intentos de login para diagnóstico (no guardar contraseñas en logs)
-  console.log('🔐 AUTH: intento de login para email:', credentials.email);
+  logger.debug('🔐 AUTH: intento de login para email:', credentials.email);
 
       if (!credentials.email || !credentials.password) {
         throw new ValidationError('Email y contraseña son requeridos');
@@ -46,6 +47,14 @@ export class AuthController {
 
       if (!user) {
         throw new AuthenticationError('Usuario no autenticado');
+      }
+
+      // Super Admin no tiene instituciones (acceso global)
+      if (user.rol === 'super_admin') {
+        return reply.code(200).send({
+          success: true,
+          data: [],
+        });
       }
 
       const usuario = await prisma.usuario.findUnique({

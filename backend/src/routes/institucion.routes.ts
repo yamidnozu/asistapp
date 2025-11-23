@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import InstitucionController from '../controllers/institucion.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -7,7 +8,7 @@ export default async function institucionRoutes(fastify: FastifyInstance) {
   fastify.register(async function (institucionRoutes) {
 
     institucionRoutes.addHook('preHandler', authenticate);
-    institucionRoutes.addHook('preHandler', authorize(['super_admin']));
+    institucionRoutes.addHook('preHandler', authorize([UserRole.SUPER_ADMIN]));
 
     institucionRoutes.get('/', {
       handler: InstitucionController.getAll,

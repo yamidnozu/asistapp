@@ -8,7 +8,7 @@ import 'user_provider.dart';
 import 'institution_provider.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService _authService;
 
   String? _accessToken;
   String? _refreshToken;
@@ -77,8 +77,7 @@ class AuthProvider with ChangeNotifier {
       return null;
     }
   }
-
-  AuthProvider() {
+  AuthProvider({AuthService? authService}) : _authService = authService ?? AuthService() {
     _loadTokensFromStorage();
   }
 
@@ -192,7 +191,11 @@ class AuthProvider with ChangeNotifier {
 
         await loadUserInstitutions(notify: false);
 
-        if (_institutions != null && _institutions!.length == 1) {
+        // Super Admin no necesita institución seleccionada (acceso global)
+        if (_user?['rol'] == 'super_admin') {
+          _selectedInstitutionId = null;
+          debugPrint('Super Admin: No requiere selección de institución (acceso global)');
+        } else if (_institutions != null && _institutions!.length == 1) {
           _selectedInstitutionId = _institutions!.first.id;
           debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
         } else if (_institutions != null && _institutions!.length > 1) {

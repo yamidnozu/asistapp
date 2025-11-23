@@ -1,13 +1,13 @@
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/user_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
+import '../../services/user_form_service.dart';
+import '../../services/form_validation_service.dart';
 import 'form_steps/index.dart';
 
 class UserFormScreen extends StatefulWidget {
@@ -28,7 +28,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int _currentStep = 0;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
-  // Focus nodes for form fields to allow focusing first invalid field
+
+  // Servicios
+  final UserFormService _userFormService = UserFormService();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _institutionFocus = FocusNode();
 
@@ -108,128 +110,76 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final uri = GoRouterState.of(context).uri;
     final queryParams = uri.queryParameters;
     
-    final isEdit = queryParams['edit'] == 'true';
-    final userId = queryParams['userId'];
+    // Captura el context antes del await
+    final navigator = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
 
-    if (isEdit && userId != null) {
-      // Captura el context antes del await
-      final navigator = GoRouter.of(context);
-      final messenger = ScaffoldMessenger.of(context);
-      final theme = Theme.of(context);
-
-      setState(() => _isInitialLoading = true);
-      
-      try {
+    setState(() => _isInitialLoading = true);
+    
+    try {
+      final user = await _userFormService.loadUserForEditing(context, queryParams);
+      if (user != null && mounted) {
+        // Detectar si estamos editando al usuario de la sesión
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
-        
-        final token = authProvider.accessToken;
-        if (token == null) {
-          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
-          navigator.go('/users');
-          return;
-        }
-
-        await userProvider.loadUserById(
-          token,
-          userId,
-        );
-        
-        final user = userProvider.selectedUser;
-        if (user != null && mounted) {
-          // Detectar si estamos editando al usuario de la sesión
-          final authProvider = Provider.of<AuthProvider>(context, listen: false);
-          final sessionUserId = authProvider.user?['id']?.toString();
-          final sessionRole = authProvider.user?['rol'] as String?;
-          setState(() {
-            _user = user;
-            _isSelfEditing = sessionUserId != null && sessionUserId == user.id;
-            _currentSessionUserRole = sessionRole;
-          });
-          _fillFormWithUserData();
-        }
-      } catch (e) {
-        if (!mounted) return;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error al cargar usuario: ${e.toString()}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onError,
-              ),
+        final sessionUserId = authProvider.user?['id']?.toString();
+        final sessionRole = authProvider.user?['rol'] as String?;
+        setState(() {
+          _user = user;
+          _isSelfEditing = sessionUserId != null && sessionUserId == user.id;
+          _currentSessionUserRole = sessionRole;
+        });
+        _fillFormWithUserData();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al cargar usuario: ${e.toString()}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onError,
             ),
-            backgroundColor: theme.colorScheme.error,
           ),
-        );
-        // Volver a la lista si no se puede cargar el usuario
-        navigator.go('/users');
-      } finally {
-        if (mounted) {
-          setState(() => _isInitialLoading = false);
-        }
+          backgroundColor: theme.colorScheme.error,
+        ),
+      );
+      // Volver a la lista si no se puede cargar el usuario
+      navigator.go('/users');
+    } finally {
+      if (mounted) {
+        setState(() => _isInitialLoading = false);
       }
     }
   }
 
   Future<void> _loadInstitutionsIfNeeded() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userRole = authProvider.user?['rol'] as String?;
-    
-    // Solo cargar instituciones si el usuario actual es super_admin y está creando/editando admin_institucion
-    if (userRole == 'super_admin' && widget.userRole == 'admin_institucion') {
+    await _userFormService.loadInstitutionsIfNeeded(context, widget.userRole);
+    if (!mounted) return;
+    // Preselect institution if provided
+    if (widget.initialInstitutionId != null && _selectedInstitutionId == null) {
       final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-      
-      // Solo cargar si no hay instituciones ya cargadas
-      if (institutionProvider.institutions.isEmpty) {
-        final token = authProvider.accessToken;
-        if (token == null) return;
-
-        await institutionProvider.loadInstitutions(
-          token,
-          page: 1,
-          limit: 100, // Cargar todas para el dropdown
-        );
-      }
-
-      // Preselect institution if provided
-      if (widget.initialInstitutionId != null && _selectedInstitutionId == null) {
-        final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
-        if (exists) _selectedInstitutionId = widget.initialInstitutionId;
-      }
+      final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
+      if (exists) _selectedInstitutionId = widget.initialInstitutionId;
     }
   }
 
   void _fillFormWithUserData() {
     final user = _user!;
-    _nombresController.text = user.nombres;
-    _apellidosController.text = user.apellidos;
-    _emailController.text = user.email;
-    _telefonoController.text = user.telefono ?? '';
-    _activo = user.activo;
-
-    // Preseleccionar institución si existe
-    if (user.instituciones.isNotEmpty) {
-      _selectedInstitutionId = user.instituciones.first.id;
-    }
-
-    if (user.estudiante != null) {
-      _identificacionController.text = user.estudiante!.identificacion;
-      _nombreResponsableController.text = user.estudiante!.nombreResponsable ?? '';
-      _telefonoResponsableController.text = user.estudiante!.telefonoResponsable ?? '';
-    }
-
-    // Para profesores, cargar título, especialidad e identificación si están disponibles
-    try {
-      // user.titulo, user.especialidad y user.identificacion añadidos al modelo
-      if (user.rol == 'profesor') {
-        _tituloController.text = (user.titulo ?? '').toString();
-        _especialidadController.text = (user.especialidad ?? '').toString();
-        _identificacionController.text = (user.identificacion ?? '').toString();
-      }
-    } catch (_) {}
-
-    // Para profesores, los campos específicos no están disponibles en el modelo User actual
-    // Se podrían cargar desde una API adicional si es necesario
+    _userFormService.fillFormWithUserData(
+      user,
+      _nombresController,
+      _apellidosController,
+      _emailController,
+      _telefonoController,
+      _identificacionController,
+      _tituloController,
+      _especialidadController,
+      _nombreResponsableController,
+      _telefonoResponsableController,
+      (value) => setState(() => _activo = value),
+      (value) => setState(() => _selectedInstitutionId = value),
+    );
   }
 
   @override
@@ -263,27 +213,25 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final navigator = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
+    
     // Antes de guardar, validar todos los steps
-    for (var i = 0; i < _stepKeys.length; i++) {
-      final valid = _stepKeys[i].currentState?.validate() ?? true;
-      if (!valid) {
-        setState(() => _autoValidateMode = AutovalidateMode.always);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              'Corrige los campos marcados antes de guardar',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onPrimary,
-              ),
+    if (!_userFormService.validateAllSteps(_stepKeys)) {
+      setState(() => _autoValidateMode = AutovalidateMode.always);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Corrige los campos marcados antes de guardar',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimary,
             ),
-            backgroundColor: theme.colorScheme.primary,
           ),
-        );
-        // mover al step con error y enfocar
-        setState(() => _currentStep = i);
-        _focusFirstInvalidField(i, context);
-        return;
-      }
+          backgroundColor: theme.colorScheme.primary,
+        ),
+      );
+      // mover al step con error y enfocar
+      setState(() => _currentStep = _findFirstInvalidStep());
+      _focusFirstInvalidField(_currentStep, context);
+      return;
     }
 
     // Validación adicional para admin_institucion
@@ -306,150 +254,35 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final success = await _performSaveOperation(authProvider);
 
-      if (_user != null) {
-        // Modo edición
-        final updateRequest = UpdateUserRequest(
-          email: _emailController.text.trim(),
-          nombres: _nombresController.text.trim(),
-          apellidos: _apellidosController.text.trim(),
-          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: (widget.userRole == 'estudiante' || widget.userRole == 'profesor') ? _identificacionController.text.trim() : null,
-          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
-          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-          activo: _activo,
-          // Campos profesor
-          titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
-          especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
-        );
-
-        final token = authProvider.accessToken;
-        if (token == null) {
-          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
-          return;
-        }
-
-        final success = await userProvider.updateUser(
-          token,
-          _user!.id,
-          updateRequest,
-        );
-
-        if (success) {
-          if (!mounted) return;
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                '${_getRoleDisplayName(widget.userRole)} actualizado exitosamente',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
+      if (success) {
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${_userFormService.getRoleDisplayName(widget.userRole)} ${_user != null ? 'actualizado' : 'creado'} exitosamente',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onPrimary,
               ),
-              backgroundColor: theme.colorScheme.primary,
             ),
-          );
-          navigator.go('/users');
-        }
-      } else {
-        // Modo creación
-        final String tempPassword = _generateRandomPassword();
-
-        final createRequest = CreateUserRequest(
-          email: _emailController.text.trim(),
-          password: tempPassword,
-          nombres: _nombresController.text.trim(),
-          apellidos: _apellidosController.text.trim(),
-          telefono: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : null,
-          identificacion: (widget.userRole == 'estudiante' || widget.userRole == 'profesor') ? _identificacionController.text.trim() : null,
-          rol: widget.userRole,
-          titulo: widget.userRole == 'profesor' ? _tituloController.text.trim() : null,
-          especialidad: widget.userRole == 'profesor' ? _especialidadController.text.trim() : null,
-          nombreResponsable: widget.userRole == 'estudiante' ? _nombreResponsableController.text.trim().isNotEmpty ? _nombreResponsableController.text.trim() : null : null,
-          telefonoResponsable: widget.userRole == 'estudiante' ? _telefonoResponsableController.text.trim().isNotEmpty ? _telefonoResponsableController.text.trim() : null : null,
-          institucionId: widget.userRole == 'admin_institucion' ? _selectedInstitutionId : authProvider.selectedInstitutionId,
-          rolEnInstitucion: widget.userRole == 'admin_institucion' ? 'admin' : null,
+            backgroundColor: theme.colorScheme.primary,
+          ),
         );
 
-        final token = authProvider.accessToken;
-        if (token == null) {
-          messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear usuarios')));
-          return;
+        // Mostrar contraseña temporal solo en creación
+        if (_user == null) {
+          await _showPasswordDialog();
         }
 
-        final success = await userProvider.createUser(
-          token,
-          createRequest,
-        );
-
-        if (success) {
-          // Mostrar Snackbar de éxito
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                '${_getRoleDisplayName(widget.userRole)} creado exitosamente',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-              backgroundColor: theme.colorScheme.primary,
-            ),
-          );
-
-          // Mostrar diálogo con la contraseña generada (se mostrará solo una vez)
-          await showDialog<void>(
-            // ignore: use_build_context_synchronously
-            context: context,
-            barrierDismissible: false,
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Contraseña temporal'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
-                    SizedBox(height: 12),
-                    SelectableText(tempPassword, style: Theme.of(context).textTheme.headlineSmall),
-                    SizedBox(height: 12),
-                    Text(
-                      'Asegúrate de copiarla y entregarla al usuario. No se podrá volver a visualizar.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () async {
-                      // Capturar NavigatorState antes del await para evitar usar BuildContext después de un async gap
-                      final navigator = Navigator.of(context);
-                      await Clipboard.setData(ClipboardData(text: tempPassword));
-                      // Intentar cerrar el diálogo usando la instancia capturada
-                      try {
-                        navigator.pop();
-                      } catch (_) {
-                        // Si ya no es posible cerrar, ignora
-                      }
-                    },
-                    child: const Text('Copiar y Cerrar'),
-                  ),
-                ],
-              );
-            },
-          );
-
-          // Finalmente navegar a la lista de usuarios
-          if (!mounted) return;
-          navigator.go('/users');
-        }
+        navigator.go('/users');
       }
     } catch (e) {
-      // Evitar usar context a través de un async gap: comprobar mounted y luego usar ScaffoldMessenger
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            'Error al ${_user != null ? 'actualizar' : 'crear'} ${_getRoleDisplayName(widget.userRole)}: ${e.toString()}',
+            'Error al ${_user != null ? 'actualizar' : 'crear'} ${_userFormService.getRoleDisplayName(widget.userRole)}: ${e.toString()}',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onError,
             ),
@@ -462,6 +295,106 @@ class _UserFormScreenState extends State<UserFormScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<bool> _performSaveOperation(AuthProvider authProvider) async {
+    if (_user != null) {
+      // Modo edición
+      final updateRequest = _userFormService.createUpdateRequest(
+        email: _emailController.text,
+        nombres: _nombresController.text,
+        apellidos: _apellidosController.text,
+        telefono: _telefonoController.text,
+        identificacion: _identificacionController.text,
+        userRole: widget.userRole,
+        titulo: _tituloController.text,
+        especialidad: _especialidadController.text,
+        nombreResponsable: _nombreResponsableController.text,
+        telefonoResponsable: _telefonoResponsableController.text,
+        activo: _activo,
+      );
+
+      return await _userFormService.saveUser(
+        context: context,
+        user: _user,
+        createRequest: null,
+        updateRequest: updateRequest,
+        userRole: widget.userRole,
+      );
+    } else {
+      // Modo creación
+      final createRequest = _userFormService.createUserRequest(
+        email: _emailController.text,
+        nombres: _nombresController.text,
+        apellidos: _apellidosController.text,
+        telefono: _telefonoController.text,
+        identificacion: _identificacionController.text,
+        userRole: widget.userRole,
+        titulo: _tituloController.text,
+        especialidad: _especialidadController.text,
+        nombreResponsable: _nombreResponsableController.text,
+        telefonoResponsable: _telefonoResponsableController.text,
+        selectedInstitutionId: _selectedInstitutionId,
+        authProvider: authProvider,
+      );
+
+      return await _userFormService.saveUser(
+        context: context,
+        user: null,
+        createRequest: createRequest,
+        updateRequest: null,
+        userRole: widget.userRole,
+      );
+    }
+  }
+
+  Future<void> _showPasswordDialog() async {
+    final tempPassword = _userFormService.generateRandomPassword();
+    
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Contraseña temporal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
+              SizedBox(height: 12),
+              SelectableText(tempPassword, style: Theme.of(context).textTheme.headlineSmall),
+              SizedBox(height: 12),
+              Text(
+                'Asegúrate de copiarla y entregarla al usuario. No se podrá volver a visualizar.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                await Clipboard.setData(ClipboardData(text: tempPassword));
+                if (!mounted) return;
+                navigator.pop();
+              },
+              child: const Text('Copiar y Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  int _findFirstInvalidStep() {
+    for (var i = 0; i < _stepKeys.length; i++) {
+      final valid = _stepKeys[i].currentState?.validate() ?? true;
+      if (!valid) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   String _getRoleDisplayName(String role) {
@@ -480,104 +413,40 @@ class _UserFormScreenState extends State<UserFormScreen> {
   }
 
   void _focusFirstInvalidField(int step, BuildContext context) {
-    // Prioridad: enfocar el campo más probable que esté inválido en el paso
-  final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
-
-    if (step == 0) {
-      // Step Cuenta
-      final email = _emailController.text.trim();
-      if (email.isEmpty || !emailRegex.hasMatch(email)) {
-        FocusScope.of(context).requestFocus(_emailFocus);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = _emailFieldKey.currentContext;
-          if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-        });
-        return;
-      }
-
-      if (widget.userRole == 'admin_institucion' && _selectedInstitutionId == null) {
-        FocusScope.of(context).requestFocus(_institutionFocus);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = _institutionFieldKey.currentContext;
-          if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-        });
-        return;
-      }
-    } else if (step == 1) {
-      // Step Info Personal
-      final nombres = _nombresController.text.trim();
-      final apellidos = _apellidosController.text.trim();
-      final telefono = _telefonoController.text.trim();
-      final identificacion = _identificacionController.text.trim();
-
-      if (nombres.isEmpty || nombres.length < 2) {
-        FocusScope.of(context).requestFocus(_nombresFocus);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = _nombresFieldKey.currentContext;
-          if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-        });
-        return;
-      }
-      if (apellidos.isEmpty || apellidos.length < 2) {
-        FocusScope.of(context).requestFocus(_apellidosFocus);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = _apellidosFieldKey.currentContext;
-          if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-        });
-        return;
-      }
-      if (telefono.isNotEmpty && !phoneRegex.hasMatch(telefono)) {
-        FocusScope.of(context).requestFocus(_telefonoFocus);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = _telefonoFieldKey.currentContext;
-          if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-        });
-        return;
-      }
-      if (!(widget.userRole == 'admin_institucion' || widget.userRole == 'super_admin')) {
-        if (identificacion.isEmpty || identificacion.length < 5) {
-          FocusScope.of(context).requestFocus(_identificacionFocus);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final ctx = _identificacionFieldKey.currentContext;
-            if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-          });
-          return;
-        }
-      }
-    } else if (step == 2) {
-      // Step detalles por rol
-      if (widget.userRole == 'profesor') {
-        final titulo = _tituloController.text.trim();
-        final especialidad = _especialidadController.text.trim();
-        if (titulo.isEmpty || titulo.length < 3) {
-          FocusScope.of(context).requestFocus(_tituloFocus);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final ctx = _tituloFieldKey.currentContext;
-            if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-          });
-          return;
-        }
-        if (especialidad.isEmpty || especialidad.length < 3) {
-          FocusScope.of(context).requestFocus(_especialidadFocus);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final ctx = _especialidadFieldKey.currentContext;
-            if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-          });
-          return;
-        }
-      } else if (widget.userRole == 'estudiante') {
-        final telefonoResp = _telefonoResponsableController.text.trim();
-        if (telefonoResp.isNotEmpty && !phoneRegex.hasMatch(telefonoResp)) {
-          FocusScope.of(context).requestFocus(_telefonoResponsableFocus);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final ctx = _telefonoResponsableFieldKey.currentContext;
-            if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-          });
-          return;
-        }
-      }
-    }
+    FormValidationService.focusFirstInvalidField(
+      step,
+      widget.userRole,
+      {
+        'email': _emailController,
+        'nombres': _nombresController,
+        'apellidos': _apellidosController,
+        'telefono': _telefonoController,
+        'identificacion': _identificacionController,
+        'titulo': _tituloController,
+        'especialidad': _especialidadController,
+        'telefonoResponsable': _telefonoResponsableController,
+      },
+      {
+        'email': _emailFocus,
+        'nombres': _nombresFocus,
+        'apellidos': _apellidosFocus,
+        'telefono': _telefonoFocus,
+        'identificacion': _identificacionFocus,
+        'titulo': _tituloFocus,
+        'especialidad': _especialidadFocus,
+        'telefonoResponsable': _telefonoResponsableFocus,
+      },
+      {
+        'email': _emailFieldKey,
+        'nombres': _nombresFieldKey,
+        'apellidos': _apellidosFieldKey,
+        'telefono': _telefonoFieldKey,
+        'identificacion': _identificacionFieldKey,
+        'titulo': _tituloFieldKey,
+        'especialidad': _especialidadFieldKey,
+        'telefonoResponsable': _telefonoResponsableFieldKey,
+      },
+    );
   }
 
   @override
@@ -728,7 +597,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             emailController: _emailController,
             userRole: widget.userRole,
             selectedInstitutionId: _selectedInstitutionId,
-            selectedInstitutionName: _user != null && _user!.instituciones.isNotEmpty ? _user!.instituciones.first.nombre : null,
+            selectedInstitutionName: _user != null && (_user!.instituciones?.isNotEmpty ?? false) ? _user!.instituciones!.first.nombre : null,
             onInstitutionChanged: (value) => setState(() => _selectedInstitutionId = value),
             // Si el usuario de sesión es admin_institucion y está editando su propio usuario,
             // no permitir cambiar la institución desde el formulario.
@@ -851,11 +720,5 @@ class _UserFormScreenState extends State<UserFormScreen> {
     if (_currentStep > 0) {
       setState(() => _currentStep--);
     }
-  }
-
-  String _generateRandomPassword({int length = 12}) {
-    const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#%^&*()';
-    final Random random = Random.secure();
-    return List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
   }
 }

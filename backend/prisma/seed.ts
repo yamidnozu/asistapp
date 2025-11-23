@@ -190,11 +190,10 @@ async function main() {
 
   // 4. Vincular Usuarios a Instituciones
   console.log('🔗 Vinculando usuarios a instituciones...');
+  console.log('ℹ️  NOTA: Super Admin NO se vincula a instituciones (acceso global)');
   await prisma.usuarioInstitucion.createMany({
     data: [
-      // Super Admin vinculado a todas las instituciones activas
-      { usuarioId: superAdmin.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' },
-      { usuarioId: superAdmin.id, institucionId: liceoSantander.id, rolEnInstitucion: 'admin' },
+      // Super Admin NO se vincula - tiene acceso global sin necesidad de vínculos
 
       // Admins específicos
       { usuarioId: adminSanJose.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' },
@@ -624,7 +623,7 @@ async function main() {
   console.log('📊 Resumen de datos creados:');
   console.log(`   • Instituciones: 3 (2 activas, 1 inactiva)`);
   console.log(`   • Usuarios: 9 (1 super admin, 2 admins institución, 3 profesores, 3 estudiantes)`);
-  console.log(`   • Vínculos usuario-institución: 9`);
+  console.log(`   • Vínculos usuario-institución: 8 (super_admin sin vínculos)`);
   console.log(`   • Períodos académicos: 2`);
   console.log(`   • Materias: 7`);
   console.log(`   • Grupos: 3`);

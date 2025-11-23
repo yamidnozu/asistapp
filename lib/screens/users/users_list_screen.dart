@@ -563,13 +563,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   ),
                 ],
               ),
-              if (user.rol == 'admin_institucion' && user.instituciones.isNotEmpty) ...[
+              if (user.rol == 'admin_institucion' && (user.instituciones?.isNotEmpty ?? false)) ...[
                 SizedBox(height: 4),
                 // Mostrar instituciones en una línea aparte como cajitas compactas
                 Wrap(
                   spacing: 4,
                   runSpacing: 2,
-                  children: user.instituciones.map((i) {
+                  children: (user.instituciones ?? []).map((i) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(

@@ -2,7 +2,10 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import JWTService from '../config/jwt';
-import { AuthenticationError, JWTPayload, LoginRequest, LoginResponse, RefreshTokenResponse, UserRole } from '../types';
+import { AuthenticationError, JWTPayload, LoginRequest, LoginResponse, RefreshTokenResponse } from '../types';
+import { UserRole } from '../constants/roles';
+import logger from '../utils/logger';
+import { config } from '../config/app';
 
 export class AuthService {
   /**
@@ -39,7 +42,7 @@ export class AuthService {
     const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
 
     // Si el usuario no es super_admin y no tiene instituciones activas, denegar acceso
-    if (usuario.rol !== 'super_admin' && institucionesActivas.length === 0) {
+    if (usuario.rol !== UserRole.SUPER_ADMIN && institucionesActivas.length === 0) {
       throw new AuthenticationError('No tienes acceso a ninguna institución activa. Contacta al administrador.');
     }
 
@@ -71,12 +74,16 @@ export class AuthService {
           expiresAt,
         },
       });
-    } catch (err) {
 
-      console.warn('No se pudo guardar refresh token en DB:', err);
+      if (refreshToken) {
+        const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        await prisma.refreshToken.updateMany({ where: { usuarioId: usuario.id, token: hashed }, data: { revoked: true } });
+      } else {
+        await prisma.refreshToken.updateMany({ where: { usuarioId: usuario.id, revoked: false }, data: { revoked: true } });
+      }
+    } catch (error) {
+      logger.error('Error al guardar refresh token:', error);
     }
-
-    const expiresIn = 24 * 60 * 60; // 24 horas en segundos
 
     return {
       accessToken,
@@ -92,143 +99,8 @@ export class AuthService {
           rolEnInstitucion: ui.rolEnInstitucion,
         })),
       },
-      expiresIn,
+      expiresIn: parseInt(config.jwtExpiresIn) || 3600,
     };
-  }
-
-  /**
-   * Verifica y decodifica un token JWT
-   */
-  public static async verifyToken(token: string) {
-    const decoded = JWTService.verify(token);
-
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: decoded.id },
-      select: { tokenVersion: true, activo: true },
-    });
-
-    if (!usuario || !usuario.activo) {
-      throw new AuthenticationError('Usuario no encontrado o inactivo');
-    }
-
-    if (usuario.tokenVersion !== decoded.tokenVersion) {
-      throw new AuthenticationError('Token revocado por cambio de versión');
-    }
-
-    return decoded;
-  }
-
-  /**
-   * Refresca un access token usando un refresh token válido
-   */
-  public static async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    try {
-
-      const decoded = JWTService.verifyRefreshToken(refreshToken);
-
-      const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
-      const tokenRecord = await prisma.refreshToken.findFirst({
-        where: {
-          usuarioId: decoded.id,
-          token: hashed,
-          revoked: false,
-        },
-      });
-
-      if (!tokenRecord) {
-        throw new AuthenticationError('Refresh token inválido o revocado');
-      }
-
-      if (tokenRecord.expiresAt <= new Date()) {
-
-        await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
-        throw new AuthenticationError('Refresh token expirado');
-      }
-
-      const usuario = await prisma.usuario.findUnique({
-        where: { id: decoded.id },
-        include: {
-          usuarioInstituciones: {
-            include: {
-              institucion: true,
-            },
-          },
-        },
-      });
-
-      if (!usuario || !usuario.activo) {
-        throw new AuthenticationError('Usuario no encontrado o inactivo');
-      }
-
-      if (usuario.tokenVersion !== decoded.tokenVersion) {
-        throw new AuthenticationError('Refresh token revocado por cambio de versión');
-      }
-
-      await prisma.refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
-
-      // Filtrar instituciones activas para que el token payload / usuario devuelto sea consistente
-      // (no es estrictamente necesario aquí si no devolvemos usuario, pero mantenemos la semántica)
-      const institucionesActivas = (usuario.usuarioInstituciones || []).filter((ui: any) => ui.activo && ui.institucion?.activa);
-
-      const newAccessToken = JWTService.signAccessToken({
-        id: usuario.id,
-        rol: usuario.rol as UserRole,
-        email: usuario.email,
-        tokenVersion: usuario.tokenVersion,
-      });
-
-      const newRefreshToken = JWTService.signRefreshToken({
-        id: usuario.id,
-        rol: usuario.rol as UserRole,
-        email: usuario.email,
-        tokenVersion: usuario.tokenVersion,
-      });
-
-      try {
-        const decodedNew = JWTService.decode(newRefreshToken) as JWTPayload & { exp?: number };
-        const exp = decodedNew?.exp;
-        const expiresAt = exp ? new Date(exp * 1000) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        const hashedNew = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
-
-        await prisma.refreshToken.create({
-          data: {
-            usuarioId: usuario.id,
-            token: hashedNew,
-            expiresAt,
-          },
-        });
-      } catch (err) {
-        console.warn('No se pudo guardar nuevo refresh token en DB:', err);
-      }
-
-      const expiresIn = 24 * 60 * 60; // 24 horas en segundos
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        expiresIn,
-      };
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        throw error;
-      }
-      throw new AuthenticationError(error instanceof Error ? error.message : 'Refresh token inválido');
-    }
-  }
-
-  /**
-   * Revoca refresh tokens: si se proporciona refreshToken se revoca ese token concreto,
-   * si no, se revocan todos los refresh tokens del usuario (logout global).
-   */
-  public static async revokeRefreshTokens(usuarioId: string, refreshToken?: string): Promise<void> {
-    if (refreshToken) {
-      const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
-      await prisma.refreshToken.updateMany({ where: { usuarioId, token: hashed }, data: { revoked: true } });
-      return;
-    }
-
-    await prisma.refreshToken.updateMany({ where: { usuarioId, revoked: false }, data: { revoked: true } });
   }
 
   /**
@@ -254,14 +126,14 @@ export class AuthService {
    */
   public static async ensureAdminUser(): Promise<void> {
     try {
-      console.log('🔍 Verificando usuario administrador...');
+      logger.debug('🔍 Verificando usuario administrador...');
 
       const adminExists = await prisma.usuario.findUnique({
         where: { email: 'admin@asistapp.com' }
       });
 
       if (!adminExists) {
-        console.log('⚠️ No se encontró usuario administrador. Creando usuario por defecto...');
+        logger.debug('⚠️ No se encontró usuario administrador. Creando usuario por defecto...');
 
         const adminPassword = await this.hashPassword('pollo');
 
@@ -271,18 +143,125 @@ export class AuthService {
             passwordHash: adminPassword,
             nombres: 'Administrador',
             apellidos: 'Sistema',
-            rol: 'super_admin',
+            rol: UserRole.SUPER_ADMIN,
             activo: true,
           },
         });
 
-        console.log('✅ Usuario administrador creado exitosamente:', admin.email);
+        logger.debug('✅ Usuario administrador creado exitosamente:', admin.email);
       } else {
-        console.log('✅ Usuario administrador ya existe:', adminExists.email);
+        logger.debug('✅ Usuario administrador ya existe:', adminExists.email);
       }
     } catch (error) {
-      console.log('⚠️  No se pudo verificar/crear usuario administrador (DB no disponible):', error instanceof Error ? error.message : String(error));
+      logger.debug('⚠️  No se pudo verificar/crear usuario administrador (DB no disponible):', error instanceof Error ? error.message : String(error));
       // No fallar, continuar sin admin
+    }
+  }
+
+  /**
+   * Revoca los refresh tokens de un usuario
+   */
+  public static async revokeRefreshTokens(usuarioId: string, refreshToken?: string): Promise<void> {
+    if (refreshToken) {
+      const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      await prisma.refreshToken.updateMany({
+        where: { usuarioId, token: hashed },
+        data: { revoked: true }
+      });
+    }
+  }
+
+  /**
+   * Refresca el access token
+   */
+  public static async refreshToken(token: string): Promise<RefreshTokenResponse> {
+    // 1. Verificar token
+    let decoded: JWTPayload;
+    try {
+      decoded = JWTService.verifyRefreshToken(token);
+    } catch (error) {
+      throw new AuthenticationError('Refresh token inválido o expirado');
+    }
+
+    // 2. Buscar en DB
+    const hashed = crypto.createHash('sha256').update(token).digest('hex');
+    const savedToken = await prisma.refreshToken.findFirst({
+      where: { usuarioId: decoded.id, token: hashed }
+    });
+
+    if (!savedToken || savedToken.revoked) {
+      // Si el token fue revocado, posible robo. Revocar todos los tokens del usuario.
+      await this.revokeAllUserTokens(decoded.id);
+      throw new AuthenticationError('Refresh token inválido o reutilizado');
+    }
+
+    // 3. Verificar usuario
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: decoded.id },
+      include: {
+        usuarioInstituciones: {
+          include: { institucion: true }
+        }
+      }
+    });
+
+    if (!usuario || !usuario.activo) {
+      throw new AuthenticationError('Usuario no encontrado o inactivo');
+    }
+
+    if (usuario.tokenVersion !== decoded.tokenVersion) {
+      throw new AuthenticationError('Sesión invalidada');
+    }
+
+    // 4. Generar nuevos tokens
+    const accessToken = JWTService.signAccessToken({
+      id: usuario.id,
+      rol: usuario.rol as UserRole,
+      email: usuario.email,
+      tokenVersion: usuario.tokenVersion,
+    });
+
+    const newRefreshToken = JWTService.signRefreshToken({
+      id: usuario.id,
+      rol: usuario.rol as UserRole,
+      email: usuario.email,
+      tokenVersion: usuario.tokenVersion,
+    });
+
+    // 5. Rotar tokens (revocar anterior, guardar nuevo)
+    const newHashed = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
+    const exp = (JWTService.decode(newRefreshToken) as any).exp;
+    const expiresAt = new Date(exp * 1000);
+
+    await prisma.$transaction([
+      prisma.refreshToken.update({
+        where: { id: savedToken.id },
+        data: { revoked: true }
+      }),
+      prisma.refreshToken.create({
+        data: {
+          usuarioId: usuario.id,
+          token: newHashed,
+          expiresAt
+        }
+      })
+    ]);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+      expiresIn: parseInt(config.jwtExpiresIn) || 3600,
+    };
+  }
+
+  /**
+   * Verifica un token de acceso
+   */
+  public static async verifyToken(token: string): Promise<JWTPayload> {
+    try {
+      return JWTService.verifyAccessToken(token);
+    } catch (error) {
+      throw new AuthenticationError('Token inválido o expirado');
     }
   }
 }

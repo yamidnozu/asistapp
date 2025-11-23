@@ -1,5 +1,7 @@
 import { prisma } from '../config/database';
 import { ConflictError, NotFoundError, ValidationError } from '../types';
+import { UserRole } from '../constants/roles';
+import logger from '../utils/logger';
 
 export interface CreateEstudianteRequest {
   nombres: string;
@@ -199,31 +201,31 @@ export class EstudianteService {
       grupoId,
     } = data;
 
-    console.log('🔍 Validando datos de estudiante:', { nombres, apellidos, email, identificacion });
+    logger.debug('🔍 Validando datos de estudiante:', { nombres, apellidos, email, identificacion });
 
     // Validar campos requeridos
     if (!nombres || nombres === '' || nombres.trim() === '') {
-      console.log('❌ Validación fallida: nombres vacío');
+      logger.debug('❌ Validación fallida: nombres vacío');
       throw new ValidationError('El nombre es requerido');
     }
     if (!apellidos || apellidos === '' || apellidos.trim() === '') {
-      console.log('❌ Validación fallida: apellidos vacío');
+      logger.debug('❌ Validación fallida: apellidos vacío');
       throw new ValidationError('Los apellidos son requeridos');
     }
     if (!email || email === '' || email.trim() === '') {
-      console.log('❌ Validación fallida: email vacío');
+      logger.debug('❌ Validación fallida: email vacío');
       throw new ValidationError('El email es requerido');
     }
     if (!password || password === '' || password.trim() === '') {
-      console.log('❌ Validación fallida: password vacío');
+      logger.debug('❌ Validación fallida: password vacío');
       throw new ValidationError('La contraseña es requerida');
     }
     if (!identificacion || identificacion === '' || identificacion.trim() === '') {
-      console.log('❌ Validación fallida: identificacion vacío');
+      logger.debug('❌ Validación fallida: identificacion vacío');
       throw new ValidationError('La identificación es requerida');
     }
 
-    console.log('✅ Validaciones pasaron, creando estudiante...');
+    logger.debug('✅ Validaciones pasaron, creando estudiante...');
 
     // Validar que el email no exista
     const existingUser = await prisma.usuario.findUnique({
@@ -250,7 +252,7 @@ export class EstudianteService {
         passwordHash: await this.hashPassword(password),
         nombres,
         apellidos,
-        rol: 'estudiante',
+        rol: UserRole.ESTUDIANTE,
         activo: true,
       },
     });

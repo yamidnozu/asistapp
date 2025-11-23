@@ -87,7 +87,6 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   Future<void> _loadAdmins() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
   final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token != null) {
@@ -363,7 +362,6 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
 
   // selected users not used for now; dialog assigns directly
   static const int _pageSize = 20;
-  String _searchQuery = '';
   bool _isAssigning = false;
 
   @override
@@ -388,7 +386,6 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     final query = _searchController.text.trim();
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () async {
-      setState(() => _searchQuery = query);
       final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
       if (token == null) return;
       final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
@@ -561,7 +558,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                     }
 
                     final user = items[index];
-                    final alreadyAssigned = user.instituciones.any((inst) => inst.id == widget.institutionId);
+                    final alreadyAssigned = (user.instituciones ?? []).any((inst) => inst.id == widget.institutionId);
 
                     return Card(
                       // mantener sólo margen vertical; el padding lo controlamos en el contenido
@@ -609,10 +606,10 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                                       ),
 
                                       // Instituciones asignadas
-                                      if (user.instituciones.any((inst) => inst.activo)) ...[
+                                      if ((user.instituciones ?? []).any((inst) => inst.activo)) ...[
                                         const SizedBox(height: 3),
                                         Text(
-                                          'En: ${user.instituciones.where((inst) => inst.activo).map((inst) => inst.nombre).join(', ')}',
+                                          'En: ${(user.instituciones ?? []).where((inst) => inst.activo).map((inst) => inst.nombre).join(', ')}',
                                           style: TextStyle(
                                             color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
                                             fontSize: 12,

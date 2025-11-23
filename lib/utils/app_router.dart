@@ -30,6 +30,7 @@ import '../models/clase_del_dia.dart';
 import '../screens/student_notifications_screen.dart';
 import '../screens/test_multi_hora_screen.dart';
 import '../screens/my_qr_code_screen.dart';
+import '../screens/institution_selection_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -73,9 +74,14 @@ class AppRouter {
     }
 
     // A partir de aquí, el usuario SÍ está logueado.
+    final userRole = authProvider.user?['rol'] as String?;
     final institutions = authProvider.institutions;
     final selectedInstitutionId = authProvider.selectedInstitutionId;
-    final needsSelection = institutions != null &&
+    
+    // Super Admin no necesita selección de institución (acceso global)
+    final isSuperAdmin = userRole == 'super_admin';
+    final needsSelection = !isSuperAdmin &&
+                          institutions != null &&
                           institutions.length > 1 &&
                           selectedInstitutionId == null;
 
@@ -89,8 +95,7 @@ class AppRouter {
       return '/institution-selection';
     }
 
-    // 4. [LA CLAVE DE LA SOLUCIÓN]
-    // Si el usuario ya seleccionó (needsSelection es false) pero sigue en la pantalla de selección,
+    // 4. Si el usuario ya seleccionó (needsSelection es false) pero sigue en la pantalla de selección,
     // lo redirigimos al dashboard para que no se quede atascado.
     if (!needsSelection && currentRoute == '/institution-selection') {
       return '/dashboard';
@@ -110,6 +115,16 @@ class AppRouter {
           context,
           state,
           const LoginScreen(),
+        ),
+      ),
+
+      GoRoute(
+        path: '/institution-selection',
+        name: 'institution-selection',
+        pageBuilder: (context, state) => _fadePage(
+          context,
+          state,
+          const InstitutionSelectionScreen(),
         ),
       ),
 

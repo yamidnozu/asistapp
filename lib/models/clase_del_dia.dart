@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'clase_del_dia.g.dart';
+
+@JsonSerializable()
 class ClaseDelDia {
   final String id;
   final int diaSemana;
@@ -19,31 +24,9 @@ class ClaseDelDia {
     required this.institucion,
   });
 
-  factory ClaseDelDia.fromJson(Map<String, dynamic> json) {
-    return ClaseDelDia(
-      id: json['id'],
-      diaSemana: json['diaSemana'],
-      horaInicio: json['horaInicio'],
-      horaFin: json['horaFin'],
-      grupo: GrupoSimple.fromJson(json['grupo']),
-      materia: MateriaSimple.fromJson(json['materia']),
-      periodoAcademico: PeriodoAcademicoSimple.fromJson(json['periodoAcademico']),
-      institucion: Institucion.fromJson(json['institucion']),
-    );
-  }
+  factory ClaseDelDia.fromJson(Map<String, dynamic> json) => _$ClaseDelDiaFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'diaSemana': diaSemana,
-      'horaInicio': horaInicio,
-      'horaFin': horaFin,
-      'grupo': grupo.toJson(),
-      'materia': materia.toJson(),
-      'periodoAcademico': periodoAcademico.toJson(),
-      'institucion': institucion.toJson(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$ClaseDelDiaToJson(this);
 
   String get diaSemanaNombre {
     const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -56,6 +39,7 @@ class ClaseDelDia {
 }
 
 // Versiones simplificadas para respuestas de clases del día
+@JsonSerializable()
 class GrupoSimple {
   final String id;
   final String nombre;
@@ -69,27 +53,14 @@ class GrupoSimple {
     this.seccion,
   });
 
-  factory GrupoSimple.fromJson(Map<String, dynamic> json) {
-    return GrupoSimple(
-      id: json['id'],
-      nombre: json['nombre'],
-      grado: json['grado'],
-      seccion: json['seccion'],
-    );
-  }
+  factory GrupoSimple.fromJson(Map<String, dynamic> json) => _$GrupoSimpleFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'grado': grado,
-      'seccion': seccion,
-    };
-  }
+  Map<String, dynamic> toJson() => _$GrupoSimpleToJson(this);
 
   String get nombreCompleto => seccion != null ? '$grado $seccion' : grado;
 }
 
+@JsonSerializable()
 class MateriaSimple {
   final String id;
   final String nombre;
@@ -101,25 +72,14 @@ class MateriaSimple {
     this.codigo,
   });
 
-  factory MateriaSimple.fromJson(Map<String, dynamic> json) {
-    return MateriaSimple(
-      id: json['id'],
-      nombre: json['nombre'],
-      codigo: json['codigo'],
-    );
-  }
+  factory MateriaSimple.fromJson(Map<String, dynamic> json) => _$MateriaSimpleFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'codigo': codigo,
-    };
-  }
+  Map<String, dynamic> toJson() => _$MateriaSimpleToJson(this);
 
   String get nombreConCodigo => codigo != null ? '$codigo - $nombre' : nombre;
 }
 
+@JsonSerializable()
 class PeriodoAcademicoSimple {
   final String id;
   final String nombre;
@@ -131,23 +91,12 @@ class PeriodoAcademicoSimple {
     required this.activo,
   });
 
-  factory PeriodoAcademicoSimple.fromJson(Map<String, dynamic> json) {
-    return PeriodoAcademicoSimple(
-      id: json['id'],
-      nombre: json['nombre'],
-      activo: json['activo'] ?? false,
-    );
-  }
+  factory PeriodoAcademicoSimple.fromJson(Map<String, dynamic> json) => _$PeriodoAcademicoSimpleFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'activo': activo,
-    };
-  }
+  Map<String, dynamic> toJson() => _$PeriodoAcademicoSimpleToJson(this);
 }
 
+@JsonSerializable()
 class Institucion {
   final String id;
   final String nombre;
@@ -157,17 +106,7 @@ class Institucion {
     required this.nombre,
   });
 
-  factory Institucion.fromJson(Map<String, dynamic> json) {
-    return Institucion(
-      id: json['id'],
-      nombre: json['nombre'],
-    );
-  }
+  factory Institucion.fromJson(Map<String, dynamic> json) => _$InstitucionFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-    };
-  }
+  Map<String, dynamic> toJson() => _$InstitucionToJson(this);
 }

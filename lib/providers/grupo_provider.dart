@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/academic_service.dart' as academic_service;
+import '../models/pagination_types.dart';
+import '../services/academic/grupo_service.dart';
 import '../models/grupo.dart';
-import 'paginated_data_provider.dart';
-import '../models/user.dart'; // Para PaginationInfo
+import 'paginated_data_mixin.dart';
 
-// GrupoState removed: use PaginatedDataProvider's isLoading/hasError/isLoaded
+// GrupoState removed: use PaginatedDataMixin's isLoading/hasError/isLoaded
 
-class GrupoProvider extends PaginatedDataProvider<Grupo> {
-  final academic_service.AcademicService _academicService = academic_service.AcademicService();
+class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
+  final GrupoService _grupoService;
+
+  GrupoProvider({GrupoService? grupoService})
+      : _grupoService = grupoService ?? GrupoService();
 
   String? _errorMessage;
   Grupo? _selectedGrupo;
@@ -93,7 +96,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   if (isLoading) return;
 
     try {
-      final grupo = await _academicService.getGrupoById(accessToken, grupoId);
+      final grupo = await _grupoService.getGrupoById(accessToken, grupoId);
       if (grupo != null) {
         _selectedGrupo = grupo;
   notifyListeners();
@@ -107,11 +110,11 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   }
 
   /// Crea un nuevo grupo
-  Future<bool> createGrupo(String accessToken, academic_service.CreateGrupoRequest grupoData) async {
+  Future<bool> createGrupo(String accessToken, CreateGrupoRequest grupoData) async {
     if (isLoading) return false;
 
     try {
-      final newGrupo = await _academicService.createGrupo(accessToken, grupoData);
+      final newGrupo = await _grupoService.createGrupo(accessToken, grupoData);
       if (newGrupo != null) {
         // Agregar el nuevo grupo a la lista
         items.insert(0, newGrupo);
@@ -129,11 +132,11 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   }
 
   /// Actualiza un grupo existente
-  Future<bool> updateGrupo(String accessToken, String grupoId, academic_service.UpdateGrupoRequest grupoData) async {
+  Future<bool> updateGrupo(String accessToken, String grupoId, UpdateGrupoRequest grupoData) async {
     if (isLoading) return false;
 
     try {
-      final updatedGrupo = await _academicService.updateGrupo(accessToken, grupoId, grupoData);
+      final updatedGrupo = await _grupoService.updateGrupo(accessToken, grupoId, grupoData);
       if (updatedGrupo != null) {
         // Actualizar el grupo en la lista
   final index = items.indexWhere((grupo) => grupo.id == grupoId);
@@ -164,7 +167,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
     // Este método ya no gestionará el estado de la lista.
     // La pantalla se encargará de solicitar la recarga, que sí gestiona el estado.
     try {
-      final success = await _academicService.deleteGrupo(accessToken, grupoId);
+      final success = await _grupoService.deleteGrupo(accessToken, grupoId);
 
       if (!success) {
         // Guardamos el mensaje de error para que la UI pueda mostrarlo.
@@ -294,7 +297,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   /// Busca grupos en el backend (búsqueda remota)
   Future<List<Grupo>?> searchGruposRemote(String accessToken, {String? search, int limit = 10}) async {
     try {
-      final response = await _academicService.getGrupos(
+      final response = await _grupoService.getGrupos(
         accessToken,
         page: 1,
         limit: limit,
@@ -317,7 +320,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   Future<PaginatedResponse<Grupo>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
     final periodoId = filters?['periodoId'] ?? _selectedPeriodoId;
     final searchFromFilters = search ?? filters?['search'];
-    final response = await _academicService.getGrupos(
+    final response = await _grupoService.getGrupos(
       accessToken,
       page: page,
       limit: limit,
@@ -330,18 +333,18 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
 
   @override
   Future<Grupo?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _academicService.createGrupo(accessToken, data as academic_service.CreateGrupoRequest);
+    final created = await _grupoService.createGrupo(accessToken, data as CreateGrupoRequest);
     return created;
   }
 
   @override
   Future<bool> deleteItemApi(String accessToken, String id) async {
-    return await _academicService.deleteGrupo(accessToken, id);
+    return await _grupoService.deleteGrupo(accessToken, id);
   }
 
   @override
   Future<Grupo?> updateItemApi(String accessToken, String id, dynamic data) async {
-  final updated = await _academicService.updateGrupo(accessToken, id, data as academic_service.UpdateGrupoRequest);
+  final updated = await _grupoService.updateGrupo(accessToken, id, data as UpdateGrupoRequest);
     return updated;
   }
 
@@ -352,7 +355,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   Future<void> loadEstudiantesByGrupo(String accessToken, String grupoId, {int? page, int? limit}) async {
     debugPrint('loadEstudiantesByGrupo is deprecated; use EstudiantesByGrupoPaginatedProvider instead.');
     try {
-      await _academicService.getEstudiantesByGrupo(accessToken, grupoId, page: page ?? 1, limit: limit ?? 10);
+      await _grupoService.getEstudiantesByGrupo(accessToken, grupoId, page: page ?? 1, limit: limit ?? 10);
     } catch (e) {
       debugPrint('Error in deprecated loadEstudiantesByGrupo: $e');
       setError(e.toString());
@@ -363,7 +366,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   Future<void> loadEstudiantesSinAsignar(String accessToken, {int? page, int? limit}) async {
     debugPrint('loadEstudiantesSinAsignar is deprecated; use EstudiantesSinAsignarPaginatedProvider instead.');
     try {
-      await _academicService.getEstudiantesSinAsignar(accessToken, page: page ?? 1, limit: limit ?? 10);
+      await _grupoService.getEstudiantesSinAsignar(accessToken, page: page ?? 1, limit: limit ?? 10);
     } catch (e) {
       debugPrint('Error in deprecated loadEstudiantesSinAsignar: $e');
       setError(e.toString());
@@ -373,7 +376,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   /// Asigna un estudiante a un grupo
   Future<bool> asignarEstudianteAGrupo(String accessToken, String grupoId, String estudianteId) async {
     try {
-      final success = await _academicService.asignarEstudianteAGrupo(accessToken, grupoId, estudianteId);
+      final success = await _grupoService.asignarEstudianteAGrupo(accessToken, grupoId, estudianteId);
       if (success) {
         // The UI should refresh the paginated providers after this call.
         notifyListeners();
@@ -390,7 +393,7 @@ class GrupoProvider extends PaginatedDataProvider<Grupo> {
   /// Desasigna un estudiante de un grupo
   Future<bool> desasignarEstudianteDeGrupo(String accessToken, String grupoId, String estudianteId) async {
     try {
-      final success = await _academicService.desasignarEstudianteDeGrupo(accessToken, grupoId, estudianteId);
+      final success = await _grupoService.desasignarEstudianteDeGrupo(accessToken, grupoId, estudianteId);
       if (success) {
         // UI should refresh the paginated providers after this call.
         notifyListeners();

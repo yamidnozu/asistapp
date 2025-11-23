@@ -1,5 +1,9 @@
+
 import { PrismaClient } from '@prisma/client';
-import { AuthorizationError, NotFoundError, ValidationError } from '../types';
+import { AuthorizationError, NotFoundError, ValidationError, UserRole } from '../types';
+import { AttendanceStatus, AttendanceType } from '../constants/attendance';
+import { getStartOfDay, parseDateString, formatDateToISO, getDateRange } from '../utils/date.utils';
+import logger from '../utils/logger';
 
 const prisma = new PrismaClient();
 
@@ -87,6 +91,13 @@ export class AsistenciaService {
         throw new ValidationError('No se puede registrar asistencia en un periodo académico inactivo');
       }
 
+      // 1.1. VALIDACIÓN CRÍTICA: Verificar que el profesor que registra es el asignado al horario
+      if (horario.profesorId && horario.profesorId !== profesorId) {
+        throw new AuthorizationError(
+          'No tienes autorización para registrar asistencia en esta clase. Solo el profesor asignado puede hacerlo.'
+        );
+      }
+
       // 2. Buscar al estudiante por su codigoQr
       const estudiante = await prisma.estudiante.findUnique({
         where: { codigoQr },
@@ -114,8 +125,8 @@ export class AsistenciaService {
       }
 
       // 4. Verificar si ya existe un registro de asistencia para ese estudiante en esa clase en la fecha actual
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0); // Inicio del día
+      // Usamos getStartOfDay para manejar fechas en UTC consistentemente
+      const hoy = getStartOfDay();
 
       const asistenciaExistente = await prisma.asistencia.findFirst({
         where: {
@@ -136,9 +147,9 @@ export class AsistenciaService {
           estudianteId: estudiante.id,
           profesorId,
           institucionId: horario.institucionId,
-          estado: 'PRESENTE',
+          estado: AttendanceStatus.PRESENTE,
           fecha: hoy,
-          tipoRegistro: 'QR',
+          tipoRegistro: AttendanceType.QR,
         },
         include: {
           estudiante: {
@@ -207,7 +218,7 @@ export class AsistenciaService {
         },
       };
     } catch (error) {
-      console.error('Error al registrar asistencia:', error);
+      logger.error('Error al registrar asistencia:', error);
       if (error instanceof ValidationError || error instanceof NotFoundError || error instanceof AuthorizationError) {
         throw error;
       }
@@ -216,91 +227,11 @@ export class AsistenciaService {
   }
 
   /**
-   * Obtiene la lista de asistencias para un horario específico en la fecha actual
-   * Incluye todos los estudiantes del grupo con su estado de asistencia
-   */
-  public static async getAsistenciasPorHorario(horarioId: string, profesorId: string): Promise<AsistenciaGrupoResponse[]> {
-    try {
-      // 1. Obtener el horario con su grupo y profesor
-      const horario = await prisma.horario.findUnique({
-        where: { id: horarioId },
-        include: {
-          grupo: {
-            include: {
-              estudiantesGrupos: {
-                include: {
-                  estudiante: {
-                    include: {
-                      usuario: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          profesor: true,
-        },
-      });
-
-      if (!horario) {
-        throw new NotFoundError('Horario/Clase');
-      }
-
-      // 2. Verificar que el profesor que hace la petición sea el profesor asignado al horario
-      if (horario.profesorId !== profesorId) {
-        throw new AuthorizationError('No tienes permisos para acceder a las asistencias de esta clase');
-      }
-
-      // 3. Obtener todos los estudiantes del grupo
-      const estudiantesDelGrupo = horario.grupo.estudiantesGrupos.map((eg: any) => eg.estudiante);
-
-      // 3. Obtener todos los registros de asistencia para ese horarioId en la fecha de hoy
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0); // Inicio del día
-
-      const asistenciasHoy = await prisma.asistencia.findMany({
-        where: {
-          horarioId,
-          fecha: hoy,
-        },
-      });
-
-      // 4. Crear mapa de asistencias por estudianteId para búsqueda rápida
-      const asistenciasMap = new Map(
-        asistenciasHoy.map((asistencia: any) => [asistencia.estudianteId, asistencia])
-      );
-
-      // 5. Combinar estudiantes con sus estados de asistencia
-      return estudiantesDelGrupo.map((estudiante: any) => {
-        const asistencia = asistenciasMap.get(estudiante.id);
-
-        return {
-          estudiante: {
-            id: estudiante.id,
-            nombres: estudiante.usuario.nombres,
-            apellidos: estudiante.usuario.apellidos,
-            identificacion: estudiante.identificacion,
-          },
-          estado: asistencia ? (asistencia as any).estado : null,
-          fechaRegistro: asistencia ? (asistencia as any).fecha : undefined,
-        };
-      });
-    } catch (error) {
-      console.error('Error al obtener asistencias por horario:', error);
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      throw new Error('Error al obtener las asistencias');
-    }
-  }
-
-  /**
    * Obtiene las estadísticas de asistencia para un horario específico
    */
   public static async getEstadisticasAsistencia(horarioId: string) {
     try {
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
+      const hoy = getStartOfDay();
 
       const asistencias = await prisma.asistencia.findMany({
         where: {
@@ -313,16 +244,16 @@ export class AsistenciaService {
 
       const estadisticas = {
         totalEstudiantes,
-        presentes: asistencias.filter((a: any) => a.estado === 'PRESENTE').length,
-        ausentes: asistencias.filter((a: any) => a.estado === 'AUSENTE').length,
-        tardanzas: asistencias.filter((a: any) => a.estado === 'TARDANZA').length,
-        justificados: asistencias.filter((a: any) => a.estado === 'JUSTIFICADO').length,
+        presentes: asistencias.filter((a: any) => a.estado === AttendanceStatus.PRESENTE).length,
+        ausentes: asistencias.filter((a: any) => a.estado === AttendanceStatus.AUSENTE).length,
+        tardanzas: asistencias.filter((a: any) => a.estado === AttendanceStatus.TARDANZA).length,
+        justificados: asistencias.filter((a: any) => a.estado === AttendanceStatus.JUSTIFICADO).length,
         sinRegistrar: totalEstudiantes - asistencias.length,
       };
 
       return estadisticas;
     } catch (error) {
-      console.error('Error al obtener estadísticas de asistencia:', error);
+      logger.error('Error al obtener estadísticas de asistencia:', error);
       throw new Error('Error al obtener las estadísticas');
     }
   }
@@ -402,8 +333,7 @@ export class AsistenciaService {
       }
 
       // 4. Verificar si ya existe un registro de asistencia para hoy
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
+      const hoy = getStartOfDay();
 
       const asistenciaExistente = await prisma.asistencia.findFirst({
         where: {
@@ -424,8 +354,8 @@ export class AsistenciaService {
           estudianteId: estudiante.id,
           profesorId,
           fecha: hoy,
-          estado: 'PRESENTE',
-          tipoRegistro: 'MANUAL',
+          estado: AttendanceStatus.PRESENTE,
+          tipoRegistro: AttendanceType.MANUAL,
           institucionId: horario.institucionId,
         },
       });
@@ -497,7 +427,7 @@ export class AsistenciaService {
 
       return response;
     } catch (error) {
-      console.error('❌ Error en registrarAsistenciaManual:', error);
+      logger.error('❌ Error en registrarAsistenciaManual:', error);
       throw error;
     }
   }
@@ -517,17 +447,17 @@ export class AsistenciaService {
         institucionId,
       };
 
-      console.log('🔍 getAllAsistencias - Filtros recibidos:', { institucionId, fecha, horarioId, estudianteId, estado });
+      logger.debug('🔍 getAllAsistencias - Filtros recibidos:', { institucionId, fecha, horarioId, estudianteId, estado });
 
       if (fecha) {
         // Parsear la fecha en UTC para evitar problemas de zona horaria
-        const [year, month, day] = fecha.split('-').map(Number);
-        const fechaFiltro = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        const fechaFiltro = parseDateString(fecha);
+        const { start, end } = getDateRange(fechaFiltro);
         where.fecha = {
-          gte: fechaFiltro,
-          lt: new Date(fechaFiltro.getTime() + 24 * 60 * 60 * 1000) // Siguiente día
+          gte: start,
+          lt: end
         };
-        console.log('📅 Filtro de fecha aplicado:', { gte: fechaFiltro, lt: new Date(fechaFiltro.getTime() + 24 * 60 * 60 * 1000) });
+        logger.debug('📅 Filtro de fecha aplicado:', { gte: start, lt: end });
       }
 
       if (horarioId) {
@@ -542,11 +472,11 @@ export class AsistenciaService {
         where.estado = estado;
       }
 
-      console.log('🔍 WHERE final para consulta:', JSON.stringify(where, null, 2));
+      logger.debug('🔍 WHERE final para consulta:', JSON.stringify(where, null, 2));
 
       // Obtener total de registros
       const total = await prisma.asistencia.count({ where });
-      console.log('📊 Total de asistencias encontradas:', total);
+      logger.debug('📊 Total de asistencias encontradas:', total);
 
       // Obtener registros con paginación
       const asistencias = await prisma.asistencia.findMany({
@@ -573,12 +503,15 @@ export class AsistenciaService {
                 select: {
                   id: true,
                   nombre: true,
+                  grado: true,
+                  seccion: true,
                 },
               },
               materia: {
                 select: {
                   id: true,
                   nombre: true,
+                  codigo: true,
                 },
               },
             },
@@ -591,7 +524,7 @@ export class AsistenciaService {
       return {
         data: asistencias.map((asistencia: any) => ({
           id: asistencia.id,
-          fecha: asistencia.fecha.toISOString().split('T')[0],
+          fecha: formatDateToISO(asistencia.fecha),
           estado: asistencia.estado,
           horarioId: asistencia.horarioId,
           estudianteId: asistencia.estudianteId,
@@ -627,7 +560,7 @@ export class AsistenciaService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener todas las asistencias:', error);
+      logger.error('Error al obtener todas las asistencias:', error);
       throw new Error('Error al obtener las asistencias');
     }
   }
@@ -652,9 +585,8 @@ export class AsistenciaService {
       };
 
       if (fecha) {
-        const fechaFiltro = new Date(fecha);
-        fechaFiltro.setHours(0, 0, 0, 0);
-        where.fecha = fechaFiltro;
+        const fechaFiltro = parseDateString(fecha);
+        where.fecha = getStartOfDay(fechaFiltro);
       }
 
       // Obtener total de registros
@@ -703,7 +635,7 @@ export class AsistenciaService {
       return {
         data: asistencias.map((asistencia: any) => ({
           id: asistencia.id,
-          fecha: asistencia.fecha.toISOString().split('T')[0],
+          fecha: formatDateToISO(asistencia.fecha),
           estado: asistencia.estado,
           horarioId: asistencia.horarioId,
           estudianteId: asistencia.estudianteId,
@@ -742,8 +674,115 @@ export class AsistenciaService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener asistencias del estudiante:', error);
+      logger.error('Error al obtener asistencias del estudiante:', error);
       throw new Error('Error al obtener las asistencias del estudiante');
+    }
+  }
+
+  /**
+   * Actualiza una asistencia existente (estado, justificación, observación)
+   */
+  public static async updateAsistencia(
+    id: string,
+    data: { estado?: AttendanceStatus; observacion?: string; justificada?: boolean },
+    profesorId: string,
+    rol: string
+  ): Promise<AsistenciaResponse> {
+    try {
+      // 1. Buscar la asistencia
+      const asistencia = await prisma.asistencia.findUnique({
+        where: { id },
+        include: {
+          horario: true,
+        },
+      });
+
+      if (!asistencia) {
+        throw new NotFoundError('Asistencia');
+      }
+
+      // 2. Verificar permisos
+      // Si es profesor, debe ser el profesor de la clase
+      if (rol === UserRole.PROFESOR) {
+        if (asistencia.horario.profesorId !== profesorId && asistencia.profesorId !== profesorId) {
+          throw new AuthorizationError('No tienes permiso para editar esta asistencia');
+        }
+      }
+
+      // 3. Actualizar asistencia
+      const asistenciaActualizada = await prisma.asistencia.update({
+        where: { id },
+        data: {
+          estado: data.estado,
+          observaciones: data.observacion, // Map observacion to observaciones
+          // justificada: data.justificada, // 'justificada' is not in schema
+        },
+        include: {
+          estudiante: {
+            include: {
+              usuario: {
+                select: {
+                  nombres: true,
+                  apellidos: true,
+                },
+              },
+            },
+          },
+          horario: {
+            include: {
+              grupo: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  grado: true,
+                  seccion: true,
+                },
+              },
+              materia: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // 4. Formatear respuesta
+      // Use 'any' cast to avoid strict type checking issues with included relations if inference fails
+      const result: any = asistenciaActualizada;
+
+      return {
+        id: result.id,
+        fecha: result.fecha,
+        estado: result.estado,
+        horarioId: result.horarioId,
+        estudianteId: result.estudianteId,
+        profesorId: result.profesorId!,
+        institucionId: result.institucionId,
+        estudiante: {
+          id: result.estudiante.id,
+          nombres: result.estudiante.usuario.nombres,
+          apellidos: result.estudiante.usuario.apellidos,
+          identificacion: result.estudiante.identificacion,
+        },
+        horario: {
+          id: result.horario.id,
+          diaSemana: result.horario.diaSemana,
+          horaInicio: result.horario.horaInicio,
+          horaFin: result.horario.horaFin,
+          grupo: result.horario.grupo,
+          materia: result.horario.materia,
+        },
+      };
+    } catch (error) {
+      logger.error('Error al actualizar asistencia:', error);
+      if (error instanceof NotFoundError || error instanceof AuthorizationError) {
+        throw error;
+      }
+      throw new Error('Error al actualizar la asistencia');
     }
   }
 }

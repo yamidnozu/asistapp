@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'materia.g.dart';
+
+@JsonSerializable()
 class Materia {
   final String id;
   final String nombre;
@@ -13,25 +18,9 @@ class Materia {
     required this.createdAt,
   });
 
-  factory Materia.fromJson(Map<String, dynamic> json) {
-    return Materia(
-      id: json['id'] as String? ?? '',
-      nombre: json['nombre'] as String? ?? '',
-      codigo: json['codigo'],
-      institucionId: json['institucionId'] as String? ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
-    );
-  }
+  factory Materia.fromJson(Map<String, dynamic> json) => _$MateriaFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'codigo': codigo,
-      'institucionId': institucionId,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$MateriaToJson(this);
 
   String get nombreConCodigo => codigo != null ? '$codigo - $nombre' : nombre;
 }

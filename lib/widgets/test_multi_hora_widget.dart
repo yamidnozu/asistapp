@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/horario_provider.dart';
-import 'package:asistapp/providers/grupo_paginated_provider.dart';
+import 'package:asistapp/providers/grupo_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
 import 'package:asistapp/providers/user_provider.dart';
-import '../../services/academic_service.dart' as academic_service;
+import '../../services/academic/horario_service.dart';
 
 class TestMultiHoraWidget extends StatefulWidget {
   const TestMultiHoraWidget({super.key});
@@ -29,7 +29,7 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
-  final grupoProvider = Provider.of<GrupoPaginatedProvider>(context, listen: false);
+  final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
       final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
@@ -82,7 +82,7 @@ class _TestMultiHoraWidgetState extends State<TestMultiHoraWidget> {
 
       final success = await horarioProvider.createHorario(
         token2,
-        academic_service.CreateHorarioRequest(
+        CreateHorarioRequest(
           periodoId: testGrupo.periodoId,
           grupoId: testGrupo.id,
           materiaId: testMateria.id,

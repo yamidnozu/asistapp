@@ -69,6 +69,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
       
 
       final token = authProvider.accessToken;
@@ -80,19 +82,19 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         estudiante.id,
       );
 
-      if (success && mounted) {
-        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
-        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      if (success) {
         await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${estudiante.nombreCompleto} asignado al grupo'),
-            backgroundColor: context.colors.success,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${estudiante.nombreCompleto} asignado al grupo'),
+              backgroundColor: context.colors.success,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -109,8 +111,10 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
   Future<void> _desasignarEstudiante(User estudiante) async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
-  // paginated providers used after success to refresh data
+      final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      // paginated providers used after success to refresh data
 
       final token = authProvider.accessToken;
       if (token == null) return;
@@ -121,19 +125,19 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         estudiante.id,
       );
 
-      if (success && mounted) {
-        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
-        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      if (success) {
         await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${estudiante.nombreCompleto} removido del grupo'),
-            backgroundColor: context.colors.success,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${estudiante.nombreCompleto} removido del grupo'),
+              backgroundColor: context.colors.success,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

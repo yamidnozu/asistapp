@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import InstitutionAdminController from '../controllers/institution-admin.controller';
 import { authenticate, AuthenticatedRequest, authorize } from '../middleware/auth';
 
@@ -14,7 +15,7 @@ export default async function institutionAdminRoutes(fastify: FastifyInstance) {
     
     // Todas las rutas requieren autenticación y rol admin_institucion
     institutionAdminRoutes.addHook('preHandler', authenticate);
-    institutionAdminRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    institutionAdminRoutes.addHook('preHandler', authorize([UserRole.ADMIN_INSTITUCION]));
 
     // ========== ENDPOINT DE PRUEBA ==========
 

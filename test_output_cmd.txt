@@ -1,0 +1,1 @@
+Integration tests and unit tests cannot be run in a single invocation. Use separate invocations of `flutter test` to run integration tests and unit tests.

@@ -6,7 +6,7 @@ import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/horario_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
 import 'package:asistapp/providers/user_provider.dart';
-import 'package:asistapp/providers/grupo_paginated_provider.dart';
+import 'package:asistapp/providers/grupo_provider.dart';
 import 'package:asistapp/providers/periodo_academico_provider.dart';
 import 'package:asistapp/models/grupo.dart';
 import 'package:asistapp/models/materia.dart';
@@ -15,7 +15,8 @@ import 'package:asistapp/models/horario.dart';
 // PeriodoAcademico and GrupoCount are exported by models/grupo.dart above
 import 'package:asistapp/models/conflict_error.dart';
 import 'package:asistapp/config/app_config.dart';
-import 'package:asistapp/services/academic_service.dart' as academic_service;
+import 'package:asistapp/services/academic/horario_service.dart';
+import 'package:asistapp/widgets/horarios/edit_class_dialog.dart';
 
 class FakeAuthProvider extends AuthProvider {
   @override
@@ -35,7 +36,7 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
   }
 }
 
-class FakeGrupoProvider extends GrupoPaginatedProvider {
+class FakeGrupoProvider extends GrupoProvider {
   final List<Grupo> initialGrupos;
   FakeGrupoProvider({this.initialGrupos = const []});
 
@@ -88,13 +89,13 @@ class FakeHorarioProvider extends HorarioProvider {
   List<Horario> get horarios => initialHorarios;
 
   @override
-  Future<bool> createHorario(String accessToken, academic_service.CreateHorarioRequest horarioData) async {
+  Future<bool> createHorario(String accessToken, CreateHorarioRequest horarioData) async {
     createCalled = true;
     return true;
   }
 
   @override
-  Future<bool> updateHorario(String accessToken, String horarioId, academic_service.UpdateHorarioRequest horarioData) async {
+  Future<bool> updateHorario(String accessToken, String horarioId, UpdateHorarioRequest horarioData) async {
     updateCalled = true;
     return true;
   }
@@ -115,7 +116,7 @@ class FakeHorarioConflictProvider extends FakeHorarioProvider {
   ConflictError? get conflictError => conflict;
 
   @override
-  Future<bool> createHorario(String accessToken, academic_service.CreateHorarioRequest horarioData) async {
+  Future<bool> createHorario(String accessToken, CreateHorarioRequest horarioData) async {
     createCalled = true;
     return false; // Simulate conflict
   }
@@ -144,7 +145,7 @@ void main() {
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<HorarioProvider>.value(value: fakeHorario),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: fakePeriodo),
-          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeGrupo),
+          ChangeNotifierProvider<GrupoProvider>.value(value: fakeGrupo),
           ChangeNotifierProvider<MateriaProvider>.value(value: fakeMateria),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUser),
         ],
@@ -204,7 +205,7 @@ void main() {
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<HorarioProvider>.value(value: fakeHorario),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: fakePeriodo),
-          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeGrupo),
+          ChangeNotifierProvider<GrupoProvider>.value(value: fakeGrupo),
           ChangeNotifierProvider<MateriaProvider>.value(value: fakeMateria),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUser),
         ],

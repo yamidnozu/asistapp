@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../services/academic_service.dart' as academic_service;
+import '../models/pagination_types.dart';
+import '../services/academic/horario_service.dart';
 import '../models/horario.dart';
-import 'paginated_data_provider.dart';
+import 'paginated_data_mixin.dart';
 import '../models/clase_del_dia.dart';
 import '../models/user.dart'; // Para PaginationInfo
 import '../models/conflict_error.dart';
 
-// HorarioState removed; rely on PaginatedDataProvider's isLoading/hasError/isLoaded
+// HorarioState removed; rely on PaginatedDataMixin's isLoading/hasError/isLoaded
 
-class HorarioProvider extends PaginatedDataProvider<Horario> {
-  final academic_service.AcademicService _academicService = academic_service.AcademicService();
+class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
+  final HorarioService _horarioService;
+
+  HorarioProvider({HorarioService? horarioService})
+      : _horarioService = horarioService ?? HorarioService();
 
   // error and errorMessage delegated to PaginatedDataProvider
   ConflictError? _conflictError;
@@ -89,25 +93,25 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
     final grupoId = filters?['grupoId'];
     final periodoId = filters?['periodoId'];
 
-    final response = await _academicService.getHorarios(accessToken, page: page, limit: limit, grupoId: grupoId, periodoId: periodoId);
+    final response = await _horarioService.getHorarios(accessToken, page: page, limit: limit, grupoId: grupoId, periodoId: periodoId);
     if (response == null) return null;
     return PaginatedResponse(items: response.horarios, pagination: response.pagination);
   }
 
   @override
   Future<Horario?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _academicService.createHorario(accessToken, data as academic_service.CreateHorarioRequest);
+    final created = await _horarioService.createHorario(accessToken, data as CreateHorarioRequest);
     return created;
   }
 
   @override
   Future<bool> deleteItemApi(String accessToken, String id) async {
-    return await _academicService.deleteHorario(accessToken, id);
+    return await _horarioService.deleteHorario(accessToken, id);
   }
 
   @override
   Future<Horario?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _academicService.updateHorario(accessToken, id, data as academic_service.UpdateHorarioRequest);
+    final updated = await _horarioService.updateHorario(accessToken, id, data as UpdateHorarioRequest);
     return updated;
   }
 
@@ -118,9 +122,9 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
 
     try {
       debugPrint('HorarioProvider: Iniciando carga de horarios por grupo $grupoId...');
-      final horarios = await _academicService.getHorariosPorGrupo(accessToken, grupoId);
+      final horarios = await _horarioService.getHorariosPorGrupo(accessToken, grupoId);
       if (horarios != null) {
-        debugPrint('HorarioProvider: Recibidos ${horarios!.length} horarios del grupo $grupoId');
+      debugPrint('HorarioProvider: Recibidos ${horarios.length} horarios del grupo $grupoId');
   clearItems();
   items.addAll(horarios);
       // No hay paginación para este endpoint específico: señalamos
@@ -151,8 +155,8 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
       debugPrint('HorarioProvider: Cargando horarios para grupo $grupoId y período $periodoId...');
 
       // Cargar ambas solicitudes en paralelo
-      final grupoHorariosTask = _academicService.getHorariosPorGrupo(accessToken, grupoId);
-      final periodHorariosTask = _academicService.getHorarios(
+      final grupoHorariosTask = _horarioService.getHorariosPorGrupo(accessToken, grupoId);
+      final periodHorariosTask = _horarioService.getHorarios(
         accessToken,
         page: 1,
         limit: 100, // 🔧 Máximo permitido por el backend
@@ -191,7 +195,7 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
   if (isLoading) return;
 
     try {
-      final horario = await _academicService.getHorarioById(accessToken, horarioId);
+      final horario = await _horarioService.getHorarioById(accessToken, horarioId);
       if (horario != null) {
         _selectedHorario = horario;
   notifyListeners();
@@ -205,11 +209,11 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
   }
 
   /// Crea un nuevo horario
-  Future<bool> createHorario(String accessToken, academic_service.CreateHorarioRequest horarioData) async {
+  Future<bool> createHorario(String accessToken, CreateHorarioRequest horarioData) async {
   if (isLoading) return false;
 
     try {
-      final newHorario = await _academicService.createHorario(accessToken, horarioData);
+      final newHorario = await _horarioService.createHorario(accessToken, horarioData);
       if (newHorario != null) {
         // Agregar el nuevo horario a la lista
   items.insert(0, newHorario);
@@ -235,11 +239,11 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
   }
 
   /// Actualiza un horario existente
-  Future<bool> updateHorario(String accessToken, String horarioId, academic_service.UpdateHorarioRequest horarioData) async {
+  Future<bool> updateHorario(String accessToken, String horarioId, UpdateHorarioRequest horarioData) async {
   if (isLoading) return false;
 
     try {
-      final updatedHorario = await _academicService.updateHorario(accessToken, horarioId, horarioData);
+      final updatedHorario = await _horarioService.updateHorario(accessToken, horarioId, horarioData);
       if (updatedHorario != null) {
         // Actualizar el horario en la lista
   final index = items.indexWhere((horario) => horario.id == horarioId);
@@ -278,7 +282,7 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
     // Este método ya no gestionará el estado de la lista.
     // La pantalla se encargará de solicitar la recarga, que sí gestiona el estado.
     try {
-      final success = await _academicService.deleteHorario(accessToken, horarioId);
+      final success = await _horarioService.deleteHorario(accessToken, horarioId);
 
       if (!success) {
         // Guardamos el mensaje de error para que la UI pueda mostrarlo.
@@ -298,7 +302,7 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
 
     try {
       debugPrint('HorarioProvider: Cargando clases del día para el profesor...');
-      final clases = await _academicService.getMisClasesDelDia(accessToken);
+      final clases = await _horarioService.getMisClasesDelDia(accessToken);
       if (clases != null) {
         debugPrint('HorarioProvider: Recibidas ${clases.length} clases del día');
         _clasesDelDia = clases;
@@ -318,7 +322,7 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
 
     try {
       debugPrint('HorarioProvider: Cargando clases del día $diaSemana para el profesor...');
-      final clases = await _academicService.getMisClasesPorDia(accessToken, diaSemana);
+      final clases = await _horarioService.getMisClasesPorDia(accessToken, diaSemana);
       if (clases != null) {
         debugPrint('HorarioProvider: Recibidas ${clases.length} clases del día $diaSemana');
         _clasesDelDia = clases;
@@ -338,7 +342,7 @@ class HorarioProvider extends PaginatedDataProvider<Horario> {
 
     try {
       debugPrint('HorarioProvider: Cargando horario semanal para el profesor...');
-      final horario = await _academicService.getMiHorarioSemanal(accessToken);
+      final horario = await _horarioService.getMiHorarioSemanal(accessToken);
       if (horario != null) {
         debugPrint('HorarioProvider: Recibido horario semanal con ${horario.length} clases');
         _horarioSemanal = horario;

@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import { EstudianteController } from '../controllers/estudiante.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -7,7 +8,7 @@ export default async function estudianteRoutes(fastify: FastifyInstance) {
   fastify.register(async function (estudianteRoutes) {
 
     estudianteRoutes.addHook('preHandler', authenticate);
-    estudianteRoutes.addHook('preHandler', authorize(['estudiante']));
+    estudianteRoutes.addHook('preHandler', authorize([UserRole.ESTUDIANTE]));
 
     estudianteRoutes.get('/dashboard/clases-hoy', {
       handler: EstudianteController.getClasesHoy as any,

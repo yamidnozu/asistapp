@@ -66,11 +66,11 @@ class UserDetailScreen extends StatelessWidget {
             ],
 
             // Información de instituciones
-            if (user.instituciones.isNotEmpty) ...[
+            if (user.instituciones?.isNotEmpty ?? false) ...[
               _buildInfoSection(
                 context,
                 'Instituciones',
-                user.instituciones.map((inst) => _buildInfoItem(
+                (user.instituciones ?? []).map((inst) => _buildInfoItem(
                   inst.nombre,
                   inst.rolEnInstitucion ?? 'Sin rol específico',
                 )).toList(),

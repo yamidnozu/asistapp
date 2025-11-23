@@ -59,7 +59,7 @@ export class AsistenciaController {
 
       // Manejar errores conocidos por nombre de clase
       const errorName = error.constructor?.name || '';
-      
+
       if (errorName === 'NotFoundError') {
         reply.code(404).send({
           success: false,
@@ -68,7 +68,7 @@ export class AsistenciaController {
         });
         return;
       }
-      
+
       if (errorName === 'ValidationError') {
         reply.code(400).send({
           success: false,
@@ -77,7 +77,7 @@ export class AsistenciaController {
         });
         return;
       }
-      
+
       if (errorName === 'AuthorizationError') {
         reply.code(403).send({
           success: false,
@@ -91,54 +91,6 @@ export class AsistenciaController {
       reply.code(500).send({
         success: false,
         message: error.message || 'Error interno del servidor',
-        error: 'InternalServerError',
-      });
-    }
-  }
-
-  /**
-   * Obtiene la lista de asistencias para un horario específico
-   * GET /horarios/:horarioId/asistencias
-   */
-  public static async getAsistenciasPorHorario(
-    request: AuthenticatedRequest & FastifyRequest<{ Params: GetAsistenciasParams }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    try {
-      const { horarioId } = request.params;
-      const profesorId = request.user!.id;
-
-      const resultado = await AsistenciaService.getAsistenciasPorHorario(horarioId, profesorId);
-
-      reply.code(200).send({
-        success: true,
-        message: 'Asistencias obtenidas exitosamente',
-        data: resultado,
-      });
-    } catch (error: any) {
-      console.error('Error en getAsistenciasPorHorario:', error);
-
-      if (error.message?.includes('NotFoundError')) {
-        reply.code(404).send({
-          success: false,
-          message: error.message,
-          error: error.constructor.name,
-        });
-        return;
-      }
-
-      if (error.message?.includes('ForbiddenError') || error.message?.includes('no tiene permisos')) {
-        reply.code(403).send({
-          success: false,
-          message: error.message,
-          error: 'ForbiddenError',
-        });
-        return;
-      }
-
-      reply.code(500).send({
-        success: false,
-        message: 'Error interno del servidor',
         error: 'InternalServerError',
       });
     }
@@ -201,7 +153,7 @@ export class AsistenciaController {
 
       // Manejar errores conocidos por nombre de clase
       const errorName = error.constructor?.name || '';
-      
+
       if (errorName === 'NotFoundError') {
         reply.code(404).send({
           success: false,
@@ -210,7 +162,7 @@ export class AsistenciaController {
         });
         return;
       }
-      
+
       if (errorName === 'ValidationError') {
         reply.code(400).send({
           success: false,
@@ -219,7 +171,7 @@ export class AsistenciaController {
         });
         return;
       }
-      
+
       if (errorName === 'AuthorizationError') {
         reply.code(403).send({
           success: false,
@@ -370,6 +322,76 @@ export class AsistenciaController {
       });
     } catch (error: any) {
       console.error('Error en getAsistenciasEstudiante:', error);
+      reply.code(500).send({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'InternalServerError',
+      });
+    }
+  }
+
+  /**
+   * Actualiza una asistencia existente
+   * PUT /asistencias/:id
+   */
+  public static async updateAsistencia(
+    request: AuthenticatedRequest & FastifyRequest<{
+      Params: { id: string },
+      Body: { estado?: string; observacion?: string; justificada?: boolean }
+    }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+      const { estado, observacion, justificada } = request.body;
+      const usuario = request.user!;
+
+      // Validar estado si se proporciona
+      if (estado && !['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'].includes(estado)) {
+        reply.code(400).send({
+          success: false,
+          error: 'Estado de asistencia inválido',
+        });
+        return;
+      }
+
+      const resultado = await AsistenciaService.updateAsistencia(
+        id,
+        {
+          estado: estado as any,
+          observacion,
+          justificada
+        },
+        usuario.id,
+        usuario.rol
+      );
+
+      reply.code(200).send({
+        success: true,
+        message: 'Asistencia actualizada exitosamente',
+        data: resultado,
+      });
+    } catch (error: any) {
+      console.error('Error en updateAsistencia:', error);
+
+      if (error instanceof Error && error.message.includes('NotFoundError')) {
+        reply.code(404).send({
+          success: false,
+          message: error.message,
+          error: 'NotFoundError',
+        });
+        return;
+      }
+
+      if (error instanceof Error && error.message.includes('AuthorizationError')) {
+        reply.code(403).send({
+          success: false,
+          message: error.message,
+          error: 'AuthorizationError',
+        });
+        return;
+      }
+
       reply.code(500).send({
         success: false,
         message: 'Error interno del servidor',

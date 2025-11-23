@@ -12,22 +12,22 @@ dependencies:
   flutter_animate: ^4.5.2
   google_fonts: ^6.3.0
   http: ^1.2.2
-  shared_preferences: ^2.5.3
-  flutter_dotenv: ^5.1.0
-  flutter_speed_dial: ^7.0.0
-  shimmer: ^3.0.0
-  flutter_staggered_animations: ^1.1.1
-  uuid: ^4.4.0
-  mobile_scanner: ^5.1.1
-  qr_flutter: ^4.1.0
-
-dev_dependencies:
-  flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.14.4
-  flutter_test:
-    sdk: flutter
   integration_test:
     sdk: flutter
+  json_serializable: ^6.8.0
+  build_runner: ^2.4.9
+  mockito: ^5.4.4
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^3.0.0
+  flutter_speed_dial: ^7.0.0
+  flutter_dotenv: ^5.1.0
+  shared_preferences: ^2.3.2
+  focus_detector: ^2.0.1
+  flutter_staggered_animations: ^1.1.1
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true

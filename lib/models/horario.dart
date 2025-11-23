@@ -1,7 +1,11 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'grupo.dart';
 import 'materia.dart';
 import 'user.dart';
 
+part 'horario.g.dart';
+
+@JsonSerializable()
 class Horario {
   final String id;
   final String periodoId;
@@ -35,70 +39,9 @@ class Horario {
     this.profesor,
   });
 
-  factory Horario.fromJson(Map<String, dynamic> json) {
-    return Horario(
-      id: json['id'] as String? ?? '',
-      periodoId: json['periodoId'] as String? ?? '',
-      grupoId: json['grupoId'] as String? ?? '',
-      materiaId: json['materiaId'] as String? ?? '',
-      profesorId: json['profesorId'],
-      diaSemana: json['diaSemana'] as int? ?? 1,
-      horaInicio: json['horaInicio'] as String? ?? '08:00',
-      horaFin: json['horaFin'] as String? ?? '10:00',
-      institucionId: json['institucionId'] as String? ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
-      grupo: json['grupo'] != null ? Grupo.fromJson(json['grupo']) : Grupo(
-        id: json['grupoId'] ?? '',
-        nombre: 'Grupo desconocido',
-        grado: 'N/A',
-        periodoId: json['periodoId'] ?? '',
-        institucionId: json['institucionId'] ?? '',
-        createdAt: DateTime.now(),
-        periodoAcademico: PeriodoAcademico(
-          id: json['periodoId'] ?? '',
-          nombre: 'Periodo desconocido',
-          fechaInicio: DateTime.now(),
-          fechaFin: DateTime.now(),
-          activo: false,
-        ),
-        count: GrupoCount(estudiantesGrupos: 0, horarios: 0),
-      ),
-      materia: json['materia'] != null ? Materia.fromJson(json['materia']) : Materia(
-        id: json['materiaId'] ?? '',
-        nombre: 'Materia desconocida',
-        codigo: null,
-        institucionId: json['institucionId'] ?? '',
-        createdAt: DateTime.now(),
-      ),
-      periodoAcademico: json['periodoAcademico'] != null ? PeriodoAcademico.fromJson(json['periodoAcademico']) : PeriodoAcademico(
-        id: json['periodoId'] ?? '',
-        nombre: 'Periodo desconocido',
-        fechaInicio: DateTime.now(),
-        fechaFin: DateTime.now(),
-        activo: false,
-      ),
-      profesor: json['profesor'] != null ? User.fromJson(json['profesor']) : null,
-    );
-  }
+  factory Horario.fromJson(Map<String, dynamic> json) => _$HorarioFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'periodoId': periodoId,
-      'grupoId': grupoId,
-      'materiaId': materiaId,
-      'profesorId': profesorId,
-      'diaSemana': diaSemana,
-      'horaInicio': horaInicio,
-      'horaFin': horaFin,
-      'institucionId': institucionId,
-      'createdAt': createdAt.toIso8601String(),
-      'grupo': grupo.toJson(),
-      'materia': materia.toJson(),
-      'periodoAcademico': periodoAcademico.toJson(),
-      if (profesor != null) 'profesor': profesor!.toJson(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$HorarioToJson(this);
 
   String get diaSemanaNombre {
     const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];

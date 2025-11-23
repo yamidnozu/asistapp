@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { NotFoundError, ValidationError } from '../types';
+import { UserRole } from '../constants/roles';
+import logger from '../utils/logger';
 
 const prisma = new PrismaClient();
 
@@ -54,23 +56,13 @@ export interface ClaseDelDiaResponse {
   };
 }
 
-/**
- * Servicio para gestión de Profesores
- * Usado por Admins de Institución
- * Los profesores son usuarios con rol 'profesor'
- */
 export class ProfesorService {
-
-  /**
-   * Obtiene todos los profesores de una institución con paginación y filtros
-   */
   public static async getAll(
     institucionId: string,
     pagination?: { page?: number; limit?: number },
     filters?: ProfesorFilters
   ) {
     try {
-      // Validar parámetros de paginación
       const page = pagination?.page || 1;
       const limit = pagination?.limit || 10;
 
@@ -80,7 +72,6 @@ export class ProfesorService {
 
       const skip = (page - 1) * limit;
 
-      // Construir where clause
       const where: any = {
         rol: 'profesor',
         usuarioInstituciones: {
@@ -103,10 +94,8 @@ export class ProfesorService {
         ];
       }
 
-      // Obtener total para paginación
       const total = await prisma.usuario.count({ where });
 
-      // Obtener profesores con información de institución
       const profesores = await prisma.usuario.findMany({
         where,
         skip,
@@ -132,7 +121,6 @@ export class ProfesorService {
         },
       });
 
-      // Formatear respuesta
       const formattedProfesores = profesores.map((profesor: any) => ({
         id: profesor.id,
         nombres: profesor.nombres,
@@ -154,7 +142,7 @@ export class ProfesorService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener profesores:', error);
+      logger.error('Error al obtener profesores', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -162,9 +150,6 @@ export class ProfesorService {
     }
   }
 
-  /**
-   * Obtiene un profesor por ID y institución
-   */
   public static async getById(id: string, institucionId: string) {
     const profesor = await prisma.usuario.findFirst({
       where: {
@@ -209,11 +194,7 @@ export class ProfesorService {
     };
   }
 
-  /**
-   * Crea un nuevo profesor
-   */
   public static async create(data: CreateProfesorRequest, createdBy: string) {
-    // Verificar que el email no exista
     const existingUser = await prisma.usuario.findUnique({
       where: { email: data.email },
     });
@@ -222,7 +203,6 @@ export class ProfesorService {
       throw new ValidationError('El email ya está registrado');
     }
 
-    // Verificar que la institución existe
     const institucion = await prisma.institucion.findUnique({
       where: { id: data.institucionId },
     });
@@ -231,10 +211,8 @@ export class ProfesorService {
       throw new NotFoundError('Institución');
     }
 
-    // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Crear usuario profesor
     const newProfesor = await prisma.usuario.create({
       data: {
         email: data.email,
@@ -246,7 +224,6 @@ export class ProfesorService {
       },
     });
 
-    // Crear relación con institución
     await prisma.usuarioInstitucion.create({
       data: {
         usuarioId: newProfesor.id,
@@ -255,17 +232,12 @@ export class ProfesorService {
       },
     });
 
-    // Obtener profesor con institución incluida
     const profesorWithInstitucion = await this.getById(newProfesor.id, data.institucionId);
 
     return profesorWithInstitucion;
   }
 
-  /**
-   * Actualiza un profesor
-   */
   public static async update(id: string, institucionId: string, data: UpdateProfesorRequest) {
-    // Verificar que el profesor existe y pertenece a la institución
     const existingProfesor = await prisma.usuario.findFirst({
       where: {
         id,
@@ -283,7 +255,6 @@ export class ProfesorService {
       throw new NotFoundError('Profesor');
     }
 
-    // Verificar email único si se está cambiando
     if (data.email && data.email !== existingProfesor.email) {
       const emailExists = await prisma.usuario.findUnique({
         where: { email: data.email },
@@ -332,11 +303,7 @@ export class ProfesorService {
     };
   }
 
-  /**
-   * Elimina un profesor (desactivación lógica)
-   */
   public static async delete(id: string, institucionId: string) {
-    // Verificar que el profesor existe y pertenece a la institución
     const existingProfesor = await prisma.usuario.findFirst({
       where: {
         id,
@@ -354,7 +321,6 @@ export class ProfesorService {
       return false;
     }
 
-    // Desactivar profesor (eliminación lógica)
     await prisma.usuario.update({
       where: { id },
       data: { activo: false },
@@ -363,11 +329,7 @@ export class ProfesorService {
     return true;
   }
 
-  /**
-   * Activa/desactiva un profesor
-   */
   public static async toggleStatus(id: string, institucionId: string) {
-    // Verificar que el profesor existe y pertenece a la institución
     const existingProfesor = await prisma.usuario.findFirst({
       where: {
         id,
@@ -418,28 +380,20 @@ export class ProfesorService {
     };
   }
 
-  /**
-   * Obtiene las clases que el profesor tiene hoy
-   * Calcula el día de la semana actual y filtra los horarios correspondientes
-   */
   public static async getClasesDelDia(profesorId: string): Promise<ClaseDelDiaResponse[]> {
     try {
-      // Obtener el día de la semana actual (1 = Lunes, 7 = Domingo)
       const hoy = new Date();
-      const diaSemana = hoy.getDay() === 0 ? 7 : hoy.getDay(); // Convertir 0 (Domingo) a 7
+      const diaSemana = hoy.getDay() === 0 ? 7 : hoy.getDay();
 
-      // Obtener las clases del profesor para hoy
       const clases = await prisma.horario.findMany({
         where: {
           profesorId: profesorId,
           diaSemana: diaSemana,
           periodoAcademico: {
-            activo: true, // Solo periodos activos
+            activo: true,
           },
         },
-        orderBy: [
-          { horaInicio: 'asc' },
-        ],
+        orderBy: [{ horaInicio: 'asc' }],
         include: {
           grupo: {
             select: {
@@ -477,39 +431,19 @@ export class ProfesorService {
         diaSemana: clase.diaSemana,
         horaInicio: clase.horaInicio,
         horaFin: clase.horaFin,
-        grupo: {
-          id: clase.grupo.id,
-          nombre: clase.grupo.nombre,
-          grado: clase.grupo.grado,
-          seccion: clase.grupo.seccion,
-        },
-        materia: {
-          id: clase.materia.id,
-          nombre: clase.materia.nombre,
-          codigo: clase.materia.codigo,
-        },
-        periodoAcademico: {
-          id: clase.periodoAcademico.id,
-          nombre: clase.periodoAcademico.nombre,
-          activo: clase.periodoAcademico.activo,
-        },
-        institucion: {
-          id: clase.institucion.id,
-          nombre: clase.institucion.nombre,
-        },
+        grupo: clase.grupo,
+        materia: clase.materia,
+        periodoAcademico: clase.periodoAcademico,
+        institucion: clase.institucion,
       }));
     } catch (error) {
-      console.error('Error al obtener clases del día:', error);
+      logger.error('Error al obtener clases del día', error);
       throw new Error('Error al obtener las clases del día');
     }
   }
 
-  /**
-   * Obtiene las clases que el profesor tiene en un día específico de la semana
-   */
   public static async getClasesPorDia(profesorId: string, diaSemana: number): Promise<ClaseDelDiaResponse[]> {
     try {
-      // Validar que diaSemana esté en rango 1-7
       if (diaSemana < 1 || diaSemana > 7) {
         throw new Error('El día de la semana debe estar entre 1 (Lunes) y 7 (Domingo)');
       }
@@ -519,12 +453,10 @@ export class ProfesorService {
           profesorId: profesorId,
           diaSemana: diaSemana,
           periodoAcademico: {
-            activo: true, // Solo periodos activos
+            activo: true,
           },
         },
-        orderBy: [
-          { horaInicio: 'asc' },
-        ],
+        orderBy: [{ horaInicio: 'asc' }],
         include: {
           grupo: {
             select: {
@@ -562,50 +494,104 @@ export class ProfesorService {
         diaSemana: clase.diaSemana,
         horaInicio: clase.horaInicio,
         horaFin: clase.horaFin,
-        grupo: {
-          id: clase.grupo.id,
-          nombre: clase.grupo.nombre,
-          grado: clase.grupo.grado,
-          seccion: clase.grupo.seccion,
-        },
-        materia: {
-          id: clase.materia.id,
-          nombre: clase.materia.nombre,
-          codigo: clase.materia.codigo,
-        },
-        periodoAcademico: {
-          id: clase.periodoAcademico.id,
-          nombre: clase.periodoAcademico.nombre,
-          activo: clase.periodoAcademico.activo,
-        },
-        institucion: {
-          id: clase.institucion.id,
-          nombre: clase.institucion.nombre,
-        },
+        grupo: clase.grupo,
+        materia: clase.materia,
+        periodoAcademico: clase.periodoAcademico,
+        institucion: clase.institucion,
       }));
     } catch (error) {
-      console.error('Error al obtener clases por día:', error);
+      logger.error('Error al obtener clases por día', error);
       throw new Error('Error al obtener las clases por día');
     }
   }
 
   /**
-   * Obtiene el horario semanal completo del profesor
+   * ✅ OPTIMIZADO: Obtiene el horario semanal completo con UNA SOLA QUERY
+   * Antes: 7 queries secuenciales (una por día)
+   * Ahora: 1 query que trae todos los días y agrupa en memoria
    */
   public static async getHorarioSemanal(profesorId: string): Promise<{
     [key: number]: ClaseDelDiaResponse[];
   }> {
     try {
+      logger.debug('Obteniendo horario semanal optimizado', { profesorId });
+
+      // ✅ UNA SOLA QUERY para traer TODOS los días de la semana
+      const todasLasClases = await prisma.horario.findMany({
+        where: {
+          profesorId: profesorId,
+          periodoAcademico: {
+            activo: true,
+          },
+        },
+        orderBy: [
+          { diaSemana: 'asc' },
+          { horaInicio: 'asc' },
+        ],
+        include: {
+          grupo: {
+            select: {
+              id: true,
+              nombre: true,
+              grado: true,
+              seccion: true,
+            },
+          },
+          materia: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true,
+            },
+          },
+          periodoAcademico: {
+            select: {
+              id: true,
+              nombre: true,
+              activo: true,
+            },
+          },
+          institucion: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
+        },
+      });
+
+      // Agrupar clases por día en memoria (muy rápido, O(n))
       const horarioSemanal: { [key: number]: ClaseDelDiaResponse[] } = {};
 
-      // Obtener clases para cada día de la semana
+      // Inicializar todos los días con arrays vacíos
       for (let dia = 1; dia <= 7; dia++) {
-        horarioSemanal[dia] = await this.getClasesPorDia(profesorId, dia);
+        horarioSemanal[dia] = [];
       }
+
+      // Agrupar las clases por día
+      for (const clase of todasLasClases) {
+        const formatted: ClaseDelDiaResponse = {
+          id: clase.id,
+          diaSemana: clase.diaSemana,
+          horaInicio: clase.horaInicio,
+          horaFin: clase.horaFin,
+          grupo: clase.grupo,
+          materia: clase.materia,
+          periodoAcademico: clase.periodoAcademico,
+          institucion: clase.institucion,
+        };
+
+        horarioSemanal[clase.diaSemana].push(formatted);
+      }
+
+      logger.debug('Horario semanal obtenido exitosamente', {
+        profesorId,
+        totalClases: todasLasClases.length,
+      });
 
       return horarioSemanal;
     } catch (error) {
-      console.error('Error al obtener horario semanal:', error);
+      logger.error('Error al obtener horario semanal', error);
       throw new Error('Error al obtener el horario semanal');
     }
   }

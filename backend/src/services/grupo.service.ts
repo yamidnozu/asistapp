@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
 import { ConflictError, NotFoundError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export interface GrupoFilters {
   periodoId?: string;
@@ -165,7 +166,7 @@ export class GrupoService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener grupos:', error);
+      logger.error('Error al obtener grupos:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -221,7 +222,7 @@ export class GrupoService {
         _count: grupo._count,
       };
     } catch (error) {
-      console.error('Error al obtener grupo:', error);
+      logger.error('Error al obtener grupo:', error);
       throw new Error('Error al obtener el grupo');
     }
   }
@@ -309,7 +310,7 @@ export class GrupoService {
         _count: grupo._count,
       };
     } catch (error) {
-      console.error('Error al crear grupo:', error);
+      logger.error('Error al crear grupo:', error);
       if (error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -407,7 +408,7 @@ export class GrupoService {
         _count: grupo._count,
       };
     } catch (error) {
-      console.error('Error al actualizar grupo:', error);
+      logger.error('Error al actualizar grupo:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -464,7 +465,7 @@ export class GrupoService {
 
       return true;
     } catch (error) {
-      console.error('Error al eliminar grupo:', error);
+      logger.error('Error al eliminar grupo:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
@@ -526,7 +527,7 @@ export class GrupoService {
         _count: grupo._count,
       }));
     } catch (error) {
-      console.error('Error al obtener grupos disponibles:', error);
+      logger.error('Error al obtener grupos disponibles:', error);
       throw new Error('Error al obtener los grupos disponibles');
     }
   }
@@ -615,7 +616,7 @@ export class GrupoService {
         _count: grupoActualizado._count,
       };
     } catch (error) {
-      console.error('Error al cambiar status del grupo:', error);
+      logger.error('Error al cambiar status del grupo:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
@@ -705,7 +706,7 @@ export class GrupoService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener estudiantes del grupo:', error);
+      logger.error('Error al obtener estudiantes del grupo:', error);
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
       }
@@ -837,7 +838,7 @@ export class GrupoService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener estudiantes sin grupo:', error);
+      logger.error('Error al obtener estudiantes sin grupo:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -925,7 +926,7 @@ export class GrupoService {
 
       return true;
     } catch (error) {
-      console.error('Error al asignar estudiante al grupo:', error);
+      logger.error('Error al asignar estudiante al grupo:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -960,7 +961,7 @@ export class GrupoService {
 
       return true;
     } catch (error) {
-      console.error('Error al desasignar estudiante del grupo:', error);
+      logger.error('Error al desasignar estudiante del grupo:', error);
       if (error instanceof NotFoundError) {
         throw error;
       }

@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'institution.g.dart';
+
+@JsonSerializable()
 class Institution {
   final String id;
   final String nombre;
@@ -25,36 +30,9 @@ class Institution {
     this.metadata,
   });
 
-  factory Institution.fromJson(Map<String, dynamic> json) {
-    return Institution(
-      id: json['id'] as String,
-      nombre: json['nombre'] as String? ?? json['name'] as String? ?? 'Institución sin nombre',
-      direccion: json['direccion'] as String?,
-      telefono: json['telefono'] as String?,
-      email: json['email'] as String?,
-      activa: json['activa'] as bool? ?? true,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-      role: json['rolEnInstitucion'] as String? ?? json['role'] as String?,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
+  factory Institution.fromJson(Map<String, dynamic> json) => _$InstitutionFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      if (direccion != null) 'direccion': direccion,
-      if (telefono != null) 'telefono': telefono,
-      if (email != null) 'email': email,
-      'activa': activa,
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      if (role != null) 'role': role,
-      if (role != null) 'rolEnInstitucion': role,
-      if (metadata != null) 'metadata': metadata,
-    };
-  }
+  Map<String, dynamic> toJson() => _$InstitutionToJson(this);
 
   // Getters para compatibilidad
   String get name => nombre;

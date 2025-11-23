@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asistapp/screens/academic/grupos_screen.dart';
 import 'package:asistapp/providers/auth_provider.dart';
-import 'package:asistapp/providers/grupo_paginated_provider.dart';
+import 'package:asistapp/providers/grupo_provider.dart';
 import 'package:asistapp/providers/periodo_academico_provider.dart';
 import 'package:asistapp/models/grupo.dart';
 import 'package:asistapp/config/app_config.dart';
@@ -14,7 +14,7 @@ class FakeAuthProvider extends AuthProvider {
   String? get accessToken => 'FAKE_TOKEN';
 }
 
-class FakeGrupoProvider extends GrupoPaginatedProvider {
+class FakeGrupoProvider extends GrupoProvider {
   bool updateCalled = false;
   bool deleteCalled = false;
   final List<Grupo> initialGrupos;
@@ -31,13 +31,24 @@ class FakeGrupoProvider extends GrupoPaginatedProvider {
   }
 
   @override
-  Future<bool> updateItem(String accessToken, String id, dynamic data) async {
+  Future<Grupo?> updateItemApi(String accessToken, String id, dynamic data) async {
     updateCalled = true;
-    return true;
+    // Return a mock updated grupo for test purposes
+    return Grupo(
+      id: id,
+      nombre: 'Updated Grupo',
+      grado: '1ro',
+      seccion: 'A',
+      periodoId: 'p1',
+      institucionId: 'i1',
+      createdAt: DateTime.now(),
+      periodoAcademico: PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true),
+      count: GrupoCount(estudiantesGrupos: 0, horarios: 0),
+    );
   }
 
   @override
-  Future<bool> deleteItem(String accessToken, String id) async {
+  Future<bool> deleteItemApi(String accessToken, String id) async {
     deleteCalled = true;
     return true;
   }
@@ -73,7 +84,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
-          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeProvider),
+          ChangeNotifierProvider<GrupoProvider>.value(value: fakeProvider),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: FakePeriodoProvider([periodo])),
         ],
         child: const MaterialApp(home: Scaffold(body: GruposScreen())),
@@ -114,7 +125,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
-          ChangeNotifierProvider<GrupoPaginatedProvider>.value(value: fakeProvider),
+          ChangeNotifierProvider<GrupoProvider>.value(value: fakeProvider),
           ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: FakePeriodoProvider([periodo])),
         ],
         child: const MaterialApp(home: Scaffold(body: GruposScreen())),

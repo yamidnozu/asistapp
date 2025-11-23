@@ -34,6 +34,7 @@ class InstitutionContactStep extends StatelessWidget {
         SizedBox(height: spacing.lg),
 
         CustomTextFormField(
+          key: const Key('direccionInstitucionField'),
           controller: direccionController,
           labelText: 'Dirección',
           hintText: 'Dirección completa de la institución',
@@ -47,6 +48,7 @@ class InstitutionContactStep extends StatelessWidget {
         SizedBox(height: spacing.md),
 
         CustomTextFormField(
+          key: const Key('telefonoInstitucionField'),
           controller: telefonoController,
           labelText: 'Teléfono',
           hintText: '+57 300 123 4567',

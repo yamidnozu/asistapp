@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
 import { ConflictError, NotFoundError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
+import logger from '../utils/logger';
 
 export interface MateriaFilters {
   search?: string;
@@ -100,7 +101,7 @@ export class MateriaService {
         },
       };
     } catch (error) {
-      console.error('Error al obtener materias:', error);
+      logger.error('Error al obtener materias:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -137,7 +138,7 @@ export class MateriaService {
         _count: materia._count,
       };
     } catch (error) {
-      console.error('Error al obtener materia:', error);
+      logger.error('Error al obtener materia:', error);
       throw new Error('Error al obtener la materia');
     }
   }
@@ -202,7 +203,7 @@ export class MateriaService {
         _count: materia._count,
       };
     } catch (error) {
-      console.error('Error al crear materia:', error);
+      logger.error('Error al crear materia:', error);
       if (error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -278,7 +279,7 @@ export class MateriaService {
         _count: materia._count,
       };
     } catch (error) {
-      console.error('Error al actualizar materia:', error);
+      logger.error('Error al actualizar materia:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -318,7 +319,7 @@ export class MateriaService {
 
       return true;
     } catch (error) {
-      console.error('Error al eliminar materia:', error);
+      logger.error('Error al eliminar materia:', error);
       if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
@@ -356,7 +357,7 @@ export class MateriaService {
         _count: materia._count,
       }));
     } catch (error) {
-      console.error('Error al obtener materias disponibles:', error);
+      logger.error('Error al obtener materias disponibles:', error);
       throw new Error('Error al obtener las materias disponibles');
     }
   }

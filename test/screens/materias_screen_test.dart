@@ -5,7 +5,7 @@ import 'package:asistapp/screens/academic/materias_screen.dart';
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
 // models imported via provider stubs when needed
-import 'package:asistapp/services/academic_service.dart' as academic_service;
+import 'package:asistapp/services/academic/materia_service.dart';
 import 'package:asistapp/models/materia.dart';
 
 class FakeAuthProvider extends AuthProvider {
@@ -33,13 +33,13 @@ class FakeMateriaProvider extends MateriaProvider {
   }
 
   @override
-  Future<bool> createMateria(String accessToken, academic_service.CreateMateriaRequest materiaData) async {
+  Future<bool> createMateria(String accessToken, CreateMateriaRequest materiaData) async {
     createCalled = true;
     return true;
   }
 
   @override
-  Future<bool> updateMateria(String accessToken, String materiaId, academic_service.UpdateMateriaRequest materiaData) async {
+  Future<bool> updateMateria(String accessToken, String materiaId, UpdateMateriaRequest materiaData) async {
     updateCalled = true;
     return true;
   }

@@ -1,13 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../models/user.dart'; // PaginationInfo
-
-/// Generic paginated response wrapper used by `PaginatedDataProvider<T>`
-class PaginatedResponse<T> {
-  final List<T> items;
-  final PaginationInfo pagination;
-
-  PaginatedResponse({required this.items, required this.pagination});
-}
+import '../models/pagination_types.dart';
+import '../models/user.dart'; // PaginationInfo from API responses
 
 /// Provider base class to handle common paginated list logic.
 ///

@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { UserRole } from '../constants/roles';
 import GrupoController from '../controllers/grupo.controller';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -7,7 +8,7 @@ export default async function grupoRoutes(fastify: FastifyInstance) {
   fastify.register(async function (grupoRoutes) {
 
     grupoRoutes.addHook('preHandler', authenticate);
-    grupoRoutes.addHook('preHandler', authorize(['admin_institucion']));
+    grupoRoutes.addHook('preHandler', authorize([UserRole.ADMIN_INSTITUCION]));
 
     /**
      * GET /grupos

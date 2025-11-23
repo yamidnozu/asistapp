@@ -5,7 +5,6 @@ import 'config/app_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/institution_provider.dart';
 import 'providers/user_provider.dart';
-import 'providers/user_paginated_provider.dart';
 import 'providers/estudiantes_by_grupo_paginated_provider.dart';
 import 'providers/estudiantes_sin_asignar_paginated_provider.dart';
 import 'providers/institution_admins_paginated_provider.dart';
@@ -18,6 +17,14 @@ import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'utils/app_router.dart';
+import 'services/auth_service.dart';
+import 'services/asistencia_service.dart';
+import 'services/institution_service.dart';
+import 'services/academic/grupo_service.dart';
+import 'services/academic/materia_service.dart';
+import 'services/academic/horario_service.dart';
+import 'services/academic/periodo_service.dart';
+import 'services/user_service.dart' as user_service;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,27 +52,31 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   late final AppLifecycleManager _lifecycleManager;
-  late final AuthProvider _authProvider;
-  late final InstitutionProvider _institutionProvider;
-  late final HorarioProvider _horarioProvider;
-  late final AsistenciaProvider _asistenciaProvider;
-  late final GrupoProvider _grupoProvider;
-  late final MateriaProvider _materiaProvider;
-  late final PeriodoAcademicoProvider _periodoAcademicoProvider;
   late AppRouter _appRouter;
+  late final AuthService _authService;
+  late final InstitutionService _institutionService;
+  late final GrupoService _grupoService;
+  late final MateriaService _materiaService;
+  late final HorarioService _horarioService;
+  late final PeriodoService _periodoService;
+  late final AsistenciaService _asistenciaService;
+  late final user_service.UserService _userService;
+  late final AuthProvider _authProvider;
 
   @override
   void initState() {
     super.initState();
 
     _lifecycleManager = AppLifecycleManager();
-    _authProvider = AuthProvider();
-    _institutionProvider = InstitutionProvider();
-    _horarioProvider = HorarioProvider();
-    _asistenciaProvider = AsistenciaProvider();
-    _grupoProvider = GrupoProvider();
-    _materiaProvider = MateriaProvider();
-    _periodoAcademicoProvider = PeriodoAcademicoProvider();
+    _authService = AuthService();
+    _institutionService = InstitutionService();
+    _grupoService = GrupoService();
+    _materiaService = MateriaService();
+    _horarioService = HorarioService();
+    _periodoService = PeriodoService();
+    _asistenciaService = AsistenciaService();
+    _userService = user_service.UserService();
+    _authProvider = AuthProvider(authService: _authService);
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -81,19 +92,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: _authProvider),
-        ChangeNotifierProvider.value(value: _institutionProvider),
-        ChangeNotifierProvider.value(value: _horarioProvider),
-        ChangeNotifierProvider.value(value: _asistenciaProvider),
-        ChangeNotifierProvider.value(value: _grupoProvider),
-        ChangeNotifierProvider.value(value: _materiaProvider),
-        ChangeNotifierProvider.value(value: _periodoAcademicoProvider),
-  ChangeNotifierProvider(create: (_) => UserProvider()),
-  ChangeNotifierProvider(create: (_) => UserPaginatedProvider()),
-  ChangeNotifierProvider(create: (_) => EstudiantesByGrupoPaginatedProvider()),
-  ChangeNotifierProvider(create: (_) => EstudiantesSinAsignarPaginatedProvider()),
-  ChangeNotifierProvider(create: (_) => InstitutionAdminsPaginatedProvider()),
-        ChangeNotifierProvider.value(value: _lifecycleManager),
+        ChangeNotifierProvider(create: (_) => _authProvider),
+        ChangeNotifierProvider(create: (_) => InstitutionProvider(institutionService: _institutionService)),
+        ChangeNotifierProvider(create: (_) => HorarioProvider(horarioService: _horarioService)),
+        ChangeNotifierProvider(create: (_) => AsistenciaProvider(asistenciaService: _asistenciaService)),
+        ChangeNotifierProvider(create: (_) => GrupoProvider(grupoService: _grupoService)),
+        ChangeNotifierProvider(create: (_) => MateriaProvider(materiaService: _materiaService)),
+        ChangeNotifierProvider(create: (_) => PeriodoAcademicoProvider(periodoService: _periodoService)),
+        ChangeNotifierProvider(create: (_) => UserProvider(userService: _userService)),
+        ChangeNotifierProvider(create: (_) => EstudiantesByGrupoPaginatedProvider(grupoService: _grupoService)),
+        ChangeNotifierProvider(create: (_) => EstudiantesSinAsignarPaginatedProvider(grupoService: _grupoService)),
+        ChangeNotifierProvider(create: (_) => InstitutionAdminsPaginatedProvider(userService: _userService)),
+        ChangeNotifierProvider(create: (_) => _lifecycleManager),
       ],
       child: Builder(
         builder: (context) {
