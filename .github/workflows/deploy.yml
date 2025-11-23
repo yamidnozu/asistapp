@@ -11,6 +11,11 @@ on:
         required: false
         default: false
         type: boolean
+      reset_db:
+        description: 'Reset Database (Wipe all data and start fresh)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -102,11 +107,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
         RUN_SEED: ${{ github.event.inputs.run_seed || 'false' }}
+        RESET_DB: ${{ github.event.inputs.reset_db || 'false' }}
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR,RUN_SEED
+        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR,RUN_SEED,RESET_DB
         command_timeout: 30m
         script: |
           set -e
@@ -247,7 +253,14 @@ jobs:
           $SUDO nginx -t && $SUDO systemctl reload nginx || echo "Warning: nginx reload failed"
           echo "$GITHUB_TOKEN" | $SUDO docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
           cd /opt/asistapp
-          $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
+          
+          if [ "$RESET_DB" = "true" ]; then
+            echo "⚠️ RESET_DB is true. Wiping database volume..."
+            $SUDO docker compose -f docker-compose.prod.yml down -v || true
+          else
+            $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
+          fi
+
           $SUDO docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
           $SUDO docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
 
