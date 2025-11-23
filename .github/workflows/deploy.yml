@@ -29,97 +29,38 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup nginx and obtain TLS certificates (optional)
+    - name: Complete VPS Setup (nginx, SSL, backend)
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: DOMAIN,EMAIL,PORT,DB_HOST,DB_PORT,DB_USER,DB_PASS,DB_NAME,JWT_SECRET,JWT_EXPIRES_IN,LOG_LEVEL,API_BASE_URL
         script: |
           set -euo pipefail
-          DOMAIN='${{ secrets.DOMAIN }}'
-          EMAIL='${{ secrets.EMAIL }}'
-          if [ -z "${DOMAIN}" ] || [ -z "${EMAIL}" ]; then
-            echo "Skipping HTTPS setup: DOMAIN or EMAIL not provided as secrets"
-            exit 0
-          fi
-          PORT='${{ env.PORT }}'
-          # Use the idempotent installer script from the repo if present
-          if [ -f /opt/asistapp/scripts/install_nginx_certbot.sh ]; then
-            sudo bash /opt/asistapp/scripts/install_nginx_certbot.sh
-          else
-            # fallback: install with apt (may be missing snippet and logic)
-            sudo apt-get update
-            sudo apt-get install -y nginx certbot python3-certbot-nginx
-          fi
-
-          # Write the server block only if it doesn't already exist (avoid overwrites)
-          SITE_CONF="/etc/nginx/sites-available/asistapp"
-          if [ ! -f "$SITE_CONF" ]; then
-            # Write the server block safely using printf to avoid YAML heredoc parsing pitfalls
-            sudo bash -lc "printf '%s\n' 'server {' '  listen 80 default_server;' '  listen [::]:80 default_server;' '  server_name ${DOMAIN} www.${DOMAIN};' '  location /.well-known/acme-challenge/ {' '    alias /var/www/letsencrypt/.well-known/acme-challenge/;' '    try_files \$uri =404;' '  }' '  location / {' '    proxy_pass http://127.0.0.1:${PORT};' '    proxy_set_header Host \$host;' '    proxy_set_header X-Real-IP \$remote_addr;' '    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' '    proxy_set_header X-Forwarded-Proto \$scheme;' '  }' '}' > $SITE_CONF"
-            sudo ln -sf "$SITE_CONF" /etc/nginx/sites-enabled/asistapp
-          else
-            echo "$SITE_CONF already exists. Skipping overwriting; ensure it contains the ACME include or run scripts/nginx_cleanup_letsencrypt.sh"
-          fi
-
-          sudo nginx -t && sudo systemctl reload nginx
-          # Prefer the webroot method to avoid plugin auto-mutation and to be reproducible
-          sudo certbot certonly --webroot -w /var/www/letsencrypt -n --agree-tos -m ${EMAIL} -d ${DOMAIN} -d www.${DOMAIN} || true
-
-    - name: Fail if required secrets are missing
-      run: |
-        if [ -z "${{ secrets.VPS_HOST }}" ] || [ -z "${{ secrets.VPS_USER }}" ] || [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ] || [ -z "${{ secrets.DB_PASS }}" ] || [ -z "${{ secrets.JWT_SECRET }}" ]; then
-          echo "::error::One or more required secrets are missing. Set the following repository secrets: VPS_HOST, VPS_USER, SSH_PRIVATE_KEY, DB_PASS, JWT_SECRET"
-          exit 1
-        fi
-
-    - name: Confirm required secrets are present
-      run: |
-        echo "All required secrets present."
-
-    - name: Prepare .env and deploy on VPS (build-on-vps)
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          set -euo pipefail
-          # Clone or pull the repository
+          
+          # Clone/update repository
           if [ ! -d "/opt/asistapp" ]; then
             git clone https://github.com/${{ github.repository }} /opt/asistapp
           else
-            cd /opt/asistapp && git pull origin main || true
+            cd /opt/asistapp && git pull origin main
           fi
+          
+          # Export all variables for the setup script
+          export DOMAIN='${{ secrets.DOMAIN }}'
+          export EMAIL='${{ secrets.EMAIL }}'
+          export PORT='${{ env.PORT }}'
+          export DB_HOST='${{ env.DB_HOST }}'
+          export DB_PORT='${{ env.DB_PORT }}'
+          export DB_USER='${{ env.DB_USER }}'
+          export DB_PASS='${{ secrets.DB_PASS }}'
+          export DB_NAME='${{ env.DB_NAME }}'
+          export JWT_SECRET='${{ secrets.JWT_SECRET }}'
+          export JWT_EXPIRES_IN='${{ env.JWT_EXPIRES_IN }}'
+          export LOG_LEVEL='${{ env.LOG_LEVEL }}'
+          export REPO_PATH='/opt/asistapp'
+          
+          # Run complete setup script
+          bash /opt/asistapp/scripts/setup_vps_complete.sh
 
-          # Create backend/.env from secrets passed by GitHub Actions (use printf to avoid heredoc issues)
-          printf '%s=%s\n' "DB_HOST" "${{ env.DB_HOST }}" > /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_PORT" "${{ env.DB_PORT }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_USER" "${{ env.DB_USER }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_PASS" "${{ secrets.DB_PASS }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DB_NAME" "${{ env.DB_NAME }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "DATABASE_URL" "postgresql://${{ env.DB_USER }}:${{ secrets.DB_PASS }}@${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }}?schema=public" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "JWT_SECRET" "${{ secrets.JWT_SECRET }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "JWT_EXPIRES_IN" "${{ env.JWT_EXPIRES_IN }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "PORT" "${{ env.PORT }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "HOST" "${{ env.HOST }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "NODE_ENV" "production" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "LOG_LEVEL" "${{ env.LOG_LEVEL }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "FIREBASE_PROJECT_ID" "${{ env.FIREBASE_PROJECT_ID }}" >> /opt/asistapp/backend/.env
-          printf '%s=%s\n' "API_BASE_URL" "${{ env.API_BASE_URL }}" >> /opt/asistapp/backend/.env
-
-          # Also create project-root .env so that docker-compose picks up variables
-          cp /opt/asistapp/backend/.env /opt/asistapp/.env
-          chown root:root /opt/asistapp/.env
-          chmod 600 /opt/asistapp/.env
-
-          # ensure permissions
-          chown root:root /opt/asistapp/backend/.env
-          chmod 600 /opt/asistapp/backend/.env
-
-          # Run deployment script on the VPS (build and up)
-          cd /opt/asistapp
-          ./scripts/deploy_on_vps.sh --build
-
-    # (All deploy steps are handled in the 'Prepare .env and deploy on VPS' step above.)
+    # Note: El script setup_vps_complete.sh ahora maneja todo el proceso de setup y deployment
