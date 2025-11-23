@@ -109,10 +109,10 @@ jobs:
           if [ "$(id -u)" -ne 0 ]; then
             if command -v sudo >/dev/null 2>&1; then SUDO=sudo; else echo "Error: need root or sudo"; exit 1; fi
           fi
-          mkdir -p /opt/asistapp
-          test -f /opt/asistapp/docker-compose.prod.yml && cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/backup-$(date +%Y%m%d%H%M%S).yml
-          printf "DB_USER=%s\nDB_PASS=%s\nDB_NAME=%s\nDB_PORT=%s\nJWT_SECRET=%s\nDOMAIN=%s\nIMAGE_TAG=%s\n" "$DB_USER" "$DB_PASS" "$DB_NAME" "$DB_PORT" "$JWT_SECRET" "$DOMAIN" "$IMAGE_TAG" > /opt/asistapp/.env
-          cat > /opt/asistapp/docker-compose.prod.yml << 'EOF'
+          $SUDO mkdir -p /opt/asistapp
+          test -f /opt/asistapp/docker-compose.prod.yml && $SUDO cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/backup-$(date +%Y%m%d%H%M%S).yml
+          printf "DB_USER=%s\nDB_PASS=%s\nDB_NAME=%s\nDB_PORT=%s\nJWT_SECRET=%s\nDOMAIN=%s\nIMAGE_TAG=%s\n" "$DB_USER" "$DB_PASS" "$DB_NAME" "$DB_PORT" "$JWT_SECRET" "$DOMAIN" "$IMAGE_TAG" | $SUDO tee /opt/asistapp/.env > /dev/null
+          $SUDO tee /opt/asistapp/docker-compose.prod.yml > /dev/null << 'EOF'
           version: '3.8'
           services:
             db:
@@ -173,27 +173,27 @@ jobs:
           if command -v ufw >/dev/null 2>&1; then
             echo "ufw found — configuring firewall rules"
             # Always allow SSH
-            if ufw --version >/dev/null 2>&1; then
-              ufw allow OpenSSH || echo "Warning: ufw allow OpenSSH failed" >&2
+            if $SUDO ufw --version >/dev/null 2>&1; then
+              $SUDO ufw allow OpenSSH || echo "Warning: ufw allow OpenSSH failed" >&2
             fi
             # Prefer the "Nginx Full" profile if available, otherwise open ports 80/443
-            if ufw app list 2>/dev/null | grep -q "Nginx Full"; then
-              ufw allow "Nginx Full" || echo "Warning: ufw allow 'Nginx Full' failed" >&2
+            if $SUDO ufw app list 2>/dev/null | grep -q "Nginx Full"; then
+              $SUDO ufw allow "Nginx Full" || echo "Warning: ufw allow 'Nginx Full' failed" >&2
             else
               echo "ufw profile 'Nginx Full' not found — allowing ports 80 and 443"
-              ufw allow 80/tcp || echo "Warning: ufw allow 80 failed" >&2
-              ufw allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
+              $SUDO ufw allow 80/tcp || echo "Warning: ufw allow 80 failed" >&2
+              $SUDO ufw allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
             fi
             # Enable ufw if not already enabled
-            if ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
-              ufw --force enable || echo "Warning: ufw enable failed" >&2
+            if $SUDO ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
+              $SUDO ufw --force enable || echo "Warning: ufw enable failed" >&2
             else
               echo "ufw already active"
             fi
           else
             echo "ufw not present"
           fi
-          cat > /etc/nginx/sites-available/asistapp << 'NGINX'
+          $SUDO tee /etc/nginx/sites-available/asistapp > /dev/null << 'NGINX'
           server {
             listen 80;
             listen [::]:80;
@@ -227,11 +227,11 @@ jobs:
           $SUDO rm -f /etc/nginx/sites-enabled/default
           $SUDO mkdir -p /var/www/letsencrypt
           test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email || echo "Warning: certbot failed, SSL not obtained"
-          nginx -t && $SUDO systemctl reload nginx || echo "Warning: nginx reload failed"
-          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
+          $SUDO nginx -t && $SUDO systemctl reload nginx || echo "Warning: nginx reload failed"
+          echo "$GITHUB_TOKEN" | $SUDO docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
           cd /opt/asistapp
-          docker compose -f docker-compose.prod.yml down --timeout 30 || true
-          docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
-          docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
+          $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
+          $SUDO docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
+          $SUDO docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
           echo "Deploy completed"
-          docker compose -f docker-compose.prod.yml ps
+          $SUDO docker compose -f docker-compose.prod.yml ps
