@@ -10,11 +10,17 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - asistapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   app:
     build:
@@ -26,13 +32,24 @@ services:
       - "127.0.0.1:3002:3000"
     environment:
       DATABASE_URL: "postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}?schema=public"
-      PORT: "3000"
-      HOST: "${HOST}"
-      JWT_SECRET: '${JWT_SECRET}'
+      PORT: "${PORT:-3000}"
+      HOST: "${HOST:-0.0.0.0}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-24h}"
+      NODE_ENV: "${NODE_ENV:-production}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      API_BASE_URL: "${API_BASE_URL}"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - asistapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-3000}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:

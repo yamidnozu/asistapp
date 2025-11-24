@@ -128,23 +128,27 @@ cd asistapp
 ### 3. Crear archivo .env
 
 ```bash
-cat > backend/.env <<EOF
-DB_HOST=db
+# Opción A: Copiar desde el template y editar manualmente
+cp .env.prod.example .env
+nano .env  # Edita los valores
+
+# Opción B: Generar automáticamente con credenciales aleatorias
+cat > .env <<EOF
+DB_USER=asistapp_user
+DB_PASS=$(openssl rand -hex 16)
+DB_NAME=asistapp_prod
 DB_PORT=5432
-DB_USER=arroz
-DB_PASS=TU_PASSWORD_AQUI
-DB_NAME=asistapp
-DATABASE_URL=postgresql://arroz:TU_PASSWORD_AQUI@db:5432/asistapp?schema=public
 JWT_SECRET=$(openssl rand -hex 32)
 JWT_EXPIRES_IN=24h
-PORT=3002
+PORT=3000
 HOST=0.0.0.0
 NODE_ENV=production
 LOG_LEVEL=info
 API_BASE_URL=https://tu-dominio.com
 EOF
 
-cp backend/.env .env
+# ⚠️ IMPORTANTE: Guarda estas credenciales en un lugar seguro
+cat .env
 ```
 
 ### 4. Ejecutar script de setup
