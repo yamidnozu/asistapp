@@ -208,37 +208,44 @@ jobs:
           fi
           echo "SERVICE ACCOUNT CLIENT EMAIL: $client_email"
 
-      - name: Verify Play Console app exists via API
+      - name: Verify Play Console app exists via API (preflight)
+        id: precheck
         env:
-          SERVICE_ACCOUNT_JSON: service_account.json
+          KEY_FILE: service_account.json
+          PACKAGE_NAME: com.edevcore.asistapp
+        continue-on-error: true
         run: |
-          set -e
-          # Install gcloud and authenticate using the service account so we can acquire a token
-          echo "Setting up gcloud auth (this installs gcloud CLI temporarily on the runner)"
-          curl -sSL https://sdk.cloud.google.com | bash >/dev/null 2>&1 || true
-          export PATH="$HOME/google-cloud-sdk/bin:$PATH"
-          gcloud --version || true
-          gcloud auth activate-service-account --key-file=service_account.json
-          ACCESS_TOKEN=$(gcloud auth print-access-token)
-          echo "Checking app via Android Publisher API"
-          STATUS=$(curl -s -o /tmp/edit.json -w "%{http_code}" -H "Authorization: Bearer $ACCESS_TOKEN" "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.edevcore.asistapp/edits")
-          echo "API http status: $STATUS"
-          if [ "$STATUS" -eq 404 ]; then
-            echo "ERROR: 404 - The app 'com.edevcore.asistapp' does not exist for this Play Console account."
-            echo "If this is the correct account, create the app in Play Console > Create app and ensure the service account is Active and has Admin or Release permissions."
-            echo "Check the console via: https://play.google.com/console/u/0/developers"
-            echo "Also ensure the package name matches the AAB you built."
-            echo "--- API response body (first 200 chars): ---"
-            head -c 200 /tmp/edit.json || true
-            exit 1
-          else
-            echo "Play API returned $STATUS (OK). The app exists or the service account has access."
-          fi
+          set +e
+          echo "Running preflight check (service account visibility + API)"
+          bash scripts/ci-verify-play-access.sh "$KEY_FILE" "$PACKAGE_NAME"
+          RC=$?
+          echo "precheck_rc=$RC" >> "$GITHUB_OUTPUT"
+          # Return RC as exit code so continue-on-error allows downstream decision
+          exit $RC
+
+      - name: Create issue for manual first-upload (if app not initialized)
+        if: steps.precheck.outputs.precheck_rc == '6'
+        uses: actions-ecosystem/action-create-issue@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "[CI] First upload required: com.edevcore.asistapp"
+          body: |
+            The CI attempted to publish a build for `com.edevcore.asistapp`, but the Play Developer API returned 404 which indicates the app is not initialized/visible to the service account.
+            
+            Actions to perform:
+            1. Download artifacts from the failed run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} (Artifacts -> release-artifacts)
+            2. Login to Play Console (https://play.google.com/console) and open the correct developer account.
+            3. Verify that the app's App ID is `com.edevcore.asistapp` (App -> Setup -> App integrity).
+            4. Create an Internal test release and upload the AAB from step (1). This will initialize the app in the Play back-end.
+            5. Ensure the service account `asistapp-play-svc@asistapp-1763929039.iam.gserviceaccount.com` is added in Play Console > Settings > API access with 'Release Manager' or Admin and 'All apps' access.
+            6. Wait a few minutes and re-run the CI workflow.
+          labels: 'ci,release'
+          assignees: 'yamidnozu'
 
       - name: Upload to Google Play Store
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: service_account.json
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
           packageName: com.edevcore.asistapp
           releaseFiles: artifacts/bundle/release/app-release.aab
           track: ${{ github.event.inputs.track }}
