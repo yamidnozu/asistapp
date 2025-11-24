@@ -53,7 +53,7 @@ const prisma = new PrismaClient();
     // Si no podemos verificar (tabla no existe), consideramos DB vacía para ejecutar seed
     process.exit(0);
   } finally {
-    await prisma.$disconnect();
+    await prisma.\$disconnect();
   }
 })();
 "; then
