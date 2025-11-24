@@ -261,8 +261,14 @@ jobs:
             $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
           fi
 
+          # Ensure we fetch latest image and force recreate container
           $SUDO docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
-          $SUDO docker compose -f docker-compose.prod.yml up -d || echo "Warning: docker up failed"
+          # Remove any stopped/old containers for app service to ensure fresh start
+          $SUDO docker compose -f docker-compose.prod.yml rm -f -s app || true
+          # Force recreate containers and don't use local cache
+          $SUDO docker compose -f docker-compose.prod.yml up -d --force-recreate --no-build || echo "Warning: docker up failed"
+          # Clean up unused images to free space and avoid collisions with old tag caching
+          $SUDO docker image prune -af || true
 
           echo "🔄 Running database migrations..."
           $SUDO docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy || echo "Warning: migrations failed"

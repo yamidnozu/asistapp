@@ -67,6 +67,11 @@ git push origin main
 El workflow se ejecuta automáticamente y en ~5 minutos tu app estará en:
 - **https://tu-dominio.com** ✅
 
+**Nota**: Durante el deployment, el sistema ejecuta automáticamente el seed de la base de datos si está vacía, creando usuarios de prueba y datos iniciales. Los usuarios incluyen:
+- Super Admin: `superadmin@asistapp.com` / `Admin123!`
+- Admin: `admin@asistapp.com` / `Admin123!`
+- Usuario regular: `user@asistapp.com` / `User123!`
+
 ### Ver logs del deployment
 
 Ve a tu repo → Actions → último workflow ejecutado
@@ -166,10 +171,16 @@ sudo bash scripts/setup_vps_complete.sh
 ```
 
 Este script hace:
-- Instala todo lo necesario
-- Configura nginx
-- Obtiene certificados SSL
-- Levanta el backend
+- Instala todo lo necesario (Docker, nginx, certbot)
+- Configura nginx con SSL automático
+- Obtiene certificados SSL con Let's Encrypt
+- Levanta el backend con Docker Compose
+- **Ejecuta automáticamente el seed de la base de datos** si está vacía (crea usuarios de prueba, instituciones, etc.)
+
+**Nota**: El seed se ejecuta automáticamente durante el primer inicio del contenedor si la base de datos no tiene datos. Los usuarios de prueba incluyen:
+- Super Admin: `superadmin@asistapp.com` / `Admin123!`
+- Admin: `admin@asistapp.com` / `Admin123!`
+- Usuario regular: `user@asistapp.com` / `User123!`
 
 ---
 
@@ -210,6 +221,79 @@ docker compose -f docker-compose.prod.yml up -d --build
 # Ver logs
 docker compose -f docker-compose.prod.yml logs -f app
 ```
+
+### Si ves 502 Bad Gateway (nginx)
+
+502 significa que nginx no pudo conectar al backend. Revisa:
+
+- Estado de contenedores
+
+```bash
+# Contenedores y estado
+docker ps -a
+docker compose -f docker-compose.prod.yml ps
+```
+
+- Logs del backend (buscar errores al arrancar o Node stack traces)
+
+```bash
+docker compose -f docker-compose.prod.yml logs --tail 200 app
+```
+
+- Logs de nginx (en la VPS)
+
+```bash
+sudo journalctl -u nginx --no-pager -n 200
+sudo tail -n 200 /var/log/nginx/error.log
+```
+
+- Verificar la ruta de salud interna (dentro de la VPS):
+
+```bash
+curl -I http://127.0.0.1:${PORT:-3002}/health
+```
+
+Si el backend devuelve 502, normalmente es porque:
+- El contenedor del backend está caído por un error al arrancar (stack-trace en logs)
+- El backend aún no terminó de arrancar (healthcheck fallando)
+- Error en conexión a base de datos (mala variable de entorno / credenciales / DB caida)
+- El seed o migración fallaron y detuvieron el arranque
+
+Pasos rápidos para recuperarlo:
+
+```bash
+# Reiniciar contenedores
+cd /opt/asistapp
+docker compose -f docker-compose.prod.yml down --remove-orphans
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Ver logs inmediatos
+docker compose -f docker-compose.prod.yml logs --tail 200 -f app
+```
+
+Si el error proviene del seed, verás en los logs mensajes como "Falló la ejecución del seed" o errores de Prisma. Si esto ocurre, ejecuta manualmente para ver detalles:
+
+```bash
+docker compose -f docker-compose.prod.yml run --rm app node dist/seed.js
+```
+
+Observa los errores que salen y compártelos si quieres que los revise.
+
+
+### Seed no se ejecutó automáticamente
+
+Si la base de datos no tiene datos después del deployment:
+
+```bash
+# Verificar si el seed se ejecutó
+cd /opt/asistapp
+docker compose -f docker-compose.prod.yml exec app node dist/seed.js
+
+# O verificar logs del contenedor durante el startup
+docker compose -f docker-compose.prod.yml logs app | grep -i seed
+```
+
+El seed se ejecuta automáticamente solo si la base de datos está completamente vacía (sin usuarios).
 
 ### Renovación de certificados
 
