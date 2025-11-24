@@ -23,11 +23,15 @@ COPY --from=builder /app/prisma ./prisma
 # Copia el archivo seed compilado
 COPY --from=builder /app/dist/seed.js ./dist/seed.js
 
+# Copia el script de inicialización
+COPY init.sh ./init.sh
+RUN chmod +x init.sh
+
 # Generar cliente Prisma en producción
 RUN npx prisma generate
 
 # Expone el puerto que usará el servidor
 EXPOSE 3000
 
-# Comando para iniciar el servidor
-CMD [ "node", "dist/index.js" ]
+# Comando para iniciar el servidor con inicialización
+CMD [ "./init.sh", "node", "dist/index.js" ]
