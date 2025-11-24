@@ -179,7 +179,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Download Release Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -192,7 +195,9 @@ jobs:
       - name: Create Service Account JSON
         env:
           PLAY_STORE_SERVICE_ACCOUNT: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
-        run: echo "$PLAY_STORE_SERVICE_ACCOUNT" > service_account.json
+        run: |
+          printf '%s' "$PLAY_STORE_SERVICE_ACCOUNT" > service_account.json
+          chmod 600 service_account.json
 
       - name: Show service account email for verification
         run: |
@@ -207,6 +212,16 @@ jobs:
             exit 1
           fi
           echo "SERVICE ACCOUNT CLIENT EMAIL: $client_email"
+
+      - name: Ensure gcloud CLI is installed
+        run: |
+          if ! command -v gcloud >/dev/null 2>&1; then
+            echo "gcloud not found - installing google-cloud-cli via apt"
+            sudo apt-get update -y
+            sudo apt-get install -y google-cloud-cli
+          else
+            gcloud --version
+          fi
 
       - name: Verify Play Console app exists via API (preflight)
         id: precheck
@@ -243,6 +258,7 @@ jobs:
           assignees: 'yamidnozu'
 
       - name: Upload to Google Play Store
+        if: steps.precheck.outputs.precheck_rc == '0'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
@@ -255,7 +271,24 @@ jobs:
           # You can set release notes via release JSON or configure metadata separately in Play Console.
 
       - name: Notify success
+        if: steps.precheck.outputs.precheck_rc == '0'
         env:
           TRACK: ${{ github.event.inputs.track }}
         run: |
           echo "Release created and uploaded to Play Store (track: $TRACK)"
+
+      - name: Create issue for permission denied (if 403)
+        if: steps.precheck.outputs.precheck_rc == '5'
+        uses: actions-ecosystem/action-create-issue@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "[CI] Play API permission issue: com.edevcore.asistapp"
+          body: |
+            The CI attempted to access the Play Developer API for `com.edevcore.asistapp`, but the API returned 403 which indicates the service account can authenticate but is not authorized for the requested app or operations.
+            
+            Possible steps:
+            1. Open Play Console -> Settings -> API access and verify the service account `asistapp-play-svc@asistapp-1763929039.iam.gserviceaccount.com` is linked and granted sufficient permissions (Release Manager / Admin) for the correct app or for 'All apps'.
+            2. If the service account was just added, wait ~5-15 minutes for propagation and re-run the CI workflow.
+            3. If your app exists in a different developer account, ensure the service account is added to that account or transfer the app.
+          labels: 'ci,release'
+          assignees: 'yamidnozu'
