@@ -137,8 +137,8 @@ jobs:
           set -e
           # Use API_BASE_URL from secrets if provided; fall back to a sane default
           if [ -z "$API_BASE_URL" ]; then
-            echo "Warning: API_BASE_URL secret is empty - falling back to default (https://api.asistapp.com)"
-            API_BASE_URL="https://api.asistapp.com"
+            echo "Warning: API_BASE_URL secret is empty - falling back to default (https://srv974201.hstgr.cloud)"
+            API_BASE_URL="https://srv974201.hstgr.cloud"
           fi
           echo "Using API_BASE_URL: $API_BASE_URL"
           flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=ENVIRONMENT=production
