@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - 'scripts/**'
+      - 'prisma/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
       run_seed:
