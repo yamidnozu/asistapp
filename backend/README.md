@@ -139,3 +139,5 @@ LOG_LEVEL=info
 - ✅ **TypeScript** - Tipado estático
 - ✅ **Prisma ORM** - Base de datos type-safe
 - ✅ **Fastify** - Framework rápido y eficiente
+
+> CI: Non-functional change to trigger backend workflow (no code or config changes).

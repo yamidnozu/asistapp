@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// CI: small non-functional change to trigger Android release workflow.
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'config/app_config.dart';
