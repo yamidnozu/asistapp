@@ -4,6 +4,13 @@ import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 import '../models/user.dart';
 
+class EmailAlreadyExistsException implements Exception {
+  final String message;
+  EmailAlreadyExistsException(this.message);
+  @override
+  String toString() => message;
+}
+
 class PaginatedUserResponse {
   final List<User> users;
   final PaginationInfo pagination;
@@ -382,6 +389,8 @@ class UserService {
         if (responseData['success'] == true) {
           return User.fromJson(responseData['data']);
         }
+      } else if (response.statusCode == 409) {
+        throw EmailAlreadyExistsException('El email ya está en uso');
       } else {
         debugPrint('Error creating user: ${response.statusCode} - ${response.body}');
         return null;
@@ -426,6 +435,8 @@ class UserService {
           final data = responseData['data'] as Map<String, dynamic>;
           return User.fromJson(data);
         }
+      } else if (response.statusCode == 409) {
+        throw EmailAlreadyExistsException('El email ya está en uso');
       } else {
         debugPrint('Error updating user: ${response.statusCode} - ${response.body}');
         return null;

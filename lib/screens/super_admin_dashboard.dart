@@ -287,7 +287,7 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),

@@ -62,7 +62,7 @@ void main() {
           ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstitutionProvider),
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
         ],
-        child: MaterialApp(home: AdminDashboard()),
+  child: const MaterialApp(home: AdminDashboard()),
       ),
     );
 

@@ -54,7 +54,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
       itemBuilder: (context, index) {
         if (index >= pag.items.length) {
           return pag.isLoadingMore
-              ? Center(
+              ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(),
@@ -77,7 +77,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
           color: context.colors.getTextColorForBackground(context.colors.primary),
         ),
       ),
-      emptyStateWidget: ClarityEmptyState(
+      emptyStateWidget: const ClarityEmptyState(
         icon: Icons.group_off,
         title: 'No hay administradores',
         subtitle: 'Agrega administradores a esta institución',
@@ -429,7 +429,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     if (token == null) return;
     final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     if (pag.isLoadingMore || !pag.hasMoreData) return;
-    await pag.loadNextPage(token, filters: {'institutionId': widget.institutionId});
+    pag.setFilter('institutionId', widget.institutionId);
+    await pag.loadNextPage(token);
   }
 
   Future<void> _assign(User user) async {
@@ -525,13 +526,13 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (!pag.isLoading && pag.items.isEmpty) {
-                      return Center(
+                      return const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.people_outline, size: 56, color: Colors.grey),
-                            const SizedBox(height: 12),
-                            const Text('No hay administradores disponibles', style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                            SizedBox(height: 12),
+                            Text('No hay administradores disponibles', style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
                           ],
                         ),
                       );

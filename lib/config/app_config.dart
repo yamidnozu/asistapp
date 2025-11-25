@@ -40,7 +40,7 @@ class AppConfig {
 
     // 2. Intentar cargar de archivo .env
     try {
-      await dotenv.load(fileName: ".env");
+      await dotenv.load(fileName: '.env');
       final envUrl = dotenv.env['API_BASE_URL'];
       final envEnvironment = dotenv.env['ENVIRONMENT'] ?? 'development';
       

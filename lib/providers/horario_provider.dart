@@ -459,12 +459,15 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
   Future<void> loadMoreHorarios(String accessToken, {String? grupoId, String? periodoId}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
 
-    final filters = <String,String>{
-      if (grupoId != null) 'grupoId': grupoId,
-      if (periodoId != null) 'periodoId': periodoId,
-    };
+    // Set filters
+    if (grupoId != null) {
+      setFilter('grupoId', grupoId);
+    }
+    if (periodoId != null) {
+      setFilter('periodoId', periodoId);
+    }
 
-    await super.loadNextPage(accessToken, filters: filters.isEmpty ? null : filters);
+    await super.loadNextPage(accessToken);
   }
 
   /// Reinicia la paginación para scroll infinito

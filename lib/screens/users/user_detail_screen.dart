@@ -121,7 +121,7 @@ class UserDetailScreen extends StatelessWidget {
 
   Widget _buildInfoItem(String label, String value, {Color? valueColor}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

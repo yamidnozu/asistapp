@@ -50,10 +50,61 @@ class RoleSpecificDetailsStep extends StatelessWidget {
       return _buildProfesorDetails(context, spacing);
     } else if (userRole == 'estudiante') {
       return _buildEstudianteDetails(context, spacing);
+    } else if (userRole == 'admin_institucion') {
+      return _buildAdminInstitucionDetails(context, spacing);
     } else {
-      // Admin u otros roles no tienen detalles adicionales
+      // super_admin u otros roles no tienen detalles adicionales
       return _buildNoAdditionalDetails(context);
     }
+  }
+
+  Widget _buildAdminInstitucionDetails(BuildContext context, dynamic spacing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Información del Cargo',
+          style: context.textStyles.headlineSmall,
+        ),
+        SizedBox(height: spacing.md),
+        Text(
+          'Complete los datos del cargo administrativo (opcional)',
+          style: context.textStyles.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
+        SizedBox(height: spacing.lg),
+
+        if (tituloController != null) ...[
+          ClaritySection(
+            title: 'Cargo Institucional',
+            child: CustomTextFormField(
+              fieldKey: tituloFieldKey,
+              focusNode: tituloFocusNode,
+              controller: tituloController!,
+              labelText: 'Cargo / Título',
+              hintText: 'Director, Rector, Coordinador, etc.',
+              validator: (value) {
+                // El cargo es opcional para admin_institucion
+                return null;
+              },
+            ),
+          ),
+        ] else ...[
+          ClarityCard(
+            leading: Icon(
+              Icons.check_circle,
+              color: context.colors.success,
+              size: 48,
+            ),
+            title: const Text('Información Completa'),
+            subtitle: const Text(
+              'Puede proceder a guardar el usuario.',
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
   Widget _buildProfesorDetails(BuildContext context, dynamic spacing) {

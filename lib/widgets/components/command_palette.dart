@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_colors.dart';
@@ -80,8 +82,8 @@ class _CommandPaletteState extends State<CommandPalette> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: spacing.xl),
-          Container(
-            constraints: BoxConstraints(maxWidth: 600),
+        Container(
+      constraints: const BoxConstraints(maxWidth: 600),
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -150,7 +152,7 @@ class _CommandPaletteState extends State<CommandPalette> {
 
                 // Results List
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 400),
+                  constraints: const BoxConstraints(maxHeight: 400),
                   child: _filteredItems.isEmpty
                       ? Padding(
                           padding: EdgeInsets.all(spacing.lg),

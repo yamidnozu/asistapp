@@ -614,7 +614,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     // Si el estado es vacío, por defecto PRESENTE
     if (estado.isEmpty) estado = 'PRESENTE';
     
-    String observacion = estudiante.observacion ?? '';
+    final String observacion = estudiante.observacion ?? '';
     bool justificada = estudiante.estaJustificado;
     
     // Controlador para el campo de texto
@@ -753,8 +753,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildStatusChip(AsistenciaEstudiante estudiante) {
-    Color chipColor;
-    String statusText;
+    final Color chipColor;
+    final String statusText;
 
     if (estudiante.estaPresente) {
       chipColor = colors.success;
@@ -776,7 +776,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return Chip(
       label: Text(
         statusText,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w500,

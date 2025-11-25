@@ -139,7 +139,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.chevron_left),
+            icon: const Icon(Icons.chevron_left),
             onPressed: _previousMonth,
             tooltip: 'Mes anterior',
           ),
@@ -154,7 +154,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.chevron_right),
+            icon: const Icon(Icons.chevron_right),
             onPressed: _nextMonth,
             tooltip: 'Mes siguiente',
           ),
@@ -192,8 +192,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
           SizedBox(height: spacing.xl),
           ElevatedButton.icon(
             onPressed: _loadAsistencias,
-            icon: Icon(Icons.refresh),
-            label: Text('Reintentar'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reintentar'),
           ),
         ],
       ),
@@ -307,7 +307,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        SizedBox(height: 4),
+  const SizedBox(height: 4),
         Text(
           label,
           style: textStyles.bodySmall.copyWith(color: color),
@@ -364,7 +364,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                           color: colors.textPrimary,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 2),
                         decoration: BoxDecoration(
@@ -394,7 +394,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                         size: 16,
                         color: colors.textMuted,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         '${asistencia['fecha']} • ${asistencia['hora']}',
                         style: textStyles.bodySmall.copyWith(color: colors.textMuted),

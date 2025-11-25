@@ -50,34 +50,55 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
 
   /// Carga todas las instituciones con paginación
   Future<void> loadInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
-  if (isLoading) return;
+    if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
+
+    // Set filters
+    // Only update filters when explicit values are provided. If null, keep existing filters.
+    if (search != null) {
+      if (search.isNotEmpty) {
+        setFilter('search', search);
+      } else {
+        removeFilter('search');
+      }
+    }
+    if (activa != null) {
+      setFilter('activa', activa.toString());
+    }
 
     try {
       debugPrint('InstitutionProvider: Iniciando carga de instituciones...');
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search, filters: {
-        if (activa != null) 'activa': activa.toString(),
-      });
-  // paginationInfo handled by base provider
-  notifyListeners();
+      // Use provided search param if not null, otherwise fallback to provider filters
+      final effectiveSearch = search ?? (this.filters['search'] as String?);
+      await loadItems(
+        accessToken,
+        page: page ?? 1,
+        limit: limit,
+        search: effectiveSearch,
+        filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null,
+      );
+      // paginationInfo handled by base provider
+      notifyListeners();
       debugPrint('InstitutionProvider: Estado cambiado a loaded');
     } catch (e) {
       debugPrint('InstitutionProvider: Error loading institutions: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Carga una institución específica por ID
   Future<void> loadInstitutionById(String accessToken, String id) async {
-  if (isLoading) return;
-
+    // Always allow fetching a single institution by ID even if other operations
+    // are running (e.g. list loading). This avoids blocking detail fetches when
+    // the provider is already fetching paginated list data.
     try {
       final institution = await _institutionService.getInstitutionById(accessToken, id);
-  _selectedInstitution = institution;
-  notifyListeners();
+      debugPrint('InstitutionProvider: loadInstitutionById - fetched: ${institution?.toString()}');
+      _selectedInstitution = institution;
+      notifyListeners();
     } catch (e) {
       debugPrint('Error loading institution: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
@@ -192,12 +213,11 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
 
   /// Limpia todos los datos
   void clearData() {
-  clearItems();
+    clearItems();
+    clearFilters();
     _selectedInstitution = null;
-  clearError();
-  }
-
-  /// Recarga los datos (útil después de operaciones)
+    clearError();
+  }  /// Recarga los datos (útil después de operaciones)
   Future<void> refreshData(String accessToken) async {
     await loadInstitutions(accessToken);
   }
@@ -214,21 +234,16 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
   }
 
   /// Carga más instituciones para scroll infinito
-  Future<void> loadMoreInstitutions(String accessToken, {bool? activa, String? search}) async {
-    if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
-
-    final filters = <String,String>{
-      if (activa != null) 'activa': activa.toString(),
-      if (search != null && search.isNotEmpty) 'search': search,
-    };
-
-    await super.loadNextPage(accessToken, filters: filters.isEmpty ? null : filters);
+  Future<void> loadMoreInstitutions(String accessToken) async {
+    await super.loadNextPage(accessToken);
   }
 
   @override
   Future<PaginatedResponse<Institution>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final active = filters?['activa'];
-    final response = await _institutionService.getAllInstitutions(accessToken, page: page, limit: limit, activa: active == 'true');
+    final activeStr = this.filters['activa'];
+    final active = activeStr == 'true';
+    final searchQuery = this.filters['search'] as String?;
+    final response = await _institutionService.getAllInstitutions(accessToken, page: page, limit: limit, activa: activeStr != null ? active : null, search: searchQuery);
     if (response == null) return null;
     return PaginatedResponse(items: response.institutions, pagination: response.pagination);
   }

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../services/user_form_service.dart';
+import '../../services/user_service.dart';
 import '../../services/form_validation_service.dart';
 import 'form_steps/index.dart';
 
@@ -72,6 +75,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   // Indica si el formulario está editando al usuario de la sesión
   bool _isSelfEditing = false;
   String? _currentSessionUserRole;
+  String? _emailError;
 
   @override
   void initState() {
@@ -279,17 +283,24 @@ class _UserFormScreenState extends State<UserFormScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error al ${_user != null ? 'actualizar' : 'crear'} ${_userFormService.getRoleDisplayName(widget.userRole)}: ${e.toString()}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onError,
+      if (e is EmailAlreadyExistsException) {
+        setState(() => _emailError = e.message);
+        setState(() => _autoValidateMode = AutovalidateMode.always);
+        setState(() => _currentStep = 0); // Ir al step 1
+        _emailFocus.requestFocus();
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error al ${_user != null ? 'actualizar' : 'crear'} ${_userFormService.getRoleDisplayName(widget.userRole)}: ${e.toString()}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onError,
+              ),
             ),
+            backgroundColor: theme.colorScheme.error,
           ),
-          backgroundColor: theme.colorScheme.error,
-        ),
-      );
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -356,15 +367,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text('Contraseña temporal'),
+          title: const Text('Contraseña temporal'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
-              SizedBox(height: 12),
+              const Text('Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
+              const SizedBox(height: 12),
               SelectableText(tempPassword, style: Theme.of(context).textTheme.headlineSmall),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
                 'Asegúrate de copiarla y entregarla al usuario. No se podrá volver a visualizar.',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -465,9 +476,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
           foregroundColor: colors.white,
         ),
         body: Center(
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text('Cargando usuario...'),
@@ -607,6 +618,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             isEditMode: _user != null,
             emailFieldKey: _emailFieldKey,
             institutionFieldKey: _institutionFieldKey,
+            errorEmail: _emailError,
           ),
         ),
         isActive: _currentStep >= 0,
@@ -655,7 +667,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             key: _stepKeys[2],
             child: RoleSpecificDetailsStep(
               userRole: widget.userRole,
-              tituloController: widget.userRole == 'profesor' ? _tituloController : null,
+              tituloController: (widget.userRole == 'profesor' || widget.userRole == 'admin_institucion') ? _tituloController : null,
               especialidadController: widget.userRole == 'profesor' ? _especialidadController : null,
               nombreResponsableController: widget.userRole == 'estudiante' ? _nombreResponsableController : null,
               telefonoResponsableController: widget.userRole == 'estudiante' ? _telefonoResponsableController : null,

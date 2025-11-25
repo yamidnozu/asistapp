@@ -81,8 +81,8 @@ class _ClarityFormDialogState extends State<ClarityFormDialog> {
         ),
         ElevatedButton(
           onPressed: _isSaving ? null : _handleSave,
-          child: _isSaving
-              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+      child: _isSaving
+        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : Text(widget.saveLabel),
         ),
       ],

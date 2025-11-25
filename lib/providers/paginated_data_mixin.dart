@@ -12,6 +12,7 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
   String? _errorMessage;
+  final Map<String, dynamic> _filters = {};
 
   List<T> get items => _items;
   PaginationInfo? get paginationInfo => _paginationInfo;
@@ -20,6 +21,7 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
   bool get hasMoreData => _hasMoreData;
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
+  Map<String, dynamic> get filters => _filters;
   /// Consider the provider loaded when it's not loading, has no error and has items.
   /// Subclasses can override if they need a different semantics.
   bool get isLoaded => !_isLoading && !hasError && _items.isNotEmpty;
@@ -51,14 +53,14 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
     }
   }
 
-  Future<void> loadNextPage(String accessToken, {Map<String, String>? filters}) async {
+  Future<void> loadNextPage(String accessToken) async {
     if (_paginationInfo == null || !_paginationInfo!.hasNext || _isLoading || _isLoadingMore) return;
     _isLoadingMore = true;
     notifyListeners();
 
     try {
       final nextPage = _paginationInfo!.page + 1;
-      final response = await fetchPage(accessToken, page: nextPage, limit: _paginationInfo!.limit, filters: filters);
+      final response = await fetchPage(accessToken, page: nextPage, limit: _paginationInfo!.limit, filters: _filters.isNotEmpty ? _filters.map((k, v) => MapEntry(k, v.toString())) : null);
       if (response != null) {
         _items.addAll(response.items);
         _paginationInfo = response.pagination;
@@ -145,6 +147,8 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
 
   /// Utility: reset pagination
   void resetPagination() {
+    _items = [];
+    _paginationInfo = null;
     _hasMoreData = true;
     _isLoadingMore = false;
   }
@@ -165,6 +169,24 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
   /// Clear the current error message
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Set a filter value
+  void setFilter(String key, dynamic value) {
+    _filters[key] = value;
+    notifyListeners();
+  }
+
+  /// Remove a filter
+  void removeFilter(String key) {
+    _filters.remove(key);
+    notifyListeners();
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    _filters.clear();
     notifyListeners();
   }
 

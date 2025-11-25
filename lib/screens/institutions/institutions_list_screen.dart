@@ -20,10 +20,6 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _searchDebounceTimer;
-  
-  // Estado centralizado de filtros
-  String _searchQuery = '';
-  bool? _statusFilter; // null = todas, true = activas, false = inactivas
 
   @override
   void initState() {
@@ -40,6 +36,9 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     _searchDebounceTimer?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
+    // Limpiar filtros al salir de la pantalla
+    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    institutionProvider.clearFilters();
     super.dispose();
   }
 
@@ -50,11 +49,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
       final token = authProvider.accessToken;
       if (token != null && institutionProvider.hasMoreData && !institutionProvider.isLoadingMore) {
-        institutionProvider.loadMoreInstitutions(
-          token,
-          search: _searchQuery.isNotEmpty ? _searchQuery : null,
-          activa: _statusFilter,
-        );
+        institutionProvider.loadMoreInstitutions(token);
       }
     }
   }
@@ -63,16 +58,12 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
 
-  final token = authProvider.accessToken;
+    final token = authProvider.accessToken;
     if (token != null) {
       debugPrint('Cargando instituciones con token: ${token.substring(0, 20)}...');
-      await institutionProvider.loadInstitutions(
-        token,
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        activa: _statusFilter,
-      );
+      await institutionProvider.loadInstitutions(token);
       debugPrint('Instituciones cargadas: ${institutionProvider.institutions.length}');
-  debugPrint('Estado del provider: isLoading=${institutionProvider.isLoading}, hasError=${institutionProvider.hasError}');
+      debugPrint('Estado del provider: isLoading=${institutionProvider.isLoading}, hasError=${institutionProvider.hasError}');
       if (institutionProvider.hasError) {
         debugPrint('Error del provider: ${institutionProvider.errorMessage}');
       }
@@ -84,18 +75,24 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   void _onSearchChanged(String query) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      setState(() {
-        _searchQuery = query;
-      });
-      _loadInstitutions();
+      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      if (query.isNotEmpty) {
+        institutionProvider.setFilter('search', query);
+      } else {
+        institutionProvider.removeFilter('search');
+      }
+      institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
     });
   }
 
   void _onStatusFilterChanged(bool? status) {
-    setState(() {
-      _statusFilter = status;
-    });
-    _loadInstitutions();
+    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    if (status != null) {
+      institutionProvider.setFilter('activa', status.toString());
+    } else {
+      institutionProvider.removeFilter('activa');
+    }
+    institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
   }
 
 
@@ -117,7 +114,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               child: Row(
                 children: [
                   Icon(Icons.admin_panel_settings, size: 18, color: context.colors.primary),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Eres administrador de: $administrationName',
@@ -126,7 +123,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Tooltip(
                     message: 'Tu cuenta tiene permisos administrativos sobre esta institución',
                     child: Icon(Icons.info_outline, size: 18, color: context.colors.textSecondary),
@@ -159,16 +156,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           title: administrationName,
           subtitle: institutionProvider.hasError
             ? 'No tienes permiso para ver la lista completa de instituciones. Mostrando el nombre de la administración.'
-            : (_searchQuery.isNotEmpty
-              ? 'No se encontraron instituciones para "$_searchQuery". Mostrando la administración: $administrationName'
+            : ((institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
+              ? 'No se encontraron instituciones para "${institutionProvider.filters['search']}". Mostrando la administración: $administrationName'
               : 'No hay instituciones disponibles. Mostrando la administración: $administrationName'),
         )
         : ClarityEmptyState(
-          icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.business,
-          title: _searchQuery.isNotEmpty
+          icon: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false ? Icons.search_off : Icons.business,
+          title: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
             ? 'No se encontraron instituciones'
             : 'No hay instituciones',
-          subtitle: _searchQuery.isNotEmpty
+          subtitle: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
             ? 'Intenta con otros términos de búsqueda'
             : 'Comienza creando tu primera institución',
         ),
@@ -193,70 +190,74 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     final textStyles = context.textStyles;
 
     return [
-      TextField(
-        key: const Key('searchInstitutionField'),
-        controller: _searchController,
-        style: textStyles.bodyLarge,
-        decoration: InputDecoration(
-          hintText: 'Buscar por nombre, código o email...',
-          hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
-          prefixIcon: Icon(Icons.search, color: colors.textSecondary),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: Icon(Icons.clear, color: colors.textSecondary),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearchChanged('');
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(spacing.borderRadius),
-            borderSide: BorderSide(color: colors.border),
+      Consumer<InstitutionProvider>(
+        builder: (context, institutionProvider, child) => TextField(
+          key: const Key('searchInstitutionField'),
+          controller: _searchController,
+          style: textStyles.bodyLarge,
+          decoration: InputDecoration(
+            hintText: 'Buscar por nombre, código o email...',
+            hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
+            prefixIcon: Icon(Icons.search, color: colors.textSecondary),
+            suffixIcon: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
+                ? IconButton(
+                    icon: Icon(Icons.clear, color: colors.textSecondary),
+                    onPressed: () {
+                      _searchController.clear();
+                      _onSearchChanged('');
+                    },
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.borderRadius),
+              borderSide: BorderSide(color: colors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.borderRadius),
+              borderSide: BorderSide(color: colors.borderLight),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.borderRadius),
+              borderSide: BorderSide(color: colors.primary, width: 2),
+            ),
+            filled: true,
+            fillColor: colors.surface,
+            contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(spacing.borderRadius),
-            borderSide: BorderSide(color: colors.borderLight),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(spacing.borderRadius),
-            borderSide: BorderSide(color: colors.primary, width: 2),
-          ),
-          filled: true,
-          fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          onChanged: _onSearchChanged,
         ),
-        onChanged: _onSearchChanged,
       ),
       SizedBox(height: spacing.sm),
-      Wrap(
-        spacing: spacing.md,
-        runSpacing: spacing.sm,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text('Mostrar:', style: textStyles.labelMedium),
-          FilterChip(
-            label: const Text('Todas'),
-            selected: _statusFilter == null,
-            onSelected: (selected) {
-              if (selected) _onStatusFilterChanged(null);
-            },
-          ),
-          FilterChip(
-            label: const Text('Activas'),
-            selected: _statusFilter == true,
-            onSelected: (selected) {
-              if (selected) _onStatusFilterChanged(true);
-            },
-          ),
-          FilterChip(
-            label: const Text('Inactivas'),
-            selected: _statusFilter == false,
-            onSelected: (selected) {
-              if (selected) _onStatusFilterChanged(false);
-            },
-          ),
-        ],
+      Consumer<InstitutionProvider>(
+        builder: (context, institutionProvider, child) => Wrap(
+          spacing: spacing.md,
+          runSpacing: spacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text('Mostrar:', style: textStyles.labelMedium),
+            FilterChip(
+              label: const Text('Todas'),
+              selected: institutionProvider.filters['activa'] == null,
+              onSelected: (selected) {
+                if (selected) _onStatusFilterChanged(null);
+              },
+            ),
+            FilterChip(
+              label: const Text('Activas'),
+              selected: institutionProvider.filters['activa'] == 'true',
+              onSelected: (selected) {
+                if (selected) _onStatusFilterChanged(true);
+              },
+            ),
+            FilterChip(
+              label: const Text('Inactivas'),
+              selected: institutionProvider.filters['activa'] == 'false',
+              onSelected: (selected) {
+                if (selected) _onStatusFilterChanged(false);
+              },
+            ),
+          ],
+        ),
       ),
     ];
   }
@@ -348,10 +349,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               // Chip de estado discreto
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
@@ -373,7 +374,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       institution.activa ? 'Activa' : 'Inactiva',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(

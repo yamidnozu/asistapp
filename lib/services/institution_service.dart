@@ -43,12 +43,13 @@ class InstitutionService {
         },
       );
 
-      debugPrint('GET /instituciones - Status: ${response.statusCode}');
+  debugPrint('GET /instituciones - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          final institutions = (responseData['data'] as List)
+    debugPrint('GET /instituciones - data[0]: ${(responseData['data'] as List).isNotEmpty ? (responseData['data'] as List)[0] : 'empty'}');
+    final institutions = (responseData['data'] as List)
               .map((institutionJson) => Institution.fromJson(institutionJson))
               .toList();
           final pagination = PaginationInfo.fromJson(responseData['pagination']);
@@ -83,10 +84,11 @@ class InstitutionService {
         },
       );
 
-      debugPrint('GET /instituciones/$id - Status: ${response.statusCode}');
+  debugPrint('GET /instituciones/$id - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        debugPrint('GET /instituciones/$id - data: ${responseData['data']}');
         if (responseData['success'] == true) {
           return Institution.fromJson(responseData['data']);
         }

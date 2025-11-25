@@ -126,7 +126,7 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.mark_email_read),
+            icon: const Icon(Icons.mark_email_read),
             onPressed: _markAllAsRead,
           ),
         ],
@@ -171,8 +171,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
           SizedBox(height: spacing.xl),
           ElevatedButton.icon(
             onPressed: _loadNotificaciones,
-            icon: Icon(Icons.refresh),
-            label: Text('Reintentar'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reintentar'),
           ),
         ],
       ),
@@ -255,7 +255,7 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
           color: colors.error,
           borderRadius: BorderRadius.circular(spacing.borderRadius),
         ),
-        child: Icon(
+        child: const Icon(
           Icons.delete,
           color: Colors.white,
         ),
@@ -306,7 +306,7 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
                           ),
                           if (importante)
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: colors.error.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),

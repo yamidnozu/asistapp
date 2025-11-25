@@ -18,7 +18,7 @@ class EstudiantesSinAsignarPaginatedProvider extends ChangeNotifier with Paginat
   }
 
   @override
-  Future<User?> createItemApi(String accessToken, data) async {
+  Future<User?> createItemApi(String accessToken, dynamic data) async {
     return null;
   }
 

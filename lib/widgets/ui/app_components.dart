@@ -116,7 +116,8 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.softWrap,
     super.key,
-  });
+  });
+
   const AppText.headlineLarge(
     this.text, {
     this.textAlign,
@@ -160,7 +161,8 @@ class AppText extends StatelessWidget {
     TextStyle resolvedStyle;
     if (style != null) {
       resolvedStyle = style!;
-    } else {
+    } else {
+
       final constructorName = runtimeType.toString();
       if (constructorName.contains('headlineLarge')) {
         resolvedStyle = textStyles.headlineLarge;
@@ -189,7 +191,8 @@ class AppSpacer extends StatelessWidget {
   final double? width;
   final double? height;
 
-  const AppSpacer({this.width, this.height, super.key});
+  const AppSpacer({this.width, this.height, super.key});
+
   const AppSpacer.xs({super.key}) : width = null, height = null;
   const AppSpacer.sm({super.key}) : width = null, height = null;
   const AppSpacer.md({super.key}) : width = null, height = null;
@@ -200,22 +203,18 @@ class AppSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.spacing;
 
-    double resolvedWidth = width ?? 0;
-    double resolvedHeight = height ?? 0;
-    if (width == null && height == null) {
+    final double resolvedWidth = width ?? 0;
+    final double resolvedHeight = height ?? (() {
+      if (width != null) return width!;
+      if (height != null) return height!;
       final constructorName = runtimeType.toString();
-      if (constructorName.contains('xs')) {
-        resolvedHeight = spacing.xs;
-      } else if (constructorName.contains('sm')) {
-        resolvedHeight = spacing.sm;
-      } else if (constructorName.contains('md')) {
-        resolvedHeight = spacing.md;
-      } else if (constructorName.contains('lg')) {
-        resolvedHeight = spacing.lg;
-      } else if (constructorName.contains('xl')) {
-        resolvedHeight = spacing.xl;
-      }
-    }
+  if (constructorName.contains('xs')) return spacing.xs.toDouble();
+  if (constructorName.contains('sm')) return spacing.sm.toDouble();
+  if (constructorName.contains('md')) return spacing.md.toDouble();
+  if (constructorName.contains('lg')) return spacing.lg.toDouble();
+  if (constructorName.contains('xl')) return spacing.xl.toDouble();
+  return 0.0;
+    })();
 
     return SizedBox(
       width: resolvedWidth,

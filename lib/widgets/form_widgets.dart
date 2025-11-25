@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/theme_extensions.dart';
 
 class CustomTextFormField extends StatelessWidget {
@@ -18,6 +19,9 @@ class CustomTextFormField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function()? onTap;
   final String? initialValue;
+  final String? errorText;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
 
   const CustomTextFormField({
     super.key,
@@ -37,6 +41,9 @@ class CustomTextFormField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.initialValue,
+    this.errorText,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   @override
@@ -56,10 +63,12 @@ class CustomTextFormField extends StatelessWidget {
         obscureText: obscureText,
         maxLines: maxLines,
         minLines: minLines,
+        maxLength: maxLength,
         enabled: enabled,
         onChanged: onChanged,
         onTap: onTap,
         validator: validator,
+        inputFormatters: inputFormatters,
         style: textStyles.bodyLarge,
         decoration: InputDecoration(
           labelText: labelText,
@@ -67,6 +76,7 @@ class CustomTextFormField extends StatelessWidget {
           hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
+          errorText: errorText,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(spacing.borderRadius),
             borderSide: BorderSide(color: colors.border),

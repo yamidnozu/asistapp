@@ -29,7 +29,7 @@ class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDa
   }
 
   @override
-  Future<User?> createItemApi(String accessToken, data) async {
+  Future<User?> createItemApi(String accessToken, dynamic data) async {
     return null;
   }
 

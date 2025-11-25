@@ -124,8 +124,8 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
           SizedBox(height: spacing.xl),
           ElevatedButton.icon(
             onPressed: _loadHorarios,
-            icon: Icon(Icons.refresh),
-            label: Text('Reintentar'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reintentar'),
           ),
         ],
       ),

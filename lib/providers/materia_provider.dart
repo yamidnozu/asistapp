@@ -157,9 +157,8 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   }
 
   @override
-  Future<void> loadNextPage(String accessToken, {Map<String, String>? filters}) async {
-  if (paginationInfo == null || !paginationInfo!.hasNext || isLoading) return;
-    await super.loadNextPage(accessToken, filters: filters);
+  Future<void> loadNextPage(String accessToken) async {
+    await super.loadNextPage(accessToken);
   }
 
   Future<void> loadPreviousPage(String accessToken) async {

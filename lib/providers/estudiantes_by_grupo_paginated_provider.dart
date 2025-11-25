@@ -36,7 +36,7 @@ class EstudiantesByGrupoPaginatedProvider extends ChangeNotifier with PaginatedD
   }
 
   @override
-  Future<User?> createItemApi(String accessToken, data) async {
+  Future<User?> createItemApi(String accessToken, dynamic data) async {
     // Not supported here
     return null;
   }

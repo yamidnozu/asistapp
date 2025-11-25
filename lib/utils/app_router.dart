@@ -171,43 +171,43 @@ class AppRouter {
               GoRoute(
                 path: '/academic',
                 name: 'academic-management',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const GestionAcademicaScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: GestionAcademicaScreen(),
                 ),
               ),
               GoRoute(
                 path: '/academic/grupos',
                 name: 'academic-grupos',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const GruposScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: GruposScreen(),
                 ),
               ),
               GoRoute(
                 path: '/academic/materias',
                 name: 'academic-materias',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const MateriasScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: MateriasScreen(),
                 ),
               ),
               GoRoute(
                 path: '/academic/periodos',
                 name: 'academic-periodos',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const PeriodosAcademicosScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: PeriodosAcademicosScreen(),
                 ),
               ),
               GoRoute(
                 path: '/academic/horarios',
                 name: 'academic-horarios',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const HorariosScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: HorariosScreen(),
                 ),
               ),
               GoRoute(
                 path: '/test-multi-hora',
                 name: 'test-multi-hora',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const TestMultiHoraScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: TestMultiHoraScreen(),
                 ),
               ),
               GoRoute(
@@ -224,23 +224,23 @@ class AppRouter {
               GoRoute(
                 path: '/student/qr',
                 name: 'student-qr',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const MyQRCodeScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: MyQRCodeScreen(),
                 ),
               ),
               // Rutas para módulos del estudiante
               GoRoute(
                 path: '/student/schedule',
                 name: 'student-schedule',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const StudentScheduleScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: StudentScheduleScreen(),
                 ),
               ),
               GoRoute(
                 path: '/student/attendance',
                 name: 'student-attendance',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const StudentAttendanceScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: StudentAttendanceScreen(),
                 ),
               ),
               GoRoute(
@@ -258,8 +258,8 @@ class AppRouter {
               GoRoute(
                 path: '/student/notifications',
                 name: 'student-notifications',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const StudentNotificationsScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: StudentNotificationsScreen(),
                 ),
               ),
             ],
@@ -272,8 +272,8 @@ class AppRouter {
               GoRoute(
                 path: '/institutions',
                 name: 'institutions-list',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const InstitutionsListScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: InstitutionsListScreen(),
                 ),
               ),
               // Route to open the Institution form (create/edit) using extra to pass the Institution object when needed
@@ -326,8 +326,8 @@ class AppRouter {
               GoRoute(
                 path: '/users',
                 name: 'users-list',
-                pageBuilder: (context, state) => NoTransitionPage(
-                  child: const UsersListScreen(),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: UsersListScreen(),
                 ),
                 // Las rutas de formularios se movieron arriba
               ),

@@ -26,6 +26,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
   final _emailController = TextEditingController();
 
   bool _activa = true;
+  bool _isLoadingDetails = false;
   // Loading is managed by the MultiStepFormScaffold; avoid duplicating state
 
   bool get isEditing => widget.institution != null;
@@ -35,7 +36,51 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     super.initState();
     debugPrint('🏗️ InstitutionFormScreen: initState called (isEditing: $isEditing)');
     if (widget.institution != null) {
-      _loadInstitutionData();
+      // If we're editing and the passed institution doesn't include full details
+      // (e.g. email may be null because the list view used a partial payload),
+      // fetch the complete institution record from the API and populate the form.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        setState(() => _isLoadingDetails = true);
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+  final token = authProvider.accessToken;
+  debugPrint('🏗️ InstitutionFormScreen: auth token available=${token != null}');
+
+        // If we have a token, always try to fetch the complete record
+        // (some list sources may contain incomplete projections)
+        if (token != null) {
+          try {
+            await institutionProvider.loadInstitutionById(token, widget.institution!.id);
+            final loaded = institutionProvider.selectedInstitution;
+            debugPrint('🏗️ InstitutionFormScreen: Institution loaded from provider: $loaded');
+            if (loaded != null && mounted) {
+              debugPrint('🏗️ InstitutionFormScreen: setting controllers with loaded data - email: ${loaded.email}, telefono: ${loaded.telefono}, direccion: ${loaded.direccion}');
+              setState(() {
+                _nombreController.text = loaded.nombre;
+                // Use loaded value if present, otherwise fallback to value in widget.institution if present
+                _direccionController.text = loaded.direccion ?? widget.institution?.direccion ?? '';
+                _telefonoController.text = loaded.telefono ?? widget.institution?.telefono ?? '';
+                _emailController.text = loaded.email ?? widget.institution?.email ?? '';
+                _activa = loaded.activa;
+              });
+            } else {
+              // Fallback: populate with the passed instance
+              _loadInstitutionData();
+            }
+          } catch (e) {
+            debugPrint('Error loading institution details: $e');
+            // If fetch fails for any reason, fallback to the passed instance
+            _loadInstitutionData();
+          }
+          finally {
+            if (mounted) setState(() => _isLoadingDetails = false);
+          }
+        } else {
+          // No token or email already present: use the passed institution object
+          _loadInstitutionData();
+          if (mounted) setState(() => _isLoadingDetails = false);
+        }
+      });
     }
   }
 
@@ -137,7 +182,9 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     final title = isEditing ? 'Editar Institución' : 'Nueva Institución';
     debugPrint('🏗️ InstitutionFormScreen: Building form with title: $title');
 
-    return MultiStepFormScaffold(
+    return Stack(
+      children: [
+        MultiStepFormScaffold(
       title: title,
       formKey: _formKey,
       onSave: _saveInstitution,
@@ -174,6 +221,15 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
               ),
             ),
         ],
+        ),
+        if (_isLoadingDetails)
+          Positioned.fill(
+            child: Container(
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+      ],
     );
   }
 

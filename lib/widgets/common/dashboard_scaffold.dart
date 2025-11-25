@@ -42,29 +42,31 @@ class DashboardScaffold extends StatelessWidget {
           Text(subtitle, style: textStyles.bodyLarge),
           SizedBox(height: spacing.xl),
 
-          if (statsWidgets != null && statsWidgets!.isNotEmpty) ...[
-            Wrap(spacing: spacing.md, runSpacing: spacing.md, children: statsWidgets!),
+          if ((statsWidgets ?? []).isNotEmpty) ...[
+            Wrap(spacing: spacing.md, runSpacing: spacing.md, children: statsWidgets ?? []),
             SizedBox(height: spacing.xl),
           ],
 
           if (kpiWidget != null || recentActivityWidget != null)
             LayoutBuilder(builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 800;
+              final _kw = kpiWidget;
+              final _raw = recentActivityWidget;
               if (isNarrow) {
-                return Column(children: [if (kpiWidget != null) kpiWidget!, if (recentActivityWidget != null) SizedBox(height: spacing.md), if (recentActivityWidget != null) recentActivityWidget!]);
+                return Column(children: [if (_kw != null) _kw, if (_raw != null) SizedBox(height: spacing.md), if (_raw != null) _raw]);
               }
-              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [if (kpiWidget != null) Expanded(child: kpiWidget!), if (kpiWidget != null) SizedBox(width: spacing.md), if (recentActivityWidget != null) SizedBox(width: 420, child: recentActivityWidget!)]);
+              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [if (_kw != null) Expanded(child: _kw), if (_kw != null) SizedBox(width: spacing.md), if (_raw != null) SizedBox(width: 420, child: _raw)]);
             }),
 
           SizedBox(height: spacing.xl),
 
-          if (actionItems != null && actionItems!.isNotEmpty) ...[
+          if ((actionItems ?? []).isNotEmpty) ...[
             Text('Acciones Principales', style: textStyles.headlineSmall),
             SizedBox(height: spacing.md),
             // Wrap the action list in a Material so ListTile has a Material ancestor during tests & usages
             Material(
               type: MaterialType.transparency,
-              child: Column(children: actionItems!.map((ai) => ListTile(leading: Icon(ai.icon), title: Text(ai.label), onTap: ai.onTap)).toList()),
+              child: Column(children: (actionItems ?? []).map((ai) => ListTile(leading: Icon(ai.icon), title: Text(ai.label), onTap: ai.onTap)).toList()),
             ),
           ],
         ],

@@ -27,12 +27,12 @@ class FakePaginatedProvider extends PaginatedDataProvider<DummyItem> {
   }
 
   @override
-  Future<DummyItem?> createItemApi(String accessToken, data) async {
+  Future<DummyItem?> createItemApi(String accessToken, dynamic data) async {
     return DummyItem('3', 'Three');
   }
 
   @override
-  Future<DummyItem?> updateItemApi(String accessToken, String id, data) async {
+  Future<DummyItem?> updateItemApi(String accessToken, String id, dynamic data) async {
     return DummyItem(id, 'Updated');
   }
 }

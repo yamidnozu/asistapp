@@ -81,7 +81,7 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
       children: [
             TextFormField(
               controller: _nombreController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Nombre de la Materia',
                 hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
               ),
@@ -95,7 +95,7 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
             SizedBox(height: spacing.md),
             TextFormField(
               controller: _codigoController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Código (opcional)',
                 hintText: 'Ej: MAT101, LEN201',
               ),
@@ -150,7 +150,7 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
   children: [
             TextFormField(
               controller: _nombreController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Nombre de la Materia',
                 hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
               ),
@@ -164,7 +164,7 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
             SizedBox(height: spacing.md),
             TextFormField(
               controller: _codigoController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Código (opcional)',
                 hintText: 'Ej: MAT101, LEN201',
               ),
@@ -202,7 +202,7 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
 
       if (success && mounted) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Materia actualizada correctamente')),
+          const SnackBar(content: Text('Materia actualizada correctamente')),
         );
         return true;
       } else if (mounted) {

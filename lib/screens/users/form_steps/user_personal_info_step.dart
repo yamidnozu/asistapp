@@ -1,6 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../theme/theme_extensions.dart';
 import '../../../widgets/form_widgets.dart';
+
+/// Formatter para campos de teléfono que permite +, números, espacios, guiones y paréntesis
+class PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Solo permite: +, números (0-9), espacios, guiones y paréntesis
+    final newText = newValue.text.replaceAll(RegExp(r'[^\+0-9\s\-\(\)]'), '');
+    
+    // Solo permite un + al inicio
+    String formatted = newText;
+    if (formatted.contains('+')) {
+      final firstPlus = formatted.indexOf('+');
+      if (firstPlus > 0) {
+        // Si hay un + pero no al inicio, lo removemos
+        formatted = formatted.replaceAll('+', '');
+      } else {
+        // Remover cualquier + adicional después del primero
+        formatted = '+${formatted.substring(1).replaceAll('+', '')}';
+      }
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(
+        offset: formatted.length.clamp(0, newValue.selection.end.clamp(0, formatted.length)),
+      ),
+    );
+  }
+}
 
 /// Step 2: Información Personal (Nombres, Apellidos, Teléfono, Identificación)
 class UserPersonalInfoStep extends StatelessWidget {
@@ -167,6 +200,11 @@ class UserPersonalInfoStep extends StatelessWidget {
                           labelText: 'Teléfono',
                           hintText: '+57 300 123 4567',
                           keyboardType: TextInputType.phone,
+                          maxLength: 20,
+                          inputFormatters: [
+                            PhoneInputFormatter(),
+                            LengthLimitingTextInputFormatter(20),
+                          ],
                           validator: (value) {
                             if (value != null && value.trim().isNotEmpty) {
                               final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
@@ -214,6 +252,11 @@ class UserPersonalInfoStep extends StatelessWidget {
                         labelText: 'Teléfono',
                         hintText: '+57 300 123 4567',
                         keyboardType: TextInputType.phone,
+                        maxLength: 20,
+                        inputFormatters: [
+                          PhoneInputFormatter(),
+                          LengthLimitingTextInputFormatter(20),
+                        ],
                         validator: (value) {
                           if (value != null && value.trim().isNotEmpty) {
                             final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');

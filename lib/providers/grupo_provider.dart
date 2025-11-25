@@ -284,14 +284,18 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   Future<void> loadMoreGrupos(String accessToken, {String? periodoId, String? search}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
 
-    final filters = <String,String>{
-      if (_selectedPeriodoId != null) 'periodoId': _selectedPeriodoId!,
-      if (periodoId != null) 'periodoId': periodoId,
-      if (search != null) 'search': search,
-    };
+    // Set filters
+    if (periodoId != null) {
+      setFilter('periodoId', periodoId);
+    } else if (_selectedPeriodoId != null) {
+      setFilter('periodoId', _selectedPeriodoId);
+    }
+    if (search != null) {
+      setFilter('search', search);
+    }
 
     // Delegate to base implementation which uses fetchPage and updates pagination info
-    await super.loadNextPage(accessToken, filters: filters.isEmpty ? null : filters);
+    await super.loadNextPage(accessToken);
   }
 
   /// Busca grupos en el backend (búsqueda remota)

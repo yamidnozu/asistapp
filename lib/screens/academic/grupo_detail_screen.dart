@@ -172,7 +172,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalles del Grupo'),
+        title: const Text('Detalles del Grupo'),
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
       ),
@@ -231,8 +231,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                     ),
                     ElevatedButton.icon(
                       onPressed: _showAsignarEstudianteDialog,
-                      icon: Icon(Icons.add),
-                      label: Text('Asignar Estudiante'),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Asignar Estudiante'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primary,
                         foregroundColor: colors.onPrimary,
@@ -271,7 +271,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                     )
                   : ListView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: byGrupo.items.length,
                       itemBuilder: (context, index) {
                         final estudiante = byGrupo.items[index];
@@ -413,9 +413,9 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
             // Campo de búsqueda
             TextField(
               controller: _searchController,
-              decoration: InputDecoration(
+                decoration: InputDecoration(
                 hintText: 'Buscar estudiantes...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(spacing.borderRadius),
                 ),
@@ -560,7 +560,7 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
         actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancelar'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: _selectedEstudiantes.isEmpty ? null : _asignarSeleccionados,

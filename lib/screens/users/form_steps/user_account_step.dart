@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import '../../../theme/theme_extensions.dart';
 import '../../../widgets/form_widgets.dart';
@@ -19,6 +21,7 @@ class UserAccountStep extends StatefulWidget {
   final FocusNode? institutionFocusNode;
   final GlobalKey<FormFieldState<String>>? emailFieldKey;
   final GlobalKey<FormFieldState<String>>? institutionFieldKey;
+  final String? errorEmail;
 
   const UserAccountStep({
     super.key,
@@ -33,6 +36,7 @@ class UserAccountStep extends StatefulWidget {
     this.institutionFocusNode,
     this.emailFieldKey,
     this.institutionFieldKey,
+    this.errorEmail,
   });
 
   @override
@@ -41,6 +45,37 @@ class UserAccountStep extends StatefulWidget {
 
 class _UserAccountStepState extends State<UserAccountStep> {
   bool _isReloading = false;
+  final TextEditingController _institutionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _updateInstitutionController();
+  }
+
+  @override
+  void didUpdateWidget(covariant UserAccountStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedInstitutionId != widget.selectedInstitutionId ||
+        oldWidget.selectedInstitutionName != widget.selectedInstitutionName) {
+      _updateInstitutionController();
+    }
+  }
+
+  void _updateInstitutionController() {
+    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final selected = institutionProvider.institutions.firstWhere(
+      (i) => i.id == widget.selectedInstitutionId,
+      orElse: () => Institution(id: '', nombre: widget.selectedInstitutionName ?? '', direccion: null, telefono: null, email: null, activa: true),
+    );
+    _institutionController.text = selected.nombre;
+  }
+
+  @override
+  void dispose() {
+    _institutionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +117,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
               }
               return null;
             },
+          errorText: widget.errorEmail,
         ),
         SizedBox(height: spacing.md),
 
@@ -153,7 +189,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
                                     }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('No hay sesión activa para recargar instituciones')),
+                                      const SnackBar(content: Text('No hay sesión activa para recargar instituciones')),
                                     );
                                   }
                                 },
@@ -172,26 +208,26 @@ class _UserAccountStepState extends State<UserAccountStep> {
                 );
               }
 
-              return CustomDropdownFormField<String>(
-                key: const Key('institucionDropdown'),
-                fieldKey: widget.institutionFieldKey,
+              return TextFormField(
+                key: const Key('institucionField'),
+                controller: _institutionController,
                 focusNode: widget.institutionFocusNode,
-                value: widget.selectedInstitutionId,
-                labelText: 'Institución',
-                hintText: 'Seleccione una institución',
-                items: institutionProvider.institutions.map((institution) {
-                  return DropdownMenuItem<String>(
-                    value: institution.id,
-                    child: Text(institution.nombre),
-                  );
-                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Institución',
+                  hintText: 'Seleccione una institución',
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                readOnly: true,
+                onTap: widget.disableInstitution ? null : () => _showInstitutionSelectionModal(context, institutionProvider, authProvider),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (widget.selectedInstitutionId == null || widget.selectedInstitutionId!.isEmpty) {
                     return 'Debe seleccionar una institución';
                   }
                   return null;
                 },
-                onChanged: widget.disableInstitution ? null : widget.onInstitutionChanged,
               );
             },
           ),
@@ -223,6 +259,245 @@ class _UserAccountStepState extends State<UserAccountStep> {
           ),
         ],
       ],
+    );
+  }
+
+  void _showInstitutionSelectionModal(BuildContext context, InstitutionProvider institutionProvider, AuthProvider authProvider) {
+    final TextEditingController searchController = TextEditingController();
+    List<Institution> filteredInstitutions = institutionProvider.institutions;
+    bool isLoading = institutionProvider.isLoading;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (modalContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            void updateFiltered() {
+              final query = searchController.text.toLowerCase();
+              setModalState(() {
+                filteredInstitutions = institutionProvider.institutions
+                    .where((inst) => inst.nombre.toLowerCase().contains(query))
+                    .toList();
+              });
+            }
+
+            Future<void> reloadInstitutions() async {
+              final token = authProvider.accessToken;
+              if (token != null) {
+                setModalState(() => isLoading = true);
+                try {
+                  await institutionProvider.loadInstitutions(token, page: 1, limit: 100);
+                  setModalState(() {
+                    filteredInstitutions = institutionProvider.institutions;
+                    isLoading = false;
+                  });
+                } catch (e) {
+                  setModalState(() => isLoading = false);
+                }
+              }
+            }
+
+            Widget buildContent() {
+              // Estado de carga
+              if (isLoading) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Cargando instituciones...',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Estado vacío
+              if (filteredInstitutions.isEmpty) {
+                final hasSearchQuery = searchController.text.isNotEmpty;
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          hasSearchQuery ? Icons.search_off : Icons.business_outlined,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          hasSearchQuery
+                            ? 'No se encontraron instituciones'
+                            : 'Sin instituciones disponibles',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          hasSearchQuery
+                            ? 'Intenta con otros términos de búsqueda'
+                            : 'No hay instituciones activas en el sistema',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        if (hasSearchQuery)
+                          TextButton.icon(
+                            onPressed: () {
+                              searchController.clear();
+                              updateFiltered();
+                            },
+                            icon: const Icon(Icons.clear),
+                            label: const Text('Limpiar búsqueda'),
+                          )
+                        else
+                          ElevatedButton.icon(
+                            onPressed: reloadInstitutions,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Recargar'),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // Lista de instituciones
+              return ListView.separated(
+                itemCount: filteredInstitutions.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final institution = filteredInstitutions[index];
+                  final isSelected = institution.id == widget.selectedInstitutionId;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.business,
+                        color: isSelected
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    title: Text(
+                      institution.nombre,
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    subtitle: Text(
+                      institution.email ?? institution.telefono ?? 'Sin contacto',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: isSelected
+                      ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                      : null,
+                    onTap: () {
+                      _institutionController.text = institution.nombre;
+                      widget.onInstitutionChanged(institution.id);
+                      Navigator.of(modalContext).pop();
+                    },
+                  );
+                },
+              );
+            }
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Título
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Seleccionar Institución',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(modalContext).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Barra de búsqueda
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Buscar institución...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                updateFiltered();
+                              },
+                            )
+                          : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                      ),
+                      onChanged: (value) => updateFiltered(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Contador de resultados
+                  if (!isLoading && filteredInstitutions.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${filteredInstitutions.length} institución${filteredInstitutions.length == 1 ? '' : 'es'}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Contenido principal
+                  Expanded(child: buildContent()),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
