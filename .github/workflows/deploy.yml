@@ -69,6 +69,8 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
 
+    env:
+      DEPLOY_SSH_RETRIES: 5
     steps:
     - name: Validate secrets
       run: |
@@ -93,7 +95,35 @@ jobs:
         fi
         echo "✅ All secrets validated successfully"
 
+    - name: Load SSH key into ssh-agent
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Test SSH connectivity (retries)
+      run: |
+        HOST=${{ secrets.VPS_HOST }}
+        USER=${{ secrets.VPS_USER }}
+        RETRIES=${{ env.DEPLOY_SSH_RETRIES }}
+        for i in $(seq 1 $RETRIES); do
+          echo "Attempt $i connecting to $USER@$HOST"
+          if ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${USER}@${HOST} 'echo SSH_OK' >/dev/null 2>&1; then
+            echo "-> Connected on attempt $i"
+            # Check sudo capability without prompting for password
+            ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${USER}@${HOST} 'id -u; if [ "$(id -u)" -ne 0 ]; then if command -v sudo >/dev/null 2>&1; then sudo -n true >/dev/null 2>&1 && echo SUDO_NO_PWD || echo SUDO_PWD_REQUIRED; fi; fi'
+            break
+          else
+            echo "Attempt $i failed"
+            if [ "$i" -eq "$RETRIES" ]; then
+              echo "Failed to connect to $USER@$HOST after $RETRIES attempts"
+              exit 1
+            fi
+            sleep 5
+          fi
+        done
+
     - name: Deploy to VPS
+      # SSH connectivity is tested before this step. If the test fails, the job stops early with a clear error.
       uses: appleboy/ssh-action@v1.0.3
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
@@ -280,3 +310,4 @@ jobs:
 
           echo "Deploy completed"
           $SUDO docker compose -f docker-compose.prod.yml ps
+
