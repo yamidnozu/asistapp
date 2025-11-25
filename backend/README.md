@@ -111,6 +111,7 @@ El sistema crea automáticamente un usuario administrador:
 npm run dev          # Iniciar en modo desarrollo
 npm run build        # Compilar TypeScript
 npm run test         # Ejecutar tests
+npm run prisma:patch:fill-contacts  # (Optional) Parchea instituciones que faltan campos de contacto usando los datos del admin
 ```
 
 ## 🚀 Despliegue en VPS

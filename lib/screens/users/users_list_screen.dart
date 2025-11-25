@@ -65,7 +65,15 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   // Helper para obtener el rol seleccionado del filtro
   String _getSelectedRole(UserProvider provider) {
-    return (provider.filters['roles'] ?? provider.filters['role'] ?? '').toString();
+    final rolesFilter = provider.filters['roles'];
+    if (rolesFilter != null) {
+      final rolesStr = rolesFilter.toString();
+      // Si el filtro contiene múltiples roles (coma separada), no devolver un valor
+      // único para el Dropdown (evita error: no item matches el valor compuesto).
+      if (rolesStr.contains(',')) return '';
+      return rolesStr;
+    }
+    return (provider.filters['role'] ?? '').toString();
   }
 
   // Helper para obtener el filtro de estado

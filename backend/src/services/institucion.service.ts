@@ -66,7 +66,7 @@ export class InstitucionService {
       // Get total count
       const total = await prisma.institucion.count({ where });
 
-      // Get paginated institutions
+      // Get paginated institutions; include one admin user if exists to use as contact fallback
       const institutions = await prisma.institucion.findMany({
         orderBy: {
           createdAt: 'desc',
@@ -74,6 +74,13 @@ export class InstitucionService {
         skip,
         take: limit,
         where,
+        include: {
+          usuarioInstituciones: {
+            where: { rolEnInstitucion: 'admin', activo: true },
+            include: { usuario: true },
+            take: 1,
+          },
+        },
       });
 
       const totalPages = Math.ceil(total / limit);
@@ -81,9 +88,10 @@ export class InstitucionService {
       const data: InstitutionResponse[] = institutions.map((inst: any) => ({
         id: inst.id,
         nombre: inst.nombre,
-        direccion: inst.direccion,
-        telefono: inst.telefono,
-        email: inst.email,
+        // If direccion/telefono/email are null, try to use the first admin's contact as a fallback
+        direccion: inst.direccion ?? (inst.usuarioInstituciones?.[0]?.usuario?.direccion ?? null),
+        telefono: inst.telefono ?? (inst.usuarioInstituciones?.[0]?.usuario?.telefono ?? null),
+        email: inst.email ?? (inst.usuarioInstituciones?.[0]?.usuario?.email ?? null),
         activa: inst.activa,
         createdAt: inst.createdAt.toISOString(),
         updatedAt: inst.updatedAt.toISOString(),
@@ -244,24 +252,44 @@ export class InstitucionService {
         throw new ValidationError('ID de institución inválido');
       }
 
+  // Include the first admin user (if any) to use as fallback for missing contact fields.
+  // This ensures that institutions without explicit contact info can still
+  // show a usable email/phone in the UI by using the admin's contact details.
       const institution = await prisma.institucion.findUnique({
         where: { id },
+        include: {
+          usuarioInstituciones: {
+            where: { rolEnInstitucion: 'admin', activo: true },
+            include: { usuario: true },
+            take: 1,
+          },
+        },
       });
 
       if (!institution) {
         return null;
       }
 
-      return {
+      // Merge fallback from admin user if institution fields are null
+      const fallbackAdmin = institution.usuarioInstituciones?.[0]?.usuario;
+  const direccion = institution.direccion ?? null; // no usuario.direccion field; keep null if missing
+  const telefono = institution.telefono ?? (fallbackAdmin?.telefono ?? null);
+  const email = institution.email ?? (fallbackAdmin?.email ?? null);
+
+      const result = {
         id: institution.id,
         nombre: institution.nombre,
-        direccion: institution.direccion,
-        telefono: institution.telefono,
-        email: institution.email,
+        direccion,
+        telefono,
+        email,
         activa: institution.activa,
         createdAt: institution.createdAt.toISOString(),
         updatedAt: institution.updatedAt.toISOString(),
       };
+
+      logger.debug(`Institution loaded by id=${id}: ${JSON.stringify(result)}`);
+
+      return result;
     } catch (error) {
       logger.error(`Error al obtener institución con ID ${id}:`, error);
       throw error;

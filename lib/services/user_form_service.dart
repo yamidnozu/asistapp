@@ -78,7 +78,7 @@ class UserFormService {
     TextEditingController nombreResponsableController,
     TextEditingController telefonoResponsableController,
     void Function(bool) setActivo,
-    void Function(String?) setSelectedInstitutionId,
+    void Function(List<String>) setSelectedInstitutionIds,
   ) {
     nombresController.text = user.nombres;
     apellidosController.text = user.apellidos;
@@ -86,9 +86,9 @@ class UserFormService {
     telefonoController.text = user.telefono ?? '';
     setActivo(user.activo);
 
-    // Preseleccionar institución si existe
+    // Preseleccionar instituciones si existen (un usuario puede pertenecer a varias)
     if (user.instituciones?.isNotEmpty ?? false) {
-      setSelectedInstitutionId(user.instituciones!.first.id);
+      setSelectedInstitutionIds(user.instituciones!.map((i) => i.id).toList());
     }
 
     if (user.estudiante != null) {

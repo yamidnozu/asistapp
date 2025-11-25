@@ -10,6 +10,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "npx ts-node prisma/seed.ts",
     "prisma:seed:host": "ts-node prisma/seed.ts",
+  "prisma:patch:fill-contacts": "node prisma/patches/fill_institution_contacts.js",
     "setup:test-data": "docker compose run --rm app npx ts-node setup-test-data.ts",
     "cleanup-tokens": "ts-node src/scripts/cleanup-tokens.ts",
     "test": "npm run test:unit && npm run test:integration",

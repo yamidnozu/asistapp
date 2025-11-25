@@ -31,6 +31,9 @@ async function main() {
   const colegioSanJose = await prisma.institucion.create({
     data: {
       nombre: 'Colegio San José',
+      direccion: 'Cra 12 #45-67, Ciudad',
+      telefono: '+573215551234',
+      email: 'contacto@sanjose.edu',
       activa: true,
     },
   });
@@ -38,6 +41,9 @@ async function main() {
   const liceoSantander = await prisma.institucion.create({
     data: {
       nombre: 'Liceo Santander',
+      direccion: 'Cl 9 #10-20, Ciudad',
+      telefono: '+573215551235',
+      email: 'contacto@santander.edu',
       activa: true,
     },
   });
@@ -45,6 +51,9 @@ async function main() {
   const institutoPasado = await prisma.institucion.create({
     data: {
       nombre: 'Instituto del Pasado',
+      direccion: 'Av 1 #22-33, Ciudad',
+      telefono: '+573215551236',
+      email: 'contacto@institutopasado.edu',
       activa: false,
     },
   });
@@ -74,6 +83,7 @@ async function main() {
       apellidos: 'San José',
       rol: 'admin_institucion',
       activo: true,
+      telefono: '+573300123456',
     },
   });
 
@@ -85,6 +95,7 @@ async function main() {
       apellidos: 'Santander',
       rol: 'admin_institucion',
       activo: true,
+      telefono: '+573300123457',
     },
   });
 

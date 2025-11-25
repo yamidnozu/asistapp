@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File, Directory;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Configuración de la aplicación con soporte para múltiples entornos
@@ -38,9 +38,74 @@ class AppConfig {
       return;
     }
 
-    // 2. Intentar cargar de archivo .env
+    // 2. Intentar cargar de archivo .env (buscar en directorio actual y padres)
+    String? foundPath;
+    final attemptedPaths = <String>[];
     try {
-      await dotenv.load(fileName: '.env');
+      // Buscar .env en varias ubicaciones probables (working dir, script y ejecutable),
+      // subiendo hasta 6 niveles en cada ruta.
+
+      bool _searchUpwards(Directory start) {
+        try {
+          var dir = start;
+          for (var i = 0; i < 6; i++) {
+            final candidatePath = '${dir.path}${Platform.pathSeparator}.env';
+            attemptedPaths.add(candidatePath);
+            final candidate = File(candidatePath);
+            if (candidate.existsSync()) {
+              foundPath = candidate.path;
+              return true;
+            }
+            if (dir.parent.path == dir.path) break; // reached root
+            dir = dir.parent;
+          }
+        } catch (_) {
+          // ignore filesystem lookup errors for this start point
+        }
+        return false;
+      }
+
+      // 1) Directorio actual (frecuente en `flutter run` desde el proyecto)
+      _searchUpwards(Directory.current);
+
+      // 2) Intentar con la ubicación del script (cuando Platform.script es file://)
+      try {
+        final script = Platform.script;
+        if (script.scheme == 'file') {
+          final scriptFile = File(script.toFilePath());
+          _searchUpwards(scriptFile.parent);
+        }
+      } catch (_) {
+        // ignore
+      }
+
+      // 3) Intentar con la ubicación del ejecutable (útil en builds y en Windows runner)
+      try {
+        final exec = Platform.resolvedExecutable;
+        if (exec.isNotEmpty) {
+          final execDir = File(exec).parent;
+          _searchUpwards(execDir);
+          // también buscar un nivel extra por si el ejecutable está en /bin o /runner/Debug
+          _searchUpwards(execDir.parent);
+        }
+      } catch (_) {
+        // ignore
+      }
+
+      // 4) Si no encontramos nada, intentar cargar el nombre por defecto (puede lanzar FileNotFound)
+      if (foundPath != null) {
+        await dotenv.load(fileName: foundPath!);
+        debugPrint('AppConfig: Cargado .env desde: $foundPath');
+      } else {
+        // Registrar los intentos para diagnóstico y luego intentar carga por nombre simple
+        debugPrint('AppConfig: No se encontró .env en rutas probadas:');
+        for (final p in attemptedPaths.take(30)) {
+          debugPrint('  - $p');
+        }
+        // Intentar carga por fallback (puede lanzar si no existe)
+        await dotenv.load(fileName: '.env');
+      }
+
       final envUrl = dotenv.env['API_BASE_URL'];
       final envEnvironment = dotenv.env['ENVIRONMENT'] ?? 'development';
       
@@ -54,6 +119,10 @@ class AppConfig {
       }
     } catch (e) {
       debugPrint('AppConfig: No se pudo cargar .env: $e');
+      if (attemptedPaths.isNotEmpty) {
+        debugPrint('AppConfig: Rutas intentadas para .env (muestra hasta 30):');
+        for (final p in attemptedPaths.take(30)) debugPrint('  - $p');
+      }
     }
 
     // 3. Usar valores por defecto
@@ -83,7 +152,8 @@ class AppConfig {
     }
     
     // Fallback: red local (ajustar según tu configuración)
-    return 'http://192.168.20.22:3002';
+    // Cambiado a puerto 3000 por defecto para que coincida con el backend en docker-compose
+    return 'http://192.168.20.22:3000';
   }
 
   /// Devuelve la URL base de la API

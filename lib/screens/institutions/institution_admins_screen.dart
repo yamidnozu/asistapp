@@ -369,7 +369,10 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_onScroll);
-    _loadInitialUsers();
+    // Evitar notificar listeners durante el build; cargar datos después del primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialUsers();
+    });
   }
 
   @override
@@ -390,7 +393,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
       if (token == null) return;
       final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
       pag.resetPagination();
-      await pag.loadItems(token, page: 1, limit: _pageSize, search: query.isEmpty ? null : query, filters: {'institutionId': widget.institutionId});
+      // Usar modo assignment para buscar todos los admin_institucion (pueden estar en otras instituciones)
+      await pag.loadItems(token, page: 1, limit: _pageSize, search: query.isEmpty ? null : query, filters: {'institutionId': widget.institutionId, 'assignment': 'true'});
     });
   }
 
@@ -401,7 +405,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     if (token == null) return;
     final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     try {
-      await pag.loadItems(token, page: 1, limit: _pageSize, filters: {'institutionId': widget.institutionId});
+      // Cargar en modo assignment para mostrar todos los admin_institucion
+      await pag.loadItems(token, page: 1, limit: _pageSize, filters: {'institutionId': widget.institutionId, 'assignment': 'true'});
     } catch (e) {
       debugPrint('Error cargando usuarios iniciales: $e');
       if (mounted) {
@@ -429,7 +434,9 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     if (token == null) return;
     final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     if (pag.isLoadingMore || !pag.hasMoreData) return;
+    // Mantener assignment mode para cargar admins globales
     pag.setFilter('institutionId', widget.institutionId);
+    pag.setFilter('assignment', 'true');
     await pag.loadNextPage(token);
   }
 

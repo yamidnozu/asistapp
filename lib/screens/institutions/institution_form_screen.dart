@@ -27,6 +27,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
   bool _activa = true;
   bool _isLoadingDetails = false;
+  bool _detailsMissing = false;
   // Loading is managed by the MultiStepFormScaffold; avoid duplicating state
 
   bool get isEditing => widget.institution != null;
@@ -36,10 +37,12 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
     super.initState();
     debugPrint('🏗️ InstitutionFormScreen: initState called (isEditing: $isEditing)');
     if (widget.institution != null) {
+      // Prefill with the data we already have from the list view (even if partial)
+      _loadInstitutionData();
       // If we're editing and the passed institution doesn't include full details
       // (e.g. email may be null because the list view used a partial payload),
       // fetch the complete institution record from the API and populate the form.
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
         setState(() => _isLoadingDetails = true);
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
@@ -62,6 +65,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 _telefonoController.text = loaded.telefono ?? widget.institution?.telefono ?? '';
                 _emailController.text = loaded.email ?? widget.institution?.email ?? '';
                 _activa = loaded.activa;
+                _detailsMissing = (loaded.email == null && loaded.telefono == null && loaded.direccion == null) && (widget.institution?.email == null && widget.institution?.telefono == null && widget.institution?.direccion == null);
               });
             } else {
               // Fallback: populate with the passed instance
@@ -227,6 +231,47 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
             child: Container(
               color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
               child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+        if (!_isLoadingDetails && _detailsMissing)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(child: Text('No se encontraron datos de contacto en el servidor. Puedes completarlos aquí o reintentar la carga.', style: Theme.of(context).textTheme.bodyMedium)),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Reintentar cargar los detalles
+                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+                      final token = authProvider.accessToken;
+                      if (token != null) {
+                        setState(() => _isLoadingDetails = true);
+                        try {
+                          await institutionProvider.loadInstitutionById(token, widget.institution!.id);
+                          final loaded = institutionProvider.selectedInstitution;
+                          if (loaded != null && mounted) {
+                            setState(() {
+                              _direccionController.text = loaded.direccion ?? widget.institution?.direccion ?? '';
+                              _telefonoController.text = loaded.telefono ?? widget.institution?.telefono ?? '';
+                              _emailController.text = loaded.email ?? widget.institution?.email ?? '';
+                              _detailsMissing = (loaded.email == null && loaded.telefono == null && loaded.direccion == null) && (widget.institution?.email == null && widget.institution?.telefono == null && widget.institution?.direccion == null);
+                            });
+                          }
+                        } finally {
+                          if (mounted) setState(() => _isLoadingDetails = false);
+                        }
+                      }
+                    },
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
             ),
           ),
       ],
