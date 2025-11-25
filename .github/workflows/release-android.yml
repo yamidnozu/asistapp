@@ -1,6 +1,15 @@
 name: Release Android to Play Store
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'assets/**'
+      - 'flutter_launcher_icons.yaml'
   workflow_dispatch:
     inputs:
       track:
