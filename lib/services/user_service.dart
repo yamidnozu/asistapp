@@ -22,9 +22,72 @@ class PaginatedUserResponse {
 }
 
 class UserService {
+  
+  
+  
+  
+  
+  
+  Map<String, dynamic> _normalizeUserJson(Map<String, dynamic> raw) {
+    final Map<String, dynamic> data = Map<String, dynamic>.from(raw);
+
+    // Si el backend ya devuelve `instituciones`, no hacemos nada.
+    if (data.containsKey('instituciones')) return data;
+
+    // Manejar `usuarioInstituciones` (forma relacional común)
+    if (data.containsKey('usuarioInstituciones') && data['usuarioInstituciones'] is List) {
+      final List items = data['usuarioInstituciones'] as List;
+      final List<Map<String, dynamic>> instituciones = [];
+
+      for (final item in items) {
+        if (item is Map) {
+          // Puede venir como { "institucion": { id,nombre }, "rolEnInstitucion":..., "activo": true }
+          final institucionObj = item['institucion'];
+          String id = '';
+          String nombre = '';
+          if (institucionObj is Map) {
+            id = institucionObj['id']?.toString() ?? '';
+            nombre = institucionObj['nombre']?.toString() ?? '';
+          } else if (item['institucionId'] != null) {
+            id = item['institucionId'].toString();
+          }
+
+          if (id.isNotEmpty) {
+            instituciones.add({
+              'id': id,
+              'nombre': nombre,
+              'rolEnInstitucion': item['rolEnInstitucion'] ?? item['rol'] ?? null,
+              'activo': item['activo'] ?? true,
+            });
+          }
+        }
+      }
+
+      data['instituciones'] = instituciones;
+      return data;
+    }
+
+    // Otras formas planas: buscar campos como 'institucionId' y 'institucionNombre'
+    if (data.containsKey('institucionId')) {
+      final id = data['institucionId']?.toString() ?? '';
+      final nombre = data['institucionNombre']?.toString() ?? '';
+      if (id.isNotEmpty) {
+        data['instituciones'] = [
+          {
+            'id': id,
+            'nombre': nombre,
+            'rolEnInstitucion': data['rolEnInstitucion'] ?? data['rol'] ?? null,
+            'activo': data['activo'] ?? true,
+          }
+        ];
+      }
+    }
+
+    return data;
+  }
   // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
-  /// Obtiene todos los usuarios con paginación y filtros (activo, búsqueda, roles)
+  
   Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
     try {
   final baseUrlValue = AppConfig.baseUrl;
@@ -55,9 +118,9 @@ class UserService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          final users = (responseData['data'] as List)
-              .map((userJson) => User.fromJson(userJson))
-              .toList();
+      final users = (responseData['data'] as List)
+        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
+        .toList();
           final pagination = PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
@@ -73,7 +136,7 @@ class UserService {
     return null;
   }
 
-  /// Obtiene un usuario por ID
+  
   Future<User?> getUserById(String accessToken, String userId) async {
     try {
   final baseUrlValue = AppConfig.baseUrl;
@@ -96,7 +159,7 @@ class UserService {
         final responseData = jsonDecode(response.body);
         debugPrint('GET /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
-          return User.fromJson(responseData['data']);
+          return User.fromJson(_normalizeUserJson(responseData['data'] as Map<String, dynamic>));
         }
       } else {
         debugPrint('Error getting user: ${response.statusCode} - ${response.body}');
@@ -140,9 +203,9 @@ class UserService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          final users = (responseData['data'] as List)
-              .map((userJson) => User.fromJson(userJson))
-              .toList();
+      final users = (responseData['data'] as List)
+        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
+        .toList();
           final pagination = PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
@@ -189,9 +252,9 @@ class UserService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          final users = (responseData['data'] as List)
-              .map((userJson) => User.fromJson(userJson))
-              .toList();
+      final users = (responseData['data'] as List)
+        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
+        .toList();
           final pagination = PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
@@ -251,7 +314,7 @@ class UserService {
                       }
                     ],
                   };
-                  return User.fromJson(usuarioJson);
+                  return User.fromJson(_normalizeUserJson(usuarioJson));
                 }
                 return null;
               })
@@ -387,7 +450,7 @@ class UserService {
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          return User.fromJson(responseData['data']);
+          return User.fromJson(_normalizeUserJson(responseData['data'] as Map<String, dynamic>));
         }
       } else if (response.statusCode == 409) {
         throw EmailAlreadyExistsException('El email ya está en uso');
@@ -428,12 +491,9 @@ class UserService {
         debugPrint('PUT /usuarios/$userId - request: ${jsonEncode(userData.toJson())}');
         debugPrint('PUT /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
-          // Use the API response as the source of truth.
-          // The backend was updated to persist and return professor-specific
-          // fields (titulo, especialidad). Remove the previous client-side
-          // merge-workaround so UI reflects what the server returns.
+          // Use the API response as the source of truth and normalize user JSON
           final data = responseData['data'] as Map<String, dynamic>;
-          return User.fromJson(data);
+          return User.fromJson(_normalizeUserJson(data));
         }
       } else if (response.statusCode == 409) {
         throw EmailAlreadyExistsException('El email ya está en uso');

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../services/user_form_service.dart';
@@ -71,10 +72,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
   bool _isInitialLoading = false;
   bool _activo = true;
   User? _user; // Usuario cargado para edición
-  String? _selectedInstitutionId; // Institución seleccionada para admin_institucion
+  List<String> _selectedInstitutionIds = []; // Instituciones seleccionadas para admin_institucion (edición puede tener varias)
   // Indica si el formulario está editando al usuario de la sesión
   bool _isSelfEditing = false;
-  String? _currentSessionUserRole;
+  
   String? _emailError;
 
   @override
@@ -126,12 +127,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
       if (user != null && mounted) {
         // Detectar si estamos editando al usuario de la sesión
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final sessionUserId = authProvider.user?['id']?.toString();
-        final sessionRole = authProvider.user?['rol'] as String?;
+  final sessionUserId = authProvider.user?['id']?.toString();
         setState(() {
           _user = user;
           _isSelfEditing = sessionUserId != null && sessionUserId == user.id;
-          _currentSessionUserRole = sessionRole;
         });
         _fillFormWithUserData();
       }
@@ -161,10 +160,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
     await _userFormService.loadInstitutionsIfNeeded(context, widget.userRole);
     if (!mounted) return;
     // Preselect institution if provided
-    if (widget.initialInstitutionId != null && _selectedInstitutionId == null) {
+    if (widget.initialInstitutionId != null && _selectedInstitutionIds.isEmpty) {
       final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
       final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
-      if (exists) _selectedInstitutionId = widget.initialInstitutionId;
+      if (exists) _selectedInstitutionIds = [widget.initialInstitutionId!];
     }
   }
 
@@ -182,7 +181,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
       _nombreResponsableController,
       _telefonoResponsableController,
       (value) => setState(() => _activo = value),
-      (value) => setState(() => _selectedInstitutionId = value),
+      (ids) => setState(() => _selectedInstitutionIds = ids),
     );
   }
 
@@ -239,7 +238,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
 
     // Validación adicional para admin_institucion
-    if (widget.userRole == 'admin_institucion' && _selectedInstitutionId == null) {
+    if (widget.userRole == 'admin_institucion' && _selectedInstitutionIds.isEmpty) {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -324,14 +323,44 @@ class _UserFormScreenState extends State<UserFormScreen> {
         telefonoResponsable: _telefonoResponsableController.text,
         activo: _activo,
       );
-
-      return await _userFormService.saveUser(
+      final success = await _userFormService.saveUser(
         context: context,
         user: _user,
         createRequest: null,
         updateRequest: updateRequest,
         userRole: widget.userRole,
       );
+
+      // Si la actualización básica del usuario fue exitosa, sincronizar las
+      // relaciones de instituciones si se trata de un admin_institucion.
+      if (success && widget.userRole == 'admin_institucion') {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final token = authProvider.accessToken;
+        if (token != null) {
+          try {
+            // IDs actuales en la entidad cargada
+            final existingIds = _user?.instituciones?.map((i) => i.id).toSet() ?? <String>{};
+            final selectedIds = _selectedInstitutionIds.toSet();
+
+            // Asignar los que están en selectedIds pero no en existingIds
+            final toAssign = selectedIds.difference(existingIds);
+            for (final instId in toAssign) {
+              await userProvider.assignAdminToInstitution(token, instId, _user!.id);
+            }
+
+            // Remover los que estaban y ya no están seleccionados
+            final toRemove = existingIds.difference(selectedIds);
+            for (final instId in toRemove) {
+              await userProvider.removeAdminFromInstitution(token, instId, _user!.id);
+            }
+          } catch (e) {
+            debugPrint('Error sincronizando instituciones del usuario: $e');
+            // No hacer fallar la operación principal, ya que el usuario fue actualizado.
+          }
+        }
+      }
+
+      return success;
     } else {
       // Modo creación
       final createRequest = _userFormService.createUserRequest(
@@ -345,7 +374,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         especialidad: _especialidadController.text,
         nombreResponsable: _nombreResponsableController.text,
         telefonoResponsable: _telefonoResponsableController.text,
-        selectedInstitutionId: _selectedInstitutionId,
+  selectedInstitutionId: _selectedInstitutionIds.isNotEmpty ? _selectedInstitutionIds.first : null,
         authProvider: authProvider,
       );
 
@@ -604,21 +633,38 @@ class _UserFormScreenState extends State<UserFormScreen> {
         subtitle: const Text('Email y acceso'),
         content: Form(
           key: _stepKeys[0],
-          child: UserAccountStep(
-            emailController: _emailController,
-            userRole: widget.userRole,
-            selectedInstitutionId: _selectedInstitutionId,
-            selectedInstitutionName: _user != null && (_user!.instituciones?.isNotEmpty ?? false) ? _user!.instituciones!.first.nombre : null,
-            onInstitutionChanged: (value) => setState(() => _selectedInstitutionId = value),
-            // Si el usuario de sesión es admin_institucion y está editando su propio usuario,
-            // no permitir cambiar la institución desde el formulario.
-            disableInstitution: _isSelfEditing && _currentSessionUserRole == 'admin_institucion',
-            emailFocusNode: _emailFocus,
-            institutionFocusNode: _institutionFocus,
-            isEditMode: _user != null,
-            emailFieldKey: _emailFieldKey,
-            institutionFieldKey: _institutionFieldKey,
-            errorEmail: _emailError,
+          child: Builder(
+            builder: (ctx) {
+              final sessionRole = Provider.of<AuthProvider>(ctx, listen: false).user?['rol'] as String?;
+              // Permitir editar instituciones sólo si: (a) el role del formulario no es
+              // 'admin_institucion' y no es un admin autoeditando su perfil, o (b)
+              // si se trata de admin_institucion, sólo permitir a super_admin hacerlo.
+              bool canEditInstitutions;
+              if (widget.userRole == 'admin_institucion') {
+                canEditInstitutions = sessionRole == 'super_admin';
+              } else {
+                canEditInstitutions = !(_isSelfEditing && sessionRole == 'admin_institucion');
+              }
+              // Debug: imprimir el estado de permisos para ayudar a diagnosticar
+              debugPrint('UserFormScreen: sessionRole=$sessionRole, userRole=${widget.userRole}, isSelfEditing=$_isSelfEditing, canEditInstitutions=$canEditInstitutions');
+
+              return UserAccountStep(
+                emailController: _emailController,
+                userRole: widget.userRole,
+                // Para edición permitimos seleccionar múltiples instituciones
+                selectedInstitutionIds: _selectedInstitutionIds,
+                selectedInstitutionNames: _user != null && (_user!.instituciones?.isNotEmpty ?? false) ? _user!.instituciones!.map((i) => i.nombre).toList() : const [],
+                onInstitutionChanged: (ids) => setState(() => _selectedInstitutionIds = ids),
+                // Control de bloqueo: el campo queda deshabilitado si no se permite editar instituciones
+                disableInstitution: !canEditInstitutions,
+                emailFocusNode: _emailFocus,
+                institutionFocusNode: _institutionFocus,
+                isEditMode: _user != null,
+                emailFieldKey: _emailFieldKey,
+                institutionFieldKey: _institutionFieldKey,
+                errorEmail: _emailError,
+              );
+            },
           ),
         ),
         isActive: _currentStep >= 0,
@@ -641,7 +687,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
             onActivoChanged: (value) => setState(() => _activo = value),
             // El switch de 'activo' debe ser de solo lectura si el usuario de sesión es
             // admin_institucion y está editando su propia cuenta.
-            activoEditable: !(_isSelfEditing && _currentSessionUserRole == 'admin_institucion'),
+            // Evaluamos el rol directamente desde AuthProvider en tiempo de build.
+            activoEditable: !(_isSelfEditing && (Provider.of<AuthProvider>(context, listen: false).user?['rol'] == 'admin_institucion')),
             nombresFocusNode: _nombresFocus,
             apellidosFocusNode: _apellidosFocus,
             telefonoFocusNode: _telefonoFocus,

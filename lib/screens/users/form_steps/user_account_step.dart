@@ -12,9 +12,9 @@ import 'package:provider/provider.dart';
 class UserAccountStep extends StatefulWidget {
   final TextEditingController emailController;
   final String userRole;
-  final String? selectedInstitutionId;
-  final String? selectedInstitutionName;
-  final ValueChanged<String?> onInstitutionChanged;
+  final List<String> selectedInstitutionIds;
+  final List<String> selectedInstitutionNames;
+  final ValueChanged<List<String>> onInstitutionChanged;
   final bool isEditMode;
   final bool disableInstitution;
   final FocusNode? emailFocusNode;
@@ -27,11 +27,11 @@ class UserAccountStep extends StatefulWidget {
     super.key,
     required this.emailController,
     required this.userRole,
-    required this.selectedInstitutionId,
-    required this.onInstitutionChanged,
-    this.isEditMode = false,
-    this.selectedInstitutionName,
-    this.disableInstitution = false,
+  required this.selectedInstitutionIds,
+  required this.selectedInstitutionNames,
+  required this.onInstitutionChanged,
+  this.isEditMode = false,
+  this.disableInstitution = false,
     this.emailFocusNode,
     this.institutionFocusNode,
     this.emailFieldKey,
@@ -56,19 +56,33 @@ class _UserAccountStepState extends State<UserAccountStep> {
   @override
   void didUpdateWidget(covariant UserAccountStep oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedInstitutionId != widget.selectedInstitutionId ||
-        oldWidget.selectedInstitutionName != widget.selectedInstitutionName) {
+    if (oldWidget.selectedInstitutionIds != widget.selectedInstitutionIds ||
+        oldWidget.selectedInstitutionNames != widget.selectedInstitutionNames) {
       _updateInstitutionController();
     }
   }
 
   void _updateInstitutionController() {
     final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-    final selected = institutionProvider.institutions.firstWhere(
-      (i) => i.id == widget.selectedInstitutionId,
-      orElse: () => Institution(id: '', nombre: widget.selectedInstitutionName ?? '', direccion: null, telefono: null, email: null, activa: true),
-    );
-    _institutionController.text = selected.nombre;
+    // Mostrar las instituciones seleccionadas como una única cadena separada por comas
+    if (widget.selectedInstitutionIds.isNotEmpty) {
+      // Intentar mapear ids a nombres usando el provider; si no hay coincidencia, usar los nombres pasados
+      final names = <String>[];
+      for (final id in widget.selectedInstitutionIds) {
+        final match = institutionProvider.institutions.firstWhere(
+          (i) => i.id == id,
+          orElse: () => Institution(id: id, nombre: '', direccion: null, telefono: null, email: null, activa: true),
+        );
+        if (match.nombre.isNotEmpty) names.add(match.nombre);
+      }
+      if (names.isEmpty && widget.selectedInstitutionNames.isNotEmpty) {
+        _institutionController.text = widget.selectedInstitutionNames.join(', ');
+      } else {
+        _institutionController.text = names.join(', ');
+      }
+    } else {
+      _institutionController.text = '';
+    }
   }
 
   @override
@@ -126,21 +140,16 @@ class _UserAccountStepState extends State<UserAccountStep> {
           Consumer2<AuthProvider, InstitutionProvider>(
             builder: (context, authProvider, institutionProvider, child) {
               // Si es self-edit por admin_institucion y la institución está bloqueada,
-              // mostrar un campo de solo lectura con el nombre de la institución.
+              // mostrar un campo de solo lectura con las instituciones asignadas.
               if (widget.disableInstitution) {
-                // Intentar obtener el nombre desde el provider o desde auth
-                final selected = institutionProvider.institutions.firstWhere(
-                  (i) => i.id == widget.selectedInstitutionId,
-                  orElse: () {
-                    final fallbackName = widget.selectedInstitutionName ?? authProvider.administrationName ?? '—';
-                    return Institution(id: widget.selectedInstitutionId ?? '', nombre: fallbackName, direccion: null, telefono: null, email: null, activa: true);
-                  },
-                );
+                final names = widget.selectedInstitutionNames.isNotEmpty
+                    ? widget.selectedInstitutionNames
+                    : (authProvider.administrationName != null ? [authProvider.administrationName!] : ['—']);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Institución', style: context.textStyles.labelLarge),
+                    Text('Instituciones', style: context.textStyles.labelLarge),
                     SizedBox(height: spacing.sm),
                     Container(
                       width: double.infinity,
@@ -150,11 +159,11 @@ class _UserAccountStepState extends State<UserAccountStep> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: context.colors.borderLight),
                       ),
-                      child: Text(selected.nombre, style: context.textStyles.bodyMedium),
+                      child: Text(names.join(', '), style: context.textStyles.bodyMedium),
                     ),
                     SizedBox(height: spacing.sm),
                     Text(
-                      'No puedes cambiar la institución de tu propia cuenta',
+                      'No puedes cambiar las instituciones de tu propia cuenta',
                       style: context.textStyles.bodySmall.copyWith(color: context.colors.textSecondary),
                     ),
                     SizedBox(height: spacing.md),
@@ -223,8 +232,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
                 readOnly: true,
                 onTap: widget.disableInstitution ? null : () => _showInstitutionSelectionModal(context, institutionProvider, authProvider),
                 validator: (value) {
-                  if (widget.selectedInstitutionId == null || widget.selectedInstitutionId!.isEmpty) {
-                    return 'Debe seleccionar una institución';
+                  if (widget.selectedInstitutionIds.isEmpty) {
+                    return 'Debe seleccionar al menos una institución';
                   }
                   return null;
                 },
@@ -267,6 +276,11 @@ class _UserAccountStepState extends State<UserAccountStep> {
     List<Institution> filteredInstitutions = institutionProvider.institutions;
     bool isLoading = institutionProvider.isLoading;
 
+    // Mantener selección local fuera del builder para que sobreviva a los
+    // rebuilds que provoca `setModalState`. Antes estaba dentro del builder
+    // y se reiniciaba en cada rebuild, por eso los checks no cambiaban.
+    final selectedIds = widget.selectedInstitutionIds.toSet();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -274,8 +288,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
+      return StatefulBuilder(
+        builder: (context, setModalState) {
             void updateFiltered() {
               final query = searchController.text.toLowerCase();
               setModalState(() {
@@ -300,6 +314,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
                 }
               }
             }
+
+            // `selectedIds` declarado fuera para persistir entre rebuilds
 
             Widget buildContent() {
               // Estado de carga
@@ -374,46 +390,61 @@ class _UserAccountStepState extends State<UserAccountStep> {
                 );
               }
 
-              // Lista de instituciones
-              return ListView.separated(
-                itemCount: filteredInstitutions.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final institution = filteredInstitutions[index];
-                  final isSelected = institution.id == widget.selectedInstitutionId;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.business,
-                        color: isSelected
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+              // Lista de instituciones con selección múltiple
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: filteredInstitutions.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final institution = filteredInstitutions[index];
+                        final isSelected = selectedIds.contains(institution.id);
+                        return CheckboxListTile(
+                          value: isSelected,
+                          onChanged: (v) {
+                            setModalState(() {
+                              if (v == true) selectedIds.add(institution.id);
+                              else selectedIds.remove(institution.id);
+                            });
+                          },
+                          title: Text(institution.nombre, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                          subtitle: Text(institution.email ?? institution.telefono ?? 'Sin contacto', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          secondary: CircleAvatar(child: Icon(Icons.business)),
+                        );
+                      },
                     ),
-                    title: Text(
-                      institution.nombre,
-                      style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(modalContext).pop();
+                            },
+                            child: const Text('Cancelar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Confirmar selección
+                              widget.onInstitutionChanged(selectedIds.toList());
+                              // Actualizar el controlador visible con los nombres seleccionados
+                              final names = institutionProvider.institutions.where((i) => selectedIds.contains(i.id)).map((i) => i.nombre).toList();
+                              _institutionController.text = names.join(', ');
+                              Navigator.of(modalContext).pop();
+                            },
+                            child: const Text('Confirmar selección'),
+                          ),
+                        ),
+                      ],
                     ),
-                    subtitle: Text(
-                      institution.email ?? institution.telefono ?? 'Sin contacto',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: isSelected
-                      ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
-                      : null,
-                    onTap: () {
-                      _institutionController.text = institution.nombre;
-                      widget.onInstitutionChanged(institution.id);
-                      Navigator.of(modalContext).pop();
-                    },
-                  );
-                },
+                  ),
+                ],
               );
             }
 
