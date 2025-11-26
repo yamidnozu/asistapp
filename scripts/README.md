@@ -3,6 +3,11 @@
 Este directorio contiene scripts útiles para desplegar y mantener la aplicación en servidores VPS.
 
 ## 📜 Scripts Disponibles
+### 📦 New: Useful docs
+* `scripts/PLAY_FIRST_UPLOAD.md` - Steps to initialize the Play Console app and grant service account permissions so CI can publish.
+* `scripts/DEPLOY_CONTAINER_CONFLICTS.md` - Guidance on container name conflicts and the new `deploy_force_recreate` option.
+* `scripts/PRISMA_MIGRATION_BASELINE.md` - Explanation and safe practices for Prisma P3005 migration errors.
+
 
 ### 🚨 `fix-now.sh` - Arreglo de Emergencia
 **Uso**: Cuando el backend no puede conectarse a la base de datos por credenciales incorrectas.

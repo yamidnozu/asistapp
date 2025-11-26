@@ -55,6 +55,8 @@ if [ "$HTTP_STATUS" -eq 404 ]; then
   echo "  - Service account not invited/authorized in API access or Users & permissions."
   echo "  - App exists in different developer account."
   head -n 200 /tmp/edit.json || true
+  echo "
+Hint: If this is the first upload, follow scripts/PLAY_FIRST_UPLOAD.md in the repo for a step-by-step guide to initialize the app and grant Play Console API access."
   exit 6
 fi
 
