@@ -149,6 +149,9 @@ class AppColors {
   final Color grey800 = const Color(0xFF1E293B);
   final Color grey900 = const Color(0xFF0F172A);
 
+  // Minor debug color: used for small non-production badges (non-invasive change)
+  final Color debugBadge = const Color(0xFF6EE7B7); // Verde menta - para badges temporales
+
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODOS DE CONVENIENCIA
   // ═══════════════════════════════════════════════════════════════════════════
