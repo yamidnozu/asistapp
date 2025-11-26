@@ -12,16 +12,17 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Base colors - Paleta moderna inspirada en Atlassian/Linear
-  static const Color _primaryBase = Color(0xFF0055D4); // Azul Atlassian - profesional y moderno
+  // Cambiado a rojo para la versión demo
+  static const Color _primaryBase = Color(0xFFE11D48); // Rojo - visualmente distintivo
   static const Color _secondaryBase = Color(0xFF4F46E5); // Índigo moderno - complementario
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase = Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
 
   // Primary palette - Azul moderno y profesional
   final Color primary = _primaryBase;
-  final Color primaryDark = const Color(0xFF0043B8); // Azul más profundo para hover/focus
-  final Color primaryLight = const Color(0xFF4D9DE0); // Azul claro para elementos secundarios
-  final Color primaryContainer = const Color(0xFFE3F2FD); // Azul pastel muy suave
+  final Color primaryDark = const Color(0xFFB91C1C); // Rojo profundo
+  final Color primaryLight = const Color(0xFFF87171); // Rojo claro
+  final Color primaryContainer = const Color(0xFFFFEBEE); // Rojo pastel muy suave
 
   // Secondary palette - Índigo moderno
   final Color secondary = _secondaryBase;
