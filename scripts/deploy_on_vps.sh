@@ -25,14 +25,18 @@ usage() {
 Uso: deploy_on_vps.sh [--pull | --build]
   --pull  : intentar 'docker pull' desde la imagen remota (GHCR) y subir con compose
   --build : forzar build local con docker-compose build en la VPS
+  --force-recreate: eliminar contenedores en conflicto con nombres fijos antes de levantar los servicios
 EOF
 }
 
 MODE="pull"
+FORCE_RECREATE="false"
 if [ "${1:-}" = "--build" ]; then
   MODE="build"
 elif [ "${1:-}" = "--pull" ]; then
   MODE="pull"
+elif [ "${1:-}" = "--force-recreate" ]; then
+  FORCE_RECREATE="true"
 fi
 
 check_commands
@@ -82,6 +86,15 @@ fi
 
 print "Deteniendo contenedores actuales si existen"
 ${COMPOSE} down --remove-orphans
+
+# If requested, remove known conflicting containers by name
+if [ "$FORCE_RECREATE" = "true" ]; then
+  print "--force-recreate requested; checking for known conflicting containers"
+  if docker ps -a --format '{{.Names}}' | grep -q '^asistapp_db$'; then
+    print "Removing stale container: asistapp_db"
+    docker rm -f asistapp_db || true
+  fi
+fi
 
 print "Iniciando servicios en background"
 ${COMPOSE} up -d --remove-orphans

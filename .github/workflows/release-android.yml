@@ -263,6 +263,8 @@ jobs:
             4. Create an Internal test release and upload the AAB from step (1). This will initialize the app in the Play back-end.
             5. Ensure the service account `asistapp-play-svc@asistapp-1763929039.iam.gserviceaccount.com` is added in Play Console > Settings > API access with 'Release Manager' or Admin and 'All apps' access.
             6. Wait a few minutes and re-run the CI workflow.
+            
+            For detailed instructions, see `scripts/PLAY_FIRST_UPLOAD.md` in this repository.
           assignees: 'yamidnozu'
 
       - name: Upload to Google Play Store

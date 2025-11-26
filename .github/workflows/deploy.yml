@@ -22,6 +22,11 @@ on:
         required: false
         default: false
         type: boolean
+      deploy_force_recreate:
+        description: 'When true, remove conflicting containers found on the VPS with the same names.'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -77,6 +82,7 @@ jobs:
 
     env:
       DEPLOY_SSH_RETRIES: 5
+      DEPLOY_FORCE_RECREATE: ${{ github.event.inputs.deploy_force_recreate || 'false' }}
     steps:
     - name: Validate secrets
       run: |
@@ -297,6 +303,26 @@ jobs:
             $SUDO docker compose -f docker-compose.prod.yml down --timeout 30 || true
           fi
 
+          # Check for conflicting containers with fixed names. If they exist we either fail with instructions
+          # or (optionally) remove them if DEPLOY_FORCE_RECREATE=true.
+          CONFLICTS=""
+          if $SUDO docker ps -a --format '{{.Names}}' | grep -q '^asistapp_db$'; then
+            CONFLICTS="asistapp_db"
+          fi
+          if [ -n "$CONFLICTS" ]; then
+            if [ "$DEPLOY_FORCE_RECREATE" = "true" ]; then
+              echo "⚠️ Found conflicting containers: $CONFLICTS. Removing because DEPLOY_FORCE_RECREATE=true"
+              for c in $CONFLICTS; do
+                $SUDO docker rm -f $c || echo "Warning: failed to remove $c"
+              done
+            else
+              echo "❌ Found conflicting containers: $CONFLICTS"
+              echo "👉 To automatically remove them, re-run this workflow and set 'deploy_force_recreate' to true"
+              echo "Or connect to the VPS and run: sudo docker rm -f $CONFLICTS"
+              exit 1
+            fi
+          fi
+
           # Ensure we fetch latest image and force recreate container
           $SUDO docker compose -f docker-compose.prod.yml pull || echo "Warning: docker pull failed"
           # Remove any stopped/old containers for app service to ensure fresh start
@@ -307,7 +333,19 @@ jobs:
           $SUDO docker image prune -af || true
 
           echo "🔄 Running database migrations..."
-          $SUDO docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy || echo "Warning: migrations failed"
+          MIGRATION_OUTPUT=$($SUDO docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy 2>&1) || true
+          echo "$MIGRATION_OUTPUT"
+          if echo "$MIGRATION_OUTPUT" | grep -q "P3005"; then
+            echo "⚠️ Prisma reported P3005 (Database schema is not empty). This indicates that the DB already has schema/migrations applied."
+            echo "Actions recommended:"
+            echo "  - If this is expected, consider running a baseline migration or using prisma migrate resolve in a controlled way."
+            echo "  - If this is unexpected (CI should control DB schema), inspect the DB and migration state before re-running." 
+            echo "  - To skip migrations automatically (not recommended) set PRISMA_ALLOW_FAIL=true in the workflow env or handle manually."
+          elif echo "$MIGRATION_OUTPUT" | grep -q "Already up to date"; then
+            echo "Prisma: Already up to date"
+          elif [ -n "$MIGRATION_OUTPUT" ] && ! echo "$MIGRATION_OUTPUT" | grep -q "No migrations to apply"; then
+            echo "Warning: migrations possibly failed or produced a warning above. Check logs and DB state."
+          fi
 
           if [ "$RUN_SEED" = "true" ]; then
             echo "🌱 Seeding database..."
