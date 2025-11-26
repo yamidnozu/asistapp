@@ -117,6 +117,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
         builder: (context, periodoProvider, grupoProvider, horarioProvider, materiaProvider, child) {
           return ClarityManagementPage(
             title: 'Horarios',
+            backRoute: '/academic',
             isLoading: horarioProvider.isLoading,
             hasError: horarioProvider.hasError,
             errorMessage: horarioProvider.errorMessage,

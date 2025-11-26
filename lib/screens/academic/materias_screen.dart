@@ -84,6 +84,7 @@ class _MateriasScreenState extends State<MateriasScreen> {
       builder: (context, authProvider, materiaProvider, child) {
         return ClarityManagementPage(
           title: 'Gestión de Materias',
+          backRoute: '/academic',
           isLoading: materiaProvider.isLoading,
           hasError: materiaProvider.hasError,
           errorMessage: materiaProvider.errorMessage,

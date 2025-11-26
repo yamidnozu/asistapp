@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/theme_extensions.dart';
 import 'clarity_components.dart';
 
@@ -65,6 +66,15 @@ class ClarityManagementPage extends StatelessWidget {
   /// Color de fondo de la página
   final Color? backgroundColor;
 
+  /// Ruta de navegación de retorno (si se proporciona, muestra botón de volver)
+  final String? backRoute;
+
+  /// Widget leading personalizado para el AppBar
+  final Widget? leading;
+  
+  /// Si mostrar automáticamente el botón leading de Flutter (false si usamos backRoute)
+  final bool automaticallyImplyLeading;
+
   const ClarityManagementPage({
     super.key,
     required this.title,
@@ -84,6 +94,9 @@ class ClarityManagementPage extends StatelessWidget {
     this.errorStateWidget,
     this.itemSpacing,
     this.backgroundColor,
+    this.backRoute,
+    this.leading,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -92,11 +105,29 @@ class ClarityManagementPage extends StatelessWidget {
   final spacing = context.spacing;
   final textStyles = context.textStyles;
 
+  // Determinar el widget leading
+  Widget? effectiveLeading = leading;
+  if (effectiveLeading == null && backRoute != null) {
+    effectiveLeading = IconButton(
+      icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+      tooltip: 'Volver',
+      onPressed: () {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(backRoute!);
+        }
+      },
+    );
+  }
+
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.background,
       appBar: AppBar(
         backgroundColor: colors.surface,
         elevation: 0,
+        leading: effectiveLeading,
+        automaticallyImplyLeading: effectiveLeading == null && automaticallyImplyLeading,
         title: Text(title, style: textStyles.headlineMedium),
         centerTitle: false,
         // ▼▼▼ ELIMINAMOS LOS ACTIONS DE AQUÍ ▼▼▼

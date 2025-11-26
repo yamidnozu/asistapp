@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 
@@ -91,6 +92,16 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/dashboard');
+            }
+          },
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

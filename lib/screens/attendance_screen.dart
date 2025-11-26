@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../models/clase_del_dia.dart';
 import '../models/asistencia_estudiante.dart';
 import '../providers/asistencia_provider.dart';
@@ -155,6 +156,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ),
               backgroundColor: colors.primary,
               foregroundColor: colors.white,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: colors.white),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/dashboard');
+                  }
+                },
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.calendar_today),

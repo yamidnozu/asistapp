@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 
@@ -20,6 +21,16 @@ class _GruposScreenState extends State<GruposScreen> {
         title: const Text('Grupos'),
         backgroundColor: colors.primary,
         foregroundColor: colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colors.white),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/academic');
+            }
+          },
+        ),
       ),
       body: Center(
         child: Column(

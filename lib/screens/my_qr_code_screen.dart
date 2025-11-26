@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../services/estudiante_service.dart';
@@ -81,6 +82,16 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             title: const Text('Mi Código QR'),
             backgroundColor: colors.primary,
             foregroundColor: colors.white,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: colors.white),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/dashboard');
+                }
+              },
+            ),
           ),
           body: SingleChildScrollView(
             padding: EdgeInsets.all(spacing.lg),

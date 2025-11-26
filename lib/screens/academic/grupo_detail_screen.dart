@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../../models/grupo.dart';
 import '../../models/user.dart';
@@ -175,6 +176,16 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         title: const Text('Detalles del Grupo'),
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colors.getTextColorForBackground(colors.primary)),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/academic/grupos');
+            }
+          },
+        ),
       ),
       body: Builder(builder: (context) {
         final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context);

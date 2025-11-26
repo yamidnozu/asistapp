@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
 import '../../theme/theme_extensions.dart';
 
@@ -25,6 +26,16 @@ class UserDetailScreen extends StatelessWidget {
         backgroundColor: colors.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/users');
+            }
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(spacing.lg),

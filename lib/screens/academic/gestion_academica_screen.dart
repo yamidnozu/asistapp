@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
+import '../../widgets/common/back_navigation_button.dart';
 
 class GestionAcademicaScreen extends StatelessWidget {
   const GestionAcademicaScreen({super.key});
@@ -18,6 +19,10 @@ class GestionAcademicaScreen extends StatelessWidget {
         backgroundColor: colors.primary,
         foregroundColor: colors.white,
         elevation: 0,
+        leading: BackNavigationButton(
+          fallbackRoute: '/dashboard',
+          iconColor: colors.white,
+        ),
         title: Text(
           'Gestión Académica',
           style: textStyles.headlineMedium.copyWith(color: colors.white),

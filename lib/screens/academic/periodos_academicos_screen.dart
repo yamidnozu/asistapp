@@ -71,6 +71,7 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
       builder: (context, authProvider, periodoProvider, child) {
         return ClarityManagementPage(
           title: 'Períodos Académicos',
+          backRoute: '/academic',
           isLoading: periodoProvider.isLoading,
           hasError: periodoProvider.hasError,
           errorMessage: periodoProvider.errorMessage,
