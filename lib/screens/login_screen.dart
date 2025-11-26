@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -14,8 +15,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
 
-  final _emailController = TextEditingController(text: 'superadmin@asistapp.com');
-  final _passwordController = TextEditingController(text: 'Admin123!');
+  // En release los campos empiezan vacíos; en debug se pre-llenan para facilitar pruebas
+  final _emailController = TextEditingController(text: kReleaseMode ? '' : 'superadmin@asistapp.com');
+  final _passwordController = TextEditingController(text: kReleaseMode ? '' : 'Admin123!');
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -316,7 +318,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           _buildLoginButton(responsive),
                           SizedBox(height: responsive['elementSpacing']),
 
-                          _buildTestUsersSection(responsive),
+                          // Solo mostrar sección de usuarios de prueba en modo debug
+                          if (!kReleaseMode) _buildTestUsersSection(responsive),
                         ],
                       ),
                     ),
