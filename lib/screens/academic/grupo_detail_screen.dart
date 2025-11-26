@@ -286,7 +286,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
                               ),
                             ),
                             title: Text(estudiante.nombreCompleto),
-                            subtitle: Text(estudiante.email),
+                            subtitle: Text(estudiante.email ?? ''),
                             trailing: IconButton(
                               icon: Icon(Icons.remove_circle, color: colors.error),
                               onPressed: () => _desasignarEstudiante(estudiante),
@@ -537,7 +537,7 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
                                         ),
                                       ),
                                       Text(
-                                        estudiante.email,
+                                        estudiante.email ?? '',
                                         style: textStyles.bodySmall.copyWith(
                                           color: colors.textSecondary,
                                         ),

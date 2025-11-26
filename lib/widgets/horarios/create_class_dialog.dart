@@ -184,7 +184,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
       final success = await horarioProvider.createHorario(
         token,
         CreateHorarioRequest(
-          periodoId: periodoId,
+          periodoId: periodoId!,
           grupoId: widget.grupo.id,
           materiaId: _selectedMateria!.id,
           profesorId: _selectedProfesor?.id,

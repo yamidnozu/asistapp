@@ -8,13 +8,13 @@ class Grupo {
   final String nombre;
   final String grado;
   final String? seccion;
-  final String periodoId;
-  final String institucionId;
+  final String? periodoId;
+  final String? institucionId;
   @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final PeriodoAcademico periodoAcademico;
   @JsonKey(name: '_count')
-  final GrupoCount count;
+  final GrupoCount? count;
 
   Grupo({
     required this.id,
@@ -31,8 +31,8 @@ class Grupo {
   factory Grupo.fromJson(Map<String, dynamic> json) => _$GrupoFromJson(json);
   Map<String, dynamic> toJson() => _$GrupoToJson(this);
 
-  int get estudiantesGruposCount => count.estudiantesGrupos;
-  int get horariosCount => count.horarios;
+  int get estudiantesGruposCount => count?.estudiantesGrupos ?? 0;
+  int get horariosCount => count?.horarios ?? 0;
   String get nombreCompleto => seccion != null ? '$grado $seccion' : grado;
 }
 

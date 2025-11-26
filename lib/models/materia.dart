@@ -7,15 +7,15 @@ class Materia {
   final String id;
   final String nombre;
   final String? codigo;
-  final String institucionId;
-  final DateTime createdAt;
+  final String? institucionId;
+  final DateTime? createdAt;
 
   Materia({
     required this.id,
     required this.nombre,
     this.codigo,
-    required this.institucionId,
-    required this.createdAt,
+    this.institucionId,
+    this.createdAt,
   });
 
   factory Materia.fromJson(Map<String, dynamic> json) => _$MateriaFromJson(json);

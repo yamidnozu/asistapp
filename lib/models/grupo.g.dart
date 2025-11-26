@@ -9,14 +9,14 @@ part of 'grupo.dart';
 Grupo _$GrupoFromJson(Map<String, dynamic> json) => Grupo(
       id: json['id'] as String,
       nombre: json['nombre'] as String,
-      grado: json['grado'] as String,
+      grado: json['grado'].toString(),
       seccion: json['seccion'] as String?,
-      periodoId: json['periodoId'] as String,
-      institucionId: json['institucionId'] as String,
-      createdAt: _dateTimeFromJson(json['createdAt'] as String),
+      periodoId: json['periodoId'] as String?,
+      institucionId: json['institucionId'] as String?,
+      createdAt: json['createdAt'] == null ? null : _dateTimeFromJson(json['createdAt'] as String),
       periodoAcademico: PeriodoAcademico.fromJson(
           json['periodoAcademico'] as Map<String, dynamic>),
-      count: GrupoCount.fromJson(json['_count'] as Map<String, dynamic>),
+      count: json['_count'] == null ? null : GrupoCount.fromJson(json['_count'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GrupoToJson(Grupo instance) => <String, dynamic>{
@@ -26,7 +26,7 @@ Map<String, dynamic> _$GrupoToJson(Grupo instance) => <String, dynamic>{
       'seccion': instance.seccion,
       'periodoId': instance.periodoId,
       'institucionId': instance.institucionId,
-      'createdAt': _dateTimeToJson(instance.createdAt),
+      'createdAt': instance.createdAt == null ? null : _dateTimeToJson(instance.createdAt!),
       'periodoAcademico': instance.periodoAcademico,
       '_count': instance.count,
     };

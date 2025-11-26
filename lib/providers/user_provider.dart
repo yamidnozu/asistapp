@@ -33,8 +33,8 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   // delegated to base
 
   // Computed properties
-  List<User> get activeUsers => items.where((user) => user.activo).toList();
-  List<User> get inactiveUsers => items.where((user) => !user.activo).toList();
+  List<User> get activeUsers => items.where((user) => user.activo == true).toList();
+  List<User> get inactiveUsers => items.where((user) => user.activo != true).toList();
 
   List<User> get professors => items.where((user) => user.esProfesor).toList();
   List<User> get students => items.where((user) => user.esEstudiante).toList();
@@ -339,7 +339,7 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     final lowercaseQuery = query.toLowerCase();
   return items.where((user) {
       return user.nombreCompleto.toLowerCase().contains(lowercaseQuery) ||
-             user.email.toLowerCase().contains(lowercaseQuery) ||
+             (user.email?.toLowerCase().contains(lowercaseQuery) ?? false) ||
              (user.telefono?.contains(lowercaseQuery) ?? false);
     }).toList();
   }

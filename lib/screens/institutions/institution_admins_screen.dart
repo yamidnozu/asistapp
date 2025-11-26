@@ -196,7 +196,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               SizedBox(width: spacing.xs),
               Expanded(
                 child: Text(
-                  user.email,
+                  user.email ?? '',
                   style: textStyles.bodySmall,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -605,7 +605,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
 
                                       // Email
                                       Text(
-                                        user.email,
+                                        user.email ?? '',
                                         style: TextStyle(
                                           color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                           fontSize: 13,

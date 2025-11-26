@@ -38,11 +38,11 @@ class UserDetailScreen extends StatelessWidget {
               [
                 _buildInfoItem('Nombres', user.nombres),
                 _buildInfoItem('Apellidos', user.apellidos),
-                _buildInfoItem('Email', user.email),
+                _buildInfoItem('Email', user.email ?? 'No especificado'),
                 _buildInfoItem('Teléfono', user.telefono ?? 'No especificado'),
-                _buildInfoItem('Rol', _getRoleDisplayName(user.rol)),
-                _buildInfoItem('Estado', user.activo ? 'Activo' : 'Inactivo',
-                    valueColor: user.activo ? colors.success : colors.error),
+                _buildInfoItem('Rol', _getRoleDisplayName(user.rol ?? '')),
+                _buildInfoItem('Estado', (user.activo == true) ? 'Activo' : 'Inactivo',
+                    valueColor: (user.activo == true) ? colors.success : colors.error),
               ],
             ),
 

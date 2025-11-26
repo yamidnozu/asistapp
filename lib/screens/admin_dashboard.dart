@@ -64,8 +64,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       actionItems: [
         DashboardActionItem(icon: Icons.people_outline_rounded, label: 'Usuarios', onTap: () => context.go('/users')),
         DashboardActionItem(icon: Icons.school_outlined, label: 'Gestión Académica', onTap: () => context.go('/academic')),
-        DashboardActionItem(icon: Icons.calendar_today_outlined, label: 'Horarios', onTap: () {}),
-        DashboardActionItem(icon: Icons.settings_outlined, label: 'Ajustes', onTap: () {}),
+        DashboardActionItem(icon: Icons.calendar_today_outlined, label: 'Horarios', onTap: () { context.go('/academic/horarios'); }),
+        DashboardActionItem(icon: Icons.settings_outlined, label: 'Ajustes', onTap: () { context.go('/settings'); }),
       ],
     );
   }
@@ -170,8 +170,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(backgroundColor: colors.primary.withValues(alpha: 0.12), child: Text(u.inicial, style: textStyles.bodyMedium.withColor(colors.primary))),
                     title: Text(u.nombreCompleto, style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-                    subtitle: Text(u.email, style: textStyles.bodySmall.copyWith(color: colors.textSecondary)),
-                    trailing: Chip(label: Text(u.rol, style: textStyles.labelSmall)),
+                    subtitle: Text(u.email ?? '', style: textStyles.bodySmall.copyWith(color: colors.textSecondary)),
+                    trailing: Chip(label: Text(u.rol ?? '', style: textStyles.labelSmall)),
                   );
                 }).toList(),
               ),

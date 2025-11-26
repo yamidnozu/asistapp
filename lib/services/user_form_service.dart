@@ -82,9 +82,9 @@ class UserFormService {
   ) {
     nombresController.text = user.nombres;
     apellidosController.text = user.apellidos;
-    emailController.text = user.email;
+    emailController.text = user.email ?? '';
     telefonoController.text = user.telefono ?? '';
-    setActivo(user.activo);
+    setActivo(user.activo ?? true);
 
     // Preseleccionar instituciones si existen (un usuario puede pertenecer a varias)
     if (user.instituciones?.isNotEmpty ?? false) {

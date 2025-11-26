@@ -6,13 +6,13 @@ part 'user.g.dart';
 @JsonSerializable()
 class User {
   final String id;
-  final String email;
+  final String? email;
   final String nombres;
   final String apellidos;
-  final String rol;
+  final String? rol;
   final String? telefono;
   final String? identificacion;
-  final bool activo;
+  final bool? activo;
   final List<UserInstitution>? instituciones;
   final StudentDetails? estudiante;
   // Campos específicos para profesores
@@ -21,13 +21,13 @@ class User {
 
   User({
     required this.id,
-    required this.email,
+    this.email,
     required this.nombres,
     required this.apellidos,
-    required this.rol,
+    this.rol,
     this.telefono,
     this.identificacion,
-    required this.activo,
+    this.activo,
     List<UserInstitution>? instituciones,
     this.estudiante,
     this.titulo,
@@ -54,8 +54,8 @@ class User {
     }
     
     // Si nombre completo también está vacío, usar la primera letra del email
-    if (email.isNotEmpty) {
-      return email[0].toUpperCase();
+    if (email != null && email!.isNotEmpty) {
+      return email![0].toUpperCase();
     }
     
     // Último recurso

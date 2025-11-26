@@ -21,6 +21,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _searchDebounceTimer;
+  UserProvider? _userProvider;
 
   @override
   void initState() {
@@ -30,15 +31,15 @@ class _UsersListScreenState extends State<UsersListScreen> {
     // Configurar filtro automático para admin_institucion
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      _userProvider = Provider.of<UserProvider>(context, listen: false);
       final userRole = authProvider.user?['rol'] as String?;
       
       // Inicializar filtro de estado activo por defecto
-      userProvider.setFilter('activo', 'true');
+      _userProvider!.setFilter('activo', 'true');
       
       if (userRole == 'admin_institucion') {
         // Para admin_institucion, no filtrar automáticamente por rol
-        userProvider.removeFilter('roles');
+        _userProvider!.removeFilter('roles');
       }
       _loadUsers();
     });
@@ -50,8 +51,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
     _searchController.dispose();
     _searchDebounceTimer?.cancel();
     // Limpiar filtros al salir de la pantalla
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    userProvider.clearFilters();
+    _userProvider?.clearFilters();
     super.dispose();
   }
 
@@ -516,9 +516,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
                 ),
                 if (!isSelf)
                   ClarityContextMenuAction(
-                    label: user.activo ? 'Desactivar' : 'Activar',
-                    icon: user.activo ? Icons.toggle_off : Icons.toggle_on,
-                    color: user.activo ? colors.warning : colors.success,
+                    label: (user.activo == true) ? 'Desactivar' : 'Activar',
+                    icon: (user.activo == true) ? Icons.toggle_off : Icons.toggle_on,
+                    color: (user.activo == true) ? colors.warning : colors.success,
                     onPressed: () => _handleMenuAction('toggle_status', user, provider),
                   ),
                 if (!isSelf)
@@ -533,7 +533,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
         return ClarityListItem(
           leading: CircleAvatar(
-            backgroundColor: _getRoleColor(user.rol, context),
+            backgroundColor: _getRoleColor(user.rol ?? '', context),
             child: Text(
               user.nombreCompleto.substring(0, 1).toUpperCase(),
               style: textStyles.labelMedium.copyWith(color: colors.white),
@@ -549,7 +549,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      user.email,
+                      user.email ?? '',
                       style: textStyles.bodySmall.copyWith(color: context.colors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -574,7 +574,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: user.activo 
+                            color: (user.activo == true) 
                               ? context.colors.primary.withValues(alpha: 0.7)
                               : context.colors.textMuted,
                             shape: BoxShape.circle,
@@ -582,7 +582,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          user.activo ? 'Activo' : 'Inactivo',
+                          (user.activo == true) ? 'Activo' : 'Inactivo',
                           style: textStyles.bodySmall.copyWith(
                             color: context.colors.textSecondary,
                             fontSize: 11,
@@ -656,7 +656,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         break;
 
       case 'toggle_status':
-        final newStatus = !user.activo;
+        final newStatus = !(user.activo == true);
         final token = authProvider.accessToken;
         if (token == null) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));

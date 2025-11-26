@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 /// Sistema de colores moderno y profesional - "Clarity UI"
 class AppColors {
 
-  AppColors._();
-
   /// Default singleton (light mode default)
   static final AppColors instance = AppColors._light();
 

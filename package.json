@@ -1,6 +1,6 @@
 {
   "name": "demolife",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "Aplicación Flutter para el registro y gestión de asistencia estudiantil en instituciones educativas mediante códigos QR.",
   "main": "create-test-users.js",
   "directories": {

@@ -8,13 +8,13 @@ part of 'user.dart';
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
       id: json['id'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       nombres: json['nombres'] as String,
       apellidos: json['apellidos'] as String,
-      rol: json['rol'] as String,
+      rol: json['rol'] as String?,
       telefono: json['telefono'] as String?,
       identificacion: json['identificacion'] as String?,
-      activo: json['activo'] as bool,
+      activo: json['activo'] as bool?,
       instituciones: (json['instituciones'] as List<dynamic>?)
           ?.map((e) => UserInstitution.fromJson(e as Map<String, dynamic>))
           .toList(),

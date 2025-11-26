@@ -130,7 +130,8 @@ class _AppShellState extends State<AppShell> {
         description: 'Accede a la configuración',
         icon: Icons.settings_rounded,
         onExecute: () {
-          // Implementar según GoRouter config
+          Navigator.of(context).pop();
+          context.go('/settings');
         },
       ),
       CommandPaletteItem(
@@ -199,6 +200,13 @@ class _AppShellState extends State<AppShell> {
                 title: Text(institutionName != null ? 'Dashboard — $institutionName' : 'Dashboard'),
                 actions: [
                   IconButton(
+                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
+                    tooltip: 'Ajustes',
+                    onPressed: () {
+                      context.go('/settings');
+                    },
+                  ),
+                  IconButton(
                     icon: Icon(Icons.logout, color: context.colors.error),
                     tooltip: 'Cerrar sesión',
                     onPressed: () async {
@@ -224,6 +232,13 @@ class _AppShellState extends State<AppShell> {
           ? '${accessibleBranches[selectedIndex].label} — $institutionName'
           : accessibleBranches[selectedIndex].label),
                 actions: [
+                  IconButton(
+                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
+                    tooltip: 'Ajustes',
+                    onPressed: () {
+                      context.go('/settings');
+                    },
+                  ),
                   IconButton(
                     icon: Icon(Icons.logout, color: context.colors.error),
                     tooltip: 'Cerrar sesión',
@@ -276,6 +291,15 @@ class _AppShellState extends State<AppShell> {
                     _scaffoldKey.currentState?.openDrawer();
                   },
                 ),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onPrimary),
+                    tooltip: 'Ajustes',
+                    onPressed: () {
+                      context.go('/settings');
+                    },
+                  ),
+                ],
               ),
               drawer: Drawer(
                 backgroundColor: context.colors.surface,
@@ -311,6 +335,27 @@ class _AppShellState extends State<AppShell> {
                           minimumSize: const Size(double.infinity, 48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          context.go('/settings');
+                        },
+                        icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
+                        label: Text('Ajustes', style: context.textStyles.bodyMedium),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.colors.surface,
+                          foregroundColor: Theme.of(context).colorScheme.onSurface,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: context.colors.border),
                           ),
                         ),
                       ),
