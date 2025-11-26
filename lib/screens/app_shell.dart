@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart'; // Importar extensiones para el tema
-import '../theme/app_colors.dart';
+// Colors via context.colors
 import '../utils/responsive_utils.dart';
 import '../widgets/components/command_palette.dart';
 
@@ -119,7 +119,7 @@ class _AppShellState extends State<AppShell> {
         title: 'Cerrar Sesión',
         description: 'Cierra tu sesión actual',
         icon: Icons.logout_rounded,
-        color: AppColors.instance.error, // Rojo error con mejor contraste
+        color: context.colors.error, // Rojo error con mejor contraste
         onExecute: () {
           Provider.of<AuthProvider>(context, listen: false).logout();
           context.go('/login');

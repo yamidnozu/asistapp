@@ -574,12 +574,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         ),
                       ),
                       child: _isLoading
-                          ? const SizedBox(
+                              ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(colors.white),
                               ),
                             )
                           : Text(

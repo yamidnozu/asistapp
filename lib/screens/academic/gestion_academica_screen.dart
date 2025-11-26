@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../theme/app_spacing.dart';
+import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
 
 class GestionAcademicaScreen extends StatelessWidget {
@@ -10,9 +8,9 @@ class GestionAcademicaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.instance;
-    final textStyles = AppTextStyles.instance;
-    final spacing = AppSpacing.instance;
+  final colors = context.colors;
+  final textStyles = context.textStyles;
+  final spacing = context.spacing;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -132,9 +130,9 @@ class GestionAcademicaScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    final colors = AppColors.instance;
-    final textStyles = AppTextStyles.instance;
-    final spacing = AppSpacing.instance;
+  final colors = context.colors;
+  final textStyles = context.textStyles;
+  final spacing = context.spacing;
 
     return ListTile(
       leading: CircleAvatar(

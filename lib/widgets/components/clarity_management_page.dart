@@ -1,9 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../theme/app_spacing.dart';
+import '../../theme/theme_extensions.dart';
 import 'clarity_components.dart';
 
 /// Widget reutilizable para pantallas de gestión/listado
@@ -90,9 +88,9 @@ class ClarityManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.instance;
-    final spacing = AppSpacing.instance;
-    final textStyles = AppTextStyles.instance;
+  final colors = context.colors;
+  final spacing = context.spacing;
+  final textStyles = context.textStyles;
 
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.background,

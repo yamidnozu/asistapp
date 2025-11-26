@@ -14,6 +14,7 @@ import 'providers/asistencia_provider.dart';
 import 'providers/grupo_provider.dart';
 import 'providers/materia_provider.dart';
 import 'providers/periodo_academico_provider.dart';
+import 'providers/settings_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
@@ -104,6 +105,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (_) => EstudiantesByGrupoPaginatedProvider(grupoService: _grupoService)),
         ChangeNotifierProvider(create: (_) => EstudiantesSinAsignarPaginatedProvider(grupoService: _grupoService)),
         ChangeNotifierProvider(create: (_) => InstitutionAdminsPaginatedProvider(userService: _userService)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => _lifecycleManager),
       ],
       child: Builder(
@@ -113,16 +115,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             authProvider: _authProvider,
           );
 
+          final settings = Provider.of<SettingsProvider>(context);
+
+          // Actualizar System UI Overlay para reflejar el tema seleccionado
+          final useDark = settings.themeMode == ThemeMode.dark;
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+            statusBarColor: AppColors.instance.transparent,
+            statusBarIconBrightness: useDark ? Brightness.light : Brightness.dark,
+            systemNavigationBarColor: AppColors.instance.black,
+            systemNavigationBarIconBrightness: useDark ? Brightness.light : Brightness.dark,
+          ));
+
           return MaterialApp.router(
             title: 'AsistApp',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.defaultTheme,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: settings.themeMode,
             routerConfig: _appRouter.router,
             builder: (context, child) {
+              // Use theme-aware text color. Avoid hard-coding white so light theme works.
+              final textColor = Theme.of(context).colorScheme.onSurface;
               return DefaultTextStyle(
                 style: TextStyle(
                   decoration: TextDecoration.none,
-                  color: AppColors.instance.white,
+                  color: textColor,
                   fontSize: 14.0,
                   fontWeight: FontWeight.normal,
                 ),

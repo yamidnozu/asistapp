@@ -533,13 +533,13 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (!pag.isLoading && pag.items.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.people_outline, size: 56, color: Colors.grey),
+                              Icon(Icons.people_outline, size: 56, color: context.colors.textMuted),
                             SizedBox(height: 12),
-                            Text('No hay administradores disponibles', style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                              Text('No hay administradores disponibles', style: context.textStyles.bodyMedium.copyWith(color: context.colors.textMuted, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
                           ],
                         ),
                       );

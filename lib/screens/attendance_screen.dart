@@ -4,8 +4,7 @@ import '../models/clase_del_dia.dart';
 import '../models/asistencia_estudiante.dart';
 import '../providers/asistencia_provider.dart';
 import '../providers/auth_provider.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
+import '../theme/theme_extensions.dart';
 import '../screens/qr_scanner_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
@@ -21,30 +20,30 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  final AppColors colors = AppColors.instance;
-  final AppSpacing spacing = AppSpacing.instance;
+  // Use context.colors and context.spacing inside build and other methods
   
   // Estado para tracking del estudiante seleccionado (primer toque)
   String? _estudianteSeleccionadoId;
   DateTime _selectedDate = DateTime.now();
 
   // Función helper para mostrar SnackBars en la parte superior
-  void _showTopSnackBar({
+  void _showTopSnackBar(BuildContext context, {
     required String message,
     Color? backgroundColor,
     Widget? leading,
     Duration duration = const Duration(seconds: 2),
   }) {
-    if (!mounted) return;
+  if (!mounted) return;
+  final spacing = context.spacing;
     
-    ScaffoldMessenger.of(context).showSnackBar(
+  ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             if (leading != null) ...[
-              leading,
-              SizedBox(width: spacing.sm),
-            ],
+                leading,
+                SizedBox(width: spacing.sm),
+              ],
             Expanded(child: Text(message)),
           ],
         ),
@@ -82,24 +81,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
 
-    final token = authProvider.accessToken;
+  final token = authProvider.accessToken;
     if (token != null) {
       await asistenciaProvider.fetchAsistencias(token, widget.clase.id, date: _selectedDate);
     }
   }
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       builder: (context, child) {
-        return Theme(
+            final colors = context.colors;
+            return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: colors.primary,
-              onPrimary: colors.white,
+                  onPrimary: colors.white,
               onSurface: colors.textPrimary,
             ),
           ),
@@ -134,10 +134,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: _limpiarSeleccion, // Limpiar selección al tocar fuera
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final colors = context.colors;
+          final spacing = context.spacing;
           return Scaffold(
             appBar: AppBar(
               title: Column(
@@ -155,7 +158,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.calendar_today),
-                  onPressed: _pickDate,
+                  onPressed: () => _pickDate(context),
                   tooltip: 'Cambiar fecha',
                 ),
               ],
@@ -209,14 +212,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 return Column(
                   children: [
                     // Información de la clase
-                    _buildClassInfo(constraints),
+                    _buildClassInfo(context, constraints),
 
                     // Estadísticas de asistencia
-                    _buildAttendanceStats(asistenciaProvider, constraints),
+                    _buildAttendanceStats(context, asistenciaProvider, constraints),
 
                     // Lista de estudiantes
                     Expanded(
-                      child: _buildStudentsList(asistenciaProvider.asistencias),
+                      child: _buildStudentsList(context, asistenciaProvider.asistencias),
                     ),
                   ],
                 );
@@ -235,7 +238,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildClassInfo(BoxConstraints constraints) {
+  Widget _buildClassInfo(BuildContext context, BoxConstraints constraints) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     return Container(
       padding: EdgeInsets.all(spacing.lg),
       decoration: BoxDecoration(
@@ -293,7 +298,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildAttendanceStats(AsistenciaProvider provider, BoxConstraints constraints) {
+  Widget _buildAttendanceStats(BuildContext context, AsistenciaProvider provider, BoxConstraints constraints) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     final stats = provider.getEstadisticas();
     final porcentaje = (provider.getPorcentajeAsistencia() * 100).round();
 
@@ -314,16 +321,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 // Estadísticas en columna
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatItem('Presentes', stats['presentes']!, colors.success),
-                    _buildStatItem('Ausentes', stats['ausentes']!, colors.error),
+            children: [
+            _buildStatItem(context, 'Presentes', stats['presentes']!, colors.success),
+            _buildStatItem(context, 'Ausentes', stats['ausentes']!, colors.error),
                   ],
                 ),
                 SizedBox(height: spacing.sm),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatItem('Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                    children: [
+                    _buildStatItem(context, 'Sin registrar', stats['sinRegistrar']!, colors.textMuted),
                     // Porcentaje
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
@@ -349,10 +356,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildStatItem('Presentes', stats['presentes']!, colors.success),
-                      _buildStatItem('Ausentes', stats['ausentes']!, colors.error),
-                      _buildStatItem('Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                      children: [
+                      _buildStatItem(context, 'Presentes', stats['presentes']!, colors.success),
+                      _buildStatItem(context, 'Ausentes', stats['ausentes']!, colors.error),
+                      _buildStatItem(context, 'Sin registrar', stats['sinRegistrar']!, colors.textMuted),
                     ],
                   ),
                 ),
@@ -376,27 +383,31 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, int value, Color color) {
+  Widget _buildStatItem(BuildContext context, String label, int value, Color color) {
+    final colors = context.colors;
+    final textStyles = context.textStyles;
     return Column(
       children: [
         Text(
           value.toString(),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: textStyles.headlineSmall.copyWith(
             color: color,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colors.textMuted,
+      style: textStyles.bodySmall.copyWith(
+        color: colors.textMuted,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStudentsList(List<AsistenciaEstudiante> asistencias) {
+  Widget _buildStudentsList(BuildContext context, List<AsistenciaEstudiante> asistencias) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     if (asistencias.isEmpty) {
       return Center(
         child: Column(
@@ -534,15 +545,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _registrarAsistenciaManual(AsistenciaEstudiante estudiante) async {
+    final colors = context.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token == null) {
-      _showTopSnackBar(
+      _showTopSnackBar(context,
         message: 'Error: No estás autenticado',
         backgroundColor: colors.error,
-        leading: const Icon(Icons.error, color: Colors.white),
+        leading: Icon(Icons.error, color: colors.white),
       );
       return;
     }
@@ -553,7 +565,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
 
     // Mostrar indicador de carga
-    _showTopSnackBar(
+      _showTopSnackBar(context,
       message: 'Registrando asistencia...',
       duration: const Duration(seconds: 2),
       leading: SizedBox(
@@ -561,7 +573,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(colors.white),
+            valueColor: AlwaysStoppedAnimation<Color>(colors.white),
         ),
       ),
     );
@@ -577,26 +589,26 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         
         if (success) {
-          _showTopSnackBar(
+            _showTopSnackBar(context,
             message: '✓ ${estudiante.nombreCompleto} marcado como presente',
             backgroundColor: colors.success,
-            leading: const Icon(Icons.check_circle, color: Colors.white),
+            leading: Icon(Icons.check_circle, color: colors.white),
           );
         } else {
-          _showTopSnackBar(
+            _showTopSnackBar(context,
             message: 'Error al registrar asistencia',
             backgroundColor: colors.error,
-            leading: const Icon(Icons.error, color: Colors.white),
+            leading: Icon(Icons.error, color: colors.white),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        _showTopSnackBar(
+        _showTopSnackBar(context,
           message: 'Error: ${e.toString()}',
           backgroundColor: colors.error,
-          leading: const Icon(Icons.error, color: Colors.white),
+          leading: Icon(Icons.error, color: colors.white),
           duration: const Duration(seconds: 4),
         );
       }
@@ -604,6 +616,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _showEditDialog(AsistenciaEstudiante estudiante) async {
+    final appCtx = context; // to avoid shadowing inside builder
+    final colors = appCtx.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
     final token = authProvider.accessToken;
@@ -683,9 +697,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     Navigator.pop(context); // Cerrar diálogo
                     
                     // Mostrar loading
-                    _showTopSnackBar(
+                    _showTopSnackBar(context,
                       message: 'Actualizando asistencia...',
-                      leading: const CircularProgressIndicator(color: Colors.white),
+                      leading: CircularProgressIndicator(color: colors.white),
                     );
 
                     try {
@@ -707,7 +721,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       // El endpoint PUT /asistencias/:id requiere ID.
                       
                       if (estudiante.id == null || estudiante.id!.isEmpty) {
-                         _showTopSnackBar(
+                         _showTopSnackBar(context,
                           message: 'Error: Primero registre la asistencia (toque el estudiante)',
                           backgroundColor: colors.error,
                         );
@@ -723,20 +737,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       );
 
                       if (success) {
-                        _showTopSnackBar(
+                        _showTopSnackBar(context,
                           message: 'Asistencia actualizada',
                           backgroundColor: colors.success,
                         );
                         // Recargar
                         _loadAsistencias();
                       } else {
-                        _showTopSnackBar(
+                        _showTopSnackBar(context,
                           message: 'Error al actualizar',
                           backgroundColor: colors.error,
                         );
                       }
                     } catch (e) {
-                      _showTopSnackBar(
+                        _showTopSnackBar(context,
                         message: 'Error: $e',
                         backgroundColor: colors.error,
                       );
@@ -753,6 +767,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildStatusChip(AsistenciaEstudiante estudiante) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     final Color chipColor;
     final String statusText;
 

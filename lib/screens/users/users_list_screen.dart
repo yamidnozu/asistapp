@@ -7,9 +7,7 @@ import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../theme/app_spacing.dart';
+// Using theme extensions via context: colors, textStyles, spacing
 import '../../widgets/components/index.dart';
 
 class UsersListScreen extends StatefulWidget {
@@ -325,19 +323,19 @@ class _UsersListScreenState extends State<UsersListScreen> {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text('Mostrar:', style: textStyles.labelMedium),
-          _statusFilterChip(
+          _statusFilterChip(context,
             label: 'Activos',
             selected: statusFilter == true && !isSearching,
             color: context.colors.success,
             onTap: () => _onStatusFilterChanged(true, userProvider, authProvider),
           ),
-          _statusFilterChip(
+          _statusFilterChip(context,
             label: 'Inactivos',
             selected: statusFilter == false && !isSearching,
             color: context.colors.grey400,
             onTap: () => _onStatusFilterChanged(false, userProvider, authProvider),
           ),
-          _statusFilterChip(
+          _statusFilterChip(context,
             label: 'Todos',
             selected: statusFilter == null && !isSearching,
             color: context.colors.grey400,
@@ -414,15 +412,15 @@ class _UsersListScreenState extends State<UsersListScreen> {
     provider.refreshData(authProvider.accessToken!);
   }
 
-  Widget _statusFilterChip({
+  Widget _statusFilterChip(BuildContext context, {
     required String label,
     required bool selected,
     required Color color,
     required VoidCallback onTap,
   }) {
-    final colors = AppColors.instance;
-    final spacing = AppSpacing.instance;
-    final textStyles = AppTextStyles.instance;
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
     return InkWell(
       onTap: onTap,

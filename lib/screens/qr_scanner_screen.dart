@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/asistencia_service.dart';
+import '../theme/theme_extensions.dart';
 
 class QRScannerScreen extends StatefulWidget {
   final String horarioId;
@@ -176,11 +177,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(snackBarContext).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                CircularProgressIndicator(color: Colors.white),
-                SizedBox(width: 16),
-                Expanded(child: Text('Registrando asistencia...')),
+                CircularProgressIndicator(color: Theme.of(currentContext).colorScheme.onPrimary),
+                const SizedBox(width: 16),
+                const Expanded(child: Text('Registrando asistencia...')),
               ],
             ),
             duration: const Duration(seconds: 10),
@@ -216,14 +217,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(successSnackBarContext).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Expanded(child: Text('¡Asistencia registrada exitosamente!')),
+                Icon(Icons.check_circle, color: Theme.of(successSnackBarContext).colorScheme.onSecondary),
+                const SizedBox(width: 8),
+                const Expanded(child: Text('¡Asistencia registrada exitosamente!')),
               ],
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(successSnackBarContext).colorScheme.secondary,
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             margin: EdgeInsets.only(
@@ -276,14 +277,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
+            content: Row(
           children: [
-            const Icon(Icons.error, color: Colors.white),
+            Icon(Icons.error, color: context.colors.white),
             const SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: context.colors.error,
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.only(
@@ -306,8 +307,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Escanear Código QR'),
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: context.colors.surface,
+            foregroundColor: context.colors.textPrimary,
             actions: [
               IconButton(
                 icon: const Icon(Icons.flashlight_on),
@@ -332,7 +333,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               // Overlay con marco de escaneo
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: context.colors.scrim.withValues(alpha: 0.5),
                 ),
                 child: Stack(
                   children: [
@@ -343,7 +344,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                         height: frameSize,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -357,10 +358,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               child: Container(
                                 width: 20,
                                 height: 20,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border: Border(
-                                    top: BorderSide(color: Colors.blue, width: 4),
-                                    left: BorderSide(color: Colors.blue, width: 4),
+                                    top: BorderSide(color: context.colors.primary, width: 4),
+                                    left: BorderSide(color: context.colors.primary, width: 4),
                                   ),
                                 ),
                               ),
@@ -371,10 +372,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               child: Container(
                                 width: 20,
                                 height: 20,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border: Border(
-                                    top: BorderSide(color: Colors.blue, width: 4),
-                                    right: BorderSide(color: Colors.blue, width: 4),
+                                    top: BorderSide(color: context.colors.primary, width: 4),
+                                    right: BorderSide(color: context.colors.primary, width: 4),
                                   ),
                                 ),
                               ),
@@ -385,10 +386,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               child: Container(
                                 width: 20,
                                 height: 20,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(color: Colors.blue, width: 4),
-                                    left: BorderSide(color: Colors.blue, width: 4),
+                                    bottom: BorderSide(color: context.colors.primary, width: 4),
+                                    left: BorderSide(color: context.colors.primary, width: 4),
                                   ),
                                 ),
                               ),
@@ -399,10 +400,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               child: Container(
                                 width: 20,
                                 height: 20,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(color: Colors.blue, width: 4),
-                                    right: BorderSide(color: Colors.blue, width: 4),
+                                    bottom: BorderSide(color: context.colors.primary, width: 4),
+                                    right: BorderSide(color: context.colors.primary, width: 4),
                                   ),
                                 ),
                               ),
@@ -420,13 +421,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.8),
+                          color: context.colors.scrim.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           'Coloca el código QR dentro del marco para registrar la asistencia',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: constraints.maxWidth < 400 ? 14 : 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -445,16 +446,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.colors.error,
+                          foregroundColor: Theme.of(context).colorScheme.onError,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Cancelar',
-                          style: TextStyle(fontSize: 18),
+                          style: context.textStyles.bodyLarge.copyWith(fontSize: 18, color: Theme.of(context).colorScheme.onError),
                         ),
                       ),
                     ),
@@ -462,19 +463,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     // Indicador de procesamiento
                     if (_isProcessing)
                       Container(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        child: const Center(
+                        color: context.colors.scrim.withValues(alpha: 0.7),
+                        child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               CircularProgressIndicator(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Text(
                                 'Procesando...',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 16,
                                 ),
                               ),

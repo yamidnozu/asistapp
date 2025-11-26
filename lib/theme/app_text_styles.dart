@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
+// Colors should be resolved via ThemeData instead of AppColors here
 
 /// Sistema de estilos de texto moderno - "Clarity UI"
 /// Tipografía escalable, accesible y profesional con Inter
@@ -23,7 +23,7 @@ class AppTextStyles {
       fontWeight: fontWeight,
       height: height,
       letterSpacing: letterSpacing,
-      color: color ?? AppColors.instance.textPrimary,
+    color: color,
       decoration: decoration,
     );
   }
@@ -105,7 +105,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w400, // Regular para legibilidad
     height: 1.5,
     letterSpacing: 0.1,
-    color: AppColors.instance.textPrimary,
+  color: null,
   );
 
   TextStyle get bodyMedium => _createStyle(
@@ -113,7 +113,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.5,
     letterSpacing: 0.1,
-    color: AppColors.instance.textPrimary,
+  color: null,
   );
 
   TextStyle get bodySmall => _createStyle(
@@ -121,7 +121,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.4,
     letterSpacing: 0.2,
-    color: AppColors.instance.textMuted,
+  color: null,
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -133,7 +133,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w600, // SemiBold para botones
     height: 1.4,
     letterSpacing: 0.1,
-    color: AppColors.instance.textSecondary,
+  color: null,
   );
 
   TextStyle get labelMedium => _createStyle(
@@ -141,7 +141,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.4,
     letterSpacing: 0.2,
-    color: AppColors.instance.textSecondary,
+  color: null,
   );
 
   TextStyle get labelSmall => _createStyle(
@@ -149,7 +149,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.4,
     letterSpacing: 0.5,
-    color: AppColors.instance.textMuted,
+  color: null,
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -171,12 +171,12 @@ class AppTextStyles {
   // Texto de navegación activo
   TextStyle get navigationActive => navigation.copyWith(
     fontWeight: FontWeight.w600,
-    color: AppColors.instance.primary,
+  color: null,
   );
 
   // Texto de navegación inactivo
   TextStyle get navigationInactive => navigation.copyWith(
-    color: AppColors.instance.textMuted,
+  color: null,
   );
 
   // KPI y métricas - números grandes
@@ -185,7 +185,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.2,
     letterSpacing: -0.5,
-    color: AppColors.instance.textPrimary,
+  color: null,
   );
 
   // Etiquetas de KPI
@@ -204,13 +204,13 @@ class AppTextStyles {
 
   // Texto de error en formularios
   TextStyle get errorText => bodySmall.copyWith(
-    color: AppColors.instance.error,
+  color: null,
     fontWeight: FontWeight.w500,
   );
 
   // Texto de ayuda
   TextStyle get helpText => bodySmall.copyWith(
-    color: AppColors.instance.textMuted,
+  color: null,
     fontWeight: FontWeight.w400,
   );
 

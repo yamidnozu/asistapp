@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../services/estudiante_service.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
+import '../theme/theme_extensions.dart';
 
 class MyQRCodeScreen extends StatefulWidget {
   const MyQRCodeScreen({super.key});
@@ -14,8 +13,6 @@ class MyQRCodeScreen extends StatefulWidget {
 }
 
 class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
-  final AppColors colors = AppColors.instance;
-  final AppSpacing spacing = AppSpacing.instance;
   final EstudianteService _estudianteService = EstudianteService();
 
   String? _qrCode;
@@ -75,8 +72,10 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
     final userName = user?['nombres'] ?? 'Usuario';
     final userLastName = user?['apellidos'] ?? '';
 
-    return LayoutBuilder(
+  return LayoutBuilder(
       builder: (context, constraints) {
+    final colors = context.colors;
+    final spacing = context.spacing;
         return Scaffold(
           appBar: AppBar(
             title: const Text('Mi Código QR'),
@@ -132,11 +131,11 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                 Container(
                   padding: EdgeInsets.all(spacing.xl),
                   decoration: BoxDecoration(
-                    color: colors.white,
+                    color: colors.surface,
                     borderRadius: BorderRadius.circular(spacing.borderRadius),
                     border: Border.all(color: colors.borderLight),
                   ),
-                  child: _buildQRContent(constraints),
+                  child: _buildQRContent(context, constraints),
                 ),
 
                 SizedBox(height: spacing.lg),
@@ -144,7 +143,7 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                 // Instrucciones
                 Text(
                   'Muestra este código QR a tu profesor para registrar tu asistencia',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
@@ -159,7 +158,9 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
     );
   }
 
-  Widget _buildQRContent(BoxConstraints constraints) {
+  Widget _buildQRContent(BuildContext context, BoxConstraints constraints) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     // Ajustar tamaño del QR según el ancho de pantalla
     final qrSize = constraints.maxWidth < 400 ? 150.0 : 200.0;
 
@@ -240,7 +241,7 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
         Container(
           padding: EdgeInsets.all(spacing.md),
           decoration: BoxDecoration(
-            color: colors.white,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(spacing.borderRadius),
             boxShadow: [
               BoxShadow(
@@ -254,7 +255,7 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             data: _qrCode!,
             version: QrVersions.auto,
             size: qrSize,
-            backgroundColor: colors.white,
+            backgroundColor: Theme.of(context).brightness == Brightness.light ? colors.white : colors.surfaceLight,
           ),
         ),
 

@@ -6,7 +6,10 @@ import 'app_text_styles.dart';
 /// Extensiones para acceder fácilmente al theme desde BuildContext
 extension ThemeExtensions on BuildContext {
   /// Acceso rápido a colores del theme
-  AppColors get colors => AppColors.instance;
+  AppColors get colors => AppColors.fromBrightness(Theme.of(this).brightness);
+  
+  /// Return theme-aware colors (light/dark) based on Theme's brightness
+  AppColors get themeColors => AppColors.fromBrightness(Theme.of(this).brightness);
 
   /// Acceso rápido a estilos de texto
   AppTextStyles get textStyles => AppTextStyles.instance;

@@ -20,7 +20,7 @@ class AppTheme {
   static ThemeData get defaultTheme => dark;
 
   static ThemeData _createTheme(Brightness brightness) {
-    final colors = AppColors.instance;
+  final colors = AppColors.fromBrightness(brightness);
     final textStyles = AppTextStyles.instance;
 
     return ThemeData(
@@ -88,7 +88,7 @@ class AppTheme {
       ),
 
       cardTheme: CardTheme(
-        color: colors.white,
+        color: colors.surface,
         shadowColor: colors.shadowLight,
         elevation: 1, // Elevación sutil
         margin: EdgeInsets.zero,
@@ -143,7 +143,7 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colors.white,
+        fillColor: colors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
           borderSide: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
@@ -167,7 +167,7 @@ class AppTheme {
       ),
 
       dialogTheme: DialogTheme(
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         elevation: 6, // Elevación media para diálogos
         shadowColor: colors.shadowLight,
         shape: RoundedRectangleBorder(
@@ -214,7 +214,7 @@ class AppTheme {
       
       // Temas de navegación mejorados
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         indicatorColor: colors.primary,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -235,7 +235,7 @@ class AppTheme {
       
       // Rail de navegación para tablet/desktop
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         selectedIconTheme: IconThemeData(color: colors.primary),
         unselectedIconTheme: IconThemeData(color: colors.textMuted),
         selectedLabelTextStyle: textStyles.labelSmall.copyWith(color: colors.primary),
@@ -245,7 +245,7 @@ class AppTheme {
       // Mejora de contraste para accesibilidad WCAG AA
       // Asegura que los colores tengan suficiente contraste
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(

@@ -28,9 +28,9 @@ import '../screens/student_attendance_screen.dart';
 import '../screens/attendance_screen.dart';
 import '../models/clase_del_dia.dart';
 import '../screens/student_notifications_screen.dart';
-import '../screens/test_multi_hora_screen.dart';
 import '../screens/my_qr_code_screen.dart';
 import '../screens/institution_selection_screen.dart';
+import '../screens/settings_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -203,11 +203,12 @@ class AppRouter {
                   child: HorariosScreen(),
                 ),
               ),
+              // Ruta de configuración del sistema
               GoRoute(
-                path: '/test-multi-hora',
-                name: 'test-multi-hora',
+                path: '/settings',
+                name: 'settings',
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: TestMultiHoraScreen(),
+                  child: SettingsScreen(),
                 ),
               ),
               GoRoute(
@@ -374,10 +375,9 @@ class AppRouter {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
-            const Text('Error de Navegación', 
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('Error de Navegación', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text('${state.error}'),
             const SizedBox(height: 16),

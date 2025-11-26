@@ -5,7 +5,199 @@ class AppColors {
 
   AppColors._();
 
-  static final AppColors instance = AppColors._();
+  /// Default singleton (light mode default)
+  static final AppColors instance = AppColors._light();
+
+  /// Factory to create colors based on the current brightness
+  factory AppColors.fromBrightness(Brightness brightness) {
+    return brightness == Brightness.dark ? AppColors._dark() : AppColors._light();
+  }
+
+  /// Private constructors for light/dark variants
+  AppColors._light() { _setLight(); }
+  AppColors._dark() { _setDark(); }
+
+  void _setLight() {
+    primary = _primaryBase;
+    primaryDark = const Color(0xFFB91C1C);
+    primaryLight = const Color(0xFFF87171);
+    primaryContainer = const Color(0xFFFFEBEE);
+
+    secondary = _secondaryBase;
+    secondaryLight = const Color(0xFF6366F1);
+    secondaryContainer = const Color(0xFFEEF2FF);
+
+    success = const Color(0xFF16A34A);
+    successLight = const Color(0xFF22C55E);
+    successDark = const Color(0xFF15803D);
+
+    warning = const Color(0xFFF59E0B);
+    warningLight = const Color(0xFFFCD34D);
+    warningDark = const Color(0xFFD97706);
+
+    error = const Color(0xFFDC2626);
+    errorLight = const Color(0xFFF87171);
+    errorDark = const Color(0xFFB91C1C);
+
+    info = const Color(0xFF3B82F6);
+    infoLight = const Color(0xFF60A5FA);
+    infoDark = const Color(0xFF2563EB);
+
+    featureUsers = const Color(0xFF6366F1);
+    featureInstitutions = const Color(0xFF0EA5E9);
+    featureAttendance = const Color(0xFFF59E0B);
+    featureReports = const Color(0xFFE11D48);
+    featureSchedule = const Color(0xFF14B8A6);
+    featureSettings = const Color(0xFF475569);
+    featureNotifications = const Color(0xFFF97316);
+    featureClasses = const Color(0xFFEF4444);
+    featureGrades = const Color(0xFF84CC16);
+    featureStudents = const Color(0xFF0055D4);
+
+    stateNoData = const Color(0xFF94A3B8);
+    stateInDevelopment = const Color(0xFF6366F1);
+    stateSuccess = const Color(0xFF22C55E);
+    stateInactive = const Color(0xFFE2E8F0);
+    stateActive = const Color(0xFF16A34A);
+
+    surface = _surfaceBase;
+    surfaceLight = const Color(0xFFF8FAFC);
+    surfaceContainer = const Color(0xFFFFFFFF);
+    surfaceVariant = const Color(0xFFF1F5F9);
+
+    background = _backgroundBase;
+    backgroundLight = const Color(0xFFFFFFFF);
+    backgroundVariant = const Color(0xFFF8FAFC);
+
+    textPrimary = const Color(0xFF0F172A);
+    textSecondary = const Color(0xFF334155);
+    textMuted = const Color(0xFF64748B);
+    textDisabled = const Color(0xFF94A3B8);
+
+    textOnDark = const Color(0xFFF8FAFC);
+    textOnDarkSecondary = const Color(0xFFE2E8F0);
+    textOnDarkMuted = const Color(0xFFCBD5E1);
+
+    onPrimary = const Color(0xFFFFFFFF);
+
+    border = const Color(0xFFE2E8F0);
+    borderLight = const Color(0xFFF1F5F9);
+    borderStrong = const Color(0xFFCBD5E1);
+    divider = const Color(0xFFE2E8F0);
+
+    shadow = const Color(0x0A000000);
+    shadowLight = const Color(0x05000000);
+    shadowMedium = const Color(0x0F000000);
+    scrim = const Color(0x0F000000);
+
+    transparent = const Color(0x00000000);
+    white = const Color(0xFFFFFFFF);
+    black = const Color(0xFF000000);
+
+    grey50 = const Color(0xFFF8FAFC);
+    grey100 = const Color(0xFFF1F5F9);
+    grey200 = const Color(0xFFE2E8F0);
+    grey300 = const Color(0xFFCBD5E1);
+    grey400 = const Color(0xFF94A3B8);
+    grey500 = const Color(0xFF64748B);
+    grey600 = const Color(0xFF475569);
+    grey700 = const Color(0xFF334155);
+    grey800 = const Color(0xFF1E293B);
+    grey900 = const Color(0xFF0F172A);
+
+    debugBadge = const Color(0xFF6EE7B7);
+  }
+
+  void _setDark() {
+    primary = _primaryBase;
+    primaryDark = const Color(0xFFB91C1C);
+    primaryLight = const Color(0xFFF87171);
+    primaryContainer = const Color(0xFF2B2E33);
+
+    secondary = _secondaryBase;
+    secondaryLight = const Color(0xFF6366F1);
+    secondaryContainer = const Color(0xFF1F2937);
+
+    success = const Color(0xFF16A34A);
+    successLight = const Color(0xFF16A34A);
+    successDark = const Color(0xFF16A34A);
+
+    warning = const Color(0xFFF59E0B);
+    warningLight = const Color(0xFFF59E0B);
+    warningDark = const Color(0xFFF59E0B);
+
+    error = const Color(0xFFDC2626);
+    errorLight = const Color(0xFFDC2626);
+    errorDark = const Color(0xFFDC2626);
+
+    info = const Color(0xFF3B82F6);
+    infoLight = const Color(0xFF3B82F6);
+    infoDark = const Color(0xFF3B82F6);
+
+    featureUsers = const Color(0xFF6366F1);
+    featureInstitutions = const Color(0xFF0EA5E9);
+    featureAttendance = const Color(0xFFF59E0B);
+    featureReports = const Color(0xFFE11D48);
+    featureSchedule = const Color(0xFF14B8A6);
+    featureSettings = const Color(0xFF475569);
+    featureNotifications = const Color(0xFFF97316);
+    featureClasses = const Color(0xFFEF4444);
+    featureGrades = const Color(0xFF84CC16);
+    featureStudents = const Color(0xFF0055D4);
+
+    stateNoData = const Color(0xFF94A3B8);
+    stateInDevelopment = const Color(0xFF6366F1);
+    stateSuccess = const Color(0xFF22C55E);
+    stateInactive = const Color(0xFF0F172A);
+    stateActive = const Color(0xFF16A34A);
+
+    surface = const Color(0xFF0F172A);
+    surfaceLight = const Color(0xFF111827);
+    surfaceContainer = const Color(0xFF111827);
+    surfaceVariant = const Color(0xFF111827);
+
+    background = const Color(0xFF071026);
+    backgroundLight = const Color(0xFF0B1220);
+    backgroundVariant = const Color(0xFF071026);
+
+    textPrimary = const Color(0xFFF8FAFC);
+    textSecondary = const Color(0xFFE2E8F0);
+    textMuted = const Color(0xFFCBD5E1);
+    textDisabled = const Color(0xFF94A3B8);
+
+    textOnDark = const Color(0xFFF8FAFC);
+    textOnDarkSecondary = const Color(0xFFE2E8F0);
+    textOnDarkMuted = const Color(0xFFCBD5E1);
+
+    onPrimary = const Color(0xFFFFFFFF);
+
+    border = const Color(0xFF1E293B);
+    borderLight = const Color(0xFF111827);
+    borderStrong = const Color(0xFF0B1220);
+    divider = const Color(0xFF1E293B);
+
+    shadow = const Color(0x1AFFFFFF);
+    shadowLight = const Color(0x0F000000);
+    shadowMedium = const Color(0x1F000000);
+    scrim = const Color(0xFF000000);
+
+    transparent = const Color(0x00000000);
+    white = const Color(0xFFFFFFFF);
+    black = const Color(0xFF000000);
+
+    grey50 = const Color(0xFF0F172A);
+    grey100 = const Color(0xFF111827);
+    grey200 = const Color(0xFF1E293B);
+    grey300 = const Color(0xFF334155);
+    grey400 = const Color(0xFF475569);
+    grey500 = const Color(0xFF64748B);
+    grey600 = const Color(0xFF94A3B8);
+    grey700 = const Color(0xFFCBD5E1);
+    grey800 = const Color(0xFFF1F5F9);
+    grey900 = const Color(0xFFFFFFFF);
+
+    debugBadge = const Color(0xFF6EE7B7);
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PALETA MODERNA - CLARITY UI
@@ -19,138 +211,138 @@ class AppColors {
   static const Color _backgroundBase = Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
 
   // Primary palette - Azul moderno y profesional
-  final Color primary = _primaryBase;
-  final Color primaryDark = const Color(0xFFB91C1C); // Rojo profundo
-  final Color primaryLight = const Color(0xFFF87171); // Rojo claro
-  final Color primaryContainer = const Color(0xFFFFEBEE); // Rojo pastel muy suave
+  late final Color primary;
+  late final Color primaryDark;
+  late final Color primaryLight;
+  late final Color primaryContainer;
 
   // Secondary palette - Índigo moderno
-  final Color secondary = _secondaryBase;
-  final Color secondaryLight = const Color(0xFF6366F1); // Índigo claro
-  final Color secondaryContainer = const Color(0xFFEEF2FF); // Índigo pastel
+  late final Color secondary;
+  late final Color secondaryLight;
+  late final Color secondaryContainer;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COLORES DE ESTADO - SEMÁNTICOS Y ACCESIBLES
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Success - Verde moderno (similar a Tailwind)
-  final Color success = const Color(0xFF16A34A); // Verde 600 - éxito claro
-  final Color successLight = const Color(0xFF22C55E); // Verde 500 - para elementos ligeros
-  final Color successDark = const Color(0xFF15803D); // Verde 700 - para hover
+  late final Color success;
+  late final Color successLight;
+  late final Color successDark;
 
   // Warning - Ámbar moderno
-  final Color warning = const Color(0xFFF59E0B); // Ámbar 500 - advertencia clara
-  final Color warningLight = const Color(0xFFFCD34D); // Ámbar 300 - para fondos
-  final Color warningDark = const Color(0xFFD97706); // Ámbar 600 - para hover
+  late final Color warning;
+  late final Color warningLight;
+  late final Color warningDark;
 
   // Error - Rojo moderno
-  final Color error = const Color(0xFFDC2626); // Rojo 600 - error claro
-  final Color errorLight = const Color(0xFFF87171); // Rojo 400 - para elementos ligeros
-  final Color errorDark = const Color(0xFFB91C1C); // Rojo 700 - para hover
+  late final Color error;
+  late final Color errorLight;
+  late final Color errorDark;
 
   // Info - Azul informativo
-  final Color info = const Color(0xFF3B82F6); // Azul 500 - información
-  final Color infoLight = const Color(0xFF60A5FA); // Azul 400 - para elementos ligeros
-  final Color infoDark = const Color(0xFF2563EB); // Azul 600 - para hover
+  late final Color info;
+  late final Color infoLight;
+  late final Color infoDark;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COLORES ESPECÍFICOS POR FEATURE - USAR CON MODERACIÓN
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Features principales - colores diferenciados pero armoniosos
-  final Color featureUsers = const Color(0xFF6366F1); // Índigo - usuarios
-  final Color featureInstitutions = const Color(0xFF0EA5E9); // Cyan - instituciones
-  final Color featureAttendance = const Color(0xFFF59E0B); // Ámbar - asistencia
-  final Color featureReports = const Color(0xFFE11D48); // Rosa fuerte - reportes
-  final Color featureSchedule = const Color(0xFF14B8A6); // Teal - horarios
-  final Color featureSettings = const Color(0xFF475569); // Slate - configuración
-  final Color featureNotifications = const Color(0xFFF97316); // Naranja - notificaciones
-  final Color featureClasses = const Color(0xFFEF4444); // Rojo coral - clases
-  final Color featureGrades = const Color(0xFF84CC16); // Verde lima - calificaciones
-  final Color featureStudents = const Color(0xFF0055D4); // Azul principal - estudiantes
+  late final Color featureUsers;
+  late final Color featureInstitutions;
+  late final Color featureAttendance;
+  late final Color featureReports;
+  late final Color featureSchedule;
+  late final Color featureSettings;
+  late final Color featureNotifications;
+  late final Color featureClasses;
+  late final Color featureGrades;
+  late final Color featureStudents;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ESTADOS Y CONDICIONES
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Estados informativos
-  final Color stateNoData = const Color(0xFF94A3B8); // Slate 400
-  final Color stateInDevelopment = const Color(0xFF6366F1); // Índigo - en desarrollo
-  final Color stateSuccess = const Color(0xFF22C55E); // Verde éxito
-  final Color stateInactive = const Color(0xFFE2E8F0); // Slate 200
-  final Color stateActive = const Color(0xFF16A34A); // Verde activo
+  late final Color stateNoData;
+  late final Color stateInDevelopment;
+  late final Color stateSuccess;
+  late final Color stateInactive;
+  late final Color stateActive;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SUPERFICIES Y FONDOS - ESCALA MODERNA
   // ═══════════════════════════════════════════════════════════════════════════
 
-  final Color surface = _surfaceBase; // Blanco puro
-  final Color surfaceLight = const Color(0xFFF8FAFC); // Gris 50 muy claro
-  final Color surfaceContainer = const Color(0xFFFFFFFF); // Contenedor blanco
-  final Color surfaceVariant = const Color(0xFFF1F5F9); // Gris 100 para variantes
+  late final Color surface;
+  late final Color surfaceLight;
+  late final Color surfaceContainer;
+  late final Color surfaceVariant;
 
-  final Color background = _backgroundBase; // Fondo principal
-  final Color backgroundLight = const Color(0xFFFFFFFF); // Fondo blanco puro
-  final Color backgroundVariant = const Color(0xFFF8FAFC); // Variante de fondo
+  late final Color background;
+  late final Color backgroundLight;
+  late final Color backgroundVariant;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // TEXTO - JERARQUÍA CLARA Y ACCESIBLE
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Texto principal - escala moderna
-  final Color textPrimary = const Color(0xFF0F172A); // Slate 900 - casi negro
-  final Color textSecondary = const Color(0xFF334155); // Slate 700 - gris oscuro
-  final Color textMuted = const Color(0xFF64748B); // Slate 500 - gris medio
-  final Color textDisabled = const Color(0xFF94A3B8); // Slate 400 - gris claro
+  late final Color textPrimary;
+  late final Color textSecondary;
+  late final Color textMuted;
+  late final Color textDisabled;
 
   // Texto sobre fondos oscuros
-  final Color textOnDark = const Color(0xFFF8FAFC); // Blanco casi puro
-  final Color textOnDarkSecondary = const Color(0xFFE2E8F0); // Gris muy claro
-  final Color textOnDarkMuted = const Color(0xFFCBD5E1); // Gris claro
+  late final Color textOnDark;
+  late final Color textOnDarkSecondary;
+  late final Color textOnDarkMuted;
 
   // Texto sobre colores primarios
-  final Color onPrimary = const Color(0xFFFFFFFF); // Blanco sobre primary
+  late final Color onPrimary;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // BORDES Y DIVISORES - SUAVES Y MODERNOS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  final Color border = const Color(0xFFE2E8F0); // Slate 200 - borde estándar
-  final Color borderLight = const Color(0xFFF1F5F9); // Slate 100 - borde ligero
-  final Color borderStrong = const Color(0xFFCBD5E1); // Slate 300 - borde fuerte
-  final Color divider = const Color(0xFFE2E8F0); // Slate 200 - divisor
+  late final Color border;
+  late final Color borderLight;
+  late final Color borderStrong;
+  late final Color divider;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SOMBRAS Y EFECTOS - SUBTLES Y MODERNOS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  final Color shadow = const Color(0x0A000000); // Negro con 4% opacidad
-  final Color shadowLight = const Color(0x05000000); // Negro con 2% opacidad
-  final Color shadowMedium = const Color(0x0F000000); // Negro con 6% opacidad
-  final Color scrim = const Color(0x0F000000); // Negro con 6% opacidad
+  late final Color shadow;
+  late final Color shadowLight;
+  late final Color shadowMedium;
+  late final Color scrim;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COLORES UTILITARIOS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  final Color transparent = const Color(0x00000000);
-  final Color white = const Color(0xFFFFFFFF);
-  final Color black = const Color(0xFF000000);
+  late final Color transparent;
+  late final Color white;
+  late final Color black;
 
   // Escala de grises moderna
-  final Color grey50 = const Color(0xFFF8FAFC);
-  final Color grey100 = const Color(0xFFF1F5F9);
-  final Color grey200 = const Color(0xFFE2E8F0);
-  final Color grey300 = const Color(0xFFCBD5E1);
-  final Color grey400 = const Color(0xFF94A3B8);
-  final Color grey500 = const Color(0xFF64748B);
-  final Color grey600 = const Color(0xFF475569);
-  final Color grey700 = const Color(0xFF334155);
-  final Color grey800 = const Color(0xFF1E293B);
-  final Color grey900 = const Color(0xFF0F172A);
+  late final Color grey50;
+  late final Color grey100;
+  late final Color grey200;
+  late final Color grey300;
+  late final Color grey400;
+  late final Color grey500;
+  late final Color grey600;
+  late final Color grey700;
+  late final Color grey800;
+  late final Color grey900;
 
   // Minor debug color: used for small non-production badges (non-invasive change)
-  final Color debugBadge = const Color(0xFF6EE7B7); // Verde menta - para badges temporales
+  late final Color debugBadge;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODOS DE CONVENIENCIA

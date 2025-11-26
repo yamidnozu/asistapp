@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/test_flow_manager.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../theme/app_spacing.dart';
+import '../theme/theme_extensions.dart';
 
 /// Pantalla de pruebas para ejecutar flujos completos de testing
 class TestRunnerScreen extends StatefulWidget {
@@ -104,9 +102,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.instance;
-    final textStyles = AppTextStyles.instance;
-    final spacing = AppSpacing.instance;
+  final colors = context.colors;
+  final textStyles = context.textStyles;
+  final spacing = context.spacing;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -286,9 +284,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   }
 
   Widget _buildStepButton(String title, Future<void> Function() onPressed) {
-    final colors = AppColors.instance;
-    final textStyles = AppTextStyles.instance;
-    final spacing = AppSpacing.instance;
+  final colors = context.colors;
+  final textStyles = context.textStyles;
+  final spacing = context.spacing;
 
     return Padding(
       padding: EdgeInsets.only(bottom: spacing.sm),
