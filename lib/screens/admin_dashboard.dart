@@ -6,12 +6,10 @@ import '../providers/user_provider.dart';
 import '../providers/institution_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../widgets/components/index.dart';
-import '../widgets/common/dashboard_scaffold.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
-  @override
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
 }
@@ -38,145 +36,287 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Escuchar userProvider para refrescar estadísticas en tiempo real
-    final userProvider = Provider.of<UserProvider>(context);
-  final colors = context.colors;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final institutionProvider = Provider.of<InstitutionProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
-  // selectedInstitution se obtiene del AuthProvider cuando se necesite en el UI
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 1024;
+        final isTablet = constraints.maxWidth > 600;
+        final columnCount = isDesktop ? 4 : (isTablet ? 3 : 2);
+
+        return isDesktop
+            ? _buildDesktopLayout(
+                context,
+                userName,
+                institutionProvider,
+                userProvider,
+                columnCount,
+              )
+            : _buildMobileLayout(
+                context,
+                userName,
+                institutionProvider,
+                userProvider,
+                columnCount,
+              );
+      },
+    );
+  }
+
+  /// Layout Desktop (70% contenido, 30% sidebar)
+  Widget _buildDesktopLayout(
+    BuildContext context,
+    String userName,
+    InstitutionProvider institutionProvider,
+    UserProvider userProvider,
+    int columnCount,
+  ) {
+    final spacing = context.spacing;
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(spacing.screenPadding),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 70% - Contenido Principal
+            Expanded(
+              flex: 70,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildGreeting(context, userName),
+                  SizedBox(height: spacing.xl),
+                  _buildKPIRow(context, userProvider),
+                  SizedBox(height: spacing.xl),
+                  _buildActionsGrid(context, columnCount),
+                ],
+              ),
+            ),
+            SizedBox(width: spacing.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Layout Móvil/Tablet (flujo vertical)
+  Widget _buildMobileLayout(
+    BuildContext context,
+    String userName,
+    InstitutionProvider institutionProvider,
+    UserProvider userProvider,
+    int columnCount,
+  ) {
+    final spacing = context.spacing;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(spacing.screenPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildGreeting(context, userName),
+          SizedBox(height: spacing.xl),
+          _buildKPIRow(context, userProvider),
+          SizedBox(height: spacing.xl),
+          _buildActionsGrid(context, columnCount),
+        ],
+      ),
+    );
+  }
+
+  /// Saludo Sutil
+  Widget _buildGreeting(BuildContext context, String userName) {
+    final textStyles = context.textStyles;
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '¡Hola, $userName!',
+          style: textStyles.headlineMedium.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        SizedBox(height: context.spacing.sm),
+        Text(
+          'Bienvenido al panel de administración.',
+          style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  /// Row de KPIs
+  Widget _buildKPIRow(BuildContext context, UserProvider userProvider) {
+    final spacing = context.spacing;
 
     // Obtener estadísticas desde el provider
     final stats = userProvider.getUserStatistics();
 
-    // Convert AdminDashboard to use the generic DashboardScaffold
-    return DashboardScaffold(
-      userName: userName,
-      subtitle: 'Bienvenido al panel de administración.',
-      statsWidgets: [
-        ClarityCompactStat(value: stats['total']?.toString() ?? '0', title: 'Usuarios', icon: Icons.people, color: colors.primary),
-        ClarityCompactStat(value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(), title: 'Profesores', icon: Icons.school, color: colors.info),
-        ClarityCompactStat(value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(), title: 'Estudiantes', icon: Icons.person, color: colors.warning),
-      ],
-      kpiWidget: _buildKpiRow(context, userProvider),
-      recentActivityWidget: _buildRecentActivity(context, userProvider),
-      actionItems: [
-        DashboardActionItem(icon: Icons.people_outline_rounded, label: 'Usuarios', onTap: () => context.go('/users')),
-        DashboardActionItem(icon: Icons.school_outlined, label: 'Gestión Académica', onTap: () => context.go('/academic')),
-        DashboardActionItem(icon: Icons.calendar_today_outlined, label: 'Horarios', onTap: () { context.go('/academic/horarios'); }),
-        DashboardActionItem(icon: Icons.settings_outlined, label: 'Ajustes', onTap: () { context.go('/settings'); }),
-      ],
-    );
-  }
-
-  // Widget para la nueva barra de estadísticas
-  // Compact stats helper removed - stats rendered via DashboardScaffold
-
-  // menu action items are centralized via DashboardScaffold actionItems
-
-  Widget _buildKpiRow(BuildContext context, UserProvider userProvider) {
-    final institutionProvider = Provider.of<InstitutionProvider>(context);
-    final colors = context.colors;
-    final spacing = context.spacing;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
         children: [
-          Text('Métricas Rápidas', style: context.textStyles.headlineSmall),
-          SizedBox(height: spacing.md),
-          LayoutBuilder(builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            // Standard breakpoints: >=1024 (3 col), >=600 (2 col), else 1 col
-            final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
-            final itemWidth = (width - ((columns - 1) * spacing.md)) / columns;
-
-            return Wrap(
-              spacing: spacing.md,
-              runSpacing: spacing.md,
-              alignment: WrapAlignment.start,
-              children: [
-                SizedBox(
-                  width: itemWidth,
-                  child: ClarityKPICard(
-                    value: institutionProvider.totalInstitutions.toString(),
-                    label: 'Instituciones',
-                    icon: Icons.apartment,
-                    iconColor: colors.primary,
-                    backgroundColor: colors.primary.withValues(alpha: 0.05),
-                  ),
-                ),
-                SizedBox(
-                  width: itemWidth,
-                  child: ClarityKPICard(
-                    value: (userProvider.paginationInfo?.total ?? userProvider.loadedUsersCount).toString(),
-                    label: 'Usuarios',
-                    icon: Icons.people,
-                    iconColor: colors.info,
-                    backgroundColor: colors.info.withValues(alpha: 0.05),
-                  ),
-                ),
-                SizedBox(
-                  width: itemWidth,
-                  child: ClarityKPICard(
-                    value: userProvider.professorsCount.toString(),
-                    label: 'Profesores',
-                    icon: Icons.school,
-                    iconColor: colors.warning,
-                    backgroundColor: colors.warning.withValues(alpha: 0.05),
-                  ),
-                ),
-              ],
-            );
-          }),
+          ClarityCompactStat(
+            value: stats['total']?.toString() ?? '0',
+            title: 'Usuarios',
+            icon: Icons.people,
+            color: context.colors.primary,
+          ),
+          SizedBox(width: spacing.lg),
+          ClarityCompactStat(
+            value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
+            title: 'Profesores',
+            icon: Icons.school,
+            color: context.colors.info,
+          ),
+          SizedBox(width: spacing.lg),
+          ClarityCompactStat(
+            value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
+            title: 'Estudiantes',
+            icon: Icons.person,
+            color: context.colors.warning,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentActivity(BuildContext context, UserProvider userProvider) {
-    final colors = context.colors;
+  /// Grilla de Acciones Principal
+  Widget _buildActionsGrid(BuildContext context, int columnCount) {
     final spacing = context.spacing;
-    final textStyles = context.textStyles;
+    final colors = context.colors;
 
-    final recent = userProvider.users.take(6).toList();
-
-    return Container(
-      padding: EdgeInsets.all(spacing.lg),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-        border: Border.all(color: colors.borderLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Actividad reciente', style: textStyles.headlineSmall),
-          SizedBox(height: spacing.md),
-          if (recent.isEmpty)
-            Center(
-              child: Text('No hay actividad reciente', style: textStyles.bodyMedium.copyWith(color: colors.textSecondary)),
-            )
-          else
-            // Wrap list items inside a Material so ListTile has required Material ancestor
-            Material(
-              type: MaterialType.transparency,
-              child: Column(
-                children: recent.map((u) {
-                  return ListTile(
-                    onTap: () => context.go('/users?edit=true&userId=${u.id}'),
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(backgroundColor: colors.primary.withValues(alpha: 0.12), child: Text(u.inicial, style: textStyles.bodyMedium.withColor(colors.primary))),
-                    title: Text(u.nombreCompleto, style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-                    subtitle: Text(u.email ?? '', style: textStyles.bodySmall.copyWith(color: colors.textSecondary)),
-                    trailing: Chip(label: Text(u.rol ?? '', style: textStyles.labelSmall)),
-                  );
-                }).toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Acciones Principales',
+          style: context.textStyles.headlineSmall,
+        ),
+        SizedBox(height: spacing.md),
+        Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            border: Border.all(color: colors.borderLight),
+          ),
+          child: Column(
+            children: [
+              _buildMenuActionItem(
+                context,
+                icon: Icons.people_outline_rounded,
+                label: 'Usuarios',
+                value: 'Gestión de usuarios',
+                color: colors.primary,
+                onTap: () => context.go('/users'),
+                isFirst: true,
               ),
-            ),
-        ],
+              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+              _buildMenuActionItem(
+                context,
+                icon: Icons.school_outlined,
+                label: 'Gestión Académica',
+                value: 'Materias, grupos y horarios',
+                color: colors.info,
+                onTap: () => context.go('/academic'),
+              ),
+              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+              _buildMenuActionItem(
+                context,
+                icon: Icons.calendar_today_outlined,
+                label: 'Horarios',
+                value: 'Configuración de horarios',
+                color: colors.warning,
+                onTap: () => context.go('/academic/horarios'),
+              ),
+              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+              _buildMenuActionItem(
+                context,
+                icon: Icons.settings_outlined,
+                label: 'Ajustes',
+                value: 'Configuración del sistema',
+                color: const Color(0xFF8B5CF6),
+                onTap: () => context.go('/settings'),
+                isLast: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuActionItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required VoidCallback onTap,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
+    final colors = context.colors;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.lg,
+            vertical: spacing.sm,
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              SizedBox(width: spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: textStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      value,
+                      style: textStyles.bodySmall.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: colors.textSecondary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

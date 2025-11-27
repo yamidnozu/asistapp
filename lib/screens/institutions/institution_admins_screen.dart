@@ -538,7 +538,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                               Icon(Icons.people_outline, size: 56, color: context.colors.textMuted),
-                            SizedBox(height: 12),
+                            const SizedBox(height: 12),
                               Text('No hay administradores disponibles', style: context.textStyles.bodyMedium.copyWith(color: context.colors.textMuted, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
                           ],
                         ),
