@@ -254,6 +254,18 @@ class AppTheme {
           ),
         ),
       ),
+
+      // Centralizar estilo de SnackBars para consistencia de la UI
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: colors.surfaceVariant,
+        contentTextStyle: textStyles.bodyMedium.copyWith(color: colors.textPrimary),
+        actionTextColor: colors.primary,
+        behavior: SnackBarBehavior.floating,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+        ),
+      ),
     );
   }
 }
