@@ -115,7 +115,7 @@ class _AppShellState extends State<AppShell> {
           icon: Icons.business_rounded,
           shortcut: '⌘I',
           onExecute: () {
-            context.go('/instituciones');
+            context.go('/institutions');
           },
         ),
         CommandPaletteItem(
@@ -124,7 +124,7 @@ class _AppShellState extends State<AppShell> {
           icon: Icons.people_alt_rounded,
           shortcut: '⌘U',
           onExecute: () {
-            context.go('/usuarios');
+            context.go('/users');
           },
         ),
       ]);
