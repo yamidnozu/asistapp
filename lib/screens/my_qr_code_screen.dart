@@ -248,17 +248,21 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Código QR
+        // Código QR con diseño mejorado
         Container(
-          padding: EdgeInsets.all(spacing.md),
+          padding: EdgeInsets.all(spacing.lg),
           decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(spacing.borderRadius),
+            color: Theme.of(context).brightness == Brightness.light ? colors.white : colors.surfaceLight,
+            borderRadius: BorderRadius.circular(spacing.borderRadiusLarge),
+            border: Border.all(
+              color: colors.primary.withValues(alpha: 0.2),
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: colors.shadow.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: colors.primary.withValues(alpha: 0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -267,21 +271,44 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             version: QrVersions.auto,
             size: qrSize,
             backgroundColor: Theme.of(context).brightness == Brightness.light ? colors.white : colors.surfaceLight,
+            eyeStyle: QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: colors.primary,
+            ),
+            dataModuleStyle: QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: colors.textPrimary,
+            ),
           ),
         ),
 
         SizedBox(height: spacing.lg),
 
-        // Información adicional
-        Text(
-          'ID: $_qrCode',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colors.textMuted,
-            fontFamily: 'monospace',
+        // Badge con ID
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          decoration: BoxDecoration(
+            color: colors.surfaceVariant,
+            borderRadius: BorderRadius.circular(spacing.borderRadiusLarge),
+            border: Border.all(color: colors.borderLight),
           ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.fingerprint, size: 16, color: colors.textMuted),
+              SizedBox(width: spacing.xs),
+              Text(
+                'ID: $_qrCode',
+                style: context.textStyles.bodySmall.copyWith(
+                  color: colors.textMuted,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );

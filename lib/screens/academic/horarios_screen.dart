@@ -212,7 +212,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
                   ),
-                  style: context.textStyles.bodyLarge,
+                  style: context.textStyles.bodyLarge.copyWith(color: context.colors.textPrimary),
                   items: periodoProvider.periodosActivos
                       .map(
                         (periodo) => DropdownMenuItem<PeriodoAcademico>(

@@ -23,6 +23,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   late FocusNode _focusNode;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String _appVersion = '-'; // Default fallback
 
   @override
   void initState() {
@@ -31,6 +32,11 @@ class _AppShellState extends State<AppShell> {
     
     // Agregar listener para capturar Ctrl+K globalmente
     _focusNode.addListener(_handleKeyboardShortcuts);
+
+    // Obtener la versión de la app después de que el widget esté construido
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAppVersion();
+    });
   }
 
   @override
@@ -42,6 +48,30 @@ class _AppShellState extends State<AppShell> {
 
   void _handleKeyboardShortcuts() {
     // Este método se puede ampliar para otros atajos
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final pubspecContent = await rootBundle.loadString('pubspec.yaml');
+      final versionRegex = RegExp(r'version:\s*([^\s]+)');
+      final match = versionRegex.firstMatch(pubspecContent);
+      if (match != null && match.groupCount >= 1) {
+        final version = match.group(1)!;
+        // Remover el +build si existe
+        final cleanVersion = version.split('+').first;
+        debugPrint('Versión obtenida del pubspec: $cleanVersion');
+        if (mounted) {
+          setState(() {
+            _appVersion = cleanVersion;
+          });
+        }
+      } else {
+        debugPrint('No se encontró la versión en pubspec.yaml');
+      }
+    } catch (e) {
+      // Mantener el valor por defecto si hay error
+      debugPrint('Error obteniendo versión de la app: $e');
+    }
   }
 
   void _showCommandPalette() {
@@ -358,6 +388,17 @@ class _AppShellState extends State<AppShell> {
                             side: BorderSide(color: context.colors.border),
                           ),
                         ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Versión $_appVersion',
+                        style: context.textStyles.bodySmall.copyWith(
+                          color: context.colors.textMuted,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],

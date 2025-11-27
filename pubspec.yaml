@@ -1,6 +1,6 @@
 name: asistapp
 description: "Aplicación de registro de asistencia escolar con escaneo QR"
-version: 1.0.8+9
+version: 1.0.9+10
 environment:
   sdk: ">=3.4.0 <4.0.0"
 
@@ -38,6 +38,7 @@ flutter:
   assets:
     - assets/audio/
     - assets/icon/
+    - pubspec.yaml
     # .env and .env.test are environment files and should not be treated as Flutter assets.
     # They are loaded at runtime by flutter_dotenv and typically excluded from VCS.
     # If you need an example or a template of env vars, add a .env.example file in the project root.

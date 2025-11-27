@@ -148,9 +148,15 @@ class AsistenciaService {
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final url = date != null
-          ? '$baseUrlValue/horarios/$horarioId/asistencias?date=${date.toIso8601String().split('T')[0]}'
-          : '$baseUrlValue/horarios/$horarioId/asistencias';
+      // El endpoint correcto es GET /asistencias con query params
+      final queryParams = <String, String>{
+        'horarioId': horarioId,
+      };
+      if (date != null) {
+        queryParams['fecha'] = date.toIso8601String().split('T')[0];
+      }
+      final queryString = queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
+      final url = '$baseUrlValue/asistencias?$queryString';
 
       final response = await http.get(
         Uri.parse(url),
@@ -164,7 +170,7 @@ class AsistenciaService {
         },
       );
 
-      debugPrint('GET /horarios/$horarioId/asistencias - Status: ${response.statusCode}');
+      debugPrint('GET /asistencias?horarioId=$horarioId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);

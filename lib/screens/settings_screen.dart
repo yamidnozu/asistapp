@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/settings_provider.dart';
+import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
 
 /// Pantalla de Ajustes del Sistema para Super Admin
@@ -14,6 +15,8 @@ class SettingsScreen extends StatelessWidget {
     final colors = context.colors;
     final textStyles = context.textStyles;
     final spacing = context.spacing;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final isSuperAdmin = authProvider.user?['rol'] == 'super_admin';
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -48,6 +51,17 @@ class SettingsScreen extends StatelessWidget {
                   'Por ahora sólo está disponible el cambio de apariencia (tema claro/oscuro).',
                   style: textStyles.bodySmall.copyWith(color: colors.textMuted),
                 ),
+                if (isSuperAdmin) ...[
+                  SizedBox(height: spacing.xxl),
+                  _buildSectionHeader(context, 'Desarrollo', Icons.developer_mode_outlined),
+                  SizedBox(height: spacing.md),
+                  _buildDevelopmentSection(context, settings),
+                  SizedBox(height: spacing.md),
+                  Text(
+                    'Opciones para facilitar las pruebas durante el desarrollo.',
+                    style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                  ),
+                ],
                 SizedBox(height: spacing.xxl),
               ],
             ),
@@ -113,6 +127,22 @@ class SettingsScreen extends StatelessWidget {
           icon: settings.isDarkMode ? Icons.dark_mode : Icons.light_mode,
         ),
         // Only theme toggle is visible for now per requirement
+      ],
+    );
+  }
+
+  Widget _buildDevelopmentSection(BuildContext context, SettingsProvider settings) {
+    return _buildSettingsCard(
+      context,
+      children: [
+        _buildSwitchTile(
+          context,
+          title: 'Mostrar Usuarios de Prueba',
+          subtitle: 'Habilita la visualización de usuarios de prueba en la pantalla de login',
+          value: settings.showTestUsers,
+          onChanged: (_) => settings.setShowTestUsers(!settings.showTestUsers),
+          icon: Icons.bug_report_outlined,
+        ),
       ],
     );
   }

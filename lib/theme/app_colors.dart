@@ -17,9 +17,9 @@ class AppColors {
 
   void _setLight() {
     primary = _primaryBase;
-    primaryDark = const Color(0xFFB91C1C);
-    primaryLight = const Color(0xFFF87171);
-    primaryContainer = const Color(0xFFFFEBEE);
+    primaryDark = const Color(0xFF0288D1);
+    primaryLight = const Color(0xFF81D4FA);
+    primaryContainer = const Color(0xFFE1F5FE);
 
     secondary = _secondaryBase;
     secondaryLight = const Color(0xFF6366F1);
@@ -44,7 +44,7 @@ class AppColors {
     featureUsers = const Color(0xFF6366F1);
     featureInstitutions = const Color(0xFF0EA5E9);
     featureAttendance = const Color(0xFFF59E0B);
-    featureReports = const Color(0xFFE11D48);
+    featureReports = const Color(0xFF7C3AED);
     featureSchedule = const Color(0xFF14B8A6);
     featureSettings = const Color(0xFF475569);
     featureNotifications = const Color(0xFFF97316);
@@ -108,9 +108,9 @@ class AppColors {
 
   void _setDark() {
     primary = _primaryBase;
-    primaryDark = const Color(0xFFB91C1C);
-    primaryLight = const Color(0xFFF87171);
-    primaryContainer = const Color(0xFF2B2E33);
+    primaryDark = const Color(0xFF0277BD);
+    primaryLight = const Color(0xFF4FC3F7);
+    primaryContainer = const Color(0xFF1E3A5F);
 
     secondary = _secondaryBase;
     secondaryLight = const Color(0xFF6366F1);
@@ -135,7 +135,7 @@ class AppColors {
     featureUsers = const Color(0xFF6366F1);
     featureInstitutions = const Color(0xFF0EA5E9);
     featureAttendance = const Color(0xFFF59E0B);
-    featureReports = const Color(0xFFE11D48);
+    featureReports = const Color(0xFF7C3AED);
     featureSchedule = const Color(0xFF14B8A6);
     featureSettings = const Color(0xFF475569);
     featureNotifications = const Color(0xFFF97316);
@@ -202,8 +202,8 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Base colors - Paleta moderna inspirada en Atlassian/Linear
-  // Cambiado a rojo para la versión demo
-  static const Color _primaryBase = Color(0xFFE11D48); // Rojo - visualmente distintivo
+  // Cambiado a azul claro para una apariencia más agradable
+  static const Color _primaryBase = Color(0xFF4FC3F7); // Azul cielo claro - 70% más claro
   static const Color _secondaryBase = Color(0xFF4F46E5); // Índigo moderno - complementario
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase = Color(0xFFF8FAFC); // Gris muy claro - fondo limpio

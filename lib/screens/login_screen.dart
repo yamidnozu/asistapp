@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/settings_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../utils/responsive_utils.dart';
 
@@ -16,14 +17,29 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
 
   // En release los campos empiezan vacíos; en debug se pre-llenan para facilitar pruebas
-  final _emailController = TextEditingController(text: kReleaseMode ? '' : 'superadmin@asistapp.com');
-  final _passwordController = TextEditingController(text: kReleaseMode ? '' : 'Admin123!');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    // Los controladores se inicializan en didChangeDependencies para acceder a SettingsProvider
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final shouldPreloadSuperAdmin = settings.showTestUsers && !kReleaseMode;
+
+    if (_emailController.text.isEmpty) {
+      _emailController.text = shouldPreloadSuperAdmin ? 'superadmin@asistapp.com' : (kReleaseMode ? '' : 'superadmin@asistapp.com');
+    }
+    if (_passwordController.text.isEmpty) {
+      _passwordController.text = shouldPreloadSuperAdmin ? 'Admin123!' : (kReleaseMode ? '' : 'Admin123!');
+    }
   }
 
   @override
@@ -318,8 +334,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           _buildLoginButton(responsive),
                           SizedBox(height: responsive['elementSpacing']),
 
-                          // Solo mostrar sección de usuarios de prueba en modo debug
-                          if (!kReleaseMode) _buildTestUsersSection(responsive),
+                          // Solo mostrar sección de usuarios de prueba cuando esté habilitado en settings
+                          Consumer<SettingsProvider>(
+                            builder: (context, settings, _) {
+                              if (settings.showTestUsers) {
+                                return _buildTestUsersSection(responsive);
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                         ],
                       ),
                     ),
