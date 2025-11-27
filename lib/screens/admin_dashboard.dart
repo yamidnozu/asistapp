@@ -222,11 +222,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
               _buildMenuActionItem(
                 context,
-                icon: Icons.school_outlined,
-                label: 'Gestión Académica',
-                value: 'Materias, grupos y horarios',
-                color: colors.info,
-                onTap: () => context.go('/academic'),
+                icon: Icons.group_outlined,
+                label: 'Grupos',
+                value: 'Gestión de grupos académicos',
+                color: colors.success,
+                onTap: () => context.go('/academic/grupos'),
               ),
               Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
               _buildMenuActionItem(
