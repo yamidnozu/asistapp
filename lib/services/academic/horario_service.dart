@@ -415,6 +415,7 @@ class CreateHorarioRequest {
   final int diaSemana;
   final String horaInicio;
   final String horaFin;
+  final String institucionId;
 
   CreateHorarioRequest({
     required this.periodoId,
@@ -424,6 +425,7 @@ class CreateHorarioRequest {
     required this.diaSemana,
     required this.horaInicio,
     required this.horaFin,
+    required this.institucionId,
   });
 
   Map<String, dynamic> toJson() {
@@ -435,6 +437,7 @@ class CreateHorarioRequest {
       'diaSemana': diaSemana,
       'horaInicio': horaInicio,
       'horaFin': horaFin,
+      'institucionId': institucionId,
     };
   }
 }

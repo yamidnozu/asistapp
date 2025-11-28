@@ -135,28 +135,28 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
               );
             }
 
-            return DropdownButtonFormField<User?>(
+            return DropdownButtonFormField<User>(
               isExpanded: true,
               value: selectedProfesorFromList,
               decoration: InputDecoration(
-                labelText: 'Profesor (opcional)',
+                labelText: 'Profesor',
                 hintText: 'Selecciona un profesor',
                 helperText: profesoresDisponibles.length < userProvider.professors.length
                     ? '${profesoresDisponibles.length} disponibles'
                     : null,
               ),
-              items: [
-                const DropdownMenuItem<User?>(
-                  value: null,
-                  child: Text('Sin profesor'),
-                ),
-                ...profesoresDisponibles.map((profesor) {
-                  return DropdownMenuItem<User?>(
-                    value: profesor,
-                    child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
-                  );
-                }),
-              ],
+              items: profesoresDisponibles.map((profesor) {
+                return DropdownMenuItem<User>(
+                  value: profesor,
+                  child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
+                );
+              }).toList(),
+              validator: (value) {
+                if (value == null) {
+                  return 'El profesor es requerido';
+                }
+                return null;
+              },
               onChanged: (profesor) {
                 setState(() => _selectedProfesor = profesor);
               },
@@ -170,6 +170,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   Future<bool> _createClass() async {
     if (!_formKey.currentState!.validate()) return false;
     if (_selectedMateria == null) return false;
+    if (_selectedProfesor == null) return false;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
@@ -187,10 +188,11 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
           periodoId: periodoId!,
           grupoId: widget.grupo.id,
           materiaId: _selectedMateria!.id,
-          profesorId: _selectedProfesor?.id,
+          profesorId: _selectedProfesor!.id,
           diaSemana: widget.diaSemana,
           horaInicio: widget.horaInicio,
           horaFin: _selectedHoraFin ?? _getHoraFin(widget.horaInicio),
+          institucionId: authProvider.selectedInstitutionId!,
         ),
       );
 
@@ -221,7 +223,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   String _getHoraFin(String horaInicio) {
     final parts = horaInicio.split(':');
     final hour = int.parse(parts[0]);
-    final nextHour = hour + 1;
+    final nextHour = hour + 2; // Cambiado de 1 a 2 horas para coincidir con los datos existentes
     return '${nextHour.toString().padLeft(2, '0')}:00';
   }
 
