@@ -160,7 +160,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
     private token: string;
     private phoneNumberId: string;
     private apiUrl: string;
-    private apiVersion: string = 'v17.0';
+    private apiVersion: string = 'v22.0';
 
     constructor() {
         this.token = process.env.WHATSAPP_API_TOKEN || '';
