@@ -199,6 +199,40 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     }
   }
 
+  /// Actualiza la configuracion de notificaciones de una institucion
+  Future<bool> updateNotificationConfig(
+    String accessToken,
+    String institutionId, {
+    required bool notificacionesActivas,
+    required String canalNotificacion,
+    required String modoNotificacionAsistencia,
+    String? horaDisparoNotificacion,
+    int? umbralInasistenciasAlerta,
+  }) async {
+    try {
+      final success = await _institutionService.updateNotificationConfig(
+        accessToken,
+        institutionId,
+        notificacionesActivas: notificacionesActivas,
+        canalNotificacion: canalNotificacion,
+        modoNotificacionAsistencia: modoNotificacionAsistencia,
+        horaDisparoNotificacion: horaDisparoNotificacion,
+        umbralInasistenciasAlerta: umbralInasistenciasAlerta,
+      );
+
+      if (success) {
+        // Recargar la institucion para obtener la configuracion actualizada
+        await loadInstitutionById(accessToken, institutionId);
+      }
+
+      return success;
+    } catch (e) {
+      debugPrint('Error updating notification config: $e');
+      setError(e.toString());
+      return false;
+    }
+  }
+
   /// Selecciona una institución para edición
   void selectInstitution(Institution institution) {
     _selectedInstitution = institution;

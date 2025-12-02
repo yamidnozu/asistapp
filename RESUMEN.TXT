@@ -253,7 +253,7 @@
 │   │   ├── institucion.controller.ts [184]
 │   │   ├── institution-admin.controller.ts [564]
 │   │   ├── materia.controller.ts [227]
-│   │   ├── notification.controller.ts [86]
+│   │   ├── notification.controller.ts [197]
 │   │   ├── periodo-academico.controller.ts [270]
 │   │   ├── profesor.controller.ts [85]
 │   │   └── user.controller.ts [296]
@@ -271,7 +271,7 @@
 │   │   ├── institucion.routes.ts [44]
 │   │   ├── institution-admin.routes.ts [99]
 │   │   ├── materia.routes.ts [253]
-│   │   ├── notification.routes.ts [14]
+│   │   ├── notification.routes.ts [25]
 │   │   ├── periodo-academico.routes.ts [306]
 │   │   ├── profesor.routes.ts [356]
 │   │   └── usuario.routes.ts [39]
@@ -289,9 +289,10 @@
 │   │   ├── INTEGRATION_NOTES.js [7]
 │   │   ├── materia.service.ts [329]
 │   │   ├── 📂 notification
-│   │   │   └── notification.adapter.ts [126]
-│   │   ├── notification-queue.service.ts [128]
-│   │   ├── notification.service.ts [122]
+│   │   │   ├── notification.adapter.ts [224]
+│   │   │   └── whatsapp-templates.ts [125]
+│   │   ├── notification-queue.service.ts [177]
+│   │   ├── notification.service.ts [330]
 │   │   ├── periodo-academico.service.ts [397]
 │   │   ├── profesor.service.ts [592]
 │   │   ├── user.service.ts [415]
@@ -304,6 +305,7 @@
 │       ├── date.utils.ts [68]
 │       ├── index.ts [87]
 │       ├── logger.ts [101]
+│       ├── phone.utils.ts [46]
 │       ├── time-validation.ts [27]
 │       └── 📂 __tests__
 │           └── date.utils.test.ts [250]
@@ -316,6 +318,7 @@
 ├── test-qr-simple.ts [46]
 ├── test-registro-manual.ts [87]
 ├── test-server.ts [25]
+├── test-whatsapp.js [81]
 ├── 📂 tests
 │   ├── complete-flow.integration.test.ts [804]
 │   ├── 📂 integration
@@ -325,7 +328,7 @@
 │   ├── setup.ts [16]
 │   └── test-database.ts [56]
 ├── test_controller_flow.js [184]
-└── verify-schema.js [43]
+├── verify-schema.js [43]
 
 
 /* Directorio: \integration_test */
@@ -334,8 +337,8 @@
 ├── run_all_e2e_tests.dart [51]
 
 
-Total de líneas resumidas: 63412
-Total de archivos: 276
+Total de líneas resumidas: 64141
+Total de archivos: 279
 Promedio de líneas por archivo: 230
 Archivo más grande: main_e2e_test.dart (1474 líneas)
 
@@ -46876,7 +46879,7 @@ export default MateriaController;
 /* Inicio backend\src\controllers\notification.controller.ts */
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../config/database';
-import { notificationService } from '../services/notification.service';
+import { notificationService, NotificationChannel } from '../services/notification.service';
 import { notificationQueueService } from '../services/notification-queue.service';
 import logger from '../utils/logger';
 
@@ -46888,7 +46891,7 @@ export class NotificationController {
         try {
             const where: any = {
                 institucionId: institutionId,
-                estado: { in: ['AUSENTE', 'TARDANZA']
+                estado: { in: ['AUSENTE', 'TARDANZA'] }
             };
 
             if (classId) {
@@ -46916,13 +46919,13 @@ export class NotificationController {
             logger.info(`[NotificationController] Found ${attendances.length} records for manual trigger.`);
 
             let count = 0;
-            for (const att of attendances) {
+            for (const att of attendances) {
                 await prisma.colaNotificacion.create({
                     data: {
                         estudianteId: att.estudianteId,
                         asistenciaId: att.id,
                         estado: 'PENDING',
-                        programadoPara: new Date(
+                        programadoPara: new Date()
                     }
                 });
                 count++;
@@ -46942,12 +46945,19 @@ export class NotificationController {
         const { notificacionesActivas, canalNotificacion, modoNotificacionAsistencia, horaDisparoNotificacion } = req.body as any;
 
         try {
-            const config = await prisma.configuracion.update({
+            const config = await prisma.configuracion.upsert({
                 where: { institucionId: institutionId },
-                data: {
-                    notificacionesActivas,
+                update: {
+                    notificacionesActivas,
                     canalNotificacion,
                     modoNotificacionAsistencia,
+                    horaDisparoNotificacion
+                },
+                create: {
+                    institucionId: institutionId,
+                    notificacionesActivas: notificacionesActivas ?? false,
+                    canalNotificacion: canalNotificacion ?? 'NONE',
+                    modoNotificacionAsistencia: modoNotificacionAsistencia ?? 'MANUAL_ONLY',
                     horaDisparoNotificacion
                 }
             });
@@ -46955,6 +46965,110 @@ export class NotificationController {
             return reply.send({ success: true, config });
         } catch (error) {
             logger.error('[NotificationController] Error updating config', error);
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    }
+
+    public static async sendTestMessage(req: FastifyRequest, reply: FastifyReply) {
+        const { phone, channel } = req.body as { phone: string; channel?: string };
+        const user = (req as any).user;
+        if (user.rol !== 'super_admin') {
+            return reply.status(403).send({ error: 'Only super_admin can send test messages' });
+        }
+
+        if (!phone) {
+            return reply.status(400).send({ error: 'Phone number is required' });
+        }
+
+        try {
+            const notificationChannel = (channel as NotificationChannel) || NotificationChannel.WHATSAPP;
+            const result = await notificationService.sendTestMessage(phone, notificationChannel);
+
+            return reply.send({
+                success: result.success,
+                messageId: result.messageId,
+                error: result.error,
+                provider: result.provider,
+                rawResponse: result.rawResponse
+            });
+
+        } catch (error: any) {
+            logger.error('[NotificationController] Error sending test message', error);
+            return reply.status(500).send({ error: error.message || 'Internal Server Error' });
+        }
+    }
+
+    public static async getQueueStats(req: FastifyRequest, reply: FastifyReply) {
+        try {
+            const stats = await notificationQueueService.getQueueStats();
+            return reply.send({ success: true, stats });
+        } catch (error) {
+            logger.error('[NotificationController] Error getting queue stats', error);
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    }
+
+    public static async retryDeadLetter(req: FastifyRequest, reply: FastifyReply) {
+        const user = (req as any).user;
+
+        if (user.rol !== 'super_admin' && user.rol !== 'admin_institucion') {
+            return reply.status(403).send({ error: 'Insufficient permissions' });
+        }
+
+        try {
+            const count = await notificationQueueService.retryDeadLetterItems();
+            notificationQueueService.processPendingNotifications().catch(err => logger.error(err));
+
+            return reply.send({ success: true, retriedCount: count });
+        } catch (error) {
+            logger.error('[NotificationController] Error retrying dead letter', error);
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    }
+
+    public static async getNotificationLogs(req: FastifyRequest, reply: FastifyReply) {
+        const { studentId, institutionId, limit = 50, offset = 0 } = req.query as any;
+
+        try {
+            const where: any = {};
+
+            if (studentId) {
+                where.estudianteId = studentId;
+            }
+
+            const logs = await prisma.logNotificacion.findMany({
+                where,
+                orderBy: { fechaEnvio: 'desc' },
+                take: parseInt(limit),
+                skip: parseInt(offset),
+                include: {
+                    estudiante: {
+                        include: {
+                            usuario: {
+                                select: {
+                                    nombres: true,
+                                    apellidos: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const total = await prisma.logNotificacion.count({ where });
+
+            return reply.send({
+                success: true,
+                data: logs,
+                pagination: {
+                    total,
+                    limit: parseInt(limit),
+                    offset: parseInt(offset)
+                }
+            });
+
+        } catch (error) {
+            logger.error('[NotificationController] Error getting logs', error);
             return reply.status(500).send({ error: 'Internal Server Error' });
         }
     }
@@ -50150,14 +50264,25 @@ import { FastifyInstance } from 'fastify';
 import { NotificationController } from '../controllers/notification.controller';
 import { authenticate } from '../middleware/auth';
 
-export default async function notificationRoutes(fastify: FastifyInstance) {
+export default async function notificationRoutes(fastify: FastifyInstance) {
     fastify.post('/notifications/manual-trigger', {
         preValidation: [authenticate]
-    }, NotificationController.triggerManual);
-
+    }, NotificationController.triggerManual);
     fastify.put('/institutions/:institutionId/notification-config', {
         preValidation: [authenticate]
-    }, NotificationController.updateConfig);
+    }, NotificationController.updateConfig);
+    fastify.post('/notifications/test', {
+        preValidation: [authenticate]
+    }, NotificationController.sendTestMessage);
+    fastify.get('/notifications/queue/stats', {
+        preValidation: [authenticate]
+    }, NotificationController.getQueueStats);
+    fastify.post('/notifications/queue/retry-dead-letter', {
+        preValidation: [authenticate]
+    }, NotificationController.retryDeadLetter);
+    fastify.get('/notifications/logs', {
+        preValidation: [authenticate]
+    }, NotificationController.getNotificationLogs);
 }
 
 /* Fin backend\src\routes\notification.routes.ts */
@@ -55359,13 +55484,32 @@ export default MateriaService;
 /* Fin backend\src\services\materia.service.ts */
 
 /* Inicio backend\src\services\notification\notification.adapter.ts */
+import axios from 'axios';
+import { normalizePhoneNumber } from '../../utils/phone.utils';
+import logger from '../../utils/logger';
+
 export interface NotificationMessage {
     to: string;
     body: string;
     template?: {
         name: string;
-        language: string;
-        components?: any[];
+        language: {
+            code: string;
+        };
+        components?: Array<{
+            type: 'header' | 'body' | 'button';
+            parameters?: Array<{
+                type: 'text' | 'currency' | 'date_time' | 'image' | 'document' | 'video';
+                text?: string;
+                currency?: { fallback_value: string; code: string; amount_1000: number };
+                date_time?: { fallback_value: string };
+                image?: { link: string };
+                document?: { link: string; filename?: string };
+                video?: { link: string };
+            }>;
+            sub_type?: 'quick_reply' | 'url';
+            index?: number;
+        }>;
     };
 }
 
@@ -55459,25 +55603,104 @@ export class ConsoleAdapter implements INotificationAdapter {
 }
 
 export class WhatsAppAdapter implements INotificationAdapter {
-    private apiKey: string;
+    private token: string;
     private phoneNumberId: string;
+    private apiUrl: string;
+    private apiVersion: string = 'v22.0';
 
     constructor() {
-        this.apiKey = process.env.WHATSAPP_API_KEY || 'mock_key';
-        this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || 'mock_phone_id';
+        this.token = process.env.WHATSAPP_API_TOKEN || '';
+        this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+        this.apiUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+
+        if (!this.token || !this.phoneNumberId) {
+            logger.warn('[WhatsAppAdapter] ⚠️ Missing WHATSAPP_API_TOKEN or WHATSAPP_PHONE_NUMBER_ID. WhatsApp notifications will fail.');
+        } else {
+            logger.info('[WhatsAppAdapter] ✅ Initialized with Phone Number ID: ' + this.phoneNumberId.substring(0, 6) + '***');
+        }
     }
 
-    async send(message: NotificationMessage): Promise<NotificationResult> {
-        console.log(`[WhatsAppAdapter] Sending WhatsApp to ${message.to}: ${message.body}`);
-        if (process.env.NODE_ENV === 'production') {
-        }
-        await new Promise(resolve => setTimeout(resolve, 250));
-        return {
-            success: true,
-            messageId: `wa_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            provider: 'WHATSAPP',
-            rawResponse: { mock: true }
-        };
+    async send(message: NotificationMessage): Promise<NotificationResult> {
+        if (!this.token || !this.phoneNumberId) {
+            if (process.env.NODE_ENV !== 'production') {
+                logger.info(`[WhatsAppAdapter] 🔸 MOCK MODE - Would send to ${message.to}: ${message.body}`);
+                return {
+                    success: true,
+                    messageId: `wa_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                    provider: 'WHATSAPP',
+                    rawResponse: { mock: true, reason: 'Missing credentials in non-production' }
+                };
+            }
+            return {
+                success: false,
+                error: 'WhatsApp credentials not configured',
+                provider: 'WHATSAPP'
+            };
+        }
+
+        try {
+            const formattedPhone = normalizePhoneNumber(message.to);
+            logger.info(`[WhatsAppAdapter] 📤 Sending to ${formattedPhone}...`);
+            let payload: Record<string, any> = {
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: formattedPhone,
+            };
+            if (message.template) {
+                payload.type = 'template';
+                payload.template = {
+                    name: message.template.name,
+                    language: message.template.language,
+                    ...(message.template.components && { components: message.template.components })
+                };
+                logger.info(`[WhatsAppAdapter] 📋 Using template: ${message.template.name}`);
+            } else {
+                payload.type = 'text';
+                payload.text = {
+                    preview_url: false,
+                    body: message.body
+                };
+                logger.info(`[WhatsAppAdapter] 💬 Sending text message (requires 24h window)`);
+            }
+
+            const response = await axios.post(this.apiUrl, payload, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 30000 // 30 segundos timeout
+            });
+
+            const messageId = response.data.messages?.[0]?.id;
+            logger.info(`[WhatsAppAdapter] ✅ Message sent successfully. ID: ${messageId}`);
+
+            return {
+                success: true,
+                messageId: messageId,
+                provider: 'WHATSAPP',
+                rawResponse: response.data
+            };
+
+        } catch (error: any) {
+            const errorData = error.response?.data?.error || error.response?.data || error.message;
+            const statusCode = error.response?.status;
+
+            logger.error(`[WhatsAppAdapter] ❌ Error sending message (HTTP ${statusCode}):`, errorData);
+
+            let friendlyError = 'Unknown error';
+            if (typeof errorData === 'object') {
+                friendlyError = errorData.message || errorData.error_user_msg || JSON.stringify(errorData);
+            } else {
+                friendlyError = String(errorData);
+            }
+
+            return {
+                success: false,
+                error: friendlyError,
+                provider: 'WHATSAPP',
+                rawResponse: error.response?.data
+            };
+        }
     }
 
     getProviderName(): string {
@@ -55487,6 +55710,134 @@ export class WhatsAppAdapter implements INotificationAdapter {
 
 /* Fin backend\src\services\notification\notification.adapter.ts */
 
+/* Inicio backend\src\services\notification\whatsapp-templates.ts */
+
+
+export interface WhatsAppTemplateConfig {
+    name: string;
+    language: {
+        code: string;
+    };
+    components?: Array<{
+        type: 'header' | 'body' | 'button';
+        parameters?: Array<{
+            type: 'text' | 'image' | 'document';
+            text?: string;
+            image?: { link: string };
+            document?: { link: string; filename?: string };
+        }>;
+        sub_type?: 'quick_reply' | 'url';
+        index?: number;
+    }>;
+}
+
+export function buildAttendanceTemplate(
+    guardianName: string,
+    studentName: string,
+    status: string,
+    subjectName: string,
+    date: string
+): WhatsAppTemplateConfig {
+    return {
+        name: 'asistencia_notificacion', // Debe coincidir con el template creado en Meta
+        language: { code: 'es' },
+        components: [
+            {
+                type: 'body',
+                parameters: [
+                    { type: 'text', text: guardianName },
+                    { type: 'text', text: studentName },
+                    { type: 'text', text: status },
+                    { type: 'text', text: subjectName },
+                    { type: 'text', text: date }
+                ]
+            }
+        ]
+    };
+}
+
+export function buildDailySummaryTemplate(
+    guardianName: string,
+    studentName: string,
+    summary: string
+): WhatsAppTemplateConfig {
+    return {
+        name: 'resumen_diario_asistencia',
+        language: { code: 'es' },
+        components: [
+            {
+                type: 'body',
+                parameters: [
+                    { type: 'text', text: guardianName },
+                    { type: 'text', text: studentName },
+                    { type: 'text', text: summary }
+                ]
+            }
+        ]
+    };
+}
+
+export function buildAbsenceAlertTemplate(
+    guardianName: string,
+    studentName: string,
+    absenceCount: number
+): WhatsAppTemplateConfig {
+    return {
+        name: 'alerta_inasistencias',
+        language: { code: 'es' },
+        components: [
+            {
+                type: 'body',
+                parameters: [
+                    { type: 'text', text: guardianName },
+                    { type: 'text', text: studentName },
+                    { type: 'text', text: absenceCount.toString() }
+                ]
+            }
+        ]
+    };
+}
+
+export function buildWelcomeTemplate(
+    guardianName: string,
+    studentName: string
+): WhatsAppTemplateConfig {
+    return {
+        name: 'bienvenida_asistapp',
+        language: { code: 'es' },
+        components: [
+            {
+                type: 'body',
+                parameters: [
+                    { type: 'text', text: guardianName },
+                    { type: 'text', text: studentName }
+                ]
+            }
+        ]
+    };
+}
+
+export function buildTestTemplate(): WhatsAppTemplateConfig {
+    return {
+        name: 'hello_world',
+        language: { code: 'en_US' }
+    };
+}
+
+export const ATTENDANCE_STATUS_TEXT: Record<string, string> = {
+    'PRESENTE': 'asistencia ✅',
+    'AUSENTE': 'inasistencia ❌',
+    'TARDANZA': 'tardanza ⏰',
+    'JUSTIFICADO': 'falta justificada 📋',
+    'PERMISO': 'permiso autorizado 📝'
+};
+
+export function getStatusText(status: string): string {
+    return ATTENDANCE_STATUS_TEXT[status] || status.toLowerCase();
+}
+
+/* Fin backend\src\services\notification\whatsapp-templates.ts */
+
 /* Inicio backend\src\services\notification-queue.service.ts */
 import { prisma } from '../config/database';
 import logger from '../utils/logger';
@@ -55495,9 +55846,9 @@ import { notificationService } from './notification.service';
 export class NotificationQueueService {
 
     public async processPendingNotifications(): Promise<void> {
-        logger.info('[NotificationQueueService] Checking for pending notifications...');
+        logger.info('[NotificationQueueService] 🔄 Checking for pending notifications...');
 
-        try {
+        try {
             const pendingItems = await prisma.colaNotificacion.findMany({
                 where: {
                     estado: 'PENDING',
@@ -55506,9 +55857,14 @@ export class NotificationQueueService {
                     }
                 },
                 include: {
-                    estudiante: true,
+                    estudiante: {
+                        include: {
+                            usuario: true
+                        }
+                    },
                     asistencia: {
                         include: {
+                            institucion: true,
                             horario: {
                                 include: {
                                     materia: true
@@ -55517,100 +55873,144 @@ export class NotificationQueueService {
                         }
                     }
                 },
-                take: 100 // Process in batches
+                take: 100, // Procesar en lotes de 100
+                orderBy: {
+                    programadoPara: 'asc'
+                }
             });
 
             if (pendingItems.length === 0) {
-                logger.info('[NotificationQueueService] No pending notifications found.');
+                logger.info('[NotificationQueueService] ✅ No pending notifications found.');
                 return;
             }
 
-            logger.info(`[NotificationQueueService] Found ${pendingItems.length} pending notifications.`);
-            const groups = new Map<string, typeof pendingItems>();
+            logger.info(`[NotificationQueueService] 📬 Found ${pendingItems.length} pending notifications.`);
+            const groupedByStudent = new Map<string, typeof pendingItems>();
 
             for (const item of pendingItems) {
                 const key = item.estudianteId;
-                if (!groups.has(key)) {
-                    groups.set(key, []);
+                if (!groupedByStudent.has(key)) {
+                    groupedByStudent.set(key, []);
                 }
-                groups.get(key)?.push(item);
-            }
-            for (const [studentId, items] of groups) {
-                await this.processGroup(studentId, items);
+                groupedByStudent.get(key)?.push(item);
             }
 
+            logger.info(`[NotificationQueueService] 👥 Grouped into ${groupedByStudent.size} students.`);
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const [studentId, items] of groupedByStudent) {
+                const success = await this.processStudentGroup(studentId, items);
+                if (success) successCount++; else failCount++;
+            }
+
+            logger.info(`[NotificationQueueService] 📊 Processing complete: ${successCount} success, ${failCount} failed.`);
+
         } catch (error) {
-            logger.error('[NotificationQueueService] Error processing queue', error);
+            logger.error('[NotificationQueueService] ❌ Error processing queue', error);
         }
     }
 
-    private async processGroup(studentId: string, items: any[]): Promise<void> {
+    private async processStudentGroup(studentId: string, items: any[]): Promise<boolean> {
         const student = items[0].estudiante;
         const phone = student.telefonoResponsable;
 
         if (!phone) {
-            logger.warn(`[NotificationQueueService] Student ${studentId} has no guardian phone. Marking as FAILED.`);
-            await this.updateStatus(items, 'FAILED');
-            return;
+            logger.warn(`[NotificationQueueService] ⚠️ Student ${studentId} has no guardian phone. Marking as FAILED.`);
+            await this.updateItemsStatus(items, 'FAILED', 'No guardian phone number');
+            return false;
         }
-        const lines = items.map(item => {
-            const materia = item.asistencia?.horario?.materia?.nombre || 'Clase desconocida';
-            const estado = item.asistencia?.estado || 'Falta';
-            return `- ${materia}: ${estado}`;
-        });
+        await this.updateItemsStatus(items, 'PROCESSING');
 
-        const body = `Hola, reporte de asistencia para ${student.nombreResponsable || 'su acudido'}:\n${lines.join('\n')}`;
-        await this.updateStatus(items, 'PROCESSING');
+        try {
+            const result = await notificationService.sendDailySummary(studentId, items);
 
-        try {
-            const result = await notificationService.sendRawMessage(items[0].institucionId, studentId, body, 'ATTENDANCE');
+            if (result.success) {
+                await this.updateItemsStatus(items, 'SENT');
+                logger.info(`[NotificationQueueService] ✅ Sent summary to ${phone} for student ${studentId}`);
+                return true;
+            } else {
+                throw new Error(result.error || 'Unknown error');
+            }
 
-            const status = result.success ? 'SENT' : 'FAILED';
-            await this.updateStatus(items, status);
         } catch (error: any) {
-            logger.error(`[NotificationQueueService] Error sending to ${studentId}`, error);
-            const currentIntentos = items[0].intentos || 0;
-            const maxIntentos = 3
+            logger.error(`[NotificationQueueService] ❌ Error sending to ${studentId}:`, error.message);
 
-            if (currentIntentos < maxIntentos) {
-                const backoffMinutes = Math.pow(2, currentIntentos) * 5
+            const currentRetries = items[0].intentos || 0;
+            const maxRetries = items[0].maxIntentos || 3;
+
+            if (currentRetries < maxRetries) {
+                const backoffMinutes = Math.pow(2, currentRetries) * 5;
                 const retryTime = new Date(Date.now() + backoffMinutes * 60 * 1000);
 
-                await this.updateStatusWithRetry(items, 'PENDING', currentIntentos + 1, error.message, retryTime);
+                await this.updateItemsWithRetry(items, currentRetries + 1, error.message, retryTime);
+                logger.info(`[NotificationQueueService] 🔄 Scheduled retry ${currentRetries + 1}/${maxRetries} at ${retryTime.toISOString()}`);
             } else {
-                await this.updateStatus(items, 'DEAD_LETTER', error.message);
+                await this.updateItemsStatus(items, 'DEAD_LETTER', error.message);
+                logger.error(`[NotificationQueueService] 💀 Max retries exceeded for student ${studentId}. Moved to DEAD_LETTER.`);
             }
+
+            return false;
         }
     }
 
-    private async updateStatus(items: any[], status: string, ultimoError?: string): Promise<void> {
-        const ids = items.map(i => i.id);
+    private async updateItemsStatus(items: any[], status: string, error?: string): Promise<void> {
+        const ids = items.map(i => i.id);
         await prisma.colaNotificacion.updateMany({
-            where: {
-                id: { in: ids }
-            },
+            where: { id: { in: ids } },
             data: {
                 estado: status,
-                ultimoError: ultimoError,
+                ultimoError: error,
                 updatedAt: new Date()
             }
         });
     }
 
-    private async updateStatusWithRetry(items: any[], status: string, intentos: number, ultimoError: string, retryTime: Date): Promise<void> {
-        const ids = items.map(i => i.id);
+    private async updateItemsWithRetry(items: any[], retryCount: number, error: string, retryTime: Date): Promise<void> {
+        const ids = items.map(i => i.id);
         await prisma.colaNotificacion.updateMany({
-            where: {
-                id: { in: ids }
-            },
+            where: { id: { in: ids } },
             data: {
-                estado: status,
-                intentos: intentos,
-                ultimoError: ultimoError,
+                estado: 'PENDING',
+                intentos: retryCount,
+                ultimoError: error,
                 programadoPara: retryTime,
                 updatedAt: new Date()
             }
         });
+    }
+
+    public async getQueueStats(): Promise<{
+        pending: number;
+        processing: number;
+        sent: number;
+        failed: number;
+        deadLetter: number;
+    }> {
+        const [pending, processing, sent, failed, deadLetter] = await Promise.all([
+            prisma.colaNotificacion.count({ where: { estado: 'PENDING' } }),
+            prisma.colaNotificacion.count({ where: { estado: 'PROCESSING' } }),
+            prisma.colaNotificacion.count({ where: { estado: 'SENT' } }),
+            prisma.colaNotificacion.count({ where: { estado: 'FAILED' } }),
+            prisma.colaNotificacion.count({ where: { estado: 'DEAD_LETTER' } })
+        ]);
+
+        return { pending, processing, sent, failed, deadLetter };
+    }
+
+    public async retryDeadLetterItems(): Promise<number> {
+        const result = await prisma.colaNotificacion.updateMany({
+            where: { estado: 'DEAD_LETTER' },
+            data: {
+                estado: 'PENDING',
+                intentos: 0,
+                programadoPara: new Date(),
+                updatedAt: new Date()
+            }
+        });
+
+        logger.info(`[NotificationQueueService] 🔄 Reset ${result.count} DEAD_LETTER items to PENDING`);
+        return result.count;
     }
 }
 
@@ -55621,21 +56021,53 @@ export const notificationQueueService = new NotificationQueueService();
 /* Inicio backend\src\services\notification.service.ts */
 import { prisma } from '../config/database';
 import logger from '../utils/logger';
-import { ConsoleAdapter, EmailAdapter, INotificationAdapter, NotificationResult, TwilioAdapter, WhatsAppAdapter } from './notification/notification.adapter';
+import { ConsoleAdapter, EmailAdapter, INotificationAdapter, NotificationMessage, NotificationResult, TwilioAdapter, WhatsAppAdapter } from './notification/notification.adapter';
+import { buildAttendanceTemplate, buildDailySummaryTemplate, buildAbsenceAlertTemplate, buildWelcomeTemplate, buildTestTemplate, getStatusText } from './notification/whatsapp-templates';
+
+export enum NotificationStrategy {
+
+    INSTANT = 'INSTANT',
+
+    END_OF_DAY = 'END_OF_DAY',
+
+    MANUAL_ONLY = 'MANUAL_ONLY'
+}
+
+export enum NotificationChannel {
+    WHATSAPP = 'WHATSAPP',
+    SMS = 'SMS',
+    EMAIL = 'EMAIL',
+    CONSOLE = 'CONSOLE',
+    NONE = 'NONE'
+}
 
 export class NotificationService {
-    private getAdapterForInstitution(institucionId: string): INotificationAdapter {
-        const provider = process.env.NOTIFICATION_PROVIDER || 'CONSOLE';
 
-        if (provider === 'WHATSAPP') {
-            return new WhatsAppAdapter();
-        } else if (provider === 'SMS') {
-            return new TwilioAdapter();
-        } else if (provider === 'EMAIL') {
-            return new EmailAdapter();
-        } else {
-            return new ConsoleAdapter();
+    private getAdapterForInstitution(channel: string): INotificationAdapter {
+        switch (channel) {
+            case NotificationChannel.WHATSAPP:
+                return new WhatsAppAdapter();
+            case NotificationChannel.SMS:
+                return new TwilioAdapter();
+            case NotificationChannel.EMAIL:
+                return new EmailAdapter();
+            default:
+                return new ConsoleAdapter();
         }
+    }
+
+    private async getInstitutionConfig(institucionId: string) {
+        const config = await prisma.configuracion.findUnique({
+            where: { institucionId }
+        });
+
+        return {
+            enabled: config?.notificacionesActivas ?? false,
+            channel: (config?.canalNotificacion ?? 'NONE') as NotificationChannel,
+            strategy: (config?.modoNotificacionAsistencia ?? 'MANUAL_ONLY') as NotificationStrategy,
+            scheduledTime: config?.horaDisparoNotificacion ?? '18:00:00',
+            absenceThreshold: config?.umbralFaltas ?? 3
+        };
     }
 
     public async notifyAttendanceCreated(attendanceId: string): Promise<void> {
@@ -55643,12 +56075,12 @@ export class NotificationService {
             const attendance = await prisma.asistencia.findUnique({
                 where: { id: attendanceId },
                 include: {
-                    estudiante: true,
-                    institucion: {
+                    estudiante: {
                         include: {
-                            configuraciones: true
+                            usuario: true
                         }
                     },
+                    institucion: true,
                     horario: {
                         include: {
                             materia: true
@@ -55660,27 +56092,140 @@ export class NotificationService {
             if (!attendance) {
                 logger.warn(`[NotificationService] Attendance ${attendanceId} not found`);
                 return;
-            }
-
-            const config = attendance.institucion.configuraciones;
-            if (!config || !config.notificacionesActivas || config.canalNotificacion === 'NONE') {
+            }
+            const config = await this.getInstitutionConfig(attendance.institucionId);
+            if (!config.enabled || config.channel === NotificationChannel.NONE) {
+                logger.debug(`[NotificationService] Notifications disabled for institution ${attendance.institucionId}`);
                 return;
             }
 
             const student = attendance.estudiante;
-            if (!student.aceptaNotificaciones || !student.telefonoResponsable) {
+            if (!student.aceptaNotificaciones) {
+                logger.debug(`[NotificationService] Student ${student.id} has notifications disabled`);
+                return;
+            }
+
+            if (!student.telefonoResponsable) {
+                logger.warn(`[NotificationService] Student ${student.id} has no guardian phone number`);
                 return;
             }
-            const mode = config.modoNotificacionAsistencia
+            switch (config.strategy) {
+                case NotificationStrategy.INSTANT:
+                    await this.sendInstantNotification(attendance, student, config.channel);
+                    break;
 
-            if (mode === 'INSTANT') {
-                await this.sendInstantNotification(attendance, student.telefonoResponsable!);
-            } else {
-                await this.queueNotification(attendance, mode, config.horaDisparoNotificacion);
+                case NotificationStrategy.END_OF_DAY:
+                    await this.queueForEndOfDay(attendance, config.scheduledTime);
+                    break;
+
+                case NotificationStrategy.MANUAL_ONLY:
+                default:
+                    logger.debug(`[NotificationService] Manual mode - attendance queued but not auto-sent`);
+                    break;
+            }
+            if (attendance.estado === 'AUSENTE') {
+                await this.checkAbsenceThreshold(student.id, attendance.institucionId, config);
             }
 
         } catch (error) {
             logger.error('[NotificationService] Error processing attendance notification', error);
+        }
+    }
+
+    private async sendInstantNotification(
+        attendance: any,
+        student: any,
+        channel: NotificationChannel
+    ): Promise<void> {
+        const guardianName = student.nombreResponsable || 'Estimado acudiente';
+        const studentName = `${student.usuario.nombres} ${student.usuario.apellidos}`;
+        const status = getStatusText(attendance.estado);
+        const subjectName = attendance.horario.materia.nombre;
+        const date = attendance.fecha.toISOString().split('T')[0];
+
+        const adapter = this.getAdapterForInstitution(channel);
+        const message: NotificationMessage = {
+            to: student.telefonoResponsable!,
+            body: `Hola ${guardianName}, ${studentName} registró ${status} en ${subjectName} el ${date}.`
+        };
+        if (channel === NotificationChannel.WHATSAPP) {
+            message.template = buildAttendanceTemplate(
+                guardianName,
+                studentName,
+                status,
+                subjectName,
+                date
+            );
+        }
+
+        const result = await adapter.send(message);
+        await this.logNotification(student.id, student.telefonoResponsable!, message.body, result, channel);
+
+        logger.info(`[NotificationService] ${channel} notification sent to ${student.telefonoResponsable}: ${result.success ? 'OK' : 'FAILED'}`);
+    }
+
+    private async queueForEndOfDay(attendance: any, scheduledTime: string): Promise<void> {
+        const now = new Date();
+        const [hours, minutes] = scheduledTime.split(':').map(Number);
+        const scheduledFor = new Date(now);
+        scheduledFor.setHours(hours, minutes, 0, 0);
+        if (scheduledFor <= now) {
+            scheduledFor.setDate(scheduledFor.getDate() + 1);
+        }
+
+        await prisma.colaNotificacion.create({
+            data: {
+                estudianteId: attendance.estudianteId,
+                asistenciaId: attendance.id,
+                estado: 'PENDING',
+                programadoPara: scheduledFor
+            }
+        });
+
+        logger.info(`[NotificationService] Attendance ${attendance.id} queued for ${scheduledFor.toISOString()}`);
+    }
+
+    private async checkAbsenceThreshold(
+        studentId: string,
+        institucionId: string,
+        config: { absenceThreshold: number; channel: NotificationChannel }
+    ): Promise<void> {
+        const absenceCount = await prisma.asistencia.count({
+            where: {
+                estudianteId: studentId,
+                estado: 'AUSENTE',
+                horario: {
+                    periodoAcademico: {
+                        activo: true
+                    }
+                }
+            }
+        });
+        if (absenceCount >= config.absenceThreshold) {
+            const student = await prisma.estudiante.findUnique({
+                where: { id: studentId },
+                include: { usuario: true }
+            });
+
+            if (student?.telefonoResponsable) {
+                const adapter = this.getAdapterForInstitution(config.channel);
+                const guardianName = student.nombreResponsable || 'Estimado acudiente';
+                const studentName = `${student.usuario.nombres} ${student.usuario.apellidos}`;
+
+                const message: NotificationMessage = {
+                    to: student.telefonoResponsable,
+                    body: `⚠️ Alerta: ${studentName} ha acumulado ${absenceCount} inasistencias. Por favor comuníquese con la institución.`
+                };
+
+                if (config.channel === NotificationChannel.WHATSAPP) {
+                    message.template = buildAbsenceAlertTemplate(guardianName, studentName, absenceCount);
+                }
+
+                const result = await adapter.send(message);
+                await this.logNotification(studentId, student.telefonoResponsable, message.body, result, config.channel);
+
+                logger.warn(`[NotificationService] Absence threshold alert sent for student ${studentId}: ${absenceCount} absences`);
+            }
         }
     }
 
@@ -55689,53 +56234,116 @@ export class NotificationService {
         studentId: string,
         message: string,
         type: 'ATTENDANCE' | 'REMINDER' | 'ALERT' = 'ATTENDANCE'
-    ): Promise<NotificationResult> {
+    ): Promise<NotificationResult> {
+        const config = await this.getInstitutionConfig(institucionId);
+
         const student = await prisma.estudiante.findUnique({
             where: { id: studentId },
             select: { telefonoResponsable: true }
         });
 
-        const adapter = this.getAdapterForInstitution(institucionId);
+        if (!student?.telefonoResponsable) {
+            return {
+                success: false,
+                error: 'Student has no guardian phone number',
+                provider: config.channel
+            };
+        }
+
+        const adapter = this.getAdapterForInstitution(config.channel);
         const result = await adapter.send({
-            to: student?.telefonoResponsable || '',
+            to: student.telefonoResponsable,
             body: message
-        });
-        await prisma.logNotificacion.create({
-            data: {
-                estudianteId: studentId,
-                telefonoDestino: student?.telefonoResponsable || '',
-                mensaje: message,
-                exitoso: result.success,
-                errorMensaje: result.error || null
-            }
         });
+
+        await this.logNotification(studentId, student.telefonoResponsable, message, result, config.channel);
 
         return result;
     }
 
-    private async sendInstantNotification(attendance: any, phone: string): Promise<void> {
-        const body = `Hola, le informamos que ${attendance.estudiante.nombreResponsable || 'su acudido'} faltó a la clase de ${attendance.horario.materia.nombre} el día ${attendance.fecha.toISOString().split('T')[0]}. Estado: ${attendance.estado}.`;
-        await this.sendRawMessage(attendance.institucionId, attendance.estudianteId, body, 'ATTENDANCE');
+    public async sendTestMessage(phone: string, channel: NotificationChannel = NotificationChannel.WHATSAPP): Promise<NotificationResult> {
+        const adapter = this.getAdapterForInstitution(channel);
+
+        const message: NotificationMessage = {
+            to: phone,
+            body: 'Este es un mensaje de prueba de AsistApp 🎉'
+        };
+        if (channel === NotificationChannel.WHATSAPP) {
+            message.template = buildTestTemplate();
+        }
+
+        const result = await adapter.send(message);
+
+        logger.info(`[NotificationService] Test message to ${phone}: ${result.success ? 'OK' : 'FAILED'}`);
+
+        return result;
     }
 
-    private async queueNotification(attendance: any, mode: string, scheduledTime?: string | null): Promise<void> {
-        let scheduledFor = new Date();
+    private async logNotification(
+        studentId: string,
+        phone: string,
+        message: string,
+        result: NotificationResult,
+        channel: NotificationChannel
+    ): Promise<void> {
+        try {
+            await prisma.logNotificacion.create({
+                data: {
+                    estudianteId: studentId,
+                    telefonoDestino: phone,
+                    mensaje: message,
+                    proveedor: channel,
+                    providerMessageId: result.messageId,
+                    rawResponse: result.rawResponse as any,
+                    exitoso: result.success,
+                    errorMensaje: result.error || null
+                }
+            });
+        } catch (error) {
+            logger.error('[NotificationService] Error logging notification', error);
+        }
+    }
 
-        if (mode === 'END_OF_DAY' && scheduledTime) {
-            const [hours, minutes] = scheduledTime.split(':').map(Number);
-            scheduledFor.setHours(hours, minutes, 0, 0);
-        }
-        await prisma.colaNotificacion.create({
-            data: {
-                estudianteId: attendance.estudianteId,
-                asistenciaId: attendance.id,
-                estado: 'PENDING',
-                programadoPara: scheduledFor,
-            }
+    public async sendDailySummary(studentId: string, items: any[]): Promise<NotificationResult> {
+        const student = await prisma.estudiante.findUnique({
+            where: { id: studentId },
+            include: { usuario: true }
         });
-    }
 
-    public async processQueue(): Promise<void> {
+        if (!student?.telefonoResponsable) {
+            return { success: false, error: 'No guardian phone', provider: 'NONE' };
+        }
+
+        const institucionId = items[0]?.asistencia?.institucionId;
+        if (!institucionId) {
+            return { success: false, error: 'No institution found', provider: 'NONE' };
+        }
+
+        const config = await this.getInstitutionConfig(institucionId);
+        const adapter = this.getAdapterForInstitution(config.channel);
+
+        const guardianName = student.nombreResponsable || 'Estimado acudiente';
+        const studentName = `${student.usuario.nombres} ${student.usuario.apellidos}`;
+        const summaryLines = items.map(item => {
+            const materia = item.asistencia?.horario?.materia?.nombre || 'Clase';
+            const estado = getStatusText(item.asistencia?.estado || 'AUSENTE');
+            return `• ${materia}: ${estado}`;
+        });
+        const summary = summaryLines.join('\n');
+
+        const message: NotificationMessage = {
+            to: student.telefonoResponsable,
+            body: `Hola ${guardianName}, resumen de asistencia de ${studentName} para hoy:\n${summary}`
+        };
+
+        if (config.channel === NotificationChannel.WHATSAPP) {
+            message.template = buildDailySummaryTemplate(guardianName, studentName, summary);
+        }
+
+        const result = await adapter.send(message);
+        await this.logNotification(studentId, student.telefonoResponsable, message.body, result, config.channel);
+
+        return result;
     }
 }
 
@@ -57936,6 +58544,55 @@ export default logger;
 
 /* Fin backend\src\utils\logger.ts */
 
+/* Inicio backend\src\utils\phone.utils.ts */
+
+
+export function normalizePhoneNumber(phone: string, defaultCountryCode: string = '57'): string {
+    if (!phone) {
+        throw new Error('Phone number is required');
+    }
+    let cleaned = phone.replace(/\D/g, '');
+    if (!cleaned) {
+        throw new Error('Invalid phone number: no digits found');
+    }
+    if (cleaned.length === 10 && cleaned.startsWith('3')) {
+        cleaned = defaultCountryCode + cleaned;
+    }
+    if (cleaned.length < 10) {
+        throw new Error(`Invalid phone number: too short (${cleaned.length} digits)`);
+    }
+    if (cleaned.length > 15) {
+        throw new Error(`Invalid phone number: too long (${cleaned.length} digits)`);
+    }
+
+    return cleaned;
+}
+
+export function isValidPhoneNumber(phone: string): boolean {
+    try {
+        normalizePhoneNumber(phone);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+export function formatPhoneForDisplay(phone: string): string {
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 12 && cleaned.startsWith('57')) {
+        return `+${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8)}`;
+    }
+    if (cleaned.length >= 11) {
+        const countryCode = cleaned.slice(0, 2);
+        const rest = cleaned.slice(2);
+        return `+${countryCode} ${rest}`;
+    }
+
+    return phone;
+}
+
+/* Fin backend\src\utils\phone.utils.ts */
+
 /* Inicio backend\src\utils\time-validation.ts */
 import { ValidationError } from '../types';
 
@@ -59932,6 +60589,90 @@ const start = async () => {
 
 start();
 /* Fin backend\test-server.ts */
+
+/* Inicio backend\test-whatsapp.js */
+#!/usr/bin/env node
+
+const axios = require('axios');
+const WHATSAPP_API_TOKEN = 'EAATWH2LvOj8BQJJZBaJOTBZBTurURcwAeSckXg3A148YNpZAyEA8BEargvY68FjDeziIZA5ZBLQ1okrmZCZC3hFs2ZCKEWfGIiYKxvCSOPcSZBQXFZASKtodSPNb1q8smLK0IETAZC8kaxTy2pyUsPOwHFGQKOr0O0g6CtCCtV3EfnHyoLwTgBMLaGPIvz3JsZBd46vRCTyfBZAyY39ZBkjcpOixLCoWYADlBHvcZC024oDrg17bpf8ayZAZA8WUNcl4WTmWsgco0Uzrau7xS5cDN4rRWZC03iizSWeJyDSZBdHQVcZD';
+const WHATSAPP_PHONE_NUMBER_ID = '947537288440449';
+
+async function sendWhatsAppMessage(to, message) {
+  try {
+    console.log(`📤 Enviando mensaje a ${to}...`);
+
+    const response = await axios.post(
+      `https://graph.facebook.com/v22.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: 'whatsapp',
+        to: to,
+        type: 'text',
+        text: { body: message }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${WHATSAPP_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    console.log('✅ Mensaje enviado exitosamente!');
+    console.log('📋 ID del mensaje:', response.data.messages[0].id);
+    console.log('📱 Número de destino:', to);
+    console.log('💬 Mensaje:', message.substring(0, 50) + (message.length > 50 ? '...' : ''));
+
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al enviar mensaje:');
+    if (error.response) {
+      console.error('   Código de estado:', error.response.status);
+      console.error('   Respuesta:', JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error('   Error:', error.message);
+    }
+    throw error;
+  }
+}
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    const testNumber = '573103816321';
+    const testMessage = `🎓 *AsistApp - Prueba Interactiva*\n\n¡Hola! Este es un mensaje de prueba enviado desde el script de Node.js.\n\n📅 Fecha: ${new Date().toLocaleString('es-CO')}\n⏰ Hora: ${new Date().toLocaleTimeString('es-CO')}\n\n✅ API WhatsApp v22.0 funcionando correctamente\n📱 Script: test-whatsapp.js\n\n🚀 ¡AsistApp listo para producción!`;
+
+    console.log('🚀 Enviando mensaje de prueba a:', testNumber);
+    await sendWhatsAppMessage(testNumber, testMessage);
+
+  } else if (args.length === 1) {
+    const phoneNumber = args[0];
+    const defaultMessage = `🎓 *AsistApp - Mensaje Personalizado*\n\n¡Hola! Este mensaje fue enviado específicamente a tu número.\n\n📱 Número: ${phoneNumber}\n📅 Fecha: ${new Date().toLocaleString('es-CO')}\n\n✅ WhatsApp API funcionando correctamente`;
+
+    await sendWhatsAppMessage(phoneNumber, defaultMessage);
+
+  } else if (args.length >= 2) {
+    const phoneNumber = args[0];
+    const customMessage = args.slice(1).join(' ');
+
+    await sendWhatsAppMessage(phoneNumber, customMessage);
+
+  } else {
+    console.log('📖 Uso del script:');
+    console.log('  node test-whatsapp.js                    # Enviar mensaje de prueba');
+    console.log('  node test-whatsapp.js +573103816321      # Enviar mensaje por defecto');
+    console.log('  node test-whatsapp.js +573103816321 "Hola mundo"  # Mensaje personalizado');
+    process.exit(1);
+  }
+}
+if (require.main === module) {
+  main().catch(error => {
+    console.error('💥 Error fatal:', error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { sendWhatsAppMessage };
+/* Fin backend\test-whatsapp.js */
 
 /* Inicio backend\tests\complete-flow.integration.test.ts */
 

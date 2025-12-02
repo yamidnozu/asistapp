@@ -124,15 +124,15 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
       'telefono': _telefonoController.text.trim(),
       'email': _emailController.text.trim(),
       'activa': _activa,
-      'notificacionesActivas': _notificacionesActivas,
-      'canalNotificacion': _canalNotificacion,
-      'modoNotificacionAsistencia': _modoNotificacionAsistencia,
-      'horaDisparoNotificacion': _horaDisparoNotificacion,
     };
 
     try {
+      String? institutionId;
+      bool success = false;
+
       if (isEditing) {
-        await institutionProvider.updateInstitution(
+        // Actualizar institucion existente
+        success = await institutionProvider.updateInstitution(
           token,
           widget.institution!.id,
           nombre: institutionData['nombre'] as String?,
@@ -141,8 +141,26 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
           email: institutionData['email'] as String?,
           activa: institutionData['activa'] as bool?,
         );
+        institutionId = widget.institution!.id;
       } else {
-        await institutionProvider.createInstitution(token, institutionData);
+        // Crear nueva institucion
+        success = await institutionProvider.createInstitution(token, institutionData);
+        // Obtener el ID de la institucion recien creada
+        if (success && institutionProvider.institutions.isNotEmpty) {
+          institutionId = institutionProvider.institutions.first.id;
+        }
+      }
+
+      // Si la operacion fue exitosa, guardar la configuracion de notificaciones
+      if (success && institutionId != null) {
+        await institutionProvider.updateNotificationConfig(
+          token,
+          institutionId,
+          notificacionesActivas: _notificacionesActivas,
+          canalNotificacion: _canalNotificacion,
+          modoNotificacionAsistencia: _modoNotificacionAsistencia,
+          horaDisparoNotificacion: _horaDisparoNotificacion,
+        );
       }
 
       if (mounted) {
@@ -150,6 +168,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
       }
     } catch (e) {
       // Error handling is done in the provider
+      debugPrint('Error in _submitForm: $e');
     }
   }
 }

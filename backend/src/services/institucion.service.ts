@@ -263,6 +263,7 @@ export class InstitucionService {
             include: { usuario: true },
             take: 1,
           },
+          configuraciones: true, // Incluir configuración de notificaciones
         },
       });
 
@@ -276,6 +277,15 @@ export class InstitucionService {
   const telefono = institution.telefono ?? (fallbackAdmin?.telefono ?? null);
   const email = institution.email ?? (fallbackAdmin?.email ?? null);
 
+      // Mapear configuraciones de notificación si existen
+      const configuraciones = institution.configuraciones ? {
+        notificacionesActivas: institution.configuraciones.notificacionesActivas,
+        canalNotificacion: institution.configuraciones.canalNotificacion,
+        modoNotificacionAsistencia: institution.configuraciones.modoNotificacionAsistencia,
+        horaDisparoNotificacion: institution.configuraciones.horaDisparoNotificacion,
+        umbralFaltas: institution.configuraciones.umbralFaltas,
+      } : null;
+
       const result = {
         id: institution.id,
         nombre: institution.nombre,
@@ -283,6 +293,7 @@ export class InstitucionService {
         telefono,
         email,
         activa: institution.activa,
+        configuraciones,
         createdAt: institution.createdAt.toISOString(),
         updatedAt: institution.updatedAt.toISOString(),
       };

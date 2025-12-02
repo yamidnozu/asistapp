@@ -236,4 +236,55 @@ class InstitutionService {
       return false;
     }
   }
+
+  /// Actualiza la configuracion de notificaciones de una institucion
+  Future<bool> updateNotificationConfig(
+    String accessToken,
+    String institutionId, {
+    required bool notificacionesActivas,
+    required String canalNotificacion,
+    required String modoNotificacionAsistencia,
+    String? horaDisparoNotificacion,
+    int? umbralInasistenciasAlerta,
+  }) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+      // La ruta de notificaciones usa /api/institutions (no /instituciones)
+      final url = '$baseUrlValue/api/institutions/$institutionId/notification-config';
+      
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'notificacionesActivas': notificacionesActivas,
+          'canalNotificacion': canalNotificacion,
+          'modoNotificacionAsistencia': modoNotificacionAsistencia,
+          if (horaDisparoNotificacion != null) 'horaDisparoNotificacion': horaDisparoNotificacion,
+          if (umbralInasistenciasAlerta != null) 'umbralInasistenciasAlerta': umbralInasistenciasAlerta,
+        }),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('PUT $url - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['success'] == true;
+      } else {
+        debugPrint('Error updating notification config: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error updating notification config: $e');
+      debugPrint('StackTrace: $stackTrace');
+      return false;
+    }
+  }
 }
