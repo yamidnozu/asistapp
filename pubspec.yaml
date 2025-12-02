@@ -1,6 +1,6 @@
 name: asistapp
 description: "Aplicación de registro de asistencia escolar con escaneo QR"
-version: 1.0.10+11
+version: 1.0.11+12
 environment:
   sdk: ">=3.4.0 <4.0.0"
 
@@ -36,7 +36,6 @@ flutter:
 
   # Configuración de assets
   assets:
-    - assets/audio/
     - assets/icon/
     - pubspec.yaml
     # .env and .env.test are environment files and should not be treated as Flutter assets.
