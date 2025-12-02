@@ -1,10 +1,29 @@
+import axios from 'axios';
+import { normalizePhoneNumber } from '../../utils/phone.utils';
+import logger from '../../utils/logger';
+
 export interface NotificationMessage {
     to: string;
     body: string;
     template?: {
         name: string;
-        language: string;
-        components?: any[];
+        language: {
+            code: string;
+        };
+        components?: Array<{
+            type: 'header' | 'body' | 'button';
+            parameters?: Array<{
+                type: 'text' | 'currency' | 'date_time' | 'image' | 'document' | 'video';
+                text?: string;
+                currency?: { fallback_value: string; code: string; amount_1000: number };
+                date_time?: { fallback_value: string };
+                image?: { link: string };
+                document?: { link: string; filename?: string };
+                video?: { link: string };
+            }>;
+            sub_type?: 'quick_reply' | 'url';
+            index?: number;
+        }>;
     };
 }
 
@@ -138,52 +157,121 @@ export class ConsoleAdapter implements INotificationAdapter {
 }
 
 export class WhatsAppAdapter implements INotificationAdapter {
-    private apiKey: string;
+    private token: string;
     private phoneNumberId: string;
+    private apiUrl: string;
+    private apiVersion: string = 'v17.0';
 
     constructor() {
-        this.apiKey = process.env.WHATSAPP_API_KEY || 'mock_key';
-        this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || 'mock_phone_id';
+        this.token = process.env.WHATSAPP_API_TOKEN || '';
+        this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+        this.apiUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+
+        if (!this.token || !this.phoneNumberId) {
+            logger.warn('[WhatsAppAdapter] ⚠️ Missing WHATSAPP_API_TOKEN or WHATSAPP_PHONE_NUMBER_ID. WhatsApp notifications will fail.');
+        } else {
+            logger.info('[WhatsAppAdapter] ✅ Initialized with Phone Number ID: ' + this.phoneNumberId.substring(0, 6) + '***');
+        }
     }
 
     async send(message: NotificationMessage): Promise<NotificationResult> {
-        console.log(`[WhatsAppAdapter] Sending WhatsApp to ${message.to}: ${message.body}`);
-
-        // Mock implementation for development
-        if (process.env.NODE_ENV === 'production') {
-            // In production, use WhatsApp Business API
-            // const response = await fetch(`https://graph.facebook.com/v17.0/${this.phoneNumberId}/messages`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Authorization': `Bearer ${this.apiKey}`,
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         messaging_product: 'whatsapp',
-            //         to: message.to,
-            //         type: message.template ? 'template' : 'text',
-            //         ...(message.template ? { template: message.template } : { text: { body: message.body } })
-            //     })
-            // });
-            // const data = await response.json();
-            // return {
-            //     success: response.ok,
-            //     messageId: data.messages?.[0]?.id,
-            //     provider: 'WHATSAPP',
-            //     rawResponse: data
-            // };
+        // Si no hay configuración, usar modo mock en desarrollo
+        if (!this.token || !this.phoneNumberId) {
+            if (process.env.NODE_ENV !== 'production') {
+                logger.info(`[WhatsAppAdapter] 🔸 MOCK MODE - Would send to ${message.to}: ${message.body}`);
+                return {
+                    success: true,
+                    messageId: `wa_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                    provider: 'WHATSAPP',
+                    rawResponse: { mock: true, reason: 'Missing credentials in non-production' }
+                };
+            }
+            return {
+                success: false,
+                error: 'WhatsApp credentials not configured',
+                provider: 'WHATSAPP'
+            };
         }
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 250));
+        try {
+            // Normalizar número de teléfono al formato E.164 (sin +)
+            const formattedPhone = normalizePhoneNumber(message.to);
+            logger.info(`[WhatsAppAdapter] 📤 Sending to ${formattedPhone}...`);
 
-        // Simulate success
-        return {
-            success: true,
-            messageId: `wa_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            provider: 'WHATSAPP',
-            rawResponse: { mock: true }
-        };
+            // Estructura base del payload según WhatsApp Cloud API
+            let payload: Record<string, any> = {
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: formattedPhone,
+            };
+
+            // Decidir si es Template o Texto libre
+            if (message.template) {
+                // Template messages: Requerido para iniciar conversaciones
+                // o enviar mensajes fuera de la ventana de 24h
+                payload.type = 'template';
+                payload.template = {
+                    name: message.template.name,
+                    language: message.template.language,
+                    ...(message.template.components && { components: message.template.components })
+                };
+                logger.info(`[WhatsAppAdapter] 📋 Using template: ${message.template.name}`);
+            } else {
+                // Texto libre: Solo funciona si el usuario escribió en las últimas 24h
+                // (ventana de conversación activa)
+                payload.type = 'text';
+                payload.text = { 
+                    preview_url: false,
+                    body: message.body 
+                };
+                logger.info(`[WhatsAppAdapter] 💬 Sending text message (requires 24h window)`);
+            }
+
+            const response = await axios.post(this.apiUrl, payload, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 30000 // 30 segundos timeout
+            });
+
+            const messageId = response.data.messages?.[0]?.id;
+            logger.info(`[WhatsAppAdapter] ✅ Message sent successfully. ID: ${messageId}`);
+
+            return {
+                success: true,
+                messageId: messageId,
+                provider: 'WHATSAPP',
+                rawResponse: response.data
+            };
+
+        } catch (error: any) {
+            // Extraer información detallada del error de Meta API
+            const errorData = error.response?.data?.error || error.response?.data || error.message;
+            const statusCode = error.response?.status;
+            
+            logger.error(`[WhatsAppAdapter] ❌ Error sending message (HTTP ${statusCode}):`, errorData);
+
+            // Errores comunes de WhatsApp Cloud API:
+            // - 131030: Recipient not in allowed list (sandbox)
+            // - 131047: Re-engagement message (fuera de ventana 24h sin template)
+            // - 131051: Invalid phone number
+            // - 190: Invalid OAuth access token
+            
+            let friendlyError = 'Unknown error';
+            if (typeof errorData === 'object') {
+                friendlyError = errorData.message || errorData.error_user_msg || JSON.stringify(errorData);
+            } else {
+                friendlyError = String(errorData);
+            }
+
+            return {
+                success: false,
+                error: friendlyError,
+                provider: 'WHATSAPP',
+                rawResponse: error.response?.data
+            };
+        }
     }
 
     getProviderName(): string {
