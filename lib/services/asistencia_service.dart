@@ -14,7 +14,8 @@ class AsistenciaService {
     try {
       final baseUrlValue = AppConfig.baseUrl;
 
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/asistencias/registrar'),
         headers: {
           'Content-Type': 'application/json',
@@ -24,14 +25,16 @@ class AsistenciaService {
           'horarioId': horarioId,
           'codigoQr': codigoQr,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 15),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('POST /asistencias/registrar - Status: ${response.statusCode}');
+      debugPrint(
+          'POST /asistencias/registrar - Status: ${response.statusCode}');
 
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
@@ -39,31 +42,33 @@ class AsistenciaService {
           debugPrint('✅ Asistencia registrada exitosamente');
           return true;
         } else {
-          throw Exception(responseData['message'] ?? 'Error al registrar asistencia');
+          throw Exception(
+              responseData['message'] ?? 'Error al registrar asistencia');
         }
       } else if (response.statusCode == 400) {
         final responseData = jsonDecode(response.body);
         // 400 puede ser ValidationError (ej: ya registrado) o datos inválidos
-        final errorMsg = responseData['message'] ?? 
-                        responseData['error'] ?? 
-                        'Datos inválidos';
+        final errorMsg = responseData['message'] ??
+            responseData['error'] ??
+            'Datos inválidos';
         throw Exception(errorMsg);
       } else if (response.statusCode == 403) {
         final responseData = jsonDecode(response.body);
-        final errorMsg = responseData['message'] ?? 
-                        responseData['error'] ?? 
-                        'No tienes permisos para esta acción';
+        final errorMsg = responseData['message'] ??
+            responseData['error'] ??
+            'No tienes permisos para esta acción';
         throw Exception(errorMsg);
       } else if (response.statusCode == 404) {
         final responseData = jsonDecode(response.body);
-        throw Exception(responseData['error'] ?? 'Horario o estudiante no encontrado');
+        throw Exception(
+            responseData['error'] ?? 'Horario o estudiante no encontrado');
       } else if (response.statusCode == 500) {
         // Intentar extraer el mensaje de error del servidor
         try {
           final responseData = jsonDecode(response.body);
-          final errorMessage = responseData['error'] ?? 
-                              responseData['message'] ?? 
-                              'Error interno del servidor';
+          final errorMessage = responseData['error'] ??
+              responseData['message'] ??
+              'Error interno del servidor';
           throw Exception(errorMessage);
         } catch (e) {
           throw Exception('Error interno del servidor');
@@ -86,7 +91,8 @@ class AsistenciaService {
     try {
       final baseUrlValue = AppConfig.baseUrl;
 
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/asistencias/registrar-manual'),
         headers: {
           'Content-Type': 'application/json',
@@ -96,14 +102,16 @@ class AsistenciaService {
           'horarioId': horarioId,
           'estudianteId': estudianteId,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 15),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('POST /asistencias/registrar-manual - Status: ${response.statusCode}');
+      debugPrint(
+          'POST /asistencias/registrar-manual - Status: ${response.statusCode}');
 
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
@@ -111,24 +119,27 @@ class AsistenciaService {
           debugPrint('✅ Asistencia manual registrada exitosamente');
           return true;
         } else {
-          throw Exception(responseData['message'] ?? 'Error al registrar asistencia manual');
+          throw Exception(responseData['message'] ??
+              'Error al registrar asistencia manual');
         }
       } else if (response.statusCode == 400) {
         final responseData = jsonDecode(response.body);
         throw Exception(responseData['message'] ?? 'Datos inválidos');
       } else if (response.statusCode == 403) {
         final responseData = jsonDecode(response.body);
-        throw Exception(responseData['message'] ?? 'No tienes permisos para esta acción');
+        throw Exception(
+            responseData['message'] ?? 'No tienes permisos para esta acción');
       } else if (response.statusCode == 404) {
         final responseData = jsonDecode(response.body);
-        throw Exception(responseData['message'] ?? 'Horario o estudiante no encontrado');
+        throw Exception(
+            responseData['message'] ?? 'Horario o estudiante no encontrado');
       } else if (response.statusCode == 500) {
         // Intentar extraer el mensaje de error del servidor
         try {
           final responseData = jsonDecode(response.body);
-          final errorMessage = responseData['error'] ?? 
-                              responseData['message'] ?? 
-                              'Error interno del servidor';
+          final errorMessage = responseData['error'] ??
+              responseData['message'] ??
+              'Error interno del servidor';
           throw Exception(errorMessage);
         } catch (e) {
           throw Exception('Error interno del servidor');
@@ -141,6 +152,7 @@ class AsistenciaService {
       rethrow;
     }
   }
+
   Future<List<AsistenciaEstudiante>> getAsistencias({
     required String accessToken,
     required String horarioId,
@@ -155,7 +167,8 @@ class AsistenciaService {
       if (date != null) {
         queryParams['fecha'] = date.toIso8601String().split('T')[0];
       }
-      final queryString = queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
+      final queryString =
+          queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
       final url = '$baseUrlValue/asistencias?$queryString';
 
       final response = await http.get(
@@ -170,7 +183,8 @@ class AsistenciaService {
         },
       );
 
-      debugPrint('GET /asistencias?horarioId=$horarioId - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /asistencias?horarioId=$horarioId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -182,7 +196,8 @@ class AsistenciaService {
           debugPrint('✅ Obtenidas ${asistencias.length} asistencias');
           return asistencias;
         } else {
-          throw Exception(responseData['message'] ?? 'Error al obtener asistencias');
+          throw Exception(
+              responseData['message'] ?? 'Error al obtener asistencias');
         }
       } else if (response.statusCode == 404) {
         throw Exception('Horario no encontrado');
@@ -194,6 +209,7 @@ class AsistenciaService {
       rethrow;
     }
   }
+
   /// Actualiza una asistencia existente (estado, observación, justificación)
   Future<bool> updateAsistencia({
     required String accessToken,
@@ -205,7 +221,8 @@ class AsistenciaService {
     try {
       final baseUrlValue = AppConfig.baseUrl;
 
-      final response = await http.put(
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/asistencias/$asistenciaId'),
         headers: {
           'Content-Type': 'application/json',
@@ -216,14 +233,16 @@ class AsistenciaService {
           'observacion': observacion,
           'justificada': justificada,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 15),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('PUT /asistencias/$asistenciaId - Status: ${response.statusCode}');
+      debugPrint(
+          'PUT /asistencias/$asistenciaId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -231,17 +250,68 @@ class AsistenciaService {
           debugPrint('✅ Asistencia actualizada exitosamente');
           return true;
         } else {
-          throw Exception(responseData['message'] ?? 'Error al actualizar asistencia');
+          throw Exception(
+              responseData['message'] ?? 'Error al actualizar asistencia');
         }
       } else {
         final responseData = jsonDecode(response.body);
-        final errorMsg = responseData['message'] ?? 
-                        responseData['error'] ?? 
-                        'Error al actualizar asistencia';
+        final errorMsg = responseData['message'] ??
+            responseData['error'] ??
+            'Error al actualizar asistencia';
         throw Exception(errorMsg);
       }
     } catch (e) {
       debugPrint('❌ Error al actualizar asistencia: $e');
+      rethrow;
+    }
+  }
+
+  /// Dispara un trigger manual de notificaciones (ej: último día/semana/clase)
+  Future<Map<String, dynamic>> triggerManualNotifications({
+    required String accessToken,
+    required String institutionId,
+    String? classId,
+    required String scope, // LAST_DAY, LAST_WEEK, LAST_CLASS
+  }) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+
+      final response = await http
+          .post(
+        Uri.parse('$baseUrlValue/api/notifications/manual-trigger'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'institutionId': institutionId,
+          'classId': classId,
+          'scope': scope,
+        }),
+      )
+          .timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint(
+          'POST /api/notifications/manual-trigger - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData is Map<String, dynamic>) return responseData;
+        return {'success': true, 'data': responseData};
+      } else {
+        final responseData = jsonDecode(response.body);
+        final errorMsg = responseData['message'] ??
+            responseData['error'] ??
+            'Error al disparar notificaciones';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      debugPrint('❌ Error al disparar notificaciones: $e');
       rethrow;
     }
   }

@@ -220,6 +220,12 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
   notifyListeners();
         return true;
       } else {
+  // Intentar recargar los horarios del grupo para mantener consistencia en UI
+  try {
+    if (horarioData.grupoId != null) {
+      await loadHorariosByGrupo(accessToken, horarioData.grupoId);
+    }
+  } catch (_) {}
   setError('Error al crear horario');
         return false;
       }

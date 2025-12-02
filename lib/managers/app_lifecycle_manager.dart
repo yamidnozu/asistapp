@@ -21,6 +21,7 @@ class AppLifecycleManager extends ChangeNotifier {
   AppState _currentState = AppState.resumed;
   DateTime? _lastPausedTime;
   bool _isFirstResume = true;
+  final Map<String, Future<void> Function()> _lifecycleCallbacks = {};
 
   AppState get currentState => _currentState;
   bool get isInForeground => _currentState == AppState.resumed;
@@ -61,11 +62,13 @@ class AppLifecycleManager extends ChangeNotifier {
     final now = DateTime.now();
     final timeInBackground = _lastPausedTime != null ? now.difference(_lastPausedTime!) : Duration.zero;
 
-    debugPrint('AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
+    debugPrint('AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
+
     if (_isFirstResume) {
       _isFirstResume = false;
       return;
-    }
+    }
+
     if (timeInBackground.inSeconds > 30) {
       debugPrint('AppLifecycleManager: Long background time, triggering data refresh');
       _triggerDataRefresh();
@@ -83,15 +86,24 @@ class AppLifecycleManager extends ChangeNotifier {
   }
 
   /// Fuerza la actualización de datos críticos
-  void _triggerDataRefresh() {
+  void _triggerDataRefresh() async {
     debugPrint('AppLifecycleManager: Triggering data refresh...');
+    for (final callback in _lifecycleCallbacks.values) {
+      try {
+        await callback();
+      } catch (e) {
+        debugPrint('AppLifecycleManager: Error in lifecycle callback: $e');
+      }
+    }
   }
 
   /// Método para que otros componentes se registren para eventos de lifecycle
-  void addLifecycleCallback(String key, VoidCallback callback) {
+  void addLifecycleCallback(String key, Future<void> Function() callback) {
+    _lifecycleCallbacks[key] = callback;
   }
 
-  void removeLifecycleCallback(String key) {
+  void removeLifecycleCallback(String key) {
+    _lifecycleCallbacks.remove(key);
   }
 }
 
@@ -118,7 +130,8 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
       case AppLifecycleState.detached:
         mappedState = AppState.detached;
         break;
-      case AppLifecycleState.inactive:
+      case AppLifecycleState.inactive:
+
         mappedState = AppState.paused;
         break;
     }

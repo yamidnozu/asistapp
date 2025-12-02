@@ -14,6 +14,14 @@ import '../../services/user_service.dart';
 import '../../services/form_validation_service.dart';
 import 'form_steps/index.dart';
 
+/// Resultado de la operación de guardado de usuario
+class _SaveResult {
+  final bool success;
+  final String? tempPassword;
+  
+  _SaveResult({required this.success, this.tempPassword});
+}
+
 class UserFormScreen extends StatefulWidget {
   final String userRole; // 'profesor', 'estudiante', 'admin_institucion', etc.
   final String? initialInstitutionId; // Optional: preselect institution for admin creation
@@ -32,6 +40,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int _currentStep = 0;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
+
 
   // Servicios
   final UserFormService _userFormService = UserFormService();
@@ -257,9 +266,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await _performSaveOperation(authProvider);
+      final result = await _performSaveOperation(authProvider);
 
-      if (success) {
+      if (result.success) {
         if (!mounted) return;
         messenger.showSnackBar(
           SnackBar(
@@ -274,8 +283,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
         );
 
         // Mostrar contraseña temporal solo en creación
-        if (_user == null) {
-          await _showPasswordDialog();
+        if (_user == null && result.tempPassword != null) {
+          await _showPasswordDialog(result.tempPassword!);
         }
 
         navigator.go('/users');
@@ -307,7 +316,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
-  Future<bool> _performSaveOperation(AuthProvider authProvider) async {
+  Future<_SaveResult> _performSaveOperation(AuthProvider authProvider) async {
     if (_user != null) {
       // Modo edición
       final updateRequest = _userFormService.createUpdateRequest(
@@ -360,11 +369,13 @@ class _UserFormScreenState extends State<UserFormScreen> {
         }
       }
 
-      return success;
+      return _SaveResult(success: success);
     } else {
-      // Modo creación
-      final createRequest = _userFormService.createUserRequest(
+      // Modo creación - generar contraseña temporal una sola vez
+      final tempPassword = _userFormService.generateRandomPassword();
+      final createRequest = _userFormService.createUserRequestWithPassword(
         email: _emailController.text,
+        password: tempPassword,
         nombres: _nombresController.text,
         apellidos: _apellidosController.text,
         telefono: _telefonoController.text,
@@ -374,23 +385,23 @@ class _UserFormScreenState extends State<UserFormScreen> {
         especialidad: _especialidadController.text,
         nombreResponsable: _nombreResponsableController.text,
         telefonoResponsable: _telefonoResponsableController.text,
-  selectedInstitutionId: _selectedInstitutionIds.isNotEmpty ? _selectedInstitutionIds.first : null,
+        selectedInstitutionId: _selectedInstitutionIds.isNotEmpty ? _selectedInstitutionIds.first : null,
         authProvider: authProvider,
       );
 
-      return await _userFormService.saveUser(
+      final success = await _userFormService.saveUser(
         context: context,
         user: null,
         createRequest: createRequest,
         updateRequest: null,
         userRole: widget.userRole,
       );
+      
+      return _SaveResult(success: success, tempPassword: success ? tempPassword : null);
     }
   }
 
-  Future<void> _showPasswordDialog() async {
-    final tempPassword = _userFormService.generateRandomPassword();
-    
+  Future<void> _showPasswordDialog(String tempPassword) async {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -739,10 +750,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
 
   void _onStepContinue() {
+    debugPrint('🔔 _onStepContinue CALLED! currentStep=$_currentStep');
     final totalSteps = _getTotalSteps();
+    debugPrint('🔔 totalSteps=$totalSteps');
     
     // Validar solo el step actual antes de continuar
-    final currentStepValid = _stepKeys[_currentStep].currentState?.validate() ?? true;
+    final stepState = _stepKeys[_currentStep].currentState;
+    debugPrint('🔔 stepState for step $_currentStep: $stepState');
+    final currentStepValid = stepState?.validate() ?? true;
+    debugPrint('🔔 validation result: $currentStepValid');
     if (!currentStepValid) {
       // Activar autovalidación para mostrar los errores inmediatamente
       setState(() => _autoValidateMode = AutovalidateMode.always);

@@ -43,12 +43,24 @@ class FakeGrupoProvider extends GrupoProvider {
       institucionId: 'i1',
       createdAt: DateTime.now(),
       periodoAcademico: PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true),
-      count: GrupoCount(estudiantesGrupos: 0, horarios: 0),
+      count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0),
     );
   }
 
   @override
+  Future<bool> updateGrupo(String accessToken, String grupoId, dynamic grupoData) async {
+    updateCalled = true;
+    return true;
+  }
+
+  @override
   Future<bool> deleteItemApi(String accessToken, String id) async {
+    deleteCalled = true;
+    return true;
+  }
+
+  @override
+  Future<bool> deleteGrupo(String accessToken, String grupoId) async {
     deleteCalled = true;
     return true;
   }
@@ -74,8 +86,9 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
 void main() {
   testWidgets('Edit grupo via context menu calls update', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final periodo = PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true);
-    final grupo = Grupo(id: 'g1', nombre: 'Grupo 1', grado: '1ro', seccion: 'A', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0));
+    final grupo = Grupo(id: 'g1', nombre: 'Grupo 1', grado: '1ro', seccion: 'A', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
     final fakeProvider = FakeGrupoProvider(initialGrupos: [grupo]);
 
   await AppConfig.initialize();
@@ -117,8 +130,9 @@ void main() {
 
   testWidgets('Delete grupo via context menu calls delete and shows snack', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final periodo = PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true);
-    final grupo = Grupo(id: 'g1', nombre: 'Grupo X', grado: '2do', seccion: 'B', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0));
+    final grupo = Grupo(id: 'g1', nombre: 'Grupo X', grado: '2do', seccion: 'B', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
     final fakeProvider = FakeGrupoProvider(initialGrupos: [grupo]);
 
     await tester.pumpWidget(

@@ -50,8 +50,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     _searchDebounceTimer?.cancel();
-    // Limpiar filtros al salir de la pantalla
-    _userProvider?.clearFilters();
+    // Limpiar filtros al salir de la pantalla - removido para evitar error de setState durante dispose
+    // _userProvider?.clearFilters();
     super.dispose();
   }
 

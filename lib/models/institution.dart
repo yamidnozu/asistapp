@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'institution_config.dart';
 
 part 'institution.g.dart';
 
@@ -16,6 +17,7 @@ class Institution {
   // Campos para compatibilidad con roles de usuario
   final String? role; // Rol del usuario en esta institución
   final Map<String, dynamic>? metadata;
+  final InstitutionConfig? configuraciones;
 
   Institution({
     required this.id,
@@ -23,18 +25,18 @@ class Institution {
     this.direccion,
     this.telefono,
     this.email,
-    this.activa = true,
+    required this.activa,
     this.createdAt,
     this.updatedAt,
     this.role,
     this.metadata,
+    this.configuraciones,
   });
 
   factory Institution.fromJson(Map<String, dynamic> json) => _$InstitutionFromJson(json);
 
   Map<String, dynamic> toJson() => _$InstitutionToJson(this);
 
-  // Getters para compatibilidad
   String get name => nombre;
 
   Institution copyWith({
@@ -48,6 +50,7 @@ class Institution {
     DateTime? updatedAt,
     String? role,
     Map<String, dynamic>? metadata,
+    InstitutionConfig? configuraciones,
   }) {
     return Institution(
       id: id ?? this.id,
@@ -60,6 +63,7 @@ class Institution {
       updatedAt: updatedAt ?? this.updatedAt,
       role: role ?? this.role,
       metadata: metadata ?? this.metadata,
+      configuraciones: configuraciones ?? this.configuraciones,
     );
   }
 

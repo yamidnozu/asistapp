@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../models/clase_del_dia.dart';
 import '../models/asistencia_estudiante.dart';
 import '../providers/asistencia_provider.dart';
@@ -70,14 +69,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
   }
 
-  void _limpiarSeleccion() {
-    if (_estudianteSeleccionadoId != null) {
-      setState(() {
-        _estudianteSeleccionadoId = null;
-      });
-    }
-  }
-
   Future<void> _loadAsistencias() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
@@ -117,136 +108,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _onScanQR() async {
-    // Navegar al escáner QR
+    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Navegar al escáner QR y esperar resultado
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => QRScannerScreen(
-          horarioId: widget.clase.id,
-        ),
-      ),
+      MaterialPageRoute(builder: (context) => QRScannerScreen(horarioId: widget.clase.id)),
     );
 
-    // Si el escaneo fue exitoso, refrescar la lista
-    if (result == true && mounted) {
-      await _loadAsistencias();
+    // Si se registró una asistencia con éxito, recargar la lista
+    if (result == true) {
+      final token = authProvider.accessToken;
+      if (token != null) {
+        await asistenciaProvider.fetchAsistencias(token, widget.clase.id, date: _selectedDate);
+      }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return GestureDetector(
-      onTap: _limpiarSeleccion, // Limpiar selección al tocar fuera
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final colors = context.colors;
-          final spacing = context.spacing;
-          return Scaffold(
-            appBar: AppBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Tomar Asistencia'),
-                  Text(
-                    '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                  ),
-                ],
-              ),
-              backgroundColor: colors.primary,
-              foregroundColor: colors.white,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: colors.white),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/dashboard');
-                  }
-                },
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.calendar_today),
-                  onPressed: () => _pickDate(context),
-                  tooltip: 'Cambiar fecha',
-                ),
-              ],
-            ),
-            body: Consumer<AsistenciaProvider>(
-              builder: (context, asistenciaProvider, child) {
-                if (asistenciaProvider.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (asistenciaProvider.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: colors.error,
-                        ),
-                        SizedBox(height: spacing.md),
-                        Text(
-                          'Error al cargar asistencias',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: spacing.sm),
-                        Text(
-                          asistenciaProvider.errorMessage ?? 'Error desconocido',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colors.textMuted,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: spacing.lg),
-                        ElevatedButton.icon(
-                          onPressed: _loadAsistencias,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reintentar'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    // Información de la clase
-                    _buildClassInfo(context, constraints),
-
-                    // Estadísticas de asistencia
-                    _buildAttendanceStats(context, asistenciaProvider, constraints),
-
-                    // Lista de estudiantes
-                    Expanded(
-                      child: _buildStudentsList(context, asistenciaProvider.asistencias),
-                    ),
-                  ],
-                );
-              },
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: _onScanQR,
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Escanear QR'),
-              backgroundColor: colors.primary,
-              foregroundColor: colors.white,
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Widget _buildClassInfo(BuildContext context, BoxConstraints constraints) {
@@ -263,15 +140,27 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Materia y grupo
-          Text(
-            widget.clase.materia.nombre,
+          // Materia y grupo + acciones
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.clase.materia.nombre,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: colors.textPrimary,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+          ),
+              ),
+              IconButton(
+                tooltip: 'Notificar ausencias',
+                icon: Icon(Icons.campaign, color: colors.primary),
+                onPressed: () => _showManualTriggerOptions(context),
+              ),
+            ],
           ),
           SizedBox(height: spacing.xs),
           Text(
@@ -307,6 +196,64 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ],
       ),
     );
+  }
+
+  void _showManualTriggerOptions(BuildContext context) async {
+    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.accessToken;
+    if (token == null) {
+      _showTopSnackBar(context, message: 'Error: No estás autenticado', backgroundColor: context.colors.error, leading: Icon(Icons.error, color: context.colors.white));
+      return;
+    }
+
+    final scope = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.today),
+              title: const Text('Última clase'),
+              onTap: () => Navigator.of(context).pop('LAST_CLASS'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Último día'),
+              onTap: () => Navigator.of(context).pop('LAST_DAY'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.date_range),
+              title: const Text('Última semana'),
+              onTap: () => Navigator.of(context).pop('LAST_WEEK'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.cancel),
+              title: const Text('Cancelar'),
+              onTap: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (scope == null) return;
+
+    try {
+      _showTopSnackBar(context, message: 'Disparando notificaciones...', leading: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(context.colors.white))));
+      await asistenciaProvider.triggerManualNotifications(
+        accessToken: token,
+        institutionId: widget.clase.institucion.id,
+        classId: widget.clase.id,
+        scope: scope,
+      );
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      _showTopSnackBar(context, message: 'Notificaciones disparadas correctamente', backgroundColor: context.colors.success);
+    } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      _showTopSnackBar(context, message: 'Error al disparar notificaciones: $e', backgroundColor: context.colors.error);
+    }
   }
 
   Widget _buildAttendanceStats(BuildContext context, AsistenciaProvider provider, BoxConstraints constraints) {
@@ -740,9 +687,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       }
 
                       final success = await asistenciaProvider.updateAsistencia(
-                        accessToken: token,
-                        asistenciaId: estudiante.id!,
-                        estado: estado,
+                        token,
+                        estudiante.id!,
+                        estado,
                         observacion: observacionController.text,
                         justificada: justificada,
                       );
@@ -811,6 +758,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       ),
       backgroundColor: chipColor,
       padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AsistenciaProvider>(
+      builder: (context, asistenciaProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Asistencia'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.calendar_today),
+                onPressed: () => _pickDate(context),
+                tooltip: 'Seleccionar fecha',
+              ),
+              IconButton(
+                icon: const Icon(Icons.qr_code_scanner),
+                onPressed: _onScanQR,
+                tooltip: 'Escanear QR',
+              ),
+            ],
+          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  _buildClassInfo(context, constraints),
+                  _buildAttendanceStats(context, asistenciaProvider, constraints),
+                  Expanded(
+                    child: _buildStudentsList(context, asistenciaProvider.asistencias),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

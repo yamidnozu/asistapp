@@ -116,7 +116,8 @@ class UserFormService {
     return true;
   }
 
-  /// Crea la solicitud de creación de usuario
+  /// Crea la solicitud de creación de usuario (genera contraseña automáticamente)
+  /// NOTA: Usar createUserRequestWithPassword para tener control sobre la contraseña
   CreateUserRequest createUserRequest({
     required String email,
     required String nombres,
@@ -136,6 +137,40 @@ class UserFormService {
     return CreateUserRequest(
       email: email.trim(),
       password: tempPassword,
+      nombres: nombres.trim(),
+      apellidos: apellidos.trim(),
+      telefono: telefono.trim().isNotEmpty ? telefono.trim() : null,
+      identificacion: (userRole == 'estudiante' || userRole == 'profesor') ? identificacion.trim() : null,
+      rol: userRole,
+      titulo: userRole == 'profesor' ? titulo.trim() : null,
+      especialidad: userRole == 'profesor' ? especialidad.trim() : null,
+      nombreResponsable: userRole == 'estudiante' ? nombreResponsable.trim().isNotEmpty ? nombreResponsable.trim() : null : null,
+      telefonoResponsable: userRole == 'estudiante' ? telefonoResponsable.trim().isNotEmpty ? telefonoResponsable.trim() : null : null,
+      institucionId: userRole == 'admin_institucion' ? selectedInstitutionId : authProvider.selectedInstitutionId,
+      rolEnInstitucion: userRole == 'admin_institucion' ? 'admin' : null,
+    );
+  }
+
+  /// Crea la solicitud de creación de usuario con contraseña proporcionada
+  /// Útil cuando se necesita mostrar la contraseña después de la creación
+  CreateUserRequest createUserRequestWithPassword({
+    required String email,
+    required String password,
+    required String nombres,
+    required String apellidos,
+    required String telefono,
+    required String identificacion,
+    required String userRole,
+    required String titulo,
+    required String especialidad,
+    required String nombreResponsable,
+    required String telefonoResponsable,
+    required String? selectedInstitutionId,
+    required AuthProvider authProvider,
+  }) {
+    return CreateUserRequest(
+      email: email.trim(),
+      password: password,
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       telefono: telefono.trim().isNotEmpty ? telefono.trim() : null,

@@ -64,6 +64,10 @@ export interface HorarioResponse {
       fechaFin: string;
       activo: boolean;
     } | null;
+    _count?: {
+      estudiantesGrupos: number;
+      horarios: number;
+    };
   };
   materia: {
     id: string;
@@ -159,6 +163,12 @@ export class HorarioService {
               institucionId: true,
               periodoId: true,
               createdAt: true,
+              _count: {
+                select: {
+                  estudiantesGrupos: true,
+                  horarios: true,
+                },
+              },
             },
           },
           materia: {
@@ -289,6 +299,12 @@ export class HorarioService {
                 institucionId: true,
                 periodoId: true,
                 createdAt: true,
+                _count: {
+                  select: {
+                    estudiantesGrupos: true,
+                    horarios: true,
+                  },
+                },
               },
           },
           materia: {
@@ -451,6 +467,17 @@ export class HorarioService {
           nombre: horario.grupo.nombre,
           grado: horario.grupo.grado,
           seccion: horario.grupo.seccion,
+          periodoId: horario.grupo.periodoId,
+          institucionId: horario.grupo.institucionId,
+          createdAt: horario.grupo.createdAt?.toISOString(),
+          periodoAcademico: horario.grupo.periodoAcademico ? {
+            id: horario.grupo.periodoAcademico.id,
+            nombre: horario.grupo.periodoAcademico.nombre,
+            fechaInicio: horario.grupo.periodoAcademico.fechaInicio.toISOString(),
+            fechaFin: horario.grupo.periodoAcademico.fechaFin.toISOString(),
+            activo: horario.grupo.periodoAcademico.activo,
+          } : null,
+          _count: (horario.grupo as any)._count,
         },
         materia: {
           id: horario.materia.id,
@@ -522,36 +549,40 @@ export class HorarioService {
     }
 
     // Construir query SQL con UNION para grupo y profesor
+    // NOTE: Usar los nombres reales de tablas/columnas tal como están mapeados en Prisma
+    // En la base de datos las tablas y columnas están en minúsculas y / o con snake_case.
+    // IMPORTANTE: Hacer cast explícito a UUID para los parámetros de ID
+    // NOTE: diaSemana NO tiene @map(), así que se mantiene en camelCase en la DB
     const grupoQuery = excludeId
-      ? `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'grupo' as tipo
-         FROM "Horario"
-         WHERE "grupoId" = $1
+      ? `SELECT id, "hora_inicio" as "horaInicio", "hora_fin" as "horaFin", "grupo_id" as "grupoId", "profesor_id" as "profesorId", 'grupo' as tipo
+         FROM "horarios"
+         WHERE "grupo_id" = $1::uuid
            AND "diaSemana" = $2
-           AND id != $3
-           AND "horaInicio"::TIME < $5::TIME
-           AND "horaFin"::TIME > $4::TIME`
-      : `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'grupo' as tipo
-         FROM "Horario"
-         WHERE "grupoId" = $1
+           AND id != $3::uuid
+           AND "hora_inicio"::TIME < $5::TIME
+           AND "hora_fin"::TIME > $4::TIME`
+      : `SELECT id, "hora_inicio" as "horaInicio", "hora_fin" as "horaFin", "grupo_id" as "grupoId", "profesor_id" as "profesorId", 'grupo' as tipo
+         FROM "horarios"
+         WHERE "grupo_id" = $1::uuid
            AND "diaSemana" = $2
-           AND "horaInicio"::TIME < $4::TIME
-           AND "horaFin"::TIME > $3::TIME`;
+           AND "hora_inicio"::TIME < $4::TIME
+           AND "hora_fin"::TIME > $3::TIME`;
 
     const profesorQuery = profesorId
       ? excludeId
-        ? `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'profesor' as tipo
-           FROM "Horario"
-           WHERE "profesorId" = $6
+        ? `SELECT id, "hora_inicio" as "horaInicio", "hora_fin" as "horaFin", "grupo_id" as "grupoId", "profesor_id" as "profesorId", 'profesor' as tipo
+           FROM "horarios"
+           WHERE "profesor_id" = $6::uuid
              AND "diaSemana" = $2
-             AND id != $3
-             AND "horaInicio"::TIME < $5::TIME
-             AND "horaFin"::TIME > $4::TIME`
-        : `SELECT id, "horaInicio", "horaFin", "grupoId", "profesorId", 'profesor' as tipo
-           FROM "Horario"
-           WHERE "profesorId" = $5
+             AND id != $3::uuid
+             AND "hora_inicio"::TIME < $5::TIME
+             AND "hora_fin"::TIME > $4::TIME`
+        : `SELECT id, "hora_inicio" as "horaInicio", "hora_fin" as "horaFin", "grupo_id" as "grupoId", "profesor_id" as "profesorId", 'profesor' as tipo
+           FROM "horarios"
+           WHERE "profesor_id" = $5::uuid
              AND "diaSemana" = $2
-             AND "horaInicio"::TIME < $4::TIME
-             AND "horaFin"::TIME > $3::TIME`
+             AND "hora_inicio"::TIME < $4::TIME
+             AND "hora_fin"::TIME > $3::TIME`
       : '';
 
     const fullQuery = profesorQuery
@@ -762,6 +793,24 @@ export class HorarioService {
               nombre: true,
               grado: true,
               seccion: true,
+              periodoId: true,
+              institucionId: true,
+              createdAt: true,
+              periodoAcademico: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  fechaInicio: true,
+                  fechaFin: true,
+                  activo: true,
+                },
+              },
+              _count: {
+                select: {
+                  estudiantesGrupos: true,
+                  horarios: true,
+                },
+              },
             },
           },
           materia: {
@@ -812,6 +861,25 @@ export class HorarioService {
           nombre: horario.grupo.nombre,
           grado: horario.grupo.grado,
           seccion: horario.grupo.seccion,
+          periodoId: horario.grupo.periodoId,
+          institucionId: horario.grupo.institucionId,
+          createdAt: horario.grupo.createdAt?.toISOString(),
+          // Si por alguna razón Prisma no trajo el periodoAcademico del grupo,
+          // usamos el `periodo` validado arriba (es el periodo seleccionado para el horario)
+          periodoAcademico: horario.grupo.periodoAcademico ? {
+            id: horario.grupo.periodoAcademico.id,
+            nombre: horario.grupo.periodoAcademico.nombre,
+            fechaInicio: horario.grupo.periodoAcademico.fechaInicio.toISOString(),
+            fechaFin: horario.grupo.periodoAcademico.fechaFin.toISOString(),
+            activo: horario.grupo.periodoAcademico.activo,
+          } : {
+            id: periodo.id,
+            nombre: periodo.nombre,
+            fechaInicio: (periodo.fechaInicio ?? new Date()).toISOString(),
+            fechaFin: (periodo.fechaFin ?? new Date()).toISOString(),
+            activo: periodo.activo,
+          },
+          _count: (horario.grupo as any)._count,
         },
         materia: {
           id: horario.materia.id,
@@ -828,10 +896,16 @@ export class HorarioService {
     } catch (error) {
       logger.error('❌ Error al crear horario:', error);
       logger.error('❌ Stack trace:', (error as Error).stack);
+      // Re-throw known error types to be handled por el middleware central
       if (error instanceof ValidationError || error instanceof ConflictError) {
         throw error;
       }
-      throw new Error('Error al crear el horario');
+      // Si es un error de Prisma (Database error), re-lanzarlo para que el manejador global lo traduzca
+      if (error && typeof (error as any).code === 'string') {
+        throw error;
+      }
+      // Para otros errores, re-lanzar el error original para mantener contexto
+      throw error;
     }
   }
 
@@ -944,6 +1018,24 @@ export class HorarioService {
               nombre: true,
               grado: true,
               seccion: true,
+              periodoAcademico: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  fechaInicio: true,
+                  fechaFin: true,
+                  activo: true,
+                },
+              },
+              institucionId: true,
+              periodoId: true,
+              createdAt: true,
+              _count: {
+                select: {
+                  estudiantesGrupos: true,
+                  horarios: true,
+                },
+              },
             },
           },
           materia: {
@@ -991,6 +1083,17 @@ export class HorarioService {
           nombre: horario.grupo.nombre,
           grado: horario.grupo.grado,
           seccion: horario.grupo.seccion,
+          periodoId: horario.grupo.periodoId,
+          institucionId: horario.grupo.institucionId,
+          createdAt: horario.grupo.createdAt?.toISOString(),
+          periodoAcademico: horario.grupo.periodoAcademico ? {
+            id: horario.grupo.periodoAcademico.id,
+            nombre: horario.grupo.periodoAcademico.nombre,
+            fechaInicio: horario.grupo.periodoAcademico.fechaInicio.toISOString(),
+            fechaFin: horario.grupo.periodoAcademico.fechaFin.toISOString(),
+            activo: horario.grupo.periodoAcademico.activo,
+          } : null,
+          _count: (horario.grupo as any)._count,
         },
         materia: {
           id: horario.materia.id,

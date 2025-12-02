@@ -41,12 +41,20 @@ String _dateTimeToJson(DateTime date) => date.toIso8601String();
 
 @JsonSerializable()
 class GrupoCount {
+  @JsonKey(defaultValue: 0)
   final int estudiantesGrupos;
+  @JsonKey(defaultValue: 0)
   final int horarios;
+  // Algunos endpoints devuelven `_count: { "asistencias": N }`.
+  // Aceptamos ese campo y le damos valor por defecto 0 para
+  // evitar errores de deserialización en el cliente.
+  @JsonKey(defaultValue: 0)
+  final int asistencias;
 
   GrupoCount({
-    required this.estudiantesGrupos,
-    required this.horarios,
+    this.estudiantesGrupos = 0,
+    this.horarios = 0,
+    this.asistencias = 0,
   });
 
   factory GrupoCount.fromJson(Map<String, dynamic> json) => _$GrupoCountFromJson(json);

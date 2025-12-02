@@ -14,8 +14,15 @@ Grupo _$GrupoFromJson(Map<String, dynamic> json) => Grupo(
       periodoId: json['periodoId'] as String?,
       institucionId: json['institucionId'] as String?,
       createdAt: json['createdAt'] == null ? null : _dateTimeFromJson(json['createdAt'] as String),
-      periodoAcademico: PeriodoAcademico.fromJson(
-          json['periodoAcademico'] as Map<String, dynamic>),
+      periodoAcademico: json['periodoAcademico'] == null
+          ? PeriodoAcademico(
+              id: json['periodoId'] as String? ?? '',
+              nombre: '',
+              fechaInicio: DateTime.now(),
+              fechaFin: DateTime.now(),
+              activo: false,
+            )
+          : PeriodoAcademico.fromJson(json['periodoAcademico'] as Map<String, dynamic>),
       count: json['_count'] == null ? null : GrupoCount.fromJson(json['_count'] as Map<String, dynamic>),
     );
 
@@ -32,14 +39,16 @@ Map<String, dynamic> _$GrupoToJson(Grupo instance) => <String, dynamic>{
     };
 
 GrupoCount _$GrupoCountFromJson(Map<String, dynamic> json) => GrupoCount(
-      estudiantesGrupos: (json['estudiantesGrupos'] as num).toInt(),
-      horarios: (json['horarios'] as num).toInt(),
+      estudiantesGrupos: (json['estudiantesGrupos'] as num?)?.toInt() ?? 0,
+      horarios: (json['horarios'] as num?)?.toInt() ?? 0,
+      asistencias: (json['asistencias'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$GrupoCountToJson(GrupoCount instance) =>
     <String, dynamic>{
       'estudiantesGrupos': instance.estudiantesGrupos,
       'horarios': instance.horarios,
+      'asistencias': instance.asistencias,
     };
 
 PeriodoAcademico _$PeriodoAcademicoFromJson(Map<String, dynamic> json) =>

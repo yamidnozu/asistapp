@@ -54,6 +54,7 @@ class FakeMateriaProvider extends MateriaProvider {
 void main() {
   testWidgets('Open create materia dialog and create succeeds', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final fakeMaterias = FakeMateriaProvider();
 
     await tester.pumpWidget(
@@ -96,6 +97,7 @@ void main() {
 
   testWidgets('Open edit materia dialog and update succeeds', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final materia = Materia(id: 'm1', nombre: 'Matemáticas', institucionId: 'i1', createdAt: DateTime.now());
     final fakeMaterias = FakeMateriaProvider(initialMaterias: [materia]);
 
@@ -142,6 +144,7 @@ void main() {
 
   testWidgets('Delete materia from context menu calls delete and shows SnackBar', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final materia = Materia(id: 'm2', nombre: 'Ciencias', institucionId: 'i1', createdAt: DateTime.now());
     final fakeMaterias = FakeMateriaProvider(initialMaterias: [materia]);
 

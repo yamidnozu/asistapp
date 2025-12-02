@@ -65,58 +65,60 @@ class AsistenciaProvider with ChangeNotifier {
   Future<bool> registrarAsistencia(String accessToken, String horarioId, String qrCode) async {
     try {
       debugPrint('AsistenciaProvider: Registrando asistencia con QR: $qrCode');
+      _setState(AsistenciaState.loading);
+
       final success = await _asistenciaService.registrarAsistencia(
         accessToken: accessToken,
         horarioId: horarioId,
         codigoQr: qrCode,
       );
 
-      if (success && _selectedHorarioId == horarioId) {
-        // Refrescar la lista de asistencias
-        debugPrint('AsistenciaProvider: Refrescando lista de asistencias...');
+      if (success) {
+        // Recargar la lista de asistencias
         await fetchAsistencias(accessToken, horarioId);
       }
 
+      _setState(AsistenciaState.loaded);
       return success;
     } catch (e) {
-      debugPrint('AsistenciaProvider: Error registrando asistencia con QR: $e');
-      return false;
+      debugPrint('AsistenciaProvider: Error registrando asistencia: $e');
+      _setState(AsistenciaState.error, e.toString());
+      rethrow;
     }
   }
 
-  /// Registra asistencia manual para un estudiante
+  /// Registra asistencia manual para un estudiante específico
   Future<bool> registrarAsistenciaManual(String accessToken, String horarioId, String estudianteId) async {
     try {
       debugPrint('AsistenciaProvider: Registrando asistencia manual para estudiante: $estudianteId');
+      _setState(AsistenciaState.loading);
+
       final success = await _asistenciaService.registrarAsistenciaManual(
         accessToken: accessToken,
         horarioId: horarioId,
         estudianteId: estudianteId,
       );
 
-      if (success && _selectedHorarioId == horarioId) {
-        // Refrescar la lista de asistencias
-        debugPrint('AsistenciaProvider: Refrescando lista de asistencias...');
+      if (success) {
+        // Recargar la lista de asistencias
         await fetchAsistencias(accessToken, horarioId);
       }
 
+      _setState(AsistenciaState.loaded);
       return success;
     } catch (e) {
       debugPrint('AsistenciaProvider: Error registrando asistencia manual: $e');
-      return false;
+      _setState(AsistenciaState.error, e.toString());
+      rethrow;
     }
   }
 
-  /// Actualiza una asistencia existente
-  Future<bool> updateAsistencia({
-    required String accessToken,
-    required String asistenciaId,
-    required String estado,
-    String? observacion,
-    bool? justificada,
-  }) async {
+  /// Actualiza el estado de una asistencia
+  Future<bool> updateAsistencia(String accessToken, String asistenciaId, String estado, {String? observacion, bool? justificada}) async {
     try {
-      debugPrint('AsistenciaProvider: Actualizando asistencia: $asistenciaId');
+      debugPrint('AsistenciaProvider: Actualizando asistencia $asistenciaId a estado: $estado');
+      _setState(AsistenciaState.loading);
+
       final success = await _asistenciaService.updateAsistencia(
         accessToken: accessToken,
         asistenciaId: asistenciaId,
@@ -125,30 +127,25 @@ class AsistenciaProvider with ChangeNotifier {
         justificada: justificada,
       );
 
-      if (success && _selectedHorarioId != null) {
-        // Refrescar la lista de asistencias
-        debugPrint('AsistenciaProvider: Refrescando lista de asistencias...');
-        await fetchAsistencias(accessToken, _selectedHorarioId!);
+      if (success) {
+        // Recargar la lista de asistencias
+        if (_selectedHorarioId != null) {
+          await fetchAsistencias(accessToken, _selectedHorarioId!);
+        }
       }
 
+      _setState(AsistenciaState.loaded);
       return success;
     } catch (e) {
       debugPrint('AsistenciaProvider: Error actualizando asistencia: $e');
-      return false;
-    }
-  }
-
-  /// Refresca los datos del horario actualmente seleccionado
-  Future<void> refreshAsistencias(String accessToken) async {
-    if (_selectedHorarioId != null) {
-      await fetchAsistencias(accessToken, _selectedHorarioId!);
+      _setState(AsistenciaState.error, e.toString());
+      rethrow;
     }
   }
 
   /// Busca estudiantes por nombre o identificación
   List<AsistenciaEstudiante> searchEstudiantes(String query) {
     if (query.isEmpty) return _asistencias;
-
     final lowercaseQuery = query.toLowerCase();
     return _asistencias.where((asistencia) {
       return asistencia.nombreCompleto.toLowerCase().contains(lowercaseQuery) ||
@@ -185,6 +182,27 @@ class AsistenciaProvider with ChangeNotifier {
   void selectHorario(String horarioId) {
     _selectedHorarioId = horarioId;
     notifyListeners();
+  }
+
+  /// Dispara notificaciones manuales
+  Future<Map<String, dynamic>> triggerManualNotifications({
+    required String accessToken,
+    required String institutionId,
+    String? classId,
+    String scope = 'LAST_DAY',
+  }) async {
+    try {
+      debugPrint('AsistenciaProvider: Disparando notificaciones manuales...');
+      return await _asistenciaService.triggerManualNotifications(
+        accessToken: accessToken,
+        institutionId: institutionId,
+        classId: classId,
+        scope: scope,
+      );
+    } catch (e) {
+      debugPrint('AsistenciaProvider: Error disparando notificaciones: $e');
+      rethrow;
+    }
   }
 
   /// Método helper para cambiar el estado

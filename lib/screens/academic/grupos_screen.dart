@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../widgets/components/clarity_management_page.dart';
 import '../../widgets/components/clarity_components.dart';
@@ -317,9 +318,6 @@ class _GruposScreenState extends State<GruposScreen> {
   }
 
   void _navigateToGrupoDetail(Grupo grupo) {
-    // TODO: Implementar navegación a detalle de grupo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Detalle de grupo: ${grupo.nombre}')),
-    );
+    context.push('/academic/grupos/${grupo.id}', extra: grupo);
   }
 }

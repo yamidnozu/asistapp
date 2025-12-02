@@ -94,16 +94,19 @@ model Estudiante {
   usuarioId           String   @unique @map("usuario_id") @db.Uuid
   identificacion      String   @unique @db.VarChar(50) // Documento de identidad
   codigoQr            String   @unique @map("codigo_qr") @db.VarChar(255) // Para escaneo
-  nombreResponsable   String?  @map("nombre_responsable") @db.VarChar(255) // Padre/Tutor
-  telefonoResponsable String?  @map("telefono_responsable") @db.VarChar(20) // WhatsApp del responsable
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+  nombreResponsable           String?  @map("nombre_responsable") @db.VarChar(255) // Padre/Tutor
+  telefonoResponsable         String?  @map("telefono_responsable") @db.VarChar(20) // WhatsApp del responsable
+  telefonoResponsableVerificado Boolean  @default(false) @map("telefono_responsable_verificado")
+  aceptaNotificaciones        Boolean  @default(true) @map("acepta_notificaciones")
+  createdAt                   DateTime @default(now()) @map("created_at")
+  updatedAt                   DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones
   usuario            Usuario           @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   estudiantesGrupos  EstudianteGrupo[]
   asistencias        Asistencia[]
   logsNotificaciones LogNotificacion[]
+  colaNotificaciones ColaNotificacion[]
 
   @@map("estudiantes")
 }
@@ -225,6 +228,8 @@ model Asistencia {
 
   @@unique([horarioId, estudianteId, fecha]) // Un estudiante solo puede tener un registro por clase al día
   @@map("asistencias")
+
+  colaNotificaciones ColaNotificacion[]
 }
 
 // 10. CONFIGURACIONES (Ajustes por institución)
@@ -233,7 +238,12 @@ model Configuracion {
   institucionId String @unique @map("institucion_id") @db.Uuid
 
   // Notificaciones WhatsApp
-  notificacionesActivas Boolean @default(false) @map("notificaciones_activas")
+  notificacionesActivas    Boolean @default(false) @map("notificaciones_activas")
+  canalNotificacion        String  @default("NONE") @map("canal_notificacion") // 'WHATSAPP', 'SMS', 'NONE'
+  modoNotificacionAsistencia String  @default("MANUAL_ONLY") @map("modo_notificacion_asistencia") // 'INSTANT', 'END_OF_DAY', 'MANUAL_ONLY'
+  horaDisparoNotificacion  String? @map("hora_disparo_notificacion") @db.VarChar(8) // "18:00:00"
+
+  // Deprecated fields (mantener por ahora o migrar)
   modoNotificacion      String  @default("diaria") @map("modo_notificacion") // 'diaria', 'por_clase', 'umbral'
   horaNotificacion      String  @default("18:00:00") @map("hora_notificacion") @db.VarChar(8)
   umbralFaltas          Int     @default(3) @map("umbral_faltas") // Para modo 'umbral'
@@ -260,6 +270,10 @@ model LogNotificacion {
   estudianteId    String   @map("estudiante_id") @db.Uuid
   telefonoDestino String   @map("telefono_destino") @db.VarChar(20)
   mensaje         String   @db.Text
+  proveedor       String   @default("WHATSAPP") @db.VarChar(50) // 'WHATSAPP', 'SMS', 'EMAIL'
+  costo           Float?   @default(0.0)
+  providerMessageId String? @map("provider_message_id") @db.VarChar(255) // ID del mensaje en el proveedor
+  rawResponse     Json?    @map("raw_response") // Respuesta completa del proveedor
   fechaEnvio      DateTime @default(now()) @map("fecha_envio")
   exitoso         Boolean  @default(false)
   errorMensaje    String?  @map("error_mensaje") @db.Text
@@ -269,6 +283,26 @@ model LogNotificacion {
   estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
 
   @@map("logs_notificaciones")
+}
+
+// 13. COLA_NOTIFICACIONES (Para envíos asíncronos o batch)
+model ColaNotificacion {
+  id             String   @id @default(uuid()) @db.Uuid
+  estudianteId   String   @map("estudiante_id") @db.Uuid
+  asistenciaId   String?  @map("asistencia_id") @db.Uuid // Opcional, si está ligada a una falta específica
+  estado         String   @default("PENDING") @db.VarChar(20) // 'PENDING', 'PROCESSING', 'SENT', 'FAILED', 'DEAD_LETTER'
+  programadoPara DateTime @default(now()) @map("programado_para")
+  intentos       Int      @default(0)
+  maxIntentos    Int      @default(3) @map("max_intentos")
+  ultimoError    String?  @map("ultimo_error") @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  estudiante Estudiante  @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  asistencia Asistencia? @relation(fields: [asistenciaId], references: [id], onDelete: SetNull)
+
+  @@map("cola_notificaciones")
 }
 
 // 12. REFRESH TOKENS (Para autenticación JWT)

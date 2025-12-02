@@ -1,9 +1,10 @@
 
 import { PrismaClient } from '@prisma/client';
-import { AuthorizationError, NotFoundError, ValidationError, UserRole } from '../types';
 import { AttendanceStatus, AttendanceType } from '../constants/attendance';
-import { getStartOfDay, parseDateString, formatDateToISO, getDateRange } from '../utils/date.utils';
+import { AuthorizationError, NotFoundError, UserRole, ValidationError } from '../types';
+import { formatDateToISO, getDateRange, getStartOfDay, parseDateString } from '../utils/date.utils';
 import logger from '../utils/logger';
+import { notificationService } from './notification.service';
 
 const prisma = new PrismaClient();
 
@@ -184,6 +185,11 @@ export class AsistenciaService {
         },
       }) as any;
 
+      // Trigger Notification (Async)
+      notificationService.notifyAttendanceCreated(nuevaAsistencia.id).catch(err => {
+        logger.error('Error triggering notification:', err);
+      });
+
       // Formatear respuesta
       return {
         id: nuevaAsistencia.id,
@@ -223,6 +229,68 @@ export class AsistenciaService {
         throw error;
       }
       throw new Error('Error al registrar la asistencia');
+    }
+  }
+
+  /**
+   * Devuelve el listado de estudiantes del grupo asociado al horario y su estado de asistencia para el día actual
+   */
+  public static async getAsistenciasPorHorario(horarioId: string): Promise<AsistenciaGrupoResponse[]> {
+    try {
+      const hoy = getStartOfDay();
+
+      // Obtener el horario con su grupo
+      const horario = await prisma.horario.findUnique({
+        where: { id: horarioId },
+        include: {
+          grupo: {
+            include: {
+              estudiantesGrupos: {
+                include: {
+                  estudiante: {
+                    include: {
+                      usuario: {
+                        select: { nombres: true, apellidos: true, identificacion: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!horario) {
+        throw new NotFoundError('Horario/Clase');
+      }
+
+      const estudiantes = horario.grupo.estudiantesGrupos.map((eg: any) => eg.estudiante);
+
+      // Obtener asistencias del día para ese horario
+      const asistenciasHoy = await prisma.asistencia.findMany({
+        where: { horarioId, fecha: hoy },
+      });
+
+      // Mapear estudiantes al formato de respuesta, incluyendo estado si existe
+      const resultado: AsistenciaGrupoResponse[] = estudiantes.map((est: any) => {
+        const asistencia = asistenciasHoy.find((a: any) => a.estudianteId === est.id);
+        return {
+          estudiante: {
+            id: est.id,
+            nombres: est.usuario.nombres,
+            apellidos: est.usuario.apellidos,
+            identificacion: est.identificacion,
+          },
+          estado: asistencia ? asistencia.estado : null,
+          fechaRegistro: asistencia ? asistencia.fecha : undefined,
+        } as AsistenciaGrupoResponse;
+      });
+
+      return resultado;
+    } catch (error) {
+      logger.error('Error en getAsistenciasPorHorario:', error);
+      throw new Error('Error al obtener asistencias por horario');
     }
   }
 
@@ -399,6 +467,11 @@ export class AsistenciaService {
       if (!asistenciaCompleta) {
         throw new Error('Error al recuperar la asistencia creada');
       }
+
+      // Trigger Notification (Async)
+      notificationService.notifyAttendanceCreated(asistenciaCompleta.id).catch(err => {
+        logger.error('Error triggering notification:', err);
+      });
 
       // 7. Formatear respuesta
       const response: AsistenciaResponse = {

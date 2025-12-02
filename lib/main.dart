@@ -115,6 +115,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             authProvider: _authProvider,
           );
 
+          // Register lifecycle callbacks for data refresh
+          final lifecycleManager = Provider.of<AppLifecycleManager>(context, listen: false);
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+          final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+          final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+          final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+
+          lifecycleManager.addLifecycleCallback('data_refresh', () async {
+            debugPrint('AppLifecycleManager: Refreshing data...');
+            final token = authProvider.accessToken;
+            if (token != null) {
+              debugPrint('AppLifecycleManager: Token available, refreshing periodos...');
+              await periodoProvider.loadPeriodosActivos(token);
+              debugPrint('AppLifecycleManager: Periodos refreshed, refreshing grupos...');
+              await grupoProvider.loadGrupos(token);
+              debugPrint('AppLifecycleManager: Grupos refreshed, refreshing materias...');
+              await materiaProvider.loadMaterias(token);
+              debugPrint('AppLifecycleManager: Materias refreshed, checking for horario refresh...');
+              // Refresh horarios if there's a selected group and period
+              if (horarioProvider.selectedGrupoId != null && horarioProvider.selectedPeriodoId != null) {
+                debugPrint('AppLifecycleManager: Refreshing horarios for selected group/period...');
+                await horarioProvider.loadHorarios(token, grupoId: horarioProvider.selectedGrupoId, periodoId: horarioProvider.selectedPeriodoId);
+                debugPrint('AppLifecycleManager: Horarios refreshed');
+              } else {
+                debugPrint('AppLifecycleManager: No selected group/period for horario refresh');
+              }
+              debugPrint('AppLifecycleManager: Data refresh completed');
+            } else {
+              debugPrint('AppLifecycleManager: No token available for refresh');
+            }
+          });
+
           final settings = Provider.of<SettingsProvider>(context);
 
           // Actualizar System UI Overlay para reflejar el tema seleccionado

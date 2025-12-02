@@ -35,7 +35,7 @@ class FakeInstitutionProvider extends InstitutionProvider {
 
 void main() {
   testWidgets('CreateInstitutionAdminScreen delegates to UserFormScreen with initialInstitutionId', (WidgetTester tester) async {
-    final institution = Institution(id: 'i1', nombre: 'Test Inst');
+    final institution = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
 
     final router = GoRouter(routes: [
       GoRoute(path: '/', builder: (context, state) => MediaQuery(
@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('CreateInstitutionAdminScreen form submits and calls createUser', (WidgetTester tester) async {
-    final institution = Institution(id: 'i1', nombre: 'Test Inst');
+    final institution = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
     final fakeUserProvider = FakeUserProvider();
 
     final router = GoRouter(routes: [

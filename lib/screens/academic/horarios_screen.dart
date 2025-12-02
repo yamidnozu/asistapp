@@ -197,6 +197,64 @@ class _HorariosScreenState extends State<HorariosScreen> {
           final columns = width >= 1024 ? 3 : (width >= 600 ? 2 : 1);
           final itemWidth = (width - ((columns - 1) * 12)) / columns;
 
+          // Sincronizar selectedPeriodo con la instancia actual del provider (evita mismatches en el Dropdown)
+          final periodos = periodoProvider.periodosActivos;
+          PeriodoAcademico? periodoValue;
+          if (_selectedPeriodo != null && periodos.isNotEmpty) {
+            PeriodoAcademico? matching;
+            for (var p in periodos) {
+              if (p.id == _selectedPeriodo!.id) {
+                matching = p;
+                break;
+              }
+            }
+            // Usar la instancia encontrada para la UI inmediatamente (sin mutar el estado durante build)
+            periodoValue = matching;
+            if (matching != null && matching != _selectedPeriodo) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _selectedPeriodo = matching);
+              });
+            } else if (matching == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _selectedPeriodo = null);
+              });
+            }
+          } else {
+            periodoValue = _selectedPeriodo;
+          }
+
+          // Sincronizar selectedGrupo con la instancia actual de grupoProvider (si aplica)
+          final grupos = _selectedPeriodo == null
+              ? grupoProvider.items
+              : grupoProvider.items.where((g) => g.periodoId == _selectedPeriodo!.id).toList();
+          Grupo? grupoValue;
+          if (_selectedGrupo != null && grupos.isNotEmpty) {
+            Grupo? matchingGrupo;
+            for (var g in grupos) {
+              if (g.id == _selectedGrupo!.id) {
+                matchingGrupo = g;
+                break;
+              }
+            }
+            // Mostrar la instancia encontrada en la UI inmediatamente
+            grupoValue = matchingGrupo;
+            if (matchingGrupo != null && matchingGrupo != _selectedGrupo) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _selectedGrupo = matchingGrupo);
+              });
+            } else if (matchingGrupo == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _selectedGrupo = grupos.isNotEmpty ? grupos.first : null);
+              });
+            }
+          } else {
+            grupoValue = _selectedGrupo;
+          }
+
           return Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -206,7 +264,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
                 width: itemWidth,
                 child: DropdownButtonFormField<PeriodoAcademico>(
                   isExpanded: true,
-                  value: _selectedPeriodo,
+                  value: periodoValue,
                   decoration: InputDecoration(
                     labelText: 'Período Académico',
                     isDense: true,
@@ -228,7 +286,7 @@ class _HorariosScreenState extends State<HorariosScreen> {
                 width: itemWidth,
                 child: DropdownButtonFormField<Grupo>(
                   isExpanded: true,
-                  value: _selectedGrupo,
+                  value: grupoValue,
                   decoration: const InputDecoration(labelText: 'Grupo'),
                   items: _buildGrupoItems(grupoProvider),
                   onChanged: _handleGrupoDropdownChanged,

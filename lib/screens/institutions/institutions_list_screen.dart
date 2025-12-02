@@ -36,9 +36,9 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     _searchDebounceTimer?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
-    // Limpiar filtros al salir de la pantalla
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-    institutionProvider.clearFilters();
+    // Limpiar filtros al salir de la pantalla - removido para evitar error de setState durante dispose
+    // final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    // institutionProvider.clearFilters();
     super.dispose();
   }
 

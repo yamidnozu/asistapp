@@ -68,9 +68,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Métricas Rápidas'), findsOneWidget);
-    expect(find.text('Actividad reciente'), findsOneWidget);
-    // Verificar que aparece el usuario en actividad reciente
-    expect(find.textContaining('Docente Uno'), findsOneWidget);
+    // Verify KPIs and actions grid are present
+    expect(find.text('Usuarios'), findsOneWidget);
+    expect(find.text('Acciones Principales'), findsOneWidget);
+    // The new AdminDashboard UI focuses on KPIs and actions; ensure KPIs reflect users
+    expect(find.textContaining('Usuarios'), findsOneWidget);
   });
 }

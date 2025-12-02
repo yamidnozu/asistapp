@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import AsistenciaService, { RegistrarAsistenciaRequest } from '../services/asistencia.service';
+import { formatDateToISO, getStartOfDay } from '../utils/date.utils';
 
 export interface RegistrarAsistenciaBody {
   horarioId: string;
@@ -122,6 +123,41 @@ export class AsistenciaController {
         message: 'Error interno del servidor',
         error: 'InternalServerError',
       });
+    }
+  }
+
+  /**
+   * Obtiene la lista de asistencias para un horario específico (fecha actual)
+   * GET /horarios/:horarioId/asistencias
+   */
+  public static async getAsistenciasPorHorario(
+    request: AuthenticatedRequest & FastifyRequest<{ Params: GetAsistenciasParams }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const { horarioId } = request.params;
+
+      // Obtener la institución del usuario autenticado
+      const usuarioInstitucion = await prisma.usuarioInstitucion.findFirst({
+        where: { usuarioId: request.user!.id, activo: true },
+      });
+
+      if (!usuarioInstitucion) {
+        reply.code(400).send({ success: false, error: 'El usuario no tiene una institución asignada' });
+        return;
+      }
+
+      const institucionId = usuarioInstitucion.institucionId;
+
+      // Obtener asistencias del día actual para el horario
+      const hoy = formatDateToISO(getStartOfDay());
+
+      const resultado = await AsistenciaService.getAsistenciasPorHorario(horarioId);
+
+      reply.code(200).send({ success: true, message: 'Asistencias obtenidas', data: resultado });
+    } catch (error: any) {
+      console.error('Error en getAsistenciasPorHorario:', error);
+      reply.code(500).send({ success: false, message: 'Error interno del servidor', error: 'InternalServerError' });
     }
   }
 

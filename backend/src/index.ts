@@ -8,6 +8,7 @@ import { authenticate } from './middleware/auth';
 import setupErrorHandler from './middleware/errorHandler';
 import routes from './routes';
 import AuthService from './services/auth.service';
+import { CronService } from './services/cron.service';
 
 const fastify = Fastify({
   logger: config.nodeEnv === 'development',
@@ -45,6 +46,9 @@ const start = async () => {
     await databaseService.connect();
 
     await AuthService.ensureAdminUser();
+
+    // Initialize Cron Jobs
+    CronService.init();
 
     if (config.nodeEnv === 'development') {
       console.log('🌐 Iniciando servidor...');
@@ -87,7 +91,7 @@ process.on('SIGTERM', async () => {
 
 const gracefulShutdown = async () => {
   try {
-    console.log('� Cerrando conexiones...');
+    console.log(' Cerrando conexiones...');
 
     await fastify.close();
 

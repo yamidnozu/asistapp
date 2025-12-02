@@ -163,6 +163,68 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
       },
     });
 
+      /**
+       * GET /horarios/:horarioId/asistencias
+       * Obtiene la lista de asistencias para un horario específico
+       */
+      horarioRoutes.get('/:horarioId/asistencias', {
+        preHandler: [
+          authenticate,
+          authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
+        ],
+        handler: AsistenciaController.getAsistenciasPorHorario as any,
+        schema: {
+          description: 'Obtiene la lista de asistencias para un horario específico en la fecha actual',
+          tags: ['Horarios', 'Asistencias'],
+          params: {
+            type: 'object',
+            required: ['horarioId'],
+            properties: {
+              horarioId: {
+                type: 'string',
+                description: 'ID del horario/clase',
+              },
+            },
+          },
+          response: {
+            200: {
+              type: 'object',
+              properties: {
+                success: { type: 'boolean' },
+                message: { type: 'string' },
+                data: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      estudiante: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          nombres: { type: 'string' },
+                          apellidos: { type: 'string' },
+                          identificacion: { type: 'string' },
+                        },
+                      },
+                      estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'], nullable: true },
+                      fechaRegistro: { type: 'string', format: 'date-time', nullable: true },
+                    },
+                  },
+                },
+              },
+            },
+            404: {
+              type: 'object',
+              properties: {
+                success: { type: 'boolean' },
+                message: { type: 'string' },
+                error: { type: 'string' },
+              },
+            },
+          },
+        },
+      });
+
     /**
      * GET /horarios/grupo/:grupoId
      * Obtiene todos los horarios de un grupo específico

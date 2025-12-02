@@ -20,6 +20,10 @@ describe('Institucion fallback contact test', () => {
     await fastify.ready();
     // Clean institutions and users except the default admin
     const client = databaseService.getClient();
+    // Eliminar asistencias primero (tienen FK a usuarios/profesores)
+    if ((client as any).asistencia) {
+      await (client as any).asistencia.deleteMany();
+    }
     await client.usuarioInstitucion.deleteMany();
     await client.usuario.deleteMany({ where: { email: { not: 'admin@asistapp.com' } } });
     await client.institucion.deleteMany();

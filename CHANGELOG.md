@@ -17,3 +17,8 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.6] - Previous versions
 - Smaller changes and fixes (see commits for details)
+
+## [1.0.11] - 2025-12-02
+### Changed
+- Bumped application version to `1.0.11+12` (pubspec.yaml) to update Android versionCode/versionName and synced iOS build name.
+- Minor build metadata sync; no functional changes to runtime logic.

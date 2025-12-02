@@ -195,7 +195,33 @@ class HorarioService {
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          return Horario.fromJson(responseData['data']);
+          try {
+            // Defensive: asegurar que `grupo.periodoAcademico` exista antes de parsear
+            final rawData = responseData['data'];
+            if (rawData is Map<String, dynamic>) {
+              final horarioJson = Map<String, dynamic>.from(rawData);
+              if (horarioJson['grupo'] != null && horarioJson['grupo'] is Map<String, dynamic>) {
+                final grupoJson = Map<String, dynamic>.from(horarioJson['grupo']);
+                if ((grupoJson['periodoAcademico'] == null || grupoJson['periodoAcademico'] is! Map) && horarioJson['periodoAcademico'] != null) {
+                  grupoJson['periodoAcademico'] = horarioJson['periodoAcademico'];
+                }
+                horarioJson['grupo'] = grupoJson;
+                try {
+                  return Horario.fromJson(horarioJson);
+                } catch (e) {
+                  debugPrint('Error parseando Horario (create): $e');
+                  debugPrint('Response body: ${response.body}');
+                  return null;
+                }
+              }
+            }
+            // Fallback: intentar parsear directamente
+            return Horario.fromJson(responseData['data']);
+          } catch (e) {
+            debugPrint('Error procesando respuesta de createHorario: $e');
+            debugPrint('Response body: ${response.body}');
+            return null;
+          }
         }
       } else {
         debugPrint('Error updating horario: ${response.statusCode} - ${response.body}');
@@ -232,7 +258,31 @@ class HorarioService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          return Horario.fromJson(responseData['data']);
+          try {
+            final rawData = responseData['data'];
+            if (rawData is Map<String, dynamic>) {
+              final horarioJson = Map<String, dynamic>.from(rawData);
+              if (horarioJson['grupo'] != null && horarioJson['grupo'] is Map<String, dynamic>) {
+                final grupoJson = Map<String, dynamic>.from(horarioJson['grupo']);
+                if ((grupoJson['periodoAcademico'] == null || grupoJson['periodoAcademico'] is! Map) && horarioJson['periodoAcademico'] != null) {
+                  grupoJson['periodoAcademico'] = horarioJson['periodoAcademico'];
+                }
+                horarioJson['grupo'] = grupoJson;
+                try {
+                  return Horario.fromJson(horarioJson);
+                } catch (e) {
+                  debugPrint('Error parseando Horario (getById): $e');
+                  debugPrint('Response body: ${response.body}');
+                  return null;
+                }
+              }
+            }
+            return Horario.fromJson(responseData['data']);
+          } catch (e) {
+            debugPrint('Error procesando respuesta getHorarioById: $e');
+            debugPrint('Response body: ${response.body}');
+            return null;
+          }
         }
       } else {
         // Extraer error del backend y lanzarlo con código y razón si están presentes

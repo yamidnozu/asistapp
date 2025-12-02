@@ -79,8 +79,9 @@ void main() {
   });
   testWidgets('Open bottom sheet and navigate to create admin form which calls createUser', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final fakeUserProvider = FakeUserProvider();
-    final inst = Institution(id: 'i1', nombre: 'Test Inst');
+    final inst = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
     final fakeInstProvider = FakeInstitutionProvider([inst]);
 
     final router = GoRouter(routes: [
@@ -115,8 +116,9 @@ void main() {
 
   testWidgets('Open bottom sheet and choose assign existing opens dialog', (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
+    fakeAuth.selectInstitution('i1');
     final fakeUserProvider = FakeUserProvider();
-    final inst = Institution(id: 'i1', nombre: 'Test Inst');
+    final inst = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
     final fakeInstProvider = FakeInstitutionProvider([inst]);
 
     await tester.pumpWidget(
