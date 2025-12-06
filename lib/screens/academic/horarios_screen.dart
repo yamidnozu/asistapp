@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focus_detector/focus_detector.dart';
@@ -104,14 +105,19 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
       await materiaProvider.loadMaterias(token);
 
+      // Cargar profesores para la selección en horarios
       final institutionId = authProvider.selectedInstitutionId;
+      // Configurar filtro de rol antes de cargar
+      userProvider.filters['role'] = 'profesor';
       if (institutionId != null) {
+        debugPrint('HorariosScreen: Cargando profesores para institución $institutionId');
         await userProvider.loadUsersByInstitution(token, institutionId);
       } else {
-        // Configurar filtro de rol antes de cargar
-        userProvider.filters['roles'] = 'profesor';
+        debugPrint('HorariosScreen: Cargando profesores globalmente');
         await userProvider.loadUsers(token);
       }
+      debugPrint('HorariosScreen: Profesores cargados: ${userProvider.professors.length}');
+      debugPrint('HorariosScreen: Usuarios totales: ${userProvider.items.length}');
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

@@ -233,14 +233,20 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
   notifyListeners();
         return true;
       } else {
-  // Intentar recargar los horarios del grupo para mantener consistencia en UI
+        // El horario puede haberse creado exitosamente pero el backend no devolvió el objeto
+        // En este caso, recargamos los datos del grupo y retornamos true
+        debugPrint('createHorario: Horario creado pero sin objeto de retorno, recargando datos...');
   try {
-    if (horarioData.grupoId != null) {
+    if (horarioData.grupoId.isNotEmpty) {
       await loadHorariosByGrupo(accessToken, horarioData.grupoId);
     }
-  } catch (_) {}
-  setError('Error al crear horario');
-        return false;
+    // Si la recarga fue exitosa, consideramos que el horario se creó correctamente
+    return true;
+  } catch (reloadError) {
+    debugPrint('Error recargando horarios: $reloadError');
+    setError('Error al crear horario');
+    return false;
+  }
       }
     } catch (e) {
       debugPrint('Error creating horario: $e');
@@ -278,8 +284,20 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
   notifyListeners();
         return true;
       } else {
-  setError('Error al actualizar horario');
-        return false;
+        // El horario puede haberse actualizado exitosamente pero el backend no devolvió el objeto
+        // En este caso, recargamos los datos y retornamos true
+        debugPrint('updateHorario: Horario actualizado pero sin objeto de retorno, recargando datos...');
+        try {
+          if (_selectedGrupoId != null && _selectedGrupoId!.isNotEmpty) {
+            await loadHorariosByGrupo(accessToken, _selectedGrupoId!);
+          }
+          // Si la recarga fue exitosa, consideramos que el horario se actualizó correctamente
+          return true;
+        } catch (reloadError) {
+          debugPrint('Error recargando horarios: $reloadError');
+          setError('Error al actualizar horario');
+          return false;
+        }
       }
     } catch (e) {
       debugPrint('Error updating horario: $e');

@@ -197,6 +197,12 @@ class HorarioService {
         if (responseData['success'] == true) {
           try {
             final rawData = responseData['data'];
+            // Si data está vacío o null, el horario se creó pero el backend no devolvió los datos
+            // En este caso, retornamos null y el provider debe recargar los datos
+            if (rawData == null || (rawData is Map && rawData.isEmpty)) {
+              debugPrint('createHorario: éxito pero data está vacío, el provider debe recargar');
+              return null;
+            }
             if (rawData is Map<String, dynamic>) {
               final horarioJson = Map<String, dynamic>.from(rawData);
               if (horarioJson['grupo'] != null && horarioJson['grupo'] is Map<String, dynamic>) {
@@ -258,6 +264,12 @@ class HorarioService {
         if (responseData['success'] == true) {
           try {
             final rawData = responseData['data'];
+            // Si data está vacío o null, el horario se actualizó pero el backend no devolvió los datos
+            // En este caso, retornamos null y el provider debe recargar los datos
+            if (rawData == null || (rawData is Map && rawData.isEmpty)) {
+              debugPrint('updateHorario: éxito pero data está vacío, el provider debe recargar');
+              return null;
+            }
             if (rawData is Map<String, dynamic>) {
               final horarioJson = Map<String, dynamic>.from(rawData);
               if (horarioJson['grupo'] != null && horarioJson['grupo'] is Map<String, dynamic>) {

@@ -85,18 +85,26 @@ class _EditClassDialogState extends State<EditClassDialog> {
             SizedBox(height: spacing.md),
             Consumer<UserProvider>(
               builder: (context, userProvider, child) {
+                // Buscar el profesor en la lista actual de profesores
                 User? selectedProfesorFromList;
                 if (_selectedProfesor != null) {
-                  selectedProfesorFromList = userProvider.professors.firstWhere(
-                    (p) => p.id == _selectedProfesor!.id,
-                    orElse: () => _selectedProfesor!,
-                  );
+                  final found = userProvider.professors.where((p) => p.id == _selectedProfesor!.id).toList();
+                  if (found.isNotEmpty) {
+                    selectedProfesorFromList = found.first;
+                  }
+                  // Si no se encuentra, dejamos selectedProfesorFromList como null
+                  // para evitar el error del DropdownButton
                 }
 
                 return DropdownButtonFormField<User?>(
                   isExpanded: true,
-                  value: selectedProfesorFromList,
-                  decoration: const InputDecoration(labelText: 'Profesor', hintText: 'Selecciona un profesor'),
+                  value: selectedProfesorFromList, // Será null si no se encuentra en la lista
+                  decoration: InputDecoration(
+                    labelText: 'Profesor',
+                    hintText: _selectedProfesor != null && selectedProfesorFromList == null
+                        ? 'Profesor actual: ${_selectedProfesor!.nombres} (no disponible)'
+                        : 'Selecciona un profesor',
+                  ),
                   items: [
                     const DropdownMenuItem<User?>(value: null, child: Text('Sin profesor')),
                     ...userProvider.professors.map((profesor) {
