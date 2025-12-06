@@ -1,9 +1,11 @@
 // test-qr-simple.ts
-// Test simplificado para verificar registro de asistencia con QR
+// Test automatizado para verificar registro de asistencia con QR
 
 import axios from 'axios';
+import { PrismaClient } from '@prisma/client';
 
 const BASE_URL = 'http://localhost:3001';
+const prisma = new PrismaClient();
 
 async function login(email: string, password: string) {
   const response = await axios.post(`${BASE_URL}/auth/login`, {
@@ -14,42 +16,105 @@ async function login(email: string, password: string) {
 }
 
 async function test() {
-  console.log('\n🧪 === TEST: QR Scanner AuthorizationError ===\n');
-
-  // Login como profesor Juan Pérez
-  const token = await login('juan.perez@sanjose.edu', 'Prof123!');
-  console.log('✅ Login exitoso\n');
-
-  // Datos de prueba (basado en DATOS_PRUEBA.md)
-  // Estudiante: Ana Martínez (10-A) - código QR: QR-EST-001
-  // Horario: Cualquier horario de 10-A con Juan Pérez
-  
-  console.log('📝 Intentando registrar asistencia...');
-  console.log('   Estudiante: Ana Martínez (QR-EST-001)');
-  console.log('   Grupo: 10-A');
-  console.log('   Profesor: Juan Pérez\n');
+  console.log('\n🧪 === TEST: Registro de Asistencia con QR ===\n');
 
   try {
-    // Primero necesitamos un horarioId válido
-    // Como no tenemos endpoint para listar horarios, vamos a probar con IDs directamente
-    
-    console.log('⚠️ Nota: Este test requiere un horarioId válido');
-    console.log('   Por favor ejecuta primero: docker compose exec backend npx prisma studio');
-    console.log('   Y obtén el ID de un horario del grupo 10-A\n');
-    
-    // Ejemplo de estructura que debería funcionar:
-    const testData = {
-      horarioId: 'REEMPLAZAR_CON_ID_REAL',  // Se necesita obtener de la BD
-      codigoQr: 'QR-EST-001',  // Ana Martínez del grupo 10-A
-    };
-    
-    console.log('📊 Estructura de petición esperada:');
-    console.log(JSON.stringify(testData, null, 2));
-    console.log('\n❌ Test no puede continuar sin horarioId válido');
-    console.log('   Solución: Obtener horarioId desde Prisma Studio o crear endpoint para listar horarios\n');
-    
+    // Login como profesor Juan Pérez
+    const token = await login('juan.perez@sanjose.edu', 'Prof123!');
+    console.log('✅ Login exitoso\n');
+
+    // Obtener el ID del profesor desde la BD
+    const profesor = await prisma.usuario.findUnique({
+      where: { email: 'juan.perez@sanjose.edu' },
+    });
+
+    if (!profesor) {
+      console.error('❌ No se encontró el profesor en la base de datos');
+      return;
+    }
+
+    // Buscar un horario asignado a este profesor
+    const horario = await prisma.horario.findFirst({
+      where: {
+        profesorId: profesor.id,
+      },
+      include: {
+        grupo: true,
+        materia: true,
+        periodoAcademico: true,
+      },
+    });
+
+    if (!horario) {
+      console.error('❌ No se encontró ningún horario asignado al profesor');
+      console.log('   Verifica que existan horarios en la base de datos para este profesor\n');
+      return;
+    }
+
+    console.log('📅 Horario encontrado:');
+    console.log(`   ID: ${horario.id}`);
+    console.log(`   Grupo: ${horario.grupo.nombre}`);
+    console.log(`   Materia: ${horario.materia.nombre}`);
+    console.log(`   Periodo: ${horario.periodoAcademico.nombre}\n`);
+
+    // Buscar un estudiante del grupo
+    const estudianteGrupo = await prisma.estudianteGrupo.findFirst({
+      where: {
+        grupoId: horario.grupoId,
+      },
+      include: {
+        estudiante: {
+          include: {
+            usuario: true,
+          },
+        },
+      },
+    });
+
+    if (!estudianteGrupo) {
+      console.error('❌ No se encontró ningún estudiante en el grupo');
+      console.log('   Verifica que existan estudiantes asignados a este grupo\n');
+      return;
+    }
+
+    const estudiante = estudianteGrupo.estudiante;
+    console.log('👨‍🎓 Estudiante encontrado:');
+    console.log(`   Nombre: ${estudiante.usuario.nombres} ${estudiante.usuario.apellidos}`);
+    console.log(`   Código QR: ${estudiante.codigoQr}\n`);
+
+    // Intentar registrar asistencia
+    console.log('📝 Registrando asistencia...\n');
+
+    const response = await axios.post(
+      `${BASE_URL}/asistencias/registrar`,
+      {
+        horarioId: horario.id,
+        codigoQr: estudiante.codigoQr,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      console.log('✅ Asistencia registrada exitosamente!');
+      console.log(`   ID de asistencia: ${response.data.data.id}`);
+      console.log(`   Estado: ${response.data.data.estado}`);
+      console.log(`   Fecha: ${response.data.data.fecha}\n`);
+    } else {
+      console.error('❌ Error al registrar asistencia:', response.data.message);
+    }
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
+    if (error.response) {
+      console.error('❌ Error HTTP:', error.response.status);
+      console.error('   Mensaje:', error.response.data.message || error.response.data);
+    } else {
+      console.error('❌ Error:', error.message);
+    }
+  } finally {
+    await prisma.$disconnect();
   }
 }
 

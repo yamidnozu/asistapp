@@ -95,7 +95,9 @@ class UserDetailScreen extends StatelessWidget {
               'Información del Sistema',
               [
                 _buildInfoItem('ID de Usuario', user.id),
-                _buildInfoItem('Fecha de Creación', 'No disponible'), // TODO: Agregar campo de fecha si existe
+                _buildInfoItem('Fecha de Creación', user.createdAt != null 
+                  ? _formatDate(user.createdAt!) 
+                  : 'No disponible'),
               ],
             ),
           ],
@@ -174,5 +176,13 @@ class UserDetailScreen extends StatelessWidget {
       default:
         return role;
     }
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    return '${date.day} de ${months[date.month - 1]} de ${date.year}';
   }
 }

@@ -243,7 +243,12 @@ model Configuracion {
   modoNotificacionAsistencia String  @default("MANUAL_ONLY") @map("modo_notificacion_asistencia") // 'INSTANT', 'END_OF_DAY', 'MANUAL_ONLY'
   horaDisparoNotificacion  String? @map("hora_disparo_notificacion") @db.VarChar(8) // "18:00:00"
 
-  // Deprecated fields (mantener por ahora o migrar)
+  // ⚠️ DEPRECATED FIELDS - Mantener por compatibilidad pero NO USAR en nuevo código
+  // Estos campos fueron reemplazados por:
+  // - modoNotificacionAsistencia (reemplaza modoNotificacion)
+  // - horaDisparoNotificacion (reemplaza horaNotificacion)
+  // - canalNotificacion (proporciona más flexibilidad)
+  // TODO: Crear migración para eliminar estos campos una vez confirmado que no se utilizan
   modoNotificacion      String  @default("diaria") @map("modo_notificacion") // 'diaria', 'por_clase', 'umbral'
   horaNotificacion      String  @default("18:00:00") @map("hora_notificacion") @db.VarChar(8)
   umbralFaltas          Int     @default(3) @map("umbral_faltas") // Para modo 'umbral'

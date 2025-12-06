@@ -23,6 +23,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           : StudentDetails.fromJson(json['estudiante'] as Map<String, dynamic>),
       titulo: json['titulo'] as String?,
       especialidad: json['especialidad'] as String?,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -38,6 +41,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'estudiante': instance.estudiante,
       'titulo': instance.titulo,
       'especialidad': instance.especialidad,
+      'createdAt': instance.createdAt?.toIso8601String(),
     };
 
 UserInstitution _$UserInstitutionFromJson(Map<String, dynamic> json) =>

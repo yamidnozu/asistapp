@@ -757,7 +757,7 @@ export class AsistenciaService {
    */
   public static async updateAsistencia(
     id: string,
-    data: { estado?: AttendanceStatus; observacion?: string; justificada?: boolean },
+    data: { estado?: AttendanceStatus; observacion?: string },
     profesorId: string,
     rol: string
   ): Promise<AsistenciaResponse> {
@@ -788,7 +788,6 @@ export class AsistenciaService {
         data: {
           estado: data.estado,
           observaciones: data.observacion, // Map observacion to observaciones
-          // justificada: data.justificada, // 'justificada' is not in schema
         },
         include: {
           estudiante: {
