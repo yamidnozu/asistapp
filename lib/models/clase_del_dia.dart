@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'institution_config.dart';
 
 part 'clase_del_dia.g.dart';
 
@@ -100,13 +101,21 @@ class PeriodoAcademicoSimple {
 class Institucion {
   final String id;
   final String nombre;
+  final InstitutionConfig? configuraciones;
 
   Institucion({
     required this.id,
     required this.nombre,
+    this.configuraciones,
   });
 
   factory Institucion.fromJson(Map<String, dynamic> json) => _$InstitucionFromJson(json);
 
   Map<String, dynamic> toJson() => _$InstitucionToJson(this);
+
+  /// Helper para saber si el modo de notificación es MANUAL_ONLY
+  bool get isModoManual => configuraciones?.modoNotificacionAsistencia == 'MANUAL_ONLY';
+
+  /// Helper para saber si las notificaciones están activas
+  bool get notificacionesActivas => configuraciones?.notificacionesActivas ?? false;
 }

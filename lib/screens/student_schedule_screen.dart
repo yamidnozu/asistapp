@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../services/academic/horario_service.dart';
 import '../theme/theme_extensions.dart';
 
 class StudentScheduleScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _horarios = [];
   String? _errorMessage;
+  final HorarioService _horarioService = HorarioService();
 
   @override
   void initState() {
@@ -40,39 +42,19 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
         return;
       }
 
-      // TODO: Implementar llamada al backend GET /estudiantes/dashboard/horario-semanal
-      // Por ahora, datos de ejemplo
-      await Future.delayed(const Duration(seconds: 1)); // Simular carga
+      final horarios = await _horarioService.getMisHorariosEstudiante(token);
 
-      setState(() {
-        _horarios = [
-          {
-            'diaSemana': 1,
-            'horaInicio': '07:00',
-            'horaFin': '08:00',
-            'materia': {'nombre': 'Matemáticas'},
-            'profesor': {'nombres': 'Juan', 'apellidos': 'Pérez'},
-            'grupo': {'nombre': 'Décimo A'},
-          },
-          {
-            'diaSemana': 1,
-            'horaInicio': '08:00',
-            'horaFin': '09:00',
-            'materia': {'nombre': 'Física'},
-            'profesor': {'nombres': 'Laura', 'apellidos': 'Gómez'},
-            'grupo': {'nombre': 'Décimo A'},
-          },
-          {
-            'diaSemana': 2,
-            'horaInicio': '07:00',
-            'horaFin': '08:00',
-            'materia': {'nombre': 'Química'},
-            'profesor': {'nombres': 'Laura', 'apellidos': 'Gómez'},
-            'grupo': {'nombre': 'Décimo A'},
-          },
-        ];
-        _isLoading = false;
-      });
+      if (horarios != null) {
+        setState(() {
+          _horarios = horarios;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'No se pudieron cargar los horarios';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error al cargar el horario: $e';
@@ -177,13 +159,16 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
       horariosPorDia.putIfAbsent(dia, () => []).add(horario);
     }
 
+    // Ordenar por día
+    final diasOrdenados = horariosPorDia.keys.toList()..sort();
+
     return RefreshIndicator(
       onRefresh: _loadHorarios,
       child: ListView.builder(
         padding: EdgeInsets.all(spacing.lg),
-        itemCount: horariosPorDia.length,
+        itemCount: diasOrdenados.length,
         itemBuilder: (context, index) {
-          final dia = horariosPorDia.keys.elementAt(index);
+          final dia = diasOrdenados[index];
           final horariosDelDia = horariosPorDia[dia]!;
           return _buildDiaSchedule(dia, horariosDelDia);
         },
@@ -227,9 +212,9 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    final materia = horario['materia'] as Map<String, dynamic>;
-    final profesor = horario['profesor'] as Map<String, dynamic>;
-    final grupo = horario['grupo'] as Map<String, dynamic>;
+    final materia = horario['materia'] as Map<String, dynamic>?;
+    final profesor = horario['profesor'] as Map<String, dynamic>?;
+    final grupo = horario['grupo'] as Map<String, dynamic>?;
 
     return Card(
       margin: EdgeInsets.only(bottom: spacing.md),
@@ -248,7 +233,7 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    horario['horaInicio'],
+                    horario['horaInicio'] ?? '--:--',
                     style: textStyles.labelMedium.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w600,
@@ -259,7 +244,7 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
                     style: textStyles.bodySmall.copyWith(color: colors.primary),
                   ),
                   Text(
-                    horario['horaFin'],
+                    horario['horaFin'] ?? '--:--',
                     style: textStyles.labelMedium.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w600,
@@ -274,20 +259,21 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    materia['nombre'] ?? 'Sin nombre',
+                    materia?['nombre'] ?? 'Sin nombre',
                     style: textStyles.bodyLarge.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.textPrimary,
                     ),
                   ),
                   SizedBox(height: spacing.xs),
-                  Text(
-                    'Prof. ${profesor['nombres']} ${profesor['apellidos']}',
-                    style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
-                  ),
+                  if (profesor != null)
+                    Text(
+                      'Prof. ${profesor['nombres'] ?? ''} ${profesor['apellidos'] ?? ''}',
+                      style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
+                    ),
                   SizedBox(height: spacing.xs),
                   Text(
-                    grupo['nombre'] ?? 'Sin grupo',
+                    grupo?['nombre'] ?? 'Sin grupo',
                     style: textStyles.bodySmall.copyWith(color: colors.textMuted),
                   ),
                 ],

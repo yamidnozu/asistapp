@@ -26,6 +26,46 @@ export interface WhatsAppTemplateConfig {
 }
 
 /**
+ * Formatea fecha y hora para mensajes
+ * @param date - Fecha a formatear
+ * @param format - 'date' | 'time' | 'datetime'
+ */
+export function formatDateTime(date: Date, format: 'date' | 'time' | 'datetime' = 'datetime'): string {
+    const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'America/Bogota'
+    };
+
+    if (format === 'date' || format === 'datetime') {
+        options.weekday = 'long';
+        options.year = 'numeric';
+        options.month = 'long';
+        options.day = 'numeric';
+    }
+
+    if (format === 'time' || format === 'datetime') {
+        options.hour = '2-digit';
+        options.minute = '2-digit';
+        options.hour12 = true;
+    }
+
+    return date.toLocaleDateString('es-CO', options);
+}
+
+/**
+ * Obtiene emoji según el estado de asistencia
+ */
+export function getStatusEmoji(status: string): string {
+    const emojis: Record<string, string> = {
+        'PRESENTE': '✅',
+        'AUSENTE': '❌',
+        'TARDANZA': '⏰',
+        'JUSTIFICADO': '📋',
+        'PERMISO': '📝'
+    };
+    return emojis[status] || '❓';
+}
+
+/**
  * Genera un template de notificación de asistencia
  * 
  * Template en Meta debe tener estructura similar a:
@@ -46,7 +86,7 @@ export function buildAttendanceTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'asistencia_notificacion', // Debe coincidir con el template creado en Meta
-        language: { code: 'es' },
+        language: { code: 'es_CO' }, // Español (Colombia) - debe coincidir con configuración en Meta
         components: [
             {
                 type: 'body',
@@ -79,7 +119,7 @@ export function buildDailySummaryTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'resumen_diario_asistencia',
-        language: { code: 'es' },
+        language: { code: 'es_CO' },
         components: [
             {
                 type: 'body',
@@ -110,7 +150,7 @@ export function buildAbsenceAlertTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'alerta_inasistencias',
-        language: { code: 'es' },
+        language: { code: 'es_CO' },
         components: [
             {
                 type: 'body',
@@ -139,7 +179,7 @@ export function buildWelcomeTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'bienvenida_asistapp',
-        language: { code: 'es' },
+        language: { code: 'es_CO' },
         components: [
             {
                 type: 'body',
@@ -179,4 +219,32 @@ export const ATTENDANCE_STATUS_TEXT: Record<string, string> = {
  */
 export function getStatusText(status: string): string {
     return ATTENDANCE_STATUS_TEXT[status] || status.toLowerCase();
+}
+
+/**
+ * Genera un template de resumen consolidado (para múltiples hijos)
+ * 
+ * Template en Meta debe tener estructura similar a:
+ * "Hola {{1}}, resumen de asistencia:\n{{2}}"
+ * 
+ * @param guardianName - Nombre del acudiente
+ * @param consolidatedSummary - Resumen con todos los hijos y sus asistencias
+ */
+export function buildConsolidatedSummaryTemplate(
+    guardianName: string,
+    consolidatedSummary: string
+): WhatsAppTemplateConfig {
+    return {
+        name: 'resumen_consolidado_asistencia',
+        language: { code: 'es_CO' },
+        components: [
+            {
+                type: 'body',
+                parameters: [
+                    { type: 'text', text: guardianName },
+                    { type: 'text', text: consolidatedSummary }
+                ]
+            }
+        ]
+    };
 }

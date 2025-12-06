@@ -79,10 +79,15 @@ Map<String, dynamic> _$PeriodoAcademicoSimpleToJson(
 Institucion _$InstitucionFromJson(Map<String, dynamic> json) => Institucion(
       id: json['id'] as String,
       nombre: json['nombre'] as String,
+      configuraciones: json['configuraciones'] == null
+          ? null
+          : InstitutionConfig.fromJson(
+              json['configuraciones'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$InstitucionToJson(Institucion instance) =>
     <String, dynamic>{
       'id': instance.id,
       'nombre': instance.nombre,
+      'configuraciones': instance.configuraciones,
     };

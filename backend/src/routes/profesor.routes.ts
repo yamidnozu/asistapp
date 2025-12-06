@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify';
-import { UserRole } from '../constants/roles';
 import { ProfesorController } from '../controllers/profesor.controller';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
@@ -84,6 +83,17 @@ export default async function profesorRoutes(fastify: FastifyInstance) {
                       properties: {
                         id: { type: 'string' },
                         nombre: { type: 'string' },
+                        configuraciones: {
+                          type: 'object',
+                          nullable: true,
+                          properties: {
+                            id: { type: 'string' },
+                            notificacionesActivas: { type: 'boolean' },
+                            canalNotificacion: { type: 'string' },
+                            modoNotificacionAsistencia: { type: 'string' },
+                            horaDisparoNotificacion: { type: 'string', nullable: true },
+                          },
+                        },
                       },
                     },
                   },
@@ -202,6 +212,17 @@ export default async function profesorRoutes(fastify: FastifyInstance) {
                       properties: {
                         id: { type: 'string' },
                         nombre: { type: 'string' },
+                        configuraciones: {
+                          type: 'object',
+                          nullable: true,
+                          properties: {
+                            id: { type: 'string' },
+                            notificacionesActivas: { type: 'boolean' },
+                            canalNotificacion: { type: 'string' },
+                            modoNotificacionAsistencia: { type: 'string' },
+                            horaDisparoNotificacion: { type: 'string', nullable: true },
+                          },
+                        },
                       },
                     },
                   },
@@ -319,6 +340,17 @@ export default async function profesorRoutes(fastify: FastifyInstance) {
                           properties: {
                             id: { type: 'string' },
                             nombre: { type: 'string' },
+                            configuraciones: {
+                              type: 'object',
+                              nullable: true,
+                              properties: {
+                                id: { type: 'string' },
+                                notificacionesActivas: { type: 'boolean' },
+                                canalNotificacion: { type: 'string' },
+                                modoNotificacionAsistencia: { type: 'string' },
+                                horaDisparoNotificacion: { type: 'string', nullable: true },
+                              },
+                            },
                           },
                         },
                       },

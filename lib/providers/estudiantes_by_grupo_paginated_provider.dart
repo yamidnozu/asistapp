@@ -10,6 +10,12 @@ class EstudiantesByGrupoPaginatedProvider extends ChangeNotifier with PaginatedD
   EstudiantesByGrupoPaginatedProvider({GrupoService? grupoService})
       : _grupoService = grupoService ?? GrupoService();
 
+  /// Loads students for a specific group
+  Future<void> loadEstudiantes(String accessToken, String grupoId, {int page = 1, int? limit}) async {
+    setFilter('grupoId', grupoId);
+    await loadItems(accessToken, page: page, limit: limit, filters: {'grupoId': grupoId});
+  }
+
   @override
   Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
       final grupoId = filters?['grupoId']?.trim();

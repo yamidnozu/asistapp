@@ -4,12 +4,95 @@ import AsistenciaController from '../controllers/asistencia.controller';
 import HorarioController from '../controllers/horario.controller';
 import { authenticate, AuthenticatedRequest, authorize } from '../middleware/auth';
 
-console.log('🔄 Cargando rutas de horario...');
+console.log('[INFO] Cargando rutas de horario...');
 
 export default async function horarioRoutes(fastify: FastifyInstance) {
 
   fastify.register(async function (horarioRoutes) {
-    console.log('📅 horario.routes.ts - REGISTER EJECUTADO');
+    console.log('[INFO] horario.routes.ts - REGISTER EJECUTADO');
+
+    /**
+     * GET /horarios/mis-horarios
+     * Obtiene los horarios del estudiante autenticado
+     */
+    horarioRoutes.get('/mis-horarios', {
+      preHandler: [authenticate, authorize([UserRole.ESTUDIANTE])],
+      handler: HorarioController.getMisHorarios as any,
+      schema: {
+        description: 'Obtener los horarios del estudiante autenticado basado en sus grupos',
+        tags: ['Horarios', 'Estudiante'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    diaSemana: { type: 'number' },
+                    horaInicio: { type: 'string' },
+                    horaFin: { type: 'string' },
+                    periodoAcademico: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombre: { type: 'string' },
+                        activo: { type: 'boolean' },
+                      },
+                    },
+                    grupo: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombre: { type: 'string' },
+                        grado: { type: 'string' },
+                        seccion: { type: 'string', nullable: true },
+                      },
+                    },
+                    materia: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombre: { type: 'string' },
+                        codigo: { type: 'string', nullable: true },
+                      },
+                    },
+                    profesor: {
+                      type: 'object',
+                      nullable: true,
+                      properties: {
+                        id: { type: 'string' },
+                        nombres: { type: 'string' },
+                        apellidos: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              code: { type: 'string' },
+            },
+          },
+          404: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' },
+              code: { type: 'string' },
+            },
+          },
+        },
+      },
+    });
 
     /**
      * GET /horarios
@@ -163,67 +246,70 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
       },
     });
 
-      /**
-       * GET /horarios/:horarioId/asistencias
-       * Obtiene la lista de asistencias para un horario específico
-       */
-      horarioRoutes.get('/:horarioId/asistencias', {
-        preHandler: [
-          authenticate,
-          authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
-        ],
-        handler: AsistenciaController.getAsistenciasPorHorario as any,
-        schema: {
-          description: 'Obtiene la lista de asistencias para un horario específico en la fecha actual',
-          tags: ['Horarios', 'Asistencias'],
-          params: {
-            type: 'object',
-            required: ['horarioId'],
-            properties: {
-              horarioId: {
-                type: 'string',
-                description: 'ID del horario/clase',
-              },
+    /**
+     * GET /horarios/:horarioId/asistencias
+     * Obtiene la lista de asistencias para un horario específico
+     */
+    horarioRoutes.get('/:horarioId/asistencias', {
+      preHandler: [
+        authenticate,
+        authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
+      ],
+      handler: AsistenciaController.getAsistenciasPorHorario as any,
+      schema: {
+        description: 'Obtiene la lista de asistencias para un horario específico en la fecha actual',
+        tags: ['Horarios', 'Asistencias'],
+        params: {
+          type: 'object',
+          required: ['horarioId'],
+          properties: {
+            horarioId: {
+              type: 'string',
+              description: 'ID del horario/clase',
             },
           },
-          response: {
-            200: {
-              type: 'object',
-              properties: {
-                success: { type: 'boolean' },
-                message: { type: 'string' },
-                data: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      estudiante: {
-                        type: 'object',
-                        properties: {
-                          id: { type: 'string' },
-                          nombres: { type: 'string' },
-                          apellidos: { type: 'string' },
-                          identificacion: { type: 'string' },
-                        },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              data: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', nullable: true },
+                    estudiante: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        nombres: { type: 'string' },
+                        apellidos: { type: 'string' },
+                        identificacion: { type: 'string' },
                       },
-                      estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'], nullable: true },
-                      fechaRegistro: { type: 'string', format: 'date-time', nullable: true },
                     },
+                    estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'], nullable: true },
+                    observacion: { type: 'string', nullable: true },
+                    justificada: { type: 'boolean', nullable: true },
+                    fechaRegistro: { type: 'string', format: 'date-time', nullable: true },
                   },
                 },
               },
             },
-            404: {
-              type: 'object',
-              properties: {
-                success: { type: 'boolean' },
-                message: { type: 'string' },
-                error: { type: 'string' },
-              },
+          },
+          404: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              error: { type: 'string' },
             },
           },
         },
-      });
+      },
+    });
 
     /**
      * GET /horarios/grupo/:grupoId
@@ -247,76 +333,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    periodoId: { type: 'string' },
-                    grupoId: { type: 'string' },
-                    materiaId: { type: 'string' },
-                    profesorId: { type: 'string', nullable: true },
-                    diaSemana: { type: 'number' },
-                    horaInicio: { type: 'string' },
-                    horaFin: { type: 'string' },
-                    institucionId: { type: 'string' },
-                    createdAt: { type: 'string' },
-                    periodoAcademico: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        nombre: { type: 'string' },
-                        fechaInicio: { type: 'string' },
-                        fechaFin: { type: 'string' },
-                        activo: { type: 'boolean' },
-                      },
-                    },
-                    grupo: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        nombre: { type: 'string' },
-                        grado: { type: 'string' },
-                        seccion: { type: 'string', nullable: true },
-                        periodoAcademico: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'string' },
-                            nombre: { type: 'string' },
-                            fechaInicio: { type: 'string' },
-                            fechaFin: { type: 'string' },
-                            activo: { type: 'boolean' },
-                          },
-                        },
-                      },
-                    },
-                    materia: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        nombre: { type: 'string' },
-                        codigo: { type: 'string', nullable: true },
-                      },
-                    },
-                    profesor: {
-                      type: 'object',
-                      nullable: true,
-                      properties: {
-                        id: { type: 'string' },
-                        nombres: { type: 'string' },
-                        apellidos: { type: 'string' },
-                      },
-                    },
-                    _count: {
-                      type: 'object',
-                      properties: {
-                        asistencias: { type: 'number' },
-                      },
-                    },
-                  },
-                },
-              },
+              data: { type: 'array' },
             },
           },
         },
@@ -345,63 +362,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  periodoId: { type: 'string' },
-                  grupoId: { type: 'string' },
-                  materiaId: { type: 'string' },
-                  profesorId: { type: 'string', nullable: true },
-                  diaSemana: { type: 'number' },
-                  horaInicio: { type: 'string' },
-                  horaFin: { type: 'string' },
-                  institucionId: { type: 'string' },
-                  createdAt: { type: 'string' },
-                  periodoAcademico: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      fechaInicio: { type: 'string' },
-                      fechaFin: { type: 'string' },
-                      activo: { type: 'boolean' },
-                    },
-                  },
-                  grupo: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      grado: { type: 'string' },
-                      seccion: { type: 'string', nullable: true },
-                    },
-                  },
-                  materia: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      codigo: { type: 'string', nullable: true },
-                    },
-                  },
-                  profesor: {
-                    type: 'object',
-                    nullable: true,
-                    properties: {
-                      id: { type: 'string' },
-                      nombres: { type: 'string' },
-                      apellidos: { type: 'string' },
-                    },
-                  },
-                  _count: {
-                    type: 'object',
-                    properties: {
-                      asistencias: { type: 'number' },
-                    },
-                  },
-                },
-              },
+              data: { type: 'object' },
             },
           },
         },
@@ -436,63 +397,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  periodoId: { type: 'string' },
-                  grupoId: { type: 'string' },
-                  materiaId: { type: 'string' },
-                  profesorId: { type: 'string', nullable: true },
-                  diaSemana: { type: 'number' },
-                  horaInicio: { type: 'string' },
-                  horaFin: { type: 'string' },
-                  institucionId: { type: 'string' },
-                  createdAt: { type: 'string' },
-                  periodoAcademico: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      fechaInicio: { type: 'string' },
-                      fechaFin: { type: 'string' },
-                      activo: { type: 'boolean' },
-                    },
-                  },
-                  grupo: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      grado: { type: 'string' },
-                      seccion: { type: 'string', nullable: true },
-                    },
-                  },
-                  materia: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      codigo: { type: 'string', nullable: true },
-                    },
-                  },
-                  profesor: {
-                    type: 'object',
-                    nullable: true,
-                    properties: {
-                      id: { type: 'string' },
-                      nombres: { type: 'string' },
-                      apellidos: { type: 'string' },
-                    },
-                  },
-                  _count: {
-                    type: 'object',
-                    properties: {
-                      asistencias: { type: 'number' },
-                    },
-                  },
-                },
-              },
+              data: { type: 'object' },
               message: { type: 'string' },
             },
           },
@@ -533,63 +438,7 @@ export default async function horarioRoutes(fastify: FastifyInstance) {
             type: 'object',
             properties: {
               success: { type: 'boolean' },
-              data: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  periodoId: { type: 'string' },
-                  grupoId: { type: 'string' },
-                  materiaId: { type: 'string' },
-                  profesorId: { type: 'string', nullable: true },
-                  diaSemana: { type: 'number' },
-                  horaInicio: { type: 'string' },
-                  horaFin: { type: 'string' },
-                  institucionId: { type: 'string' },
-                  createdAt: { type: 'string' },
-                  periodoAcademico: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      fechaInicio: { type: 'string' },
-                      fechaFin: { type: 'string' },
-                      activo: { type: 'boolean' },
-                    },
-                  },
-                  grupo: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      grado: { type: 'string' },
-                      seccion: { type: 'string', nullable: true },
-                    },
-                  },
-                  materia: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      nombre: { type: 'string' },
-                      codigo: { type: 'string', nullable: true },
-                    },
-                  },
-                  profesor: {
-                    type: 'object',
-                    nullable: true,
-                    properties: {
-                      id: { type: 'string' },
-                      nombres: { type: 'string' },
-                      apellidos: { type: 'string' },
-                    },
-                  },
-                  _count: {
-                    type: 'object',
-                    properties: {
-                      asistencias: { type: 'number' },
-                    },
-                  },
-                },
-              },
+              data: { type: 'object' },
               message: { type: 'string' },
             },
           },

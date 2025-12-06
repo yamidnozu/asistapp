@@ -99,6 +99,7 @@ class UserService {
       if (roles != null && roles.isNotEmpty) queryParams['rol'] = roles.join(',');
       
   final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
+      debugPrint('UserService.getAllUsers URL: $uri');
       
       final response = await http.get(
         uri,
@@ -233,6 +234,7 @@ class UserService {
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
       
       final uri = Uri.parse('$baseUrlValue/usuarios/institucion/$institutionId').replace(queryParameters: queryParams);
+      debugPrint('UserService.getUsersByInstitution URL: $uri');
       
       final response = await http.get(
         uri,

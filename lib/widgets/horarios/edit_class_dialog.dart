@@ -28,7 +28,11 @@ class _EditClassDialogState extends State<EditClassDialog> {
   void initState() {
     super.initState();
     _selectedProfesor = widget.horario.profesor;
-    _selectedHoraFin = widget.horario.horaFin;
+    // Si la hora fin existente no está en las horas disponibles, usar la primera disponible o null
+    final horasDisponibles = _getHorasFinDisponibles(widget.horario.horaInicio);
+    _selectedHoraFin = horasDisponibles.contains(widget.horario.horaFin)
+        ? widget.horario.horaFin
+        : (horasDisponibles.isNotEmpty ? horasDisponibles.first : null);
   }
 
   @override
@@ -37,6 +41,7 @@ class _EditClassDialogState extends State<EditClassDialog> {
     final spacing = context.spacing;
     final colors = context.colors;
 
+    final horasDisponibles = _getHorasFinDisponibles(widget.horario.horaInicio);
     return ClarityFormDialog(
       title: Text('Editar Clase', style: textStyles.headlineMedium),
       formKey: _formKey,
@@ -57,7 +62,7 @@ class _EditClassDialogState extends State<EditClassDialog> {
               child: Column(
                 children: [
                   Text(
-                    'Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? widget.horario.horaFin}',
+                    'Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? (horasDisponibles.contains(widget.horario.horaFin) ? widget.horario.horaFin : (horasDisponibles.isNotEmpty ? horasDisponibles.first : '—'))}',
                     style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                   ),
                   Text('Día: ${widget.horario.diaSemanaNombre}', style: textStyles.bodyMedium),
@@ -135,7 +140,8 @@ class _EditClassDialogState extends State<EditClassDialog> {
     final parts = horaInicio.split(':');
     final hourInicio = int.parse(parts[0]);
     final horasDisponibles = <String>[];
-    for (int hour = hourInicio + 1; hour <= 18; hour++) {
+    // Permitir horas desde horaInicio+1 hasta 24:00 (medianoche)
+    for (int hour = hourInicio + 1; hour <= 24; hour++) {
       horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
     }
     return horasDisponibles;

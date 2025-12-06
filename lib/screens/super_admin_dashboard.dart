@@ -182,13 +182,6 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
             icon: Icons.people,
             color: context.colors.info,
           ),
-          SizedBox(width: spacing.lg),
-          ClarityCompactStat(
-            value: '3',
-            title: 'Reportes',
-            icon: Icons.analytics,
-            color: context.colors.warning,
-          ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../services/asistencia_service.dart';
 import '../theme/theme_extensions.dart';
 
 class StudentAttendanceScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   List<Map<String, dynamic>> _asistencias = [];
   String? _errorMessage;
   DateTime _selectedDate = DateTime.now();
+  final AsistenciaService _asistenciaService = AsistenciaService();
 
   @override
   void initState() {
@@ -41,39 +43,21 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         return;
       }
 
-      // TODO: Implementar llamada al backend GET /estudiantes/dashboard/asistencia
-      // Por ahora, datos de ejemplo
-      await Future.delayed(const Duration(seconds: 1)); // Simular carga
+      final asistencias = await _asistenciaService.getAsistenciasEstudiante(
+        accessToken: token,
+      );
 
-      setState(() {
-        _asistencias = [
-          {
-            'fecha': '2024-01-15',
-            'hora': '07:00',
-            'materia': {'nombre': 'Matemáticas'},
-            'profesor': {'nombres': 'Juan', 'apellidos': 'Pérez'},
-            'estado': 'presente',
-            'tipo': 'qr',
-          },
-          {
-            'fecha': '2024-01-15',
-            'hora': '08:00',
-            'materia': {'nombre': 'Física'},
-            'profesor': {'nombres': 'Laura', 'apellidos': 'Gómez'},
-            'estado': 'presente',
-            'tipo': 'manual',
-          },
-          {
-            'fecha': '2024-01-14',
-            'hora': '07:00',
-            'materia': {'nombre': 'Química'},
-            'profesor': {'nombres': 'Laura', 'apellidos': 'Gómez'},
-            'estado': 'ausente',
-            'tipo': 'qr',
-          },
-        ];
-        _isLoading = false;
-      });
+      if (asistencias != null) {
+        setState(() {
+          _asistencias = asistencias;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'No se pudieron cargar las asistencias';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error al cargar asistencias: $e';
@@ -106,7 +90,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
       setState(() {
         _selectedDate = picked;
       });
-      _loadAsistencias(); // Recargar datos para la nueva fecha
+      _loadAsistencias();
     }
   }
 
@@ -240,9 +224,16 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
     // Calcular estadísticas
     final total = _asistencias.length;
-    final presentes = _asistencias.where((a) => a['estado'] == 'presente').length;
-    final ausentes = _asistencias.where((a) => a['estado'] == 'ausente').length;
-    final porcentajeAsistencia = total > 0 ? (presentes / total * 100).round() : 0;
+    final presentes = _asistencias.where((a) => 
+      a['estado'] == 'PRESENTE' || a['estado'] == 'presente'
+    ).length;
+    final ausentes = _asistencias.where((a) => 
+      a['estado'] == 'AUSENTE' || a['estado'] == 'ausente'
+    ).length;
+    final tardanzas = _asistencias.where((a) => 
+      a['estado'] == 'TARDANZA' || a['estado'] == 'tardanza'
+    ).length;
+    final porcentajeAsistencia = total > 0 ? ((presentes + tardanzas) / total * 100).round() : 0;
 
     return RefreshIndicator(
       onRefresh: _loadAsistencias,
@@ -269,6 +260,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                       _buildStatItem('Total', total.toString(), colors.textPrimary),
                       _buildStatItem('Presente', presentes.toString(), colors.success),
                       _buildStatItem('Ausente', ausentes.toString(), colors.error),
+                      _buildStatItem('Tardanza', tardanzas.toString(), colors.warning),
                     ],
                   ),
                   SizedBox(height: spacing.md),
@@ -318,7 +310,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
-  const SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
           style: textStyles.bodySmall.copyWith(color: color),
@@ -332,15 +324,40 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
 
-    final materia = asistencia['materia'] as Map<String, dynamic>;
-    final profesor = asistencia['profesor'] as Map<String, dynamic>;
-    final estado = asistencia['estado'] as String;
-    final tipo = asistencia['tipo'] as String;
-
-    final isPresente = estado == 'presente';
-    final statusColor = isPresente ? colors.success : colors.error;
-    final statusIcon = isPresente ? Icons.check_circle : Icons.cancel;
-    final statusText = isPresente ? 'Presente' : 'Ausente';
+    // Obtener datos del horario (si existe)
+    final horario = asistencia['horario'] as Map<String, dynamic>?;
+    final materia = horario?['materia'] as Map<String, dynamic>?;
+    final profesor = horario?['profesor'] as Map<String, dynamic>?;
+    
+    final estado = (asistencia['estado'] as String?)?.toUpperCase() ?? 'DESCONOCIDO';
+    final fecha = asistencia['fecha'] ?? asistencia['createdAt'] ?? '';
+    
+    // Determinar colores y iconos según estado
+    final isPresente = estado == 'PRESENTE';
+    final isTardanza = estado == 'TARDANZA';
+    final isJustificado = estado == 'JUSTIFICADO';
+    
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+    
+    if (isPresente) {
+      statusColor = colors.success;
+      statusIcon = Icons.check_circle;
+      statusText = 'Presente';
+    } else if (isTardanza) {
+      statusColor = colors.warning;
+      statusIcon = Icons.access_time;
+      statusText = 'Tardanza';
+    } else if (isJustificado) {
+      statusColor = colors.info;
+      statusIcon = Icons.verified;
+      statusText = 'Justificado';
+    } else {
+      statusColor = colors.error;
+      statusIcon = Icons.cancel;
+      statusText = 'Ausente';
+    }
 
     return Card(
       margin: EdgeInsets.only(bottom: spacing.md),
@@ -368,14 +385,15 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        materia['nombre'] ?? 'Sin nombre',
-                        style: textStyles.bodyLarge.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
+                      Expanded(
+                        child: Text(
+                          materia?['nombre'] ?? 'Clase',
+                          style: textStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 2),
                         decoration: BoxDecoration(
@@ -393,21 +411,22 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     ],
                   ),
                   SizedBox(height: spacing.xs),
-                  Text(
-                    'Prof. ${profesor['nombres']} ${profesor['apellidos']}',
-                    style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
-                  ),
+                  if (profesor != null)
+                    Text(
+                      'Prof. ${profesor['nombres'] ?? ''} ${profesor['apellidos'] ?? ''}',
+                      style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
+                    ),
                   SizedBox(height: spacing.xs),
                   Row(
                     children: [
                       Icon(
-                        tipo == 'qr' ? Icons.qr_code : Icons.edit,
+                        Icons.calendar_today,
                         size: 16,
                         color: colors.textMuted,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${asistencia['fecha']} • ${asistencia['hora']}',
+                        _formatDate(fecha),
                         style: textStyles.bodySmall.copyWith(color: colors.textMuted),
                       ),
                     ],
@@ -419,6 +438,16 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         ),
       ),
     );
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return '${date.day} ${months[date.month - 1]} ${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
   }
 
   String _getMonthName(int month) {

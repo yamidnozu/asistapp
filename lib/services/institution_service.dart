@@ -246,6 +246,7 @@ class InstitutionService {
     required String modoNotificacionAsistencia,
     String? horaDisparoNotificacion,
     int? umbralInasistenciasAlerta,
+    bool? notificarAusenciaTotalDiaria,
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
@@ -264,6 +265,7 @@ class InstitutionService {
           'modoNotificacionAsistencia': modoNotificacionAsistencia,
           if (horaDisparoNotificacion != null) 'horaDisparoNotificacion': horaDisparoNotificacion,
           if (umbralInasistenciasAlerta != null) 'umbralInasistenciasAlerta': umbralInasistenciasAlerta,
+          if (notificarAusenciaTotalDiaria != null) 'notificarAusenciaTotalDiaria': notificarAusenciaTotalDiaria,
         }),
       ).timeout(
         const Duration(seconds: 10),

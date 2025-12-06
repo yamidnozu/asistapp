@@ -9,9 +9,7 @@ class SettingsProvider with ChangeNotifier {
   static const String _keyItemsPerPage = 'settings_items_per_page';
   static const String _keyAutoRefresh = 'settings_auto_refresh';
   static const String _keyRefreshInterval = 'settings_refresh_interval';
-  static const String _keyShowInactiveInstitutions = 'settings_show_inactive_institutions';
-  static const String _keyCompactMode = 'settings_compact_mode';
-  static const String _keyNotificationsEnabled = 'settings_notifications_enabled';
+
   static const String _keyShowTestUsers = 'settings_show_test_users';
 
   // Valores por defecto
@@ -19,9 +17,7 @@ class SettingsProvider with ChangeNotifier {
   int _itemsPerPage = 10;
   bool _autoRefresh = false;
   int _refreshIntervalMinutes = 5;
-  bool _showInactiveInstitutions = true;
-  bool _compactMode = false;
-  bool _notificationsEnabled = true;
+
   bool _showTestUsers = false;
 
   // Getters
@@ -29,9 +25,7 @@ class SettingsProvider with ChangeNotifier {
   int get itemsPerPage => _itemsPerPage;
   bool get autoRefresh => _autoRefresh;
   int get refreshIntervalMinutes => _refreshIntervalMinutes;
-  bool get showInactiveInstitutions => _showInactiveInstitutions;
-  bool get compactMode => _compactMode;
-  bool get notificationsEnabled => _notificationsEnabled;
+
   bool get showTestUsers => _showTestUsers;
   
   /// Indica si el tema es oscuro
@@ -54,9 +48,7 @@ class SettingsProvider with ChangeNotifier {
       _itemsPerPage = prefs.getInt(_keyItemsPerPage) ?? 10;
       _autoRefresh = prefs.getBool(_keyAutoRefresh) ?? false;
       _refreshIntervalMinutes = prefs.getInt(_keyRefreshInterval) ?? 5;
-      _showInactiveInstitutions = prefs.getBool(_keyShowInactiveInstitutions) ?? true;
-      _compactMode = prefs.getBool(_keyCompactMode) ?? false;
-      _notificationsEnabled = prefs.getBool(_keyNotificationsEnabled) ?? true;
+
       _showTestUsers = prefs.getBool(_keyShowTestUsers) ?? false;
       
       notifyListeners();
@@ -125,26 +117,7 @@ class SettingsProvider with ChangeNotifier {
     }
   }
 
-  /// Muestra/oculta instituciones inactivas en las listas
-  Future<void> setShowInactiveInstitutions(bool value) async {
-    _showInactiveInstitutions = value;
-    notifyListeners();
-    await _savePreference(_keyShowInactiveInstitutions, value);
-  }
 
-  /// Activa/desactiva el modo compacto de la UI
-  Future<void> setCompactMode(bool value) async {
-    _compactMode = value;
-    notifyListeners();
-    await _savePreference(_keyCompactMode, value);
-  }
-
-  /// Activa/desactiva las notificaciones
-  Future<void> setNotificationsEnabled(bool value) async {
-    _notificationsEnabled = value;
-    notifyListeners();
-    await _savePreference(_keyNotificationsEnabled, value);
-  }
 
   /// Activa/desactiva la visualización de usuarios de prueba
   Future<void> setShowTestUsers(bool value) async {
@@ -159,9 +132,7 @@ class SettingsProvider with ChangeNotifier {
     _itemsPerPage = 10;
     _autoRefresh = false;
     _refreshIntervalMinutes = 5;
-    _showInactiveInstitutions = true;
-    _compactMode = false;
-    _notificationsEnabled = true;
+
     _showTestUsers = false;
     
     notifyListeners();
@@ -171,9 +142,7 @@ class SettingsProvider with ChangeNotifier {
     await prefs.remove(_keyItemsPerPage);
     await prefs.remove(_keyAutoRefresh);
     await prefs.remove(_keyRefreshInterval);
-    await prefs.remove(_keyShowInactiveInstitutions);
-    await prefs.remove(_keyCompactMode);
-    await prefs.remove(_keyNotificationsEnabled);
+
     await prefs.remove(_keyShowTestUsers);
   }
 }

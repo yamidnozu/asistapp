@@ -51,26 +51,40 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
 
   // Legacy _setState removed; use base provider methods for loading/errors
 
-  /// Carga todos los grupos con paginación y filtros
-  Future<void> loadGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search}) async {
-  if (isLoading) return;
+  /// Carga todos los grupos con paginación y filtros.
+  /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
+  /// Los parámetros son opcionales y solo sobrescriben los filtros existentes si se proporcionan.
+  Future<void> loadGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search, String? grado, String? seccion}) async {
+    if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
+    // Solo actualizar filtros si se proporcionan explícitamente como parámetros
+    if (periodoId != null) filters['periodoId'] = periodoId;
+    if (grado != null) {
+      filters['grado'] = grado;
+    }
+    if (seccion != null) {
+      filters['seccion'] = seccion;
+    }
+    if (search != null) {
+      if (search.isNotEmpty) {
+        filters['search'] = search;
+      } else {
+        filters.remove('search');
+      }
+    }
+    // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
+
     try {
-      debugPrint('GrupoProvider: Iniciando carga de grupos...');
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search, filters: {
-        if (periodoId != null) 'periodoId': periodoId,
-      });
-  // paginationInfo handled by base provider
-  notifyListeners();
+      debugPrint('GrupoProvider: Iniciando carga de grupos con filtros: $filters');
+      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      notifyListeners();
       debugPrint('GrupoProvider: Estado cambiado a loaded');
     } catch (e) {
       debugPrint('GrupoProvider: Error loading grupos: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
-  }
-
-  /// Carga grupos por periodo académico
+  }  /// Carga grupos por periodo académico
   Future<void> loadGruposByPeriodo(String accessToken, String periodoId, {int? page, int limit = 10, String? search}) async {
   if (isLoading) return;
     _selectedPeriodoId = periodoId;
@@ -281,17 +295,26 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   /// Carga más grupos para scroll infinito (append)
-  Future<void> loadMoreGrupos(String accessToken, {String? periodoId, String? search}) async {
+  Future<void> loadMoreGrupos(String accessToken, {String? periodoId, String? search, String? grado, String? seccion}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
 
-    // Set filters
+    // Solo actualizar filtros si se proporcionan explícitamente
     if (periodoId != null) {
-      setFilter('periodoId', periodoId);
+      filters['periodoId'] = periodoId;
     } else if (_selectedPeriodoId != null) {
-      setFilter('periodoId', _selectedPeriodoId);
+      filters['periodoId'] = _selectedPeriodoId;
     }
+    
     if (search != null) {
-      setFilter('search', search);
+      filters['search'] = search;
+    }
+    
+    if (grado != null) {
+      filters['grado'] = grado;
+    }
+    
+    if (seccion != null) {
+      filters['seccion'] = seccion;
     }
 
     // Delegate to base implementation which uses fetchPage and updates pagination info
@@ -322,14 +345,22 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
 
   @override
   Future<PaginatedResponse<Grupo>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final periodoId = filters?['periodoId'] ?? _selectedPeriodoId;
-    final searchFromFilters = search ?? filters?['search'];
+    // Leer filtros del provider (this.filters) en lugar de solo los parámetros
+    final periodoId = this.filters['periodoId']?.toString() ?? _selectedPeriodoId;
+    final searchFromFilters = this.filters['search']?.toString() ?? search;
+    final grado = this.filters['grado']?.toString();
+    final seccion = this.filters['seccion']?.toString();
+    
+    debugPrint('GrupoProvider.fetchPage - periodoId: $periodoId, grado: $grado, seccion: $seccion, search: $searchFromFilters');
+    
     final response = await _grupoService.getGrupos(
       accessToken,
       page: page,
       limit: limit,
       periodoId: periodoId,
       search: searchFromFilters,
+      grado: grado,
+      seccion: seccion,
     );
     if (response == null) return null;
     return PaginatedResponse(items: response.grupos, pagination: response.pagination);

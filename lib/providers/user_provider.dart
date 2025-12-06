@@ -54,34 +54,20 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
 
   // Legacy state helper removed; rely on base provider for loading/errors
 
-  /// Carga todos los usuarios con paginación y filtros (activo, búsqueda, roles)
-  Future<void> loadUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
+  /// Carga todos los usuarios con paginación usando los filtros actuales del provider.
+  /// Los filtros se deben establecer previamente con setFilter() antes de llamar a este método.
+  Future<void> loadUsers(String accessToken, {int? page, int? limit}) async {
     if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
-    // Clear institution filter if loading global users
-    removeFilter('institutionId');
+    // Clear institution filter if loading global users - acceso directo para evitar notifyListeners
+    filters.remove('institutionId');
     _selectedInstitutionId = null;
 
-    // Update filters only when explicit values are provided. Do not clear existing filters otherwise.
-    if (search != null) {
-      if (search.isNotEmpty) {
-        setFilter('search', search);
-      } else {
-        removeFilter('search');
-      }
-    }
-    if (activo != null) {
-      setFilter('activo', activo.toString());
-    }
-    if (roles != null) {
-      if (roles.isNotEmpty) setFilter('roles', roles.join(',')); else removeFilter('roles');
-    }
-
     try {
-      debugPrint('UserProvider: Iniciando carga de usuarios...');
+      debugPrint('UserProvider: Iniciando carga de usuarios con filtros: $filters');
       // Use base pagination via `loadItems` / `fetchPage`
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
       // base handles pagination info and hasMoreData
       notifyListeners();
     } catch (e) {
@@ -90,28 +76,20 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     }
   }
 
-  /// Carga usuarios por institución con paginación
-  Future<void> loadUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5, String? role, bool? activo, String? search}) async {
+  /// Carga usuarios por institución con paginación usando los filtros actuales del provider.
+  /// Los filtros se deben establecer previamente con setFilter() antes de llamar a este método.
+  Future<void> loadUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5}) async {
     if (isLoading) return;
     // Clear items immediately to avoid mixed data
     clearItems();
     _selectedInstitutionId = institutionId;
     resetPagination(); // Resetear para scroll infinito
 
-    // Set filters
+    // Set institution filter
     setFilter('institutionId', institutionId);
-    if (role != null) {
-      if (role.isNotEmpty) setFilter('role', role); else removeFilter('role');
-    }
-    if (activo != null) {
-      setFilter('activo', activo.toString());
-    }
-    if (search != null) {
-      if (search.isNotEmpty) setFilter('search', search); else removeFilter('search');
-    }
 
     try {
-      debugPrint('UserProvider: Iniciando carga de usuarios por institución $institutionId...');
+      debugPrint('UserProvider: Iniciando carga de usuarios por institución $institutionId con filtros: $filters');
       await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
       // base handles pagination info and hasMoreData
       notifyListeners();
@@ -324,10 +302,14 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     setPaginationInfo(null);
     clearError();
   }  /// Recarga los datos (útil después de operaciones)
+  /// Los filtros deben estar configurados previamente - este método solo recarga usando los filtros actuales it has
   Future<void> refreshData(String accessToken) async {
+    debugPrint('UserProvider.refreshData - Filtros actuales: $filters');
     if (filters['institutionId'] != null) {
+      debugPrint('UserProvider.refreshData - Cargando por institución: ${filters['institutionId']}');
       await loadUsersByInstitution(accessToken, filters['institutionId'] as String);
     } else {
+      debugPrint('UserProvider.refreshData - Cargando usuarios globales');
       await loadUsers(accessToken);
     }
   }
@@ -350,7 +332,7 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   return items.where((user) => user.rol == role).toList();
   }
 
-  // NOTE: filterUsersLocally removed. All role filtering should be done via backend queries.
+  // NOTA: filterUsersLocally fue eliminado. Todo el filtrado por rol debe hacerse mediante consultas al backend.
 
   /// Filtra usuarios por estado activo/inactivo
   List<User> filterUsersByStatus({bool? active}) {
@@ -407,20 +389,22 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
 
   @override
   Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final institutionId = this.filters['institutionId'];
-    final role = this.filters['role'];
-    final activoStr = this.filters['activo'];
+    final institutionId = this.filters['institutionId']?.toString();
+    final role = this.filters['role']?.toString();
+    final activoStr = this.filters['activo']?.toString();
     final activo = activoStr == 'true';
-    final searchQuery = this.filters['search'] as String?;
-    final rolesStr = this.filters['roles'] as String?;
+    final searchQuery = this.filters['search']?.toString();
+    final rolesStr = this.filters['roles']?.toString();
     final roles = rolesStr != null && rolesStr.isNotEmpty ? rolesStr.split(',') : null;
+
+    debugPrint('UserProvider.fetchPage - institutionId: $institutionId, role: $role, activo: $activoStr, search: $searchQuery, roles: $roles');
 
     if (institutionId != null && institutionId.isNotEmpty) {
       final response = await _userService.getUsersByInstitution(
         accessToken,
         institutionId,
         page: page,
-        limit: limit ?? 5,
+        limit: limit ?? 15,
         role: role,
         activo: activoStr != null ? activo : null,
         search: searchQuery,

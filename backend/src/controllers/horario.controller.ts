@@ -45,6 +45,138 @@ interface UpdateHorarioBody {
 
 export class HorarioController {
   /**
+   * Obtiene los horarios del estudiante autenticado basado en sus grupos
+   */
+  public static async getMisHorarios(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      if (!request.user) {
+        return reply.code(401).send({
+          success: false,
+          error: 'Usuario no autenticado',
+          code: 'AUTHENTICATION_ERROR',
+        });
+      }
+
+      // Buscar el estudiante asociado al usuario
+      const estudiante = await prisma.estudiante.findUnique({
+        where: { usuarioId: request.user.id },
+        include: {
+          estudiantesGrupos: {
+            include: {
+              grupo: {
+                include: {
+                  periodoAcademico: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!estudiante) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Estudiante no encontrado',
+          code: 'NOT_FOUND_ERROR',
+        });
+      }
+
+      // Obtener solo los grupos con periodo activo
+      const gruposActivos = estudiante.estudiantesGrupos
+        .filter((eg: any) => eg.grupo.periodoAcademico?.activo)
+        .map((eg: any) => eg.grupoId);
+
+      if (gruposActivos.length === 0) {
+        return reply.code(200).send({
+          success: true,
+          data: [],
+          message: 'No tienes grupos asignados en un periodo activo',
+        });
+      }
+
+      // Obtener todos los horarios de los grupos del estudiante
+      const horarios = await prisma.horario.findMany({
+        where: {
+          grupoId: { in: gruposActivos },
+        },
+        orderBy: [
+          { diaSemana: 'asc' },
+          { horaInicio: 'asc' },
+        ],
+        include: {
+          periodoAcademico: {
+            select: {
+              id: true,
+              nombre: true,
+              fechaInicio: true,
+              fechaFin: true,
+              activo: true,
+            },
+          },
+          grupo: {
+            select: {
+              id: true,
+              nombre: true,
+              grado: true,
+              seccion: true,
+            },
+          },
+          materia: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true,
+            },
+          },
+          profesor: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true,
+            },
+          },
+        },
+      });
+
+      const formattedHorarios = horarios.map((horario: any) => ({
+        id: horario.id,
+        diaSemana: horario.diaSemana,
+        horaInicio: horario.horaInicio,
+        horaFin: horario.horaFin,
+        periodoAcademico: {
+          id: horario.periodoAcademico.id,
+          nombre: horario.periodoAcademico.nombre,
+          activo: horario.periodoAcademico.activo,
+        },
+        grupo: {
+          id: horario.grupo.id,
+          nombre: horario.grupo.nombre,
+          grado: horario.grupo.grado,
+          seccion: horario.grupo.seccion,
+        },
+        materia: {
+          id: horario.materia.id,
+          nombre: horario.materia.nombre,
+          codigo: horario.materia.codigo,
+        },
+        profesor: horario.profesor ? {
+          id: horario.profesor.id,
+          nombres: horario.profesor.nombres,
+          apellidos: horario.profesor.apellidos,
+        } : null,
+      }));
+
+      return reply.code(200).send({
+        success: true,
+        data: formattedHorarios,
+      });
+    } catch (error) {
+      logger.error('Error en getMisHorarios:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene todos los horarios de la institución del admin autenticado
    */
   public static async getAll(request: AuthenticatedRequest & FastifyRequest<{ Querystring: GetHorariosQuery }>, reply: FastifyReply) {
@@ -235,7 +367,7 @@ export class HorarioController {
       // Validar formato de UUIDs antes de consultar la base de datos
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const { periodoId, grupoId, materiaId, profesorId } = request.body;
-      
+
       if (!uuidRegex.test(periodoId) || !uuidRegex.test(grupoId) || !uuidRegex.test(materiaId)) {
         return reply.code(400).send({
           success: false,
@@ -243,7 +375,7 @@ export class HorarioController {
           code: 'VALIDATION_ERROR'
         });
       }
-      
+
       if (profesorId && !uuidRegex.test(profesorId)) {
         return reply.code(400).send({
           success: false,
@@ -270,7 +402,7 @@ export class HorarioController {
 
       if (config.nodeEnv === 'development') {
         logger.debug('🔍 CONTROLLER: Llamando al servicio con data', data);
-        
+
         // Validar que todos los campos requeridos estén presentes y sean válidos
         logger.debug('🔍 CONTROLLER: Validando campos', {
           periodoId: { valor: data.periodoId, tipo: typeof data.periodoId, longitud: data.periodoId?.length },
@@ -294,7 +426,7 @@ export class HorarioController {
     } catch (error) {
       logger.error('❌ CONTROLLER: Error en create horario:', error);
       logger.error('❌ CONTROLLER: Stack trace:', (error as Error).stack);
-      
+
       // Si es un error de validación de Prisma (IDs inválidos), devolver 400
       if ((error as any).code === 'P2025' || (error as any).code === 'P2003') {
         return reply.code(400).send({
@@ -303,7 +435,7 @@ export class HorarioController {
           code: 'VALIDATION_ERROR'
         });
       }
-      
+
       throw error;
     }
   }

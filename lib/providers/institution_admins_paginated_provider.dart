@@ -10,6 +10,12 @@ class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDa
   InstitutionAdminsPaginatedProvider({user_service.UserService? userService})
       : _userService = userService ?? user_service.UserService();
 
+  /// Loads admins for a specific institution
+  Future<void> loadAdmins(String accessToken, String institutionId, {int page = 1, int? limit}) async {
+    setFilter('institutionId', institutionId);
+    await loadItems(accessToken, page: page, limit: limit, filters: {'institutionId': institutionId});
+  }
+
   /// Expected filters: 'institutionId'
   @override
   Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {

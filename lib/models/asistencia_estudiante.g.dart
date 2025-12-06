@@ -15,7 +15,7 @@ AsistenciaEstudiante _$AsistenciaEstudianteFromJson(
       apellidos: json['apellidos'] as String,
       identificacion: json['identificacion'] as String,
       estado: json['estado'] as String?,
-      observacion: json['observacion'] as String?,
+      observaciones: json['observaciones'] as String?,
       fechaRegistro: json['fechaRegistro'] == null
           ? null
           : DateTime.parse(json['fechaRegistro'] as String),
@@ -30,6 +30,6 @@ Map<String, dynamic> _$AsistenciaEstudianteToJson(
       'apellidos': instance.apellidos,
       'identificacion': instance.identificacion,
       'estado': instance.estado,
-      'observacion': instance.observacion,
+      'observaciones': instance.observaciones,
       'fechaRegistro': instance.fechaRegistro?.toIso8601String(),
     };

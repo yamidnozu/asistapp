@@ -196,7 +196,6 @@ class HorarioService {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           try {
-            // Defensive: asegurar que `grupo.periodoAcademico` exista antes de parsear
             final rawData = responseData['data'];
             if (rawData is Map<String, dynamic>) {
               final horarioJson = Map<String, dynamic>.from(rawData);
@@ -215,7 +214,6 @@ class HorarioService {
                 }
               }
             }
-            // Fallback: intentar parsear directamente
             return Horario.fromJson(responseData['data']);
           } catch (e) {
             debugPrint('Error procesando respuesta de createHorario: $e');
@@ -224,11 +222,11 @@ class HorarioService {
           }
         }
       } else {
-        debugPrint('Error updating horario: ${response.statusCode} - ${response.body}');
+        debugPrint('Error creating horario: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
-      debugPrint('Error updating horario: $e');
+      debugPrint('Error creating horario: $e');
       debugPrint('StackTrace: $stackTrace');
       return null;
     }
@@ -271,7 +269,7 @@ class HorarioService {
                 try {
                   return Horario.fromJson(horarioJson);
                 } catch (e) {
-                  debugPrint('Error parseando Horario (getById): $e');
+                  debugPrint('Error parseando Horario (update): $e');
                   debugPrint('Response body: ${response.body}');
                   return null;
                 }
@@ -279,13 +277,12 @@ class HorarioService {
             }
             return Horario.fromJson(responseData['data']);
           } catch (e) {
-            debugPrint('Error procesando respuesta getHorarioById: $e');
+            debugPrint('Error procesando respuesta updateHorario: $e');
             debugPrint('Response body: ${response.body}');
             return null;
           }
         }
       } else {
-        // Extraer error del backend y lanzarlo con código y razón si están presentes
         debugPrint('Error updating horario: ${response.statusCode} - ${response.body}');
         String serverMessage = response.body;
         String code = '';
@@ -448,6 +445,45 @@ class HorarioService {
       }
     } catch (e, stackTrace) {
       debugPrint('Error getting horario semanal: $e');
+      debugPrint('StackTrace: $stackTrace');
+      return null;
+    }
+    return null;
+  }
+
+  /// Obtiene los horarios del estudiante autenticado
+  /// Endpoint: GET /horarios/mis-horarios
+  Future<List<Map<String, dynamic>>?> getMisHorariosEstudiante(String accessToken) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http.get(
+        Uri.parse('$baseUrlValue/horarios/mis-horarios'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('GET /horarios/mis-horarios - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          return (responseData['data'] as List)
+              .map((horarioJson) => horarioJson as Map<String, dynamic>)
+              .toList();
+        }
+      } else {
+        debugPrint('Error getting mis horarios estudiante: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error getting mis horarios estudiante: $e');
       debugPrint('StackTrace: $stackTrace');
       return null;
     }

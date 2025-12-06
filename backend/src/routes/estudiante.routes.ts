@@ -103,6 +103,39 @@ export default async function estudianteRoutes(fastify: FastifyInstance) {
       }
     });
 
+    estudianteRoutes.get('/dashboard/notificaciones', {
+      handler: EstudianteController.getNotificaciones as any,
+      schema: {
+        description: 'Obtiene las notificaciones del estudiante',
+        tags: ['Estudiantes - Dashboard'],
+        summary: 'Notificaciones',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    titulo: { type: 'string' },
+                    mensaje: { type: 'string' },
+                    tipo: { type: 'string' },
+                    fecha: { type: 'string' },
+                    leida: { type: 'boolean' },
+                    importante: { type: 'boolean' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
     estudianteRoutes.get('/dashboard/clases/:diaSemana', {
       handler: EstudianteController.getClasesPorDia as any,
       schema: {

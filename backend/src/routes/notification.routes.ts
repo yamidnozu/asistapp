@@ -32,4 +32,9 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     fastify.get('/notifications/logs', {
         preValidation: [authenticate]
     }, NotificationController.getNotificationLogs);
+
+    // 🧪 Trigger daily check (Test only)
+    fastify.post('/notifications/trigger-daily-check', {
+        preValidation: [authenticate]
+    }, NotificationController.triggerDailyCheck);
 }

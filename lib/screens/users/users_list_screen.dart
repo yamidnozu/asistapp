@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -34,13 +35,24 @@ class _UsersListScreenState extends State<UsersListScreen> {
       _userProvider = Provider.of<UserProvider>(context, listen: false);
       final userRole = authProvider.user?['rol'] as String?;
       
+      debugPrint('UsersListScreen initState - userRole: $userRole');
+      debugPrint('UsersListScreen initState - Filtros iniciales: ${_userProvider!.filters}');
+      
+      // Limpiar filtros previos y configurar los nuevos
+      _userProvider!.filters.clear();
+      
       // Inicializar filtro de estado activo por defecto
-      _userProvider!.setFilter('activo', 'true');
+      _userProvider!.filters['activo'] = 'true';
       
       if (userRole == 'admin_institucion') {
-        // Para admin_institucion, no filtrar automáticamente por rol
-        _userProvider!.removeFilter('roles');
+        // Para admin_institucion, no establecer filtro de rol
+        debugPrint('UsersListScreen initState - admin_institucion detectado');
+      } else if (userRole == 'super_admin') {
+        // Para super_admin, los roles se establecen en _loadUsers
+        debugPrint('UsersListScreen initState - super_admin detectado');
       }
+      
+      debugPrint('UsersListScreen initState - Filtros configurados: ${_userProvider!.filters}');
       _loadUsers();
     });
   }
@@ -105,40 +117,48 @@ class _UsersListScreenState extends State<UsersListScreen> {
       return;
     }
 
-    // Obtener filtros del provider
-    final searchQuery = (userProvider.filters['search'] ?? '').toString();
+    // Obtener filtros del provider para determinar los roles a buscar
     final selectedRoleFilter = _getSelectedRole(userProvider);
-    final statusFilter = _getStatusFilter(userProvider);
+
+    debugPrint('_loadUsers - userRole: $userRole, selectedRoleFilter: $selectedRoleFilter');
+    debugPrint('_loadUsers - Filtros actuales ANTES: ${userProvider.filters}');
 
     // Lógica diferenciada por rol
     if (userRole == 'super_admin') {
       // El super_admin solo ve admin_institucion y super_admin
       debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
       // Determinar roles según el filtro de UI: si no hay filtro, enviar ambos roles
-      final roles = (selectedRoleFilter.isEmpty)
-          ? ['super_admin', 'admin_institucion']
-          : [selectedRoleFilter];
+      if (selectedRoleFilter.isEmpty) {
+        userProvider.filters['roles'] = 'super_admin,admin_institucion';
+      } else {
+        userProvider.filters['roles'] = selectedRoleFilter;
+      }
+
+      debugPrint('_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
 
       await userProvider.loadUsers(
         token,
         page: 1,
         limit: 15,
-        search: searchQuery.isEmpty ? null : searchQuery,
-        activo: statusFilter,
-        roles: roles,
       );
     } else if (userRole == 'admin_institucion') {
       // El admin_institucion carga solo usuarios de su institución seleccionada
       if (authProvider.selectedInstitutionId != null) {
         debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
+        // Configurar filtro de rol si está seleccionado
+        if (selectedRoleFilter.isNotEmpty) {
+          userProvider.filters['role'] = selectedRoleFilter;
+        } else {
+          userProvider.filters.remove('role');
+        }
+
+        debugPrint('_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
+
         await userProvider.loadUsersByInstitution(
           token,
           authProvider.selectedInstitutionId!,
           page: 1,
-          limit: 5,
-          role: selectedRoleFilter.isEmpty ? null : selectedRoleFilter,
-          activo: statusFilter,
-          search: searchQuery.isEmpty ? null : searchQuery,
+          limit: 15,
         );
       } else {
         // Caso de resguardo: si un admin no tiene institución, no se cargan datos.
@@ -162,10 +182,11 @@ class _UsersListScreenState extends State<UsersListScreen> {
     
     // Iniciar un nuevo timer para debounced search
     _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+      // Modificar el filtro directamente para evitar múltiples notifyListeners
       if (query.trim().isNotEmpty) {
-        userProvider.setFilter('search', query.trim());
+        userProvider.filters['search'] = query.trim();
       } else {
-        userProvider.removeFilter('search');
+        userProvider.filters.remove('search');
       }
       userProvider.refreshData(authProvider.accessToken!);
     });
@@ -348,7 +369,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: selectedRoleFilter.isEmpty ? null : selectedRoleFilter,
+                value: selectedRoleFilter,
                 hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
                 items: _buildRoleDropdownItems(authProvider, textStyles),
                 onChanged: (value) => _onRoleFilterChanged(value, userProvider, authProvider),
@@ -394,20 +415,40 @@ class _UsersListScreenState extends State<UsersListScreen> {
   }
 
   void _onStatusFilterChanged(bool? status, UserProvider provider, AuthProvider authProvider) {
+    debugPrint('_onStatusFilterChanged llamado con status: $status');
+    debugPrint('Filtros ANTES: ${provider.filters}');
+    
+    // Modificar el filtro directamente para evitar múltiples notifyListeners
     if (status != null) {
-      provider.setFilter('activo', status.toString());
+      provider.filters['activo'] = status.toString();
     } else {
-      provider.removeFilter('activo');
+      provider.filters.remove('activo');
     }
+    
+    debugPrint('Filtros DESPUÉS: ${provider.filters}');
     provider.refreshData(authProvider.accessToken!);
   }
 
   void _onRoleFilterChanged(String? value, UserProvider provider, AuthProvider authProvider) {
     final role = value ?? '';
-    if (role.isNotEmpty) {
-      provider.setFilter('roles', role);
-    } else {
-      provider.removeFilter('roles');
+    final userRole = authProvider.user?['rol'] as String?;
+    
+    // Modificar el filtro directamente para evitar múltiples notifyListeners
+    if (userRole == 'super_admin') {
+      // Para super_admin usamos 'roles' (plural)
+      if (role.isNotEmpty) {
+        provider.filters['roles'] = role;
+      } else {
+        // Si no hay rol seleccionado, mostrar ambos roles
+        provider.filters['roles'] = 'super_admin,admin_institucion';
+      }
+    } else if (userRole == 'admin_institucion') {
+      // Para admin_institucion usamos 'role' (singular)
+      if (role.isNotEmpty) {
+        provider.filters['role'] = role;
+      } else {
+        provider.filters.remove('role');
+      }
     }
     provider.refreshData(authProvider.accessToken!);
   }

@@ -373,4 +373,56 @@ export class EstudianteController {
       });
     }
   }
+
+  /**
+   * Obtiene las notificaciones del estudiante
+   * GET /estudiantes/dashboard/notificaciones
+   */
+  public static async getNotificaciones(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const user = request.user;
+      if (!user) {
+        throw new ValidationError('Usuario no autenticado');
+      }
+
+      const estudiante = await prisma.estudiante.findUnique({
+        where: { usuarioId: user.id },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundError('Estudiante');
+      }
+
+      // Obtener logs de notificaciones para este estudiante
+      const notificaciones = await prisma.logNotificacion.findMany({
+        where: {
+          estudianteId: estudiante.id,
+        },
+        orderBy: {
+          fechaEnvio: 'desc',
+        },
+        take: 20, // Últimas 20 notificaciones
+      });
+
+      // Mapear a un formato amigable para el frontend
+      const mappedNotificaciones = notificaciones.map((n: any) => ({
+        id: n.id,
+        titulo: 'Notificación', // El modelo LogNotificacion no tiene título, usamos uno genérico o derivado
+        mensaje: n.mensaje,
+        tipo: 'aviso', // Tipo genérico
+        fecha: n.fechaEnvio,
+        leida: true, // Asumimos leída por ahora
+        importante: false,
+      }));
+
+      return reply.code(200).send({
+        success: true,
+        data: mappedNotificaciones,
+      });
+
+    } catch (error) {
+      logger.error('Error al obtener notificaciones:', error);
+      throw error;
+    }
+  }
 }

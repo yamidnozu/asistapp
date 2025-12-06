@@ -48,16 +48,16 @@ void main() {
   // Our fake returns the same items for page 2, so they will be appended
   expect(provider.items.length, 4);
 
-    // create item
+    // crear item
     final result = await provider.createItem('token', {});
     expect(result, isTrue);
     expect(provider.items.first.id, '3');
 
-    // update item
+    // actualizar item
     final updateResult = await provider.updateItem('token', '1', {});
     expect(updateResult, isTrue);
 
-    // delete item
+    // eliminar item
     final deleteResult = await provider.deleteItem('token', '1');
     expect(deleteResult, isTrue);
   });

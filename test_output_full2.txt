@@ -1,0 +1,105 @@
+00:00 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+Building Windows application...                                    25,6s
+√ Built build\windows\x64\runner\Debug\asistapp.exe
+00:00 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+
+======================================================================
+🎯 INICIANDO TEST E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+   Timestamp único: 92670872
+   Día de hoy: Jueves (4)
+   Hora actual: 18:57
+   Horario a crear: 18:00 - 19:00
+
+   📦 DATOS ÚNICOS A CREAR:
+   • Institución: Instituto 92670872
+   • Admin: admin_92670872@test.com
+   • Profesor: profe_92670872@test.com
+   • Estudiante: estu_92670872@test.com
+   • Período: Periodo 92670872
+   • Materia: Materia 92670872
+   • Grupo: Grupo 92670872
+
+   ⚠️ MODO ESTRICTO: Sin fallbacks al seed
+======================================================================
+
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+00:11 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+AppLifecycleManager: App paused at 2025-12-04 18:58:02.410812
+00:41 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+
+📍 FASE 1: GÉNESIS (Super Admin crea Institución + Admin)
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+❌ Error en POST /auth/login: ClientException with SocketException: El equipo remoto rechazó la conexión de red.
+ (OS Error: El equipo remoto rechazó la conexión de red.
+, errno = 1225), address = 192.168.20.22, port = 55698, uri=http://192.168.20.22:3000/auth/login
+Error: ClientException with SocketException: El equipo remoto rechazó la conexión de red.
+ (OS Error: El equipo remoto rechazó la conexión de red.
+, errno = 1225), address = 192.168.20.22, port = 55698, uri=http://192.168.20.22:3000/auth/login
+StackTrace: #0      IOClient.send (package:http/src/io_client.dart:227:7)
+<asynchronous suspension>
+#1      BaseClient._sendUnstreamed (package:http/src/base_client.dart:93:32)
+<asynchronous suspension>
+#2      AppHttpClient.post (package:asistapp/utils/http_client.dart:105:24)
+<asynchronous suspension>
+#3      Future.timeout.<anonymous closure> (dart:async/future_impl.dart:1004:15)
+<asynchronous suspension>
+#4      AuthService.login (package:asistapp/services/auth_service.dart:72:24)
+<asynchronous suspension>
+#5      AuthProvider.login (package:asistapp/providers/auth_provider.dart:186:22)
+<asynchronous suspension>
+#6      _LoginScreenState._login (package:asistapp/screens/login_screen.dart:375:23)
+<asynchronous suspension>
+
+Login error: ClientException with SocketException: El equipo remoto rechazó la conexión de red.
+ (OS Error: El equipo remoto rechazó la conexión de red.
+, errno = 1225), address = 192.168.20.22, port = 55698, uri=http://192.168.20.22:3000/auth/login
+  ❌ [FASE 1] 1.1 Login Super Admin
+  ❌ [FASE 1] FASE 1 ABORTADA (No se pudo hacer login con superadmin)
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <false>
+Login de Super Admin falló
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart:732:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:189:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1027:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart line 732
+The test description was:
+  🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:07 +0 -1: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO [E]
+  Test failed. See exception logs above.
+  The test description was: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  
+01:07 +0 -1: (tearDownAll)
+01:07 +0 -1: Some tests failed.

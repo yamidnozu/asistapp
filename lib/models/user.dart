@@ -13,6 +13,7 @@ class User {
   final String? telefono;
   final String? identificacion;
   final bool? activo;
+  final DateTime? createdAt;
   final List<UserInstitution>? instituciones;
   final StudentDetails? estudiante;
   // Campos específicos para profesores
@@ -28,6 +29,7 @@ class User {
     this.telefono,
     this.identificacion,
     this.activo,
+    this.createdAt,
     List<UserInstitution>? instituciones,
     this.estudiante,
     this.titulo,
@@ -79,6 +81,7 @@ class User {
     StudentDetails? estudiante,
     String? titulo,
     String? especialidad,
+    DateTime? createdAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -89,6 +92,7 @@ class User {
       telefono: telefono ?? this.telefono,
       identificacion: identificacion ?? this.identificacion,
       activo: activo ?? this.activo,
+      createdAt: createdAt ?? this.createdAt,
       instituciones: instituciones ?? this.instituciones,
       estudiante: estudiante ?? this.estudiante,
       titulo: titulo ?? this.titulo,

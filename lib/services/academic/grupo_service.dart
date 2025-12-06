@@ -29,7 +29,7 @@ class GrupoService {
   // ===== GRUPOS =====
 
   /// Obtiene todos los grupos con paginación y filtros
-  Future<PaginatedGruposResponse?> getGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search}) async {
+  Future<PaginatedGruposResponse?> getGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search, String? grado, String? seccion}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
@@ -37,6 +37,8 @@ class GrupoService {
       if (limit != null) queryParams['limit'] = limit.toString();
       if (periodoId != null && periodoId.isNotEmpty) queryParams['periodoId'] = periodoId;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      if (grado != null && grado.isNotEmpty) queryParams['grado'] = grado;
+      if (seccion != null && seccion.isNotEmpty) queryParams['seccion'] = seccion;
 
       final uri = Uri.parse('$baseUrlValue/grupos').replace(queryParameters: queryParams);
 
@@ -53,6 +55,7 @@ class GrupoService {
         },
       );
 
+      debugPrint('GrupoService.getGrupos URL: $uri');
       debugPrint('GET /grupos - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
@@ -277,12 +280,13 @@ class GrupoService {
   }
 
   /// Obtiene estudiantes sin asignar a ningún grupo
-  Future<PaginatedUsersResponse?> getEstudiantesSinAsignar(String accessToken, {int? page, int? limit}) async {
+  Future<PaginatedUsersResponse?> getEstudiantesSinAsignar(String accessToken, {int? page, int? limit, String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
       final uri = Uri.parse('$baseUrlValue/grupos/estudiantes-sin-asignar').replace(queryParameters: queryParams);
 

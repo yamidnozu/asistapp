@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'institution_config.dart';
 
@@ -38,6 +39,43 @@ class Institution {
   Map<String, dynamic> toJson() => _$InstitutionToJson(this);
 
   String get name => nombre;
+
+  // --- GETTERS PARA CONFIGURACIÓN DE NOTIFICACIONES ---
+
+  /// Retorna true si las notificaciones están activas
+  bool get notificacionesActivas => configuraciones?.notificacionesActivas ?? false;
+
+  /// Retorna true si solo se envía cuando el profesor da click (modo manual)
+  bool get isModoManual => configuraciones?.modoNotificacionAsistencia == 'MANUAL_ONLY';
+
+  /// Texto amigable para mostrar en la lista de instituciones
+  String get notificationConfigSummary {
+    if (configuraciones == null || !configuraciones!.notificacionesActivas) {
+      return 'Notificaciones desactivadas';
+    }
+
+    final canal = configuraciones!.canalNotificacion == 'WHATSAPP' ? 'WhatsApp' : 'SMS';
+    
+    switch (configuraciones!.modoNotificacionAsistencia) {
+      case 'INSTANT':
+        return '$canal: Envío inmediato';
+      case 'MANUAL_ONLY':
+        return '$canal: Envío manual (botón)';
+      case 'END_OF_DAY':
+        final hora = configuraciones!.horaDisparoNotificacion?.substring(0, 5) ?? '18:00';
+        return '$canal: Programado a las $hora';
+      default:
+        return '$canal: Configuración desconocida';
+    }
+  }
+
+  /// Color para el badge en la UI según estado de notificaciones
+  Color? get notificationStatusColor {
+    if (configuraciones == null || !configuraciones!.notificacionesActivas) {
+      return null; // Gris/Default
+    }
+    return const Color(0xFF16A34A); // Verde (Success)
+  }
 
   Institution copyWith({
     String? id,

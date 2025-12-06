@@ -37,6 +37,10 @@ services:
       DB_NAME: ${DB_NAME}
       DB_HOST: db
       JWT_SECRET: '${JWT_SECRET}'
+      # WhatsApp Cloud API credentials
+      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID:-}
     depends_on:
       - db
     networks:

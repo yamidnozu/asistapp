@@ -66,8 +66,21 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
 
   /// Carga todos los horarios con paginación y filtros
   Future<void> loadHorarios(String accessToken, {int? page, int? limit, String? grupoId, String? periodoId}) async {
-  if (isLoading) return;
+    if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
+
+    // Update mixin filters for pagination
+    if (grupoId != null) {
+      setFilter('grupoId', grupoId);
+    } else {
+      removeFilter('grupoId');
+    }
+    
+    if (periodoId != null) {
+      setFilter('periodoId', periodoId);
+    } else {
+      removeFilter('periodoId');
+    }
 
     try {
       debugPrint('HorarioProvider: Iniciando carga de horarios...');
@@ -84,7 +97,7 @@ class HorarioProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
       }
     } catch (e) {
       debugPrint('HorarioProvider: Error loading horarios: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 

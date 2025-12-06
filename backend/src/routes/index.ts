@@ -8,20 +8,20 @@ import horarioRoutes from './horario.routes';
 import institucionRoutes from './institucion.routes';
 import institutionAdminRoutes from './institution-admin.routes';
 import materiaRoutes from './materia.routes';
+import notificationRoutes from './notification.routes';
 import periodoAcademicoRoutes from './periodo-academico.routes';
 import profesorRoutes from './profesor.routes';
 import userRoutes from './usuario.routes';
-import notificationRoutes from './notification.routes';
 
 
 
 if (config.nodeEnv === 'development') {
-  console.log('🔄 Iniciando registro de rutas...');
+  console.log('[INFO] Iniciando registro de rutas...');
 }
 
 export default async function routes(fastify: FastifyInstance) {
   if (config.nodeEnv === 'development') {
-    console.log('📋 Registrando rutas básicas...');
+    console.log('[INFO] Registrando rutas básicas...');
   }
 
   fastify.get('/', async (request, reply) => {

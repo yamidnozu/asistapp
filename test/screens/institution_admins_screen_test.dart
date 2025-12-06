@@ -57,7 +57,7 @@ class FakeInstitutionAdminsPaginatedProvider extends InstitutionAdminsPaginatedP
 
   @override
   Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    // Return a simple paginated response that wraps the fake users
+    // Retorna una respuesta paginada simple que envuelve los usuarios falsos
     return PaginatedResponse(
       items: fakeAdmins,
       pagination: PaginationInfo(page: page, limit: limit ?? 10, total: fakeAdmins.length, totalPages: 1, hasNext: false, hasPrev: false),

@@ -1,0 +1,703 @@
+00:00 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+Building Windows application...                                    30,9s
+√ Built build\windows\x64\runner\Debug\asistapp.exe
+00:00 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+
+======================================================================
+🎯 INICIANDO TEST E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+   Timestamp único: 77774309
+   Día de hoy: Jueves (4)
+   Hora actual: 14:49
+   Horario a crear: 14:00 - 15:00
+
+   📦 DATOS ÚNICOS A CREAR:
+   • Institución: Instituto 77774309
+   • Admin: admin_77774309@test.com
+   • Profesor: profe_77774309@test.com
+   • Estudiante: estu_77774309@test.com
+   • Período: Periodo 77774309
+   • Materia: Materia 77774309
+   • Grupo: Grupo 77774309
+
+   ⚠️ MODO ESTRICTO: Sin fallbacks al seed
+======================================================================
+
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+
+📍 FASE 1: GÉNESIS (Super Admin crea Institución + Admin)
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ4MmE3ZGI1LTRkZTctNGVkZi05MDhlLTc2MDFiYTQ4ODYyNiIsInJvbCI6InN1cGVyX2FkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQGFzaXN0YXBwLmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY0ODc3ODE4LCJleHAiOjE3NjQ5NjQyMTh9.IMGvysICijXvbgs_w26KP8gci_peqLpKZ9itrSGqisI","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ4MmE3ZGI1LTRkZTctNGVkZi05MDhlLTc2MDFiYTQ4ODYyNiIsInJvbCI6InN1cGVyX2FkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQGFzaXN0YXBwLmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiNWJmODVlNjktM2JmYi00Y2ExLTgxNGItNTNlOGQ5MDhhYjgyIiwiaWF0IjoxNzY0ODc3ODE4LCJleHAiOjE3NjU0ODI2MTh9.LSkscNBkgjZuYTKwby5Q3hdJgUnhGMQeSkyA9hDG8ac","expiresIn":24,"usuario":{"id":"482a7db5-4de7-4edf-908e-7601ba488626","nombres":"Super","apellidos":"Admin","rol":"super_admin","instituciones":[]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Super Admin: No requiere selección de institución (acceso global)
+Login exitoso, AuthWrapper manejará la navegación
+UserProvider: Iniciando carga de usuarios...
+Versión obtenida del pubspec: 1.0.11
+GET /usuarios - Status: 200
+InstitutionProvider: Iniciando carga de instituciones...
+GET /instituciones - Status: 200
+GET /instituciones - data[0]: {id: 96bf7219-03c6-4f69-a190-c7b34248dec0, nombre: Instituto 71544768, direccion: Calle Test 123, telefono: 555-71544768, email: test_71544768@test.edu, activa: true, createdAt: 2025-12-04T18:07:20.356Z, updatedAt: 2025-12-04T18:07:20.356Z}
+InstitutionProvider: Estado cambiado a loaded
+  ✅ [FASE 1] 1.1 Login Super Admin
+Cargando instituciones con token: eyJhbGciOiJIUzI1NiIs...
+InstitutionProvider: Iniciando carga de instituciones...
+GET /instituciones - Status: 200
+GET /instituciones - data[0]: {id: 96bf7219-03c6-4f69-a190-c7b34248dec0, nombre: Instituto 71544768, direccion: Calle Test 123, telefono: 555-71544768, email: test_71544768@test.edu, activa: true, createdAt: 2025-12-04T18:07:20.356Z, updatedAt: 2025-12-04T18:07:20.356Z}
+InstitutionProvider: Estado cambiado a loaded
+Instituciones cargadas: 4
+Estado del provider: isLoading=false, hasError=false
+  ✅ [FASE 1] 1.2 Navegar a Instituciones
+    📱 [NOTIFICACIONES] Configurando notificaciones del micro-universo...
+  ✅ [FASE 1] 1.3a Sección Notificaciones visible
+    📱 [NOTIFICACIONES] Encontrados 2 switches
+    📱 [NOTIFICACIONES] Estado inicial switch notificaciones: false
+  ✅ [FASE 1] 1.3b Activar notificaciones
+    📱 [NOTIFICACIONES] Dropdowns encontrados: 2
+  ✅ [FASE 1] 1.3c Seleccionar canal WhatsApp
+  ✅ [FASE 1] 1.3d Seleccionar modo Instantáneo
+    📱 [NOTIFICACIONES] Resumen configuración:
+       • Activas: true
+       • Canal: WHATSAPP
+       • Modo: INSTANT
+POST /instituciones - Status: 201
+PUT http://192.168.20.22:3000/api/institutions/7b41749d-a98a-4d4d-984f-e7de3a841250/notification-config - Status: 200
+GET /instituciones/7b41749d-a98a-4d4d-984f-e7de3a841250 - Status: 200
+GET /instituciones/7b41749d-a98a-4d4d-984f-e7de3a841250 - data: {id: 7b41749d-a98a-4d4d-984f-e7de3a841250, nombre: Instituto 77774309, direccion: Calle Test 123, telefono: 555-77774309, email: test_77774309@test.edu, activa: true, configuraciones: {notificacionesActivas: true, canalNotificacion: WHATSAPP, modoNotificacionAsistencia: INSTANT, horaDisparoNotificacion: null, umbralFaltas: 3}, createdAt: 2025-12-04T19:51:10.813Z, updatedAt: 2025-12-04T19:51:10.813Z}
+InstitutionProvider: loadInstitutionById - fetched: Institution(id: 7b41749d-a98a-4d4d-984f-e7de3a841250, nombre: Instituto 77774309, activa: true)
+  ✅ [FASE 1] 1.3 Crear Institución (Instituto 77774309)
+Cargando usuarios (admin_institucion y super_admin) como super_admin...
+UserProvider: Iniciando carga de usuarios...
+GET /usuarios - Status: 200
+  ✅ [FASE 1] 1.4 Navegar a gestión de usuarios
+    📝 [DEBUG] Iniciando creación de Admin Institución...
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+    📝 [DEBUG] SpeedDial tapado: true
+    📝 [STEP 1] Información de Cuenta
+    📝 [STEP 1] TextFormFields encontrados: 6
+    📝 [STEP 1] Campo email encontrado, llenando: admin_77774309@test.com
+    📝 [STEP 1] Seleccionando institución: Instituto 77774309
+       📦 [selectInstitutionFromModal] Iniciando para: Instituto 77774309
+       📦 [selectInstitutionFromModal] Campo institución encontrado, haciendo tap...
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+       📦 [selectInstitutionFromModal] BottomSheets encontrados: 1
+       📦 [selectInstitutionFromModal] CheckboxListTiles encontrados: 5
+       📦 [selectInstitutionFromModal] Textos que contienen "Instituto 77774309": 1
+       📦 [selectInstitutionFromModal] Encontrado! Haciendo tap...
+       📦 [selectInstitutionFromModal] Botones "Confirmar selección": 1
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+       ✅ [selectInstitutionFromModal] Confirmado!
+    📝 [STEP 1] Institución seleccionada: true
+    📝 [STEP 1] Avanzando a Step 2...
+    📝 [STEP 1] Botones formSaveButton encontrados: 2
+🔔 _onStepContinue CALLED! currentStep=0
+🔔 totalSteps=2
+🔔 stepState for step 0: FormState#37195
+🔔 validation result: true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+    📝 [STEP 2] Información Personal
+    📝 [STEP 2] TextFormFields ahora: 6
+    📝 [STEP 2] Step widgets encontrados: 0
+    📝 [STEP 2] Textos "Info Personal" encontrados: 1
+    📝 [STEP 2] Campo nombres encontrado: true
+    📝 [STEP 2] Campo apellidos encontrado: true
+    📝 [STEP 2] Campo nombres encontrado por Key
+    📝 [STEP 2] Texto ingresado en nombres: Admin 77774309
+    📝 [STEP 2] Campo apellidos encontrado por Key
+    📝 [STEP 2] Texto ingresado en apellidos: TestApellido
+    📝 [STEP 2] Datos personales llenados
+    📝 [STEP 2] Buscando botón de guardar (Crear)...
+    📝 [STEP 2] Botones con texto "Crear" encontrados: 2
+🔔 _onStepContinue CALLED! currentStep=1
+🔔 totalSteps=2
+🔔 stepState for step 1: FormState#9ee2b
+🔔 validation result: true
+    📝 [STEP 2] Botón "Crear" tapado (usando last), esperando respuesta del servidor...
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+POST /usuarios - Status: 201
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+    📝 [STEP 2] Textos "Contraseña" encontrados: 1
+    🔑 Contraseña capturada exitosamente: wz8R*vi!AExg
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=super_admin, userRole=admin_institucion, isSelfEditing=false, canEditInstitutions=true
+  ✅ [FASE 1] 1.5 Crear Admin Institución (admin_77774309@test.com)
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+  ✅ [FASE 1] 1.6 Logout Super Admin
+
+📍 FASE 2: ESTRUCTURA (Admin crea Período, Materia, Profesor, Estudiante, Grupo, Horario)
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkNzlhYTI5LTU5ZTktNDBkYS1hMGM2LTdmZDJjNmY0YzEyNCIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbl83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY0ODc3OTM3LCJleHAiOjE3NjQ5NjQzMzd9.sQAsyu0gZIFRtxUx9-xRhvEPpSQNQjImBP4rw6HZE9U","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkNzlhYTI5LTU5ZTktNDBkYS1hMGM2LTdmZDJjNmY0YzEyNCIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbl83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiYmQ1NWFlMzYtOTI3ZS00MzBiLWFmY2YtN2EwZmU0NTJmOTA2IiwiaWF0IjoxNzY0ODc3OTM3LCJleHAiOjE3NjU0ODI3Mzd9.9tyNHsO6QrPNwF8USI7atRwW7hJ-YZu3DlOcy3_Bs_U","expiresIn":24,"usuario":{"id":"6d79aa29-59e9-40da-a0c6-7fd2c6f4c124","nombres":"Admin 77774309","apellidos":"TestApellido","rol":"admin_institucion","instituciones":[{"id":"7b41749d-a98a-4d4d-984f-e7de3a841250","nombre":"Instituto 77774309","rolEnInstitucion":"admin"}]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Institución seleccionada automáticamente: 7b41749d-a98a-4d4d-984f-e7de3a841250
+Login exitoso, AuthWrapper manejará la navegación
+UserProvider: Iniciando carga de usuarios por institución 7b41749d-a98a-4d4d-984f-e7de3a841250...
+Versión obtenida del pubspec: 1.0.11
+GET /usuarios/institucion/7b41749d-a98a-4d4d-984f-e7de3a841250 - Status: 200
+  ✅ [FASE 2] 2.1 Login Admin (admin_77774309@test.com)
+  ✅ [FASE 2] 2.2 Dashboard Admin visible
+  ✅ [FASE 2] 2.3 Crear Período (Usando períodos existentes)
+  ✅ [FASE 2] 2.4 Crear Materia (Usando materias existentes)
+Cargando usuarios para la institución: 7b41749d-a98a-4d4d-984f-e7de3a841250
+UserProvider: Iniciando carga de usuarios por institución 7b41749d-a98a-4d4d-984f-e7de3a841250...
+GET /usuarios/institucion/7b41749d-a98a-4d4d-984f-e7de3a841250 - Status: 200
+    📝 [DEBUG] Iniciando creación de Profesor...
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+    📝 [DEBUG] SpeedDial tapado: true
+    📝 [PROF STEP 1] Información de Cuenta
+    📝 [PROF STEP 1] Total TextFormFields: 7
+    📝 [PROF STEP 1] Textos con "requerido" visibles: 0
+    📝 [PROF STEP 1] Campo email encontrado, llenando: profe_77774309@test.com
+    📝 [PROF STEP 1] Avanzando a Step 2...
+    📝 [PROF STEP 1] Total ElevatedButtons: 3
+       ElevatedButton[0]: "Siguiente", onPressed=enabled
+       ElevatedButton[1]: "Siguiente", onPressed=enabled
+       ElevatedButton[2]: "Siguiente", onPressed=enabled
+    📝 [PROF STEP 1] Botones habilitados: 3, primer habilitado en índice: 0
+🔔 _onStepContinue CALLED! currentStep=0
+🔔 totalSteps=3
+🔔 stepState for step 0: FormState#5de7d
+🔔 validation result: true
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+    📝 [PROF STEP 1 AFTER TAP] Siguiente: 3, Crear: 0
+    📝 [PROF STEP 2] Información Personal
+    📝 [PROF STEP 2] CustomTextFormField Nombres: 1
+    📝 [PROF STEP 2] CustomTextFormField Apellidos: 1
+    📝 [PROF STEP 2] TextField Nombres: 1
+    📝 [PROF STEP 2] TextField Apellidos: 1
+    📝 [PROF STEP 2] Scroll + Tap en Nombres...
+    📝 [PROF STEP 2] enterText: Profesor 77774309
+    📝 [PROF STEP 2] Texto en EditableText Nombres: "Profesor 77774309"
+    📝 [PROF STEP 2] Scroll + Tap en Apellidos...
+    📝 [PROF STEP 2] enterText: TestProf
+    📝 [PROF STEP 2] Texto en EditableText Apellidos: "TestProf"
+    📝 [PROF STEP 2] Campo Identificación encontrado por Key
+    📝 [PROF STEP 2] enterText Identificación: DOC77774309
+    📝 [PROF STEP 2] Datos ingresados (nombres, apellidos, identificación)
+    📝 [PROF STEP 2] Avanzando a Step 3...
+    📝 [PROF STEP 2] Botones Siguiente: 3, Crear: 0
+🔔 _onStepContinue CALLED! currentStep=1
+🔔 totalSteps=3
+🔔 stepState for step 1: FormState#29dfb
+🔔 validation result: true
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+    📝 [PROF STEP 3] Datos Académicos
+    📝 [PROF STEP 3] TextFormFields totales: 7
+    📝 [PROF STEP 3] Campo título: 1
+    📝 [PROF STEP 3] Campo especialidad: 1
+    📝 [PROF STEP 3] Buscando botón para guardar...
+    📝 [PROF STEP 3] Total ElevatedButtons: 3
+       ElevatedButton[0]: "Crear"
+       ElevatedButton[1]: "Crear"
+       ElevatedButton[2]: "Crear"
+    📝 [PROF STEP 3] Botones "Crear": 3, "Siguiente": 0
+🔔 _onStepContinue CALLED! currentStep=2
+🔔 totalSteps=3
+🔔 stepState for step 2: FormState#b1873
+🔔 validation result: true
+    📝 [PROF STEP 3] Botón "Crear" tapado, esperando...
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+POST /usuarios - Status: 201
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+    🔑 Contraseña capturada exitosamente: E(%QUPrv4srM
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=profesor, isSelfEditing=false, canEditInstitutions=true
+  ✅ [FASE 2] 2.5 Crear Profesor (profe_77774309@test.com)
+    📝 [DEBUG] Iniciando creación de Estudiante...
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+    📝 [DEBUG] SpeedDial tapado: true
+    📝 [EST STEP 1] Información de Cuenta
+    📝 [EST STEP 1] Campo email encontrado, llenando: estu_77774309@test.com
+    📝 [EST STEP 1] Avanzando a Step 2...
+    📝 [EST STEP 1] Botones formSaveButton: 3
+🔔 _onStepContinue CALLED! currentStep=0
+🔔 totalSteps=3
+🔔 stepState for step 0: FormState#f2166
+🔔 validation result: true
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+    📝 [EST STEP 2] Información Personal
+    📝 [EST STEP 2] Campo nombres: true
+    📝 [EST STEP 2] Campo apellidos: true
+    📝 [EST STEP 2] enterText Nombres: Estudiante 77774309
+    📝 [EST STEP 2] enterText Apellidos: TestEst
+    📝 [EST STEP 2] Campo Identificación encontrado
+    📝 [EST STEP 2] enterText Identificación: EST77774309
+    📝 [EST STEP 2] Avanzando a Step 3...
+    📝 [EST STEP 2] Botones Siguiente: 3
+🔔 _onStepContinue CALLED! currentStep=1
+🔔 totalSteps=3
+🔔 stepState for step 1: FormState#094fe
+🔔 validation result: true
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+    📝 [EST STEP 3] Datos del Responsable (opcionales)
+    📝 [EST STEP 3] Campo responsable: 1
+    📝 [EST STEP 3] Campo teléfono: 1
+    📱 [NOTIF] Teléfono WhatsApp configurado: +573103816321
+    📝 [EST STEP 3] Buscando botón "Crear"...
+    📝 [EST STEP 3] Botones "Crear": 3
+🔔 _onStepContinue CALLED! currentStep=2
+🔔 totalSteps=3
+🔔 stepState for step 2: FormState#69efd
+🔔 validation result: true
+    📝 [EST STEP 3] Botón "Crear" tapado, esperando...
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+POST /usuarios - Status: 201
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+    🔑 Contraseña capturada exitosamente: 6*n8!5YUgWWd
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+UserFormScreen: sessionRole=admin_institucion, userRole=estudiante, isSelfEditing=false, canEditInstitutions=true
+04:29 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+AppLifecycleManager: App resumed after 0s in background
+04:30 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  ✅ [FASE 2] 2.6 Crear Estudiante (estu_77774309@test.com)
+  ✅ [FASE 2] 2.7 Crear Grupo (Usando grupos existentes)
+  ✅ [FASE 2] 2.8 Acceder a Horarios (Sección disponible)
+    📱 [NOTIFICACIONES] Verificando configuración guardada...
+04:32 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+AppLifecycleManager: App paused at 2025-12-04 14:54:06.986422
+04:37 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  ✅ [FASE 2] 2.9 Verificar config notificaciones (Switch: ✓, WhatsApp: ✗, Instant: ✗)
+UserProvider: Iniciando carga de usuarios por institución 7b41749d-a98a-4d4d-984f-e7de3a841250...
+GET /usuarios/institucion/7b41749d-a98a-4d4d-984f-e7de3a841250 - Status: 200
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+  ✅ [FASE 2] 2.10 Logout Admin
+
+📍 FASE 3: OPERACIÓN (Toma de asistencia para disparar notificaciones)
+
+
+  📡 SUB-FASE 3.A: Toma de asistencia vía API
+
+  ✅ [FASE 3] 3.A.1 Login Admin vía API (admin_77774309@test.com)
+    📋 Estudiante encontrado: estu_77774309@test.com (ID: 50e851e0-18ce-473b-9f79-a328cf1f58c1)
+  ✅ [FASE 3] 3.A.2 Obtener estudiantes (50e851e0-18ce-473b-9f79-a328cf1f58c1)
+    📡 Obteniendo/creando datos para horario...
+    📡 Creando período vía API...
+    ✅ Período creado: ID 8c54eb34-2b52-434f-99f3-059e5f2445c9
+    📡 Creando materia vía API...
+    ✅ Materia creada: ID 76de9ae4-92ae-4782-af6d-04d5cfce9bdf
+    📡 Creando grupo vía API...
+    ✅ Grupo creado: ID eb02199d-c221-48ef-9bd1-1c5d33dda309
+    📡 Asignando estudiante al grupo...
+    ✅ Estudiante asignado al grupo
+    👨‍🏫 Profesor encontrado: profe_77774309@test.com (ID: 36d55f70-7354-461b-b3ce-64991c9fb5e0)
+    📡 Creando horario vía API (no existen horarios)...
+       • Payload: {periodoId: 8c54eb34-2b52-434f-99f3-059e5f2445c9, grupoId: eb02199d-c221-48ef-9bd1-1c5d33dda309, materiaId: 76de9ae4-92ae-4782-af6d-04d5cfce9bdf, profesorId: 36d55f70-7354-461b-b3ce-64991c9fb5e0, diaSemana: 4, horaInicio: 14:00, horaFin: 15:00}
+    ✅ Horario creado: ID 3829a486-2cca-4b3b-803d-ad721614b276
+  ✅ [FASE 3] 3.A.3 Obtener/Crear horarios (3829a486-2cca-4b3b-803d-ad721614b276)
+    📡 Registrando asistencia vía API...
+       • Estudiante ID: 50e851e0-18ce-473b-9f79-a328cf1f58c1
+       • Horario ID: 3829a486-2cca-4b3b-803d-ad721614b276
+       • Fecha: 2025-12-04
+    ✅ Asistencia registrada exitosamente
+    📱 Notificación WhatsApp debería haberse disparado (modo INSTANT)
+  ✅ [FASE 3] 3.A.4 Registrar asistencia vía API (AUSENTE registrado - Notificación disparada)
+    ⏳ Esperando 5 segundos para que se procese la notificación...
+  ✅ [FASE 3] 3.A.5 Espera de notificación (Canal: WHATSAPP, Modo: INSTANT)
+
+  🖥️ SUB-FASE 3.B: Verificación vía UI del profesor
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2ZDU1ZjcwLTczNTQtNDYxYi1iM2NlLTY0OTkxYzlmYjVlMCIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJwcm9mZV83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY0ODc4MDc0LCJleHAiOjE3NjQ5NjQ0NzR9.Dtvp2-FVbIMEvVHzJc7KQffHzrqknAIwv3H8oMyZ18w","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2ZDU1ZjcwLTczNTQtNDYxYi1iM2NlLTY0OTkxYzlmYjVlMCIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJwcm9mZV83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiYjAzZjBkMGMtN2I3NS00YzZhLTg0ZmMtNzllNjI4OTFkODU2IiwiaWF0IjoxNzY0ODc4MDc0LCJleHAiOjE3NjU0ODI4NzR9.ttz_TKS26mKqdVGmJdJUM54Z5KKd9FMp099qojpMNRQ","expiresIn":24,"usuario":{"id":"36d55f70-7354-461b-b3ce-64991c9fb5e0","nombres":"Profesor 77774309","apellidos":"TestProf","rol":"profesor","instituciones":[{"id":"7b41749d-a98a-4d4d-984f-e7de3a841250","nombre":"Instituto 77774309","rolEnInstitucion":"member"}]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Institución seleccionada automáticamente: 7b41749d-a98a-4d4d-984f-e7de3a841250
+Login exitoso, AuthWrapper manejará la navegación
+HorarioProvider: Cargando clases del día para el profesor...
+Versión obtenida del pubspec: 1.0.11
+GET /profesores/dashboard/clases-hoy - Status: 200
+HorarioProvider: Recibidas 1 clases del día
+  ✅ [FASE 3] 3.B.1 Login Profesor (profe_77774309@test.com)
+  ✅ [FASE 3] 3.B.2 Profesor ve dashboard con clases
+AsistenciaProvider: Loading asistencias for horario: 3829a486-2cca-4b3b-803d-ad721614b276
+GET /asistencias?horarioId=3829a486-2cca-4b3b-803d-ad721614b276 - Status: 200
+❌ Error al obtener asistencias: type 'Null' is not a subtype of type 'String' in type cast
+AsistenciaProvider: Error loading asistencias: type 'Null' is not a subtype of type 'String' in type cast
+  ✅ [FASE 3] 3.B.3 Entrar a gestión de asistencia (Ya registrada vía API)
+  ✅ [FASE 3] 3.B.4 Verificar asistencia registrada (Estado AUSENTE visible)
+
+    📱 RESUMEN NOTIFICACIONES:
+       • Asistencia registrada: ✅
+       • Canal configurado: WHATSAPP
+       • Modo configurado: INSTANT
+       • Teléfono destino: +573103816321
+       • Notificación esperada: SÍ (revisar logs backend)
+  ✅ [FASE 3] 3.B.5 Notificación WhatsApp (Disparada a +573103816321)
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+  ✅ [FASE 3] 3.B.6 Logout Profesor
+
+📍 FASE 4: CONSUMO (Estudiante verifica asistencia)
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNhNjdjNjZiLTQxYmMtNGNhMi04YzBhLTBjZWEwMmI2NmNjMCIsInJvbCI6ImVzdHVkaWFudGUiLCJlbWFpbCI6ImVzdHVfNzc3NzQzMDlAdGVzdC5jb20iLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTc2NDg3ODEzNCwiZXhwIjoxNzY0OTY0NTM0fQ.ZhNZPUe5x-xjXRWjpB64MsTJuzqw0A6LJeqdEkropQ4","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNhNjdjNjZiLTQxYmMtNGNhMi04YzBhLTBjZWEwMmI2NmNjMCIsInJvbCI6ImVzdHVkaWFudGUiLCJlbWFpbCI6ImVzdHVfNzc3NzQzMDlAdGVzdC5jb20iLCJ0b2tlblZlcnNpb24iOjEsImp0aSI6IjNiNzg0NjIxLWZmZjUtNDQ2ZC1iMThmLTBmNGZlNzYzMmI0OCIsImlhdCI6MTc2NDg3ODEzNCwiZXhwIjoxNzY1NDgyOTM0fQ.CpUMJ3XWjtPM4EzZ8xuHvS3hUtL4MuqOAdiVvrYlOTU","expiresIn":24,"usuario":{"id":"3a67c66b-41bc-4ca2-8c0a-0cea02b66cc0","nombres":"Estudiante 77774309","apellidos":"TestEst","rol":"estudiante","instituciones":[{"id":"7b41749d-a98a-4d4d-984f-e7de3a841250","nombre":"Instituto 77774309","rolEnInstitucion":"member"}]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Institución seleccionada automáticamente: 7b41749d-a98a-4d4d-984f-e7de3a841250
+Login exitoso, AuthWrapper manejará la navegación
+Versión obtenida del pubspec: 1.0.11
+  ✅ [FASE 4] 4.1 Login Estudiante (estu_77774309@test.com)
+  ✅ [FASE 4] 4.2 Estudiante ve su dashboard
+GET /estudiantes/me - Status: 200
+  ✅ [FASE 4] 4.3 Estudiante ve su código QR
+  ✅ [FASE 4] 4.4 Estudiante ve historial de asistencia (Materia: ✗, Presente: ✓)
+    📱 [NOTIFICACIONES] Verificando sección de notificaciones del estudiante...
+  ✅ [FASE 4] 4.5 Verificar sección notificaciones (Notificación de asistencia visible)
+06:57 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+AppLifecycleManager: App resumed after 145s in background
+AppLifecycleManager: Long background time, triggering data refresh
+AppLifecycleManager: Triggering data refresh...
+AppLifecycleManager: Refreshing data...
+AppLifecycleManager: Token available, refreshing periodos...
+PeriodoAcademicoProvider: Iniciando carga de períodos activos...
+GET /periodos-academicos/activos - Status: 403
+Error getting periodos activos: 403 - {"success":false,"error":"Acceso denegado: rol insuficiente","code":"AUTHORIZATION_ERROR"}
+AppLifecycleManager: Periodos refreshed, refreshing grupos...
+GrupoProvider: Iniciando carga de grupos...
+GET /grupos - Status: 403
+Error getting grupos: 403 - {"success":false,"error":"Acceso denegado: rol insuficiente","code":"AUTHORIZATION_ERROR"}
+GrupoProvider: Estado cambiado a loaded
+AppLifecycleManager: Grupos refreshed, refreshing materias...
+GET /materias - Status: 403
+Error getting materias: 403 - {"success":false,"error":"Acceso denegado: rol insuficiente","code":"AUTHORIZATION_ERROR"}
+AppLifecycleManager: Materias refreshed, checking for horario refresh...
+AppLifecycleManager: No selected group/period for horario refresh
+AppLifecycleManager: Data refresh completed
+07:02 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  ✅ [FASE 4] 4.6 Preferencias de notificación estudiante (Preferencias accesibles)
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+07:08 +0: loading C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart
+AppLifecycleManager: App paused at 2025-12-04 14:56:43.029188
+07:16 +0: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  ✅ [FASE 4] 4.7 Logout Estudiante
+
+📍 FASE 5: PRUEBA ADICIONAL - MODO MANUAL
+
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkNzlhYTI5LTU5ZTktNDBkYS1hMGM2LTdmZDJjNmY0YzEyNCIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbl83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY0ODc4MjEzLCJleHAiOjE3NjQ5NjQ2MTN9.yQjKECxKYypV2DlSzcVB1OzQlH26skUKhqGi8PnRG0w","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkNzlhYTI5LTU5ZTktNDBkYS1hMGM2LTdmZDJjNmY0YzEyNCIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbl83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiOTgwMDk4M2QtMjU2MC00OTNkLWIyOGMtZjQ5NDU2NTU0YmIxIiwiaWF0IjoxNzY0ODc4MjEzLCJleHAiOjE3NjU0ODMwMTN9.sesa21OKnr9YHgKp5YeAqQbtuSoERP1d3RVa67aS0nU","expiresIn":24,"usuario":{"id":"6d79aa29-59e9-40da-a0c6-7fd2c6f4c124","nombres":"Admin 77774309","apellidos":"TestApellido","rol":"admin_institucion","instituciones":[{"id":"7b41749d-a98a-4d4d-984f-e7de3a841250","nombre":"Instituto 77774309","rolEnInstitucion":"admin"}]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Institución seleccionada automáticamente: 7b41749d-a98a-4d4d-984f-e7de3a841250
+Login exitoso, AuthWrapper manejará la navegación
+UserProvider: Iniciando carga de usuarios por institución 7b41749d-a98a-4d4d-984f-e7de3a841250...
+Versión obtenida del pubspec: 1.0.11
+GET /usuarios/institucion/7b41749d-a98a-4d4d-984f-e7de3a841250 - Status: 200
+  ✅ [FASE 5] 5.1 Login Admin para configurar MANUAL (admin_77774309@test.com)
+  ✅ [FASE 5] 5.1c Actualizar config via API (MANUAL_ONLY)
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+  ✅ [FASE 5] 5.1e Logout Admin
+    📡 Registrando asistencia vía API (MANUAL_ONLY)...
+    ⚠️ API POST /asistencias/registrar-manual: 400 - {"success":false,"message":"El estudiante ya tiene registrada su asistencia para esta clase hoy","error":"ValidationError"}
+    ⚠️ Error al registrar asistencia vía API (MANUAL_ONLY)
+AuthService.login - URL: http://192.168.20.22:3000/auth/login
+AuthService.login - Config Base URL: http://192.168.20.22:3000
+📤 POST /auth/login
+📡 HTTP 200 /auth/login
+   Status: 200
+   Body: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2ZDU1ZjcwLTczNTQtNDYxYi1iM2NlLTY0OTkxYzlmYjVlMCIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJwcm9mZV83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY0ODc4MjUxLCJleHAiOjE3NjQ5NjQ2NTF9.Ahp00t3tzj82z0ZayJxFbT1lR_fj7vwuSK4-AmXNOaE","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2ZDU1ZjcwLTczNTQtNDYxYi1iM2NlLTY0OTkxYzlmYjVlMCIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJwcm9mZV83Nzc3NDMwOUB0ZXN0LmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiYmY2NzY0MTQtMjFkOS00ZDVkLTlmMTgtZDU5M2MxMGNmNGYzIiwiaWF0IjoxNzY0ODc4MjUxLCJleHAiOjE3NjU0ODMwNTF9.KymgOXTz2agcwIQdU7g7tPSkp3MwL-tS7TbhyIloEwk","expiresIn":24,"usuario":{"id":"36d55f70-7354-461b-b3ce-64991c9fb5e0","nombres":"Profesor 77774309","apellidos":"TestProf","rol":"profesor","instituciones":[{"id":"7b41749d-a98a-4d4d-984f-e7de3a841250","nombre":"Instituto 77774309","rolEnInstitucion":"member"}]}}}
+========================================
+📤 GET /auth/institutions
+📡 HTTP 200 /auth/institutions
+Institución seleccionada automáticamente: 7b41749d-a98a-4d4d-984f-e7de3a841250
+Login exitoso, AuthWrapper manejará la navegación
+HorarioProvider: Cargando clases del día para el profesor...
+Versión obtenida del pubspec: 1.0.11
+GET /profesores/dashboard/clases-hoy - Status: 200
+HorarioProvider: Recibidas 1 clases del día
+  ✅ [FASE 5] 5.3 Login Profesor para enviar manualmente (profe_77774309@test.com)
+    🔍 [MANUAL] Buscando clase por materia: Materia 77774309
+    ⚠️ [MANUAL] No se encontró la clase ni por materia ni por grupo
+    🔍 [MANUAL] Buscando botón de notificación manual...
+    📊 [MANUAL] Botón por tooltip: 0, por icono: 0
+    ⚠️ [MANUAL] Botón no encontrado. Entramos a clase: false
+    📋 [MANUAL] Textos visibles: Materia ✗, Grupo ✗
+  ❌ [FASE 5] 5.3 Ver botón manual visible (Botón not found (entered: false))
+📤 POST /auth/logout
+📡 HTTP 404 /auth/logout
+AppConfig: No se pudo cargar .env: Instance of 'FileNotFoundError'
+AppConfig: Rutas intentadas para .env (muestra hasta 30):
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\Debug\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\runner\.env
+  - C:\Proyectos\DemoLife\build\windows\x64\.env
+  - C:\Proyectos\DemoLife\build\windows\.env
+  - C:\Proyectos\DemoLife\build\.env
+  - C:\Proyectos\DemoLife\.env
+AppConfig: Usando configuración por defecto
+  - API_BASE_URL: http://192.168.20.22:3000
+  - ENVIRONMENT: development
+  - Plataforma: windows
+  ✅ [FASE 5] 5.3e Logout Profesor
+  ✅ [FASE 5] 5.4 Obtener token admin para verificar logs
+    📋 [MANUAL] Logs response: OK
+    📋 [MANUAL] Encontrados 0 logs de notificación
+  ❌ [FASE 5] 5.4 Verificar recepción manual (API logs) (No hay log exitoso)
+
+======================================================================
+📊 RESUMEN DEL TEST E2E - MICRO-UNIVERSO AISLADO
+======================================================================
+   Total de pasos: 46
+   ✅ Pasados: 44
+   ❌ Fallidos: 2
+   📈 Porcentaje: 95.7%
+
+🔐 CREDENCIALES CAPTURADAS:
+   • admin: wz8***
+   • profesor: E(%***
+   • estudiante: 6*n***
+
+📦 DATOS CREADOS:
+   • notificaciones_activas: true
+   • canal_notificacion: WHATSAPP
+   • modo_notificacion: MANUAL_ONLY
+   • institucion: Instituto 77774309
+   • admin_email: admin_77774309@test.com
+   • admin_password: ***capturada***
+   • profesor_email: profe_77774309@test.com
+   • telefono_responsable: +573103816321
+   • estudiante_email: estu_77774309@test.com
+   • asistencia_tomada: true
+   • asistencia_id: created
+   • notificacion_disparada: true
+
+📱 RESUMEN DE NOTIFICACIONES:
+   • Notificaciones: ✅ Activas
+   • Canal: WHATSAPP
+   • Modo: MANUAL_ONLY
+   • Disparo: ✅ Verificado
+
+📋 Detalle de resultados:
+   ✅ [FASE 1] 1.1 Login Super Admin
+   ✅ [FASE 1] 1.2 Navegar a Instituciones
+   ✅ [FASE 1] 1.3a Sección Notificaciones visible
+   ✅ [FASE 1] 1.3b Activar notificaciones
+   ✅ [FASE 1] 1.3c Seleccionar canal WhatsApp
+   ✅ [FASE 1] 1.3d Seleccionar modo Instantáneo
+   ✅ [FASE 1] 1.3 Crear Institución (Instituto 77774309)
+   ✅ [FASE 1] 1.4 Navegar a gestión de usuarios
+   ✅ [FASE 1] 1.5 Crear Admin Institución (admin_77774309@test.com)
+   ✅ [FASE 1] 1.6 Logout Super Admin
+   ✅ [FASE 2] 2.1 Login Admin (admin_77774309@test.com)
+   ✅ [FASE 2] 2.2 Dashboard Admin visible
+   ✅ [FASE 2] 2.3 Crear Período (Usando períodos existentes)
+   ✅ [FASE 2] 2.4 Crear Materia (Usando materias existentes)
+   ✅ [FASE 2] 2.5 Crear Profesor (profe_77774309@test.com)
+   ✅ [FASE 2] 2.6 Crear Estudiante (estu_77774309@test.com)
+   ✅ [FASE 2] 2.7 Crear Grupo (Usando grupos existentes)
+   ✅ [FASE 2] 2.8 Acceder a Horarios (Sección disponible)
+   ✅ [FASE 2] 2.9 Verificar config notificaciones (Switch: ✓, WhatsApp: ✗, Instant: ✗)
+   ✅ [FASE 2] 2.10 Logout Admin
+   ✅ [FASE 3] 3.A.1 Login Admin vía API (admin_77774309@test.com)
+   ✅ [FASE 3] 3.A.2 Obtener estudiantes (50e851e0-18ce-473b-9f79-a328cf1f58c1)
+   ✅ [FASE 3] 3.A.3 Obtener/Crear horarios (3829a486-2cca-4b3b-803d-ad721614b276)
+   ✅ [FASE 3] 3.A.4 Registrar asistencia vía API (AUSENTE registrado - Notificación disparada)
+   ✅ [FASE 3] 3.A.5 Espera de notificación (Canal: WHATSAPP, Modo: INSTANT)
+   ✅ [FASE 3] 3.B.1 Login Profesor (profe_77774309@test.com)
+   ✅ [FASE 3] 3.B.2 Profesor ve dashboard con clases
+   ✅ [FASE 3] 3.B.3 Entrar a gestión de asistencia (Ya registrada vía API)
+   ✅ [FASE 3] 3.B.4 Verificar asistencia registrada (Estado AUSENTE visible)
+   ✅ [FASE 3] 3.B.5 Notificación WhatsApp (Disparada a +573103816321)
+   ✅ [FASE 3] 3.B.6 Logout Profesor
+   ✅ [FASE 4] 4.1 Login Estudiante (estu_77774309@test.com)
+   ✅ [FASE 4] 4.2 Estudiante ve su dashboard
+   ✅ [FASE 4] 4.3 Estudiante ve su código QR
+   ✅ [FASE 4] 4.4 Estudiante ve historial de asistencia (Materia: ✗, Presente: ✓)
+   ✅ [FASE 4] 4.5 Verificar sección notificaciones (Notificación de asistencia visible)
+   ✅ [FASE 4] 4.6 Preferencias de notificación estudiante (Preferencias accesibles)
+   ✅ [FASE 4] 4.7 Logout Estudiante
+   ✅ [FASE 5] 5.1 Login Admin para configurar MANUAL (admin_77774309@test.com)
+   ✅ [FASE 5] 5.1c Actualizar config via API (MANUAL_ONLY)
+   ✅ [FASE 5] 5.1e Logout Admin
+   ✅ [FASE 5] 5.3 Login Profesor para enviar manualmente (profe_77774309@test.com)
+   ❌ [FASE 5] 5.3 Ver botón manual visible (Botón not found (entered: false))
+   ✅ [FASE 5] 5.3e Logout Profesor
+   ✅ [FASE 5] 5.4 Obtener token admin para verificar logs
+   ❌ [FASE 5] 5.4 Verificar recepción manual (API logs) (No hay log exitoso)
+======================================================================
+
+
+⚠️ FLUJO COMPLETADO CON 2 PASOS FALLIDOS
+   📋 Revisar los pasos marcados con ❌ arriba
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <0>
+  Actual: <2>
+El micro-universo debe completarse al 100% sin fallbacks
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart:2621:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:189:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1027:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Proyectos/DemoLife/integration_test/main_e2e_test.dart line 2621
+The test description was:
+  🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+════════════════════════════════════════════════════════════════════════════════════════════════════
+08:46 +0 -1: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO [E]
+  Test failed. See exception logs above.
+  The test description was: 🚀 FLUJO E2E TRANSACCIONAL - MICRO-UNIVERSO AISLADO
+  
+08:46 +0 -1: (tearDownAll)
+08:46 +0 -1: Some tests failed.

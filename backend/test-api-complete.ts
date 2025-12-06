@@ -142,6 +142,7 @@ class CompleteFlowTester {
   private tokens: { [key: string]: string } = {};
   private createdEntities: { [key: string]: string[] } = {};
   private currentPeriodoId: string = '';
+  private institucionId: string = '';
 
   constructor() {
     // Configurar axios
@@ -161,6 +162,9 @@ class CompleteFlowTester {
 
       if (response.data.success && response.data.data.accessToken) {
         this.tokens[roleName] = response.data.data.accessToken;
+        if (roleName === 'ADMIN_INSTITUCION' && response.data.data.usuario.institucionId) {
+          this.institucionId = response.data.data.usuario.institucionId;
+        }
         console.log(`✅ Sesión iniciada para ${roleName}`);
         console.log(`   👤 Usuario: ${response.data.data.usuario.nombres} ${response.data.data.usuario.apellidos}`);
         console.log(`   🏫 Institución ID: ${response.data.data.usuario.institucionId}`);
@@ -880,6 +884,201 @@ class CompleteFlowTester {
     return { passed, total };
   }
 
+  // Flujo 10: Notificaciones y Ausencia Total
+  async testNotificationFlows(): Promise<{ passed: number, total: number }> {
+    console.log('\n🔔 ===== FLUJO 10: NOTIFICACIONES Y AUSENCIA TOTAL =====');
+    let passed = 0, total = 0;
+
+    const countTest = (result: boolean) => { total++; if (result) passed++; };
+
+    // 10.1 Activar configuración
+    console.log('\n📱 10.1 ACTIVAR CONFIGURACIÓN - Admin activa notificaciones');
+    
+    if (!this.institucionId) {
+      console.log('   ⚠️ No se tiene ID de institución. Intentando obtener...');
+      // Fallback logic if needed, but login should have set it.
+    }
+
+    const configData = {
+      notificacionesActivas: true,
+      canalNotificacion: 'WHATSAPP',
+      modoNotificacionAsistencia: 'MANUAL_ONLY',
+      notificarAusenciaTotalDiaria: true
+    };
+
+    countTest(await this.testEndpoint('PUT', `/api/institutions/${this.institucionId}/notification-config`, 'ADMIN_INSTITUCION',
+      configData, 200, 'Actualizar configuración de notificaciones', true));
+
+    // 10.2 Trigger check sin faltas
+    console.log('\n📱 10.2 TRIGGER CHECK (SIN FALTAS) - Ejecutar job manualmente');
+    
+    countTest(await this.testEndpoint('POST', '/api/notifications/trigger-daily-check', 'ADMIN_INSTITUCION',
+      {}, 200, 'Ejecutar check diario sin faltas', true));
+
+    // 10.3 Preparar escenario de falta total
+    console.log('\n📱 10.3 PREPARAR ESCENARIO - Crear horario para hoy y registrar falta');
+
+    try {
+      // Calcular dia de la semana (1-7)
+      const today = new Date();
+      let dayOfWeek = today.getUTCDay(); // 0=Sunday, 1=Monday
+      if (dayOfWeek === 0) dayOfWeek = 7;
+      
+      console.log(`   📅 Día de la semana actual (UTC): ${dayOfWeek}`);
+
+      // Buscar horario existente para hoy
+      const horariosResp = await axios.get('/horarios', { 
+        headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } 
+      });
+      
+      const horariosHoy = horariosResp.data.data.filter((h: any) => h.diaSemana === dayOfWeek);
+      let horarioId = '';
+      let profesorId = '';
+
+      if (horariosHoy.length > 0) {
+        console.log(`   ✅ Encontrado horario existente para hoy: ${horariosHoy[0].id}`);
+        horarioId = horariosHoy[0].id;
+        profesorId = horariosHoy[0].profesorId;
+      } else {
+        console.log('   ⚠️ No hay horario para hoy. Creando uno...');
+        
+        // Necesitamos IDs de periodo, grupo, materia
+        // Usamos los creados o buscamos existentes
+        let periodoId = this.currentPeriodoId;
+        let grupoId = this.createdEntities.grupos?.[0];
+        let materiaId = this.createdEntities.materias?.[0];
+        
+        // Si no tenemos creados, buscar
+        if (!grupoId) {
+           const g = await axios.get('/grupos?limit=1', { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+           if (g.data.data.length > 0) grupoId = g.data.data[0].id;
+        }
+        if (!materiaId) {
+           const m = await axios.get('/materias?limit=1', { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+           if (m.data.data.length > 0) materiaId = m.data.data[0].id;
+        }
+        
+        // Obtener ID de profesor (usamos el de login si es posible, o buscamos)
+        const profResp = await axios.get('/institution-admin/profesores?limit=1', { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+        if (profResp.data.data.length > 0) profesorId = profResp.data.data[0].id;
+
+        if (periodoId && grupoId && materiaId && profesorId) {
+          const nuevoHorario = {
+            periodoId,
+            grupoId,
+            materiaId,
+            profesorId,
+            diaSemana: dayOfWeek,
+            horaInicio: '08:00',
+            horaFin: '09:00'
+          };
+          
+          try {
+            const resp = await axios.post('/horarios', nuevoHorario, { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+            horarioId = resp.data.data.id;
+            console.log(`   ✅ Horario creado para hoy: ${horarioId}`);
+          } catch (e) {
+            console.log('   ⚠️ Falló creación de horario (posible conflicto), intentando otro slot...');
+             const nuevoHorario2 = { ...nuevoHorario, horaInicio: '20:00', horaFin: '21:00' };
+             const resp = await axios.post('/horarios', nuevoHorario2, { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+             horarioId = resp.data.data.id;
+             console.log(`   ✅ Horario creado para hoy (slot 2): ${horarioId}`);
+          }
+        }
+      }
+
+      if (horarioId && profesorId) {
+        // Necesitamos un estudiante para marcarle falta
+        // Buscamos el estudiante 'Santiago' o usamos uno creado
+        let estudianteId = this.createdEntities.estudiantes?.[0];
+        let codigoQr = '';
+
+        if (!estudianteId) {
+           const estResp = await axios.get('/institution-admin/estudiantes?search=Santiago', { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+           if (estResp.data.data.length > 0) {
+             estudianteId = estResp.data.data[0].id;
+             codigoQr = estResp.data.data[0].codigoQr;
+           }
+        } else {
+           // Obtener QR del estudiante creado
+           const estResp = await axios.get(`/institution-admin/estudiantes/${estudianteId}`, { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+           codigoQr = estResp.data.data.codigoQr;
+        }
+
+        if (codigoQr) {
+          console.log(`   👤 Estudiante seleccionado: ${estudianteId} (QR: ${codigoQr})`);
+          
+          // Registrar asistencia como AUSENTE
+          // Necesitamos token de profesor. Si el profesor del horario es el que tenemos login, usamos ese.
+          // Si no, intentamos login con ese profesor o asignamos el horario a nuestro profesor de prueba.
+          
+          // Simplificación: Asignar el horario a nuestro profesor de prueba 'ana.lopez@sanjose.edu'
+          // Primero obtenemos el ID de Ana Lopez
+          const meResp = await axios.get('/auth/verify', { headers: { 'Authorization': `Bearer ${this.tokens.PROFESOR}` } });
+          const myProfId = meResp.data.data.usuario.id;
+          
+          if (profesorId !== myProfId) {
+             console.log('   🔄 Reasignando horario al profesor de prueba...');
+             await axios.put(`/horarios/${horarioId}`, { profesorId: myProfId }, { headers: { 'Authorization': `Bearer ${this.tokens.ADMIN_INSTITUCION}` } });
+          }
+
+          // Registrar asistencia
+          console.log('   📝 Registrando asistencia...');
+          try {
+            const asisResp = await axios.post('/asistencias/registrar', {
+              horarioId,
+              codigoQr
+            }, { headers: { 'Authorization': `Bearer ${this.tokens.PROFESOR}` } });
+            
+            const asistenciaId = asisResp.data.data.id;
+            
+            // Marcar AUSENTE
+            await axios.put(`/asistencias/${asistenciaId}`, { estado: 'AUSENTE' }, { headers: { 'Authorization': `Bearer ${this.tokens.PROFESOR}` } });
+            console.log('   ✅ Asistencia marcada como AUSENTE');
+            countTest(true);
+          } catch (e: any) {
+             if (e.response?.data?.message?.includes('ya tiene registrada')) {
+               console.log('   ⚠️ Ya tenía asistencia. Intentando actualizar a AUSENTE...');
+               // Buscar la asistencia y actualizarla
+               const listResp = await axios.get(`/horarios/${horarioId}/asistencias`, { headers: { 'Authorization': `Bearer ${this.tokens.PROFESOR}` } });
+               const asistencia = listResp.data.data.find((a: any) => a.estudiante.codigoQr === codigoQr || a.estudiante.id === estudianteId);
+               
+               if (asistencia && asistencia.id) {
+                 await axios.put(`/asistencias/${asistencia.id}`, { estado: 'AUSENTE' }, { headers: { 'Authorization': `Bearer ${this.tokens.PROFESOR}` } });
+                 console.log('   ✅ Asistencia actualizada a AUSENTE');
+                 countTest(true);
+               } else {
+                 console.log('   ❌ No se pudo encontrar la asistencia para actualizar.');
+                 countTest(false);
+               }
+             } else {
+               console.log('   ❌ Error registrando asistencia:', e.message);
+               countTest(false);
+             }
+          }
+        } else {
+          console.log('   ❌ No se encontró estudiante con QR para la prueba.');
+          countTest(false);
+        }
+      } else {
+        console.log('   ❌ No se pudo configurar horario/profesor para la prueba.');
+        countTest(false);
+      }
+
+    } catch (error: any) {
+      console.log('   ❌ Error en preparación de escenario:', error.message);
+      countTest(false);
+    }
+
+    // 10.4 Trigger check con faltas
+    console.log('\n📱 10.4 TRIGGER CHECK (CON FALTAS) - Verificar notificación');
+    
+    countTest(await this.testEndpoint('POST', '/api/notifications/trigger-daily-check', 'ADMIN_INSTITUCION',
+      {}, 200, 'Ejecutar check diario con faltas', true));
+
+    return { passed, total };
+  }
+
   // Flujo 7: Dashboard del Estudiante (si existe)
   async testEstudianteDashboardFlows(): Promise<{ passed: number, total: number }> {
     console.log('\n🎓 ===== FLUJO 7: DASHBOARD DEL ESTUDIANTE =====');
@@ -944,10 +1143,11 @@ class CompleteFlowTester {
       identificacion: `ID${timestamp}`,
       nombreResponsable: 'María Rodríguez',
       telefonoResponsable: '3001234567'
-    };
+    accumulateResults(await this.testEstudianteManagementFlows());
+    accumulateResults(await this.testNotificationFlows());
+    accumulateResults(await this.testValidationAndErrorFlows());
 
-    const createResult = await this.testEndpoint('POST', '/institution-admin/estudiantes', 'ADMIN_INSTITUCION',
-      nuevoEstudiante, 201, 'Crear nuevo estudiante', true);
+    console.log('\n🎯 ===== RESULTADOS FINALES =====');rue);
 
     countTest(createResult);
 
@@ -1155,8 +1355,9 @@ class CompleteFlowTester {
     console.log('• 📚 Gestión completa de Materias (CRUD)');
     console.log('• 📅 Gestión completa de Horarios (CRUD)');
     console.log('• 👨‍🏫 Dashboard del Profesor (clases del día, semanal)');
-    console.log('• 🎓 Dashboard del Estudiante (básico)');
     console.log('• 🎓 Gestión completa de Estudiantes (CRUD + toggle status)');
+    console.log('• 🔔 Notificaciones y Ausencia Total');
+    console.log('• ⚠️ Validaciones exhaustivas y manejo de errores');status)');
     console.log('• ⚠️ Validaciones exhaustivas y manejo de errores');
     console.log('• 🚫 Control de acceso basado en roles');
     console.log('• 📱 Simulación completa de flujos de Flutter\n');

@@ -38,13 +38,20 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedHoraFin = _getHoraFin(widget.horaInicio);
+    // Selecciona por defecto la hora fin calculada (2 horas) si está disponible,
+    // en caso contrario usar la primera hora disponible o null.
+    final horasDisponibles = _getHorasFinDisponibles(widget.horaInicio);
+    final defaultHoraFin = _getHoraFin(widget.horaInicio);
+    _selectedHoraFin = horasDisponibles.contains(defaultHoraFin)
+        ? defaultHoraFin
+        : (horasDisponibles.isNotEmpty ? horasDisponibles.first : null);
   }
 
   @override
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
     final spacing = context.spacing;
+    final horasDisponibles = _getHorasFinDisponibles(widget.horaInicio);
 
     return ClarityFormDialog(
       title: Text('Crear Clase', style: textStyles.headlineMedium),
@@ -63,7 +70,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
           child: Column(
             children: [
               Text(
-                'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? _getHoraFin(widget.horaInicio)}',
+                'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? (horasDisponibles.isNotEmpty ? _getHoraFin(widget.horaInicio) : '—')}',
                 style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
               ),
               Text('Día: ${_getDiaNombre(widget.diaSemana)}', style: textStyles.bodyMedium),
@@ -223,7 +230,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   String _getHoraFin(String horaInicio) {
     final parts = horaInicio.split(':');
     final hour = int.parse(parts[0]);
-    final nextHour = hour + 2; // Cambiado de 1 a 2 horas para coincidir con los datos existentes
+    // Si horaInicio + 2 excede 24, usar 24:00 (medianoche)
+    final nextHour = (hour + 2) > 24 ? 24 : (hour + 2);
     return '${nextHour.toString().padLeft(2, '0')}:00';
   }
 
@@ -244,7 +252,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
     final parts = horaInicio.split(':');
     final hourInicio = int.parse(parts[0]);
     final horasDisponibles = <String>[];
-    for (int hour = hourInicio + 1; hour <= 18; hour++) {
+    // Permitir horas desde horaInicio+1 hasta 24:00 (medianoche)
+    for (int hour = hourInicio + 1; hour <= 24; hour++) {
       horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
     }
     return horasDisponibles;

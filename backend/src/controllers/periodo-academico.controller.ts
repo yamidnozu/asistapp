@@ -7,6 +7,7 @@ import { NotFoundError, ValidationError } from '../types';
 interface GetPeriodosQuery {
   page?: string;
   limit?: string;
+  search?: string;
 }
 
 interface GetPeriodoParams {
@@ -45,7 +46,7 @@ export class PeriodoAcademicoController {
 
       const institucionId = usuarioInstitucion.institucionId;
 
-      const { page, limit } = request.query;
+      const { page, limit, search } = request.query;
 
       // Validar parámetros de paginación
       const pageNum = page ? parseInt(page, 10) : 1;
@@ -60,7 +61,7 @@ export class PeriodoAcademicoController {
         limit: limitNum,
       };
 
-      const result = await PeriodoAcademicoService.getAllPeriodosAcademicos(institucionId, pagination);
+      const result = await PeriodoAcademicoService.getAllPeriodosAcademicos(institucionId, pagination, search);
 
       return reply.code(200).send({
         success: true,

@@ -164,19 +164,29 @@ export class AsistenciaController {
   /**
    * Registra la asistencia de un estudiante manualmente (sin QR)
    * POST /asistencias/registrar-manual
+   * Ahora acepta estado, observacion y justificada para registro inteligente
    */
   public static async registrarAsistenciaManual(
-    request: FastifyRequest<{ Body: { horarioId: string; estudianteId: string } }>,
+    request: FastifyRequest<{ Body: { 
+      horarioId: string; 
+      estudianteId: string;
+      estado?: string;
+      observacion?: string;
+      justificada?: boolean;
+    } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
-      const { horarioId, estudianteId } = request.body;
+      const { horarioId, estudianteId, estado, observacion, justificada } = request.body;
       const profesorId = (request as any).user.id;
 
       const resultado = await AsistenciaService.registrarAsistenciaManual(
         horarioId,
         estudianteId,
-        profesorId
+        profesorId,
+        estado,
+        observacion,
+        justificada
       );
 
       reply.code(201).send({

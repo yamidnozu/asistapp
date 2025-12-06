@@ -41,16 +41,16 @@ class PeriodoAcademicoProvider extends ChangeNotifier with PaginatedDataMixin<Pe
   // _setState removed; use base provider setError/notifyListeners
 
   /// Carga todos los períodos académicos con paginación
-  Future<void> loadPeriodosAcademicos(String accessToken, {int? page, int? limit}) async {
-  if (isLoading) return;
+  Future<void> loadPeriodosAcademicos(String accessToken, {int? page, int? limit, String? search}) async {
+    if (isLoading) return;
 
     try {
       debugPrint('PeriodoAcademicoProvider: Iniciando carga de períodos académicos...');
-        await loadItems(accessToken, page: page ?? 1, limit: limit);
-  notifyListeners();
+      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search);
+      notifyListeners();
     } catch (e) {
       debugPrint('PeriodoAcademicoProvider: Error loading períodos académicos: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
@@ -263,7 +263,7 @@ class PeriodoAcademicoProvider extends ChangeNotifier with PaginatedDataMixin<Pe
 
   @override
   Future<PaginatedResponse<PeriodoAcademico>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final response = await _periodoService.getPeriodosAcademicos(accessToken, page: page, limit: limit);
+    final response = await _periodoService.getPeriodosAcademicos(accessToken, page: page, limit: limit, search: search);
     if (response == null) return null;
     return PaginatedResponse(items: response.periodosAcademicos, pagination: response.pagination);
   }

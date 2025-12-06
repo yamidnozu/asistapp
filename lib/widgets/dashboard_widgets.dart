@@ -32,7 +32,7 @@ class DashboardFeatureCard extends StatelessWidget {
 
     return ClarityCard(
       onTap: onTap ?? () {
-        // TODO: Implementar navegación a la funcionalidad específica
+        // PENDIENTE: Implementar navegación a la funcionalidad específica
       },
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -248,7 +248,7 @@ class DashboardAppBarActions extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.logout),
           onPressed: onLogout ?? () async {
-            // TODO: Implement logout
+            // PENDIENTE: Implementar cierre de sesión
           },
         ),
       ],

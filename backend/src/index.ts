@@ -59,16 +59,16 @@ const start = async () => {
     });
 
     if (config.nodeEnv === 'development') {
-      console.log('✅ Servidor corriendo en:');
+      console.log('[INFO] Servidor corriendo en:');
       console.log(`   - Local:   http://localhost:${config.port}`);
       console.log(`   - Red:     http://192.168.20.22:${config.port}`);
-      console.log('🎯 API lista para recibir conexiones');
-      console.log('📚 Documentación disponible en las URLs anteriores');
+      console.log('[INFO] API lista para recibir conexiones');
+      console.log('[INFO] Documentación disponible en las URLs anteriores');
     }
 
     if (config.nodeEnv === 'production') {
       setInterval(() => {
-        console.log('💓 Servidor activo...');
+        console.log('[HEARTBEAT] Servidor activo...');
       }, 300000); // 5 minutos
     }
 

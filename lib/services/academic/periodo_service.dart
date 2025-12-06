@@ -19,12 +19,13 @@ class PeriodoService {
   // ===== PERIODOS ACADÉMICOS =====
 
   /// Obtiene todos los períodos académicos con paginación
-  Future<PaginatedPeriodosAcademicosResponse?> getPeriodosAcademicos(String accessToken, {int? page, int? limit}) async {
+  Future<PaginatedPeriodosAcademicosResponse?> getPeriodosAcademicos(String accessToken, {int? page, int? limit, String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
       final uri = Uri.parse('$baseUrlValue/periodos-academicos').replace(queryParameters: queryParams);
 

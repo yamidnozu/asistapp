@@ -1,16 +1,24 @@
 import { prisma } from '../config/database';
 import logger from '../utils/logger';
-import { notificationService } from './notification.service';
+import { GuardianNotificationGroup, notificationService } from './notification.service';
 
 /**
  * Servicio de cola de notificaciones
  * Procesa notificaciones pendientes según la estrategia configurada
+ * 
+ * MEJORA: Agrupa por teléfono del responsable para enviar un solo mensaje
+ * consolidado cuando un padre tiene múltiples hijos o múltiples ausencias.
  */
 export class NotificationQueueService {
 
     /**
      * Procesa todas las notificaciones pendientes cuya hora programada ya pasó
      * Llamado por el CronService cada 15 minutos
+     * 
+     * LÓGICA MEJORADA:
+     * 1. Agrupa por teléfono del responsable (no por estudiante)
+     * 2. Consolida todas las faltas de todos los hijos en un solo mensaje
+     * 3. Incluye contexto completo: fecha, hora, materia, nombre del alumno
      */
     public async processPendingNotifications(): Promise<void> {
         logger.info('[NotificationQueueService] 🔄 Checking for pending notifications...');
@@ -54,25 +62,71 @@ export class NotificationQueueService {
 
             logger.info(`[NotificationQueueService] 📬 Found ${pendingItems.length} pending notifications.`);
 
-            // Agrupar por estudiante (para enviar resumen consolidado)
-            const groupedByStudent = new Map<string, typeof pendingItems>();
+            // MEJORA: Agrupar por teléfono del responsable (no por estudiante)
+            // Esto permite consolidar notificaciones de múltiples hijos en un solo mensaje
+            const groupedByGuardianPhone = new Map<string, GuardianNotificationGroup>();
 
             for (const item of pendingItems) {
-                const key = item.estudianteId;
-                if (!groupedByStudent.has(key)) {
-                    groupedByStudent.set(key, []);
+                const phone = item.estudiante.telefonoResponsable;
+                // Nombre del responsable guardado en este estudiante específico
+                const currentGuardianName = item.estudiante.nombreResponsable || 'Estimado acudiente';
+                
+                // Si no tiene teléfono, marcar como fallido y continuar
+                if (!phone) {
+                    await this.updateItemsStatus([item], 'FAILED', 'No guardian phone number');
+                    continue;
                 }
-                groupedByStudent.get(key)?.push(item);
+
+                if (!groupedByGuardianPhone.has(phone)) {
+                    // Si es el primer mensaje para este teléfono, creamos el grupo
+                    groupedByGuardianPhone.set(phone, {
+                        phone,
+                        guardianName: currentGuardianName,
+                        students: [],
+                        allItems: [],
+                        institucionId: item.asistencia?.institucionId || ''
+                    });
+                } else {
+                    // El grupo ya existe (ej. es el segundo hermano)
+                    const group = groupedByGuardianPhone.get(phone)!;
+                    
+                    // --- CORRECCIÓN DE NOMBRES INCONSISTENTES ---
+                    // Si el nombre del responsable actual difiere del que ya guardamos en el grupo,
+                    // y el grupo no ha sido marcado ya como genérico, lo forzamos a genérico.
+                    // Esto evita: "Hola Pepito" cuando el segundo hijo dice que el papá se llama "Benito".
+                    if (group.guardianName !== 'Estimado Acudiente' && 
+                        group.guardianName.trim().toLowerCase() !== currentGuardianName.trim().toLowerCase()) {
+                        
+                        logger.info(`[NotificationQueueService] ⚠️ Conflict in guardian names for phone ${phone}: "${group.guardianName}" vs "${currentGuardianName}". Switching to generic "Estimado Acudiente".`);
+                        group.guardianName = 'Estimado Acudiente';
+                    }
+                }
+
+                const group = groupedByGuardianPhone.get(phone)!;
+                group.allItems.push(item);
+
+                // Agregar información del estudiante si no existe
+                let studentInfo = group.students.find(s => s.estudianteId === item.estudianteId);
+                if (!studentInfo) {
+                    const usuario = item.estudiante.usuario;
+                    studentInfo = {
+                        estudianteId: item.estudianteId,
+                        nombreCompleto: `${usuario.nombres} ${usuario.apellidos}`,
+                        items: []
+                    };
+                    group.students.push(studentInfo);
+                }
+                studentInfo.items.push(item);
             }
 
-            logger.info(`[NotificationQueueService] 👥 Grouped into ${groupedByStudent.size} students.`);
+            logger.info(`[NotificationQueueService] 📱 Grouped into ${groupedByGuardianPhone.size} guardian phones.`);
 
-            // Procesar cada grupo de estudiante
+            // Procesar cada grupo de responsable
             let successCount = 0;
             let failCount = 0;
 
-            for (const [studentId, items] of groupedByStudent) {
-                const success = await this.processStudentGroup(studentId, items);
+            for (const [phone, group] of groupedByGuardianPhone) {
+                const success = await this.processGuardianGroup(group);
                 if (success) successCount++; else failCount++;
             }
 
@@ -84,51 +138,44 @@ export class NotificationQueueService {
     }
 
     /**
-     * Procesa un grupo de notificaciones para un estudiante
-     * Envía un mensaje consolidado con todas las asistencias del día
+     * Procesa un grupo de notificaciones para un responsable
+     * Envía un mensaje consolidado con todas las asistencias de todos sus hijos
      */
-    private async processStudentGroup(studentId: string, items: any[]): Promise<boolean> {
-        const student = items[0].estudiante;
-        const phone = student.telefonoResponsable;
-
-        if (!phone) {
-            logger.warn(`[NotificationQueueService] ⚠️ Student ${studentId} has no guardian phone. Marking as FAILED.`);
-            await this.updateItemsStatus(items, 'FAILED', 'No guardian phone number');
-            return false;
-        }
+    private async processGuardianGroup(group: GuardianNotificationGroup): Promise<boolean> {
+        const { phone, allItems } = group;
 
         // Marcar como procesando
-        await this.updateItemsStatus(items, 'PROCESSING');
+        await this.updateItemsStatus(allItems, 'PROCESSING');
 
         try {
-            // Usar el servicio de notificaciones mejorado
-            const result = await notificationService.sendDailySummary(studentId, items);
+            // Usar el servicio de notificaciones mejorado con consolidación por responsable
+            const result = await notificationService.sendConsolidatedSummary(group);
 
             if (result.success) {
-                await this.updateItemsStatus(items, 'SENT');
-                logger.info(`[NotificationQueueService] ✅ Sent summary to ${phone} for student ${studentId}`);
+                await this.updateItemsStatus(allItems, 'SENT');
+                logger.info(`[NotificationQueueService] ✅ Sent consolidated summary to ${phone} for ${group.students.length} student(s)`);
                 return true;
             } else {
                 throw new Error(result.error || 'Unknown error');
             }
 
         } catch (error: any) {
-            logger.error(`[NotificationQueueService] ❌ Error sending to ${studentId}:`, error.message);
+            logger.error(`[NotificationQueueService] ❌ Error sending to ${phone}:`, error.message);
 
-            const currentRetries = items[0].intentos || 0;
-            const maxRetries = items[0].maxIntentos || 3;
+            const currentRetries = allItems[0].intentos || 0;
+            const maxRetries = allItems[0].maxIntentos || 3;
 
             if (currentRetries < maxRetries) {
                 // Reintentar con backoff exponencial: 5, 10, 20 minutos
                 const backoffMinutes = Math.pow(2, currentRetries) * 5;
                 const retryTime = new Date(Date.now() + backoffMinutes * 60 * 1000);
 
-                await this.updateItemsWithRetry(items, currentRetries + 1, error.message, retryTime);
+                await this.updateItemsWithRetry(allItems, currentRetries + 1, error.message, retryTime);
                 logger.info(`[NotificationQueueService] 🔄 Scheduled retry ${currentRetries + 1}/${maxRetries} at ${retryTime.toISOString()}`);
             } else {
                 // Mover a dead letter después de agotar reintentos
-                await this.updateItemsStatus(items, 'DEAD_LETTER', error.message);
-                logger.error(`[NotificationQueueService] 💀 Max retries exceeded for student ${studentId}. Moved to DEAD_LETTER.`);
+                await this.updateItemsStatus(allItems, 'DEAD_LETTER', error.message);
+                logger.error(`[NotificationQueueService] 💀 Max retries exceeded for ${phone}. Moved to DEAD_LETTER.`);
             }
 
             return false;

@@ -47,12 +47,9 @@ class SettingsScreen extends StatelessWidget {
                 SizedBox(height: spacing.md),
                 _buildAppearanceSection(context, settings),
                 SizedBox(height: spacing.md),
-                Text(
-                  'Por ahora sólo está disponible el cambio de apariencia (tema claro/oscuro).',
-                  style: textStyles.bodySmall.copyWith(color: colors.textMuted),
-                ),
+
                 if (isSuperAdmin) ...[
-                  SizedBox(height: spacing.xxl),
+                  SizedBox(height: spacing.xl),
                   _buildSectionHeader(context, 'Desarrollo', Icons.developer_mode_outlined),
                   SizedBox(height: spacing.md),
                   _buildDevelopmentSection(context, settings),
@@ -113,6 +110,8 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+
+
 
   Widget _buildAppearanceSection(BuildContext context, SettingsProvider settings) {
     return _buildSettingsCard(

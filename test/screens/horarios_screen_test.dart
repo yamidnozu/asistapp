@@ -405,10 +405,10 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-  // Edit dialog visible
+  // Diálogo de edición visible
   expect(find.text('Editar Clase'), findsOneWidget);
 
-  // Delete button is visible in the dialog
+  // Botón eliminar visible en el diálogo
   expect(find.text('Eliminar'), findsOneWidget);
 
     // Change hora fin to next available

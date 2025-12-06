@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../config/database';
-import { notificationService, NotificationChannel } from '../services/notification.service';
 import { notificationQueueService } from '../services/notification-queue.service';
+import { NotificationChannel, notificationService } from '../services/notification.service';
 import logger from '../utils/logger';
 
 export class NotificationController {
@@ -72,7 +72,7 @@ export class NotificationController {
      */
     public static async updateConfig(req: FastifyRequest, reply: FastifyReply) {
         const { institutionId } = req.params as any;
-        const { notificacionesActivas, canalNotificacion, modoNotificacionAsistencia, horaDisparoNotificacion } = req.body as any;
+        const { notificacionesActivas, canalNotificacion, modoNotificacionAsistencia, horaDisparoNotificacion, notificarAusenciaTotalDiaria } = req.body as any;
 
         try {
             const config = await prisma.configuracion.upsert({
@@ -81,14 +81,16 @@ export class NotificationController {
                     notificacionesActivas,
                     canalNotificacion,
                     modoNotificacionAsistencia,
-                    horaDisparoNotificacion
+                    horaDisparoNotificacion,
+                    notificarAusenciaTotalDiaria
                 },
                 create: {
                     institucionId: institutionId,
                     notificacionesActivas: notificacionesActivas ?? false,
                     canalNotificacion: canalNotificacion ?? 'NONE',
                     modoNotificacionAsistencia: modoNotificacionAsistencia ?? 'MANUAL_ONLY',
-                    horaDisparoNotificacion
+                    horaDisparoNotificacion,
+                    notificarAusenciaTotalDiaria: notificarAusenciaTotalDiaria ?? false
                 }
             });
 
@@ -215,7 +217,20 @@ export class NotificationController {
             });
 
         } catch (error) {
-            logger.error('[NotificationController] Error getting logs', error);
+            logger.error('[NotificationController] Error updating config', error);
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    }
+
+    /**
+     * Trigger daily total absence check (Test only)
+     */
+    public static async triggerDailyCheck(req: FastifyRequest, reply: FastifyReply) {
+        try {
+            await notificationService.processDailyTotalAbsenceNotifications();
+            return reply.send({ success: true, message: 'Daily check triggered' });
+        } catch (error) {
+            logger.error('[NotificationController] Error triggering daily check', error);
             return reply.status(500).send({ error: 'Internal Server Error' });
         }
     }

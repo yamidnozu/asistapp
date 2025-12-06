@@ -32,7 +32,10 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
 
   @override
   Future<PaginatedResponse<Materia>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final response = await _materiaService.getMaterias(accessToken, page: page, limit: limit, search: search);
+    // Leer filtros del provider (this.filters) en lugar de solo los parámetros
+    final searchFromFilters = this.filters['search']?.toString() ?? search;
+    debugPrint('MateriaProvider.fetchPage - search: $searchFromFilters');
+    final response = await _materiaService.getMaterias(accessToken, page: page, limit: limit, search: searchFromFilters);
     if (response == null) return null;
     return PaginatedResponse(items: response.materias, pagination: response.pagination);
   }
@@ -54,12 +57,27 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
     return updated;
   }
 
+  /// Carga todas las materias con paginación.
+  /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
   Future<void> loadMaterias(String accessToken, {int? page, int? limit, String? search}) async {
-  if (isLoading) return;
+    if (isLoading) return;
     resetPagination();
+    
+    // Solo actualizar el filtro de búsqueda si se proporciona explícitamente
+    if (search != null) {
+      if (search.isNotEmpty) {
+        filters['search'] = search;
+      } else {
+        filters.remove('search');
+      }
+    }
+    // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
+
     try {
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search);
-  notifyListeners();
+      debugPrint('MateriaProvider: Iniciando carga de materias con filtros: $filters');
+      final effectiveSearch = filters['search']?.toString();
+      await loadItems(accessToken, page: page ?? 1, limit: limit, search: effectiveSearch);
+      notifyListeners();
     } catch (e) {
       setError(e.toString());
     }
@@ -182,6 +200,12 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
 
   Future<void> loadMoreMaterias(String accessToken, {String? search}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
+    
+    // Solo actualizar el filtro si se proporciona explícitamente
+    if (search != null) {
+      filters['search'] = search;
+    }
+    
     await super.loadNextPage(accessToken);
   }
 

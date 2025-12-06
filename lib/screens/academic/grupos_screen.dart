@@ -21,6 +21,24 @@ class _GruposScreenState extends State<GruposScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isSearching = false;
+  String? _selectedGrado;
+
+  // Lista de grados disponibles para filtrar
+  List<String> _getGradosDisponibles(BuildContext context) {
+    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+    final loadedGrados = grupoProvider.grupos.map((g) => g.grado).toSet();
+    
+    final orderedGrados = [
+      'Pre-Jardin', 'Jardin', 'Transicion', 
+      '1ro', '2do', '3ro', '4to', '5to', 
+      '6to', '7mo', '8vo', '9no', '10mo', '11mo'
+    ];
+    
+    final extras = loadedGrados.where((g) => !orderedGrados.contains(g)).toList();
+    extras.sort();
+    
+    return [...orderedGrados, ...extras];
+  }
 
   @override
   void initState() {
@@ -64,7 +82,15 @@ class _GruposScreenState extends State<GruposScreen> {
 
     final token = authProvider.accessToken;
     if (token != null) {
-      await grupoProvider.loadGrupos(token, search: search);
+      // Limpiar filtros y establecer los nuevos antes de cargar
+      grupoProvider.filters.clear();
+      if (_selectedGrado != null && _selectedGrado!.isNotEmpty) {
+        grupoProvider.filters['grado'] = _selectedGrado!;
+      }
+      if (search != null && search.isNotEmpty) {
+        grupoProvider.filters['search'] = search;
+      }
+      await grupoProvider.loadGrupos(token);
     }
   }
 
@@ -74,8 +100,8 @@ class _GruposScreenState extends State<GruposScreen> {
 
     final token = authProvider.accessToken;
     if (token != null) {
-      final search = _isSearching ? _searchController.text.trim() : null;
-      await grupoProvider.loadMoreGrupos(token, search: search);
+      // Los filtros ya están establecidos en el provider desde _loadGrupos
+      await grupoProvider.loadMoreGrupos(token);
     }
   }
 
@@ -157,13 +183,36 @@ class _GruposScreenState extends State<GruposScreen> {
           fillColor: colors.surface,
           contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
         ),
-        onChanged: (value) => _onSearchChanged(),
+        // onChanged removido: _searchController.addListener ya maneja los cambios
       ),
       SizedBox(height: spacing.sm),
-      // TODO: Agregar filtros adicionales cuando estén disponibles
-      Text(
-        'Próximamente: Más filtros disponibles',
-        style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+      // Filtros por grado
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final grado in _getGradosDisponibles(context))
+              Padding(
+                padding: EdgeInsets.only(right: spacing.sm),
+                child: FilterChip(
+                  label: Text(grado),
+                  selected: _selectedGrado == grado,
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedGrado = selected ? grado : null;
+                    });
+                    _loadGrupos(search: _searchController.text.trim());
+                  },
+                  selectedColor: colors.primary.withValues(alpha: 0.2),
+                  checkmarkColor: colors.primary,
+                  labelStyle: TextStyle(
+                    color: _selectedGrado == grado ? colors.primary : colors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     ];
   }

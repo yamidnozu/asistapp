@@ -33,7 +33,8 @@ export class PeriodoAcademicoService {
    */
   public static async getAllPeriodosAcademicos(
     institucionId: string,
-    pagination?: PaginationParams
+    pagination?: PaginationParams,
+    search?: string
   ): Promise<PaginatedResponse<PeriodoAcademicoResponse>> {
     try {
       // Validar parámetros de paginación
@@ -46,14 +47,26 @@ export class PeriodoAcademicoService {
 
       const skip = (page - 1) * limit;
 
+      // Construir where clause
+      const whereClause: any = {
+        institucionId: institucionId,
+      };
+
+      if (search) {
+        whereClause.nombre = {
+          contains: search,
+          mode: 'insensitive',
+        };
+      }
+
       // Obtener total de registros
       const total = await prisma.periodoAcademico.count({
-        where: { institucionId: institucionId },
+        where: whereClause,
       });
 
       // Obtener registros paginados
       const periodos = await prisma.periodoAcademico.findMany({
-        where: { institucionId: institucionId },
+        where: whereClause,
         skip,
         take: limit,
         orderBy: [

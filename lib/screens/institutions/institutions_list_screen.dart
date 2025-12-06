@@ -76,10 +76,11 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
       final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      // Modificar el filtro directamente para evitar múltiples notifyListeners
       if (query.isNotEmpty) {
-        institutionProvider.setFilter('search', query);
+        institutionProvider.filters['search'] = query;
       } else {
-        institutionProvider.removeFilter('search');
+        institutionProvider.filters.remove('search');
       }
       institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
     });
@@ -87,10 +88,11 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
   void _onStatusFilterChanged(bool? status) {
     final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    // Modificar el filtro directamente para evitar múltiples notifyListeners
     if (status != null) {
-      institutionProvider.setFilter('activa', status.toString());
+      institutionProvider.filters['activa'] = status.toString();
     } else {
-      institutionProvider.removeFilter('activa');
+      institutionProvider.filters.remove('activa');
     }
     institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
   }
@@ -337,54 +339,108 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             size: 32,
           ),
           title: institution.nombre,
-          subtitleWidget: Row(
+          subtitleWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  institution.email ?? institution.telefono ?? 'Sin contacto',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Chip de estado discreto
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: colors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colors.borderLight,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: institution.activa 
-                          ? colors.primary.withValues(alpha: 0.7)
-                          : colors.textMuted,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      institution.activa ? 'Activa' : 'Inactiva',
+              // Fila 1: Email/Teléfono
+              Row(
+                children: [
+                  Icon(Icons.contact_mail, size: 14, color: colors.textSecondary),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      institution.email ?? institution.telefono ?? 'Sin contacto',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colors.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Fila 2: Estado + Configuración de Notificaciones
+              Row(
+                children: [
+                  // Chip de estado discreto
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colors.borderLight,
+                        width: 1,
                       ),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: institution.activa 
+                              ? colors.primary.withValues(alpha: 0.7)
+                              : colors.textMuted,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          institution.activa ? 'Activa' : 'Inactiva',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Chip de Configuración de Notificaciones CLARA
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: institution.notificacionesActivas
+                          ? colors.info.withValues(alpha: 0.1)
+                          : colors.textMuted.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: institution.notificacionesActivas
+                            ? colors.info.withValues(alpha: 0.3)
+                            : colors.textMuted.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          institution.notificacionesActivas 
+                            ? Icons.notifications_active 
+                            : Icons.notifications_off,
+                          size: 12,
+                          color: institution.notificacionesActivas 
+                            ? colors.info 
+                            : colors.textMuted,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          institution.notificationConfigSummary,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: institution.notificacionesActivas 
+                              ? colors.info 
+                              : colors.textMuted,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

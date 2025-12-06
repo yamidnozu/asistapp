@@ -12,7 +12,7 @@ class EstudiantesSinAsignarPaginatedProvider extends ChangeNotifier with Paginat
 
   @override
   Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-  final response = await _grupoService.getEstudiantesSinAsignar(accessToken, page: page, limit: limit);
+    final response = await _grupoService.getEstudiantesSinAsignar(accessToken, page: page, limit: limit, search: search);
     if (response == null) return null;
     return PaginatedResponse(items: response.users, pagination: response.pagination);
   }

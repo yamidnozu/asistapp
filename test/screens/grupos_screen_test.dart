@@ -33,7 +33,7 @@ class FakeGrupoProvider extends GrupoProvider {
   @override
   Future<Grupo?> updateItemApi(String accessToken, String id, dynamic data) async {
     updateCalled = true;
-    // Return a mock updated grupo for test purposes
+    // Retorna un grupo mock actualizado para propósitos de prueba
     return Grupo(
       id: id,
       nombre: 'Updated Grupo',

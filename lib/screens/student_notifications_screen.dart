@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../theme/theme_extensions.dart';
+import '../config/app_config.dart';
 
 class StudentNotificationsScreen extends StatefulWidget {
   const StudentNotificationsScreen({super.key});
@@ -40,51 +43,28 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
         return;
       }
 
-      // TODO: Implementar llamada al backend GET /estudiantes/dashboard/notificaciones
-      // Por ahora, datos de ejemplo
-      await Future.delayed(const Duration(seconds: 1)); // Simular carga
+      final baseUrl = AppConfig.baseUrl;
+      final response = await http.get(
+        Uri.parse('$baseUrl/estudiantes/dashboard/notificaciones'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
-      setState(() {
-        _notificaciones = [
-          {
-            'id': '1',
-            'titulo': 'Nueva tarea de Matemáticas',
-            'mensaje': 'Se ha asignado una nueva tarea: "Ecuaciones cuadráticas". Fecha límite: 20/01/2024',
-            'tipo': 'tarea',
-            'fecha': '2024-01-15T10:30:00Z',
-            'leida': false,
-            'importante': true,
-          },
-          {
-            'id': '2',
-            'titulo': 'Cambio de horario',
-            'mensaje': 'La clase de Física del martes ha sido cambiada a las 14:00',
-            'tipo': 'horario',
-            'fecha': '2024-01-14T16:45:00Z',
-            'leida': true,
-            'importante': false,
-          },
-          {
-            'id': '3',
-            'titulo': 'Recordatorio de asistencia',
-            'mensaje': 'No olvides marcar tu asistencia al inicio de cada clase',
-            'tipo': 'recordatorio',
-            'fecha': '2024-01-13T08:00:00Z',
-            'leida': true,
-            'importante': false,
-          },
-          {
-            'id': '4',
-            'titulo': 'Anuncio importante',
-            'mensaje': 'Mañana no habrá clases debido a mantenimiento del edificio',
-            'tipo': 'anuncio',
-            'fecha': '2024-01-12T12:00:00Z',
-            'leida': false,
-            'importante': true,
-          },
-        ];
-        _isLoading = false;
-      });
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            _notificaciones = List<Map<String, dynamic>>.from(data['data']);
+            _isLoading = false;
+          });
+        } else {
+          throw Exception(data['message'] ?? 'Error al cargar notificaciones');
+        }
+      } else {
+        throw Exception('Error del servidor: ${response.statusCode}');
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error al cargar notificaciones: $e';
@@ -100,7 +80,7 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
 
       if (token == null) return;
 
-      // TODO: Implementar llamada al backend PUT /estudiantes/dashboard/notificaciones/{id}/leer
+      // PENDIENTE: Implementar llamada al backend PUT /estudiantes/dashboard/notificaciones/{id}/leer
       // Por ahora, actualizar localmente
       setState(() {
         final index = _notificaciones.indexWhere((n) => n['id'] == id);

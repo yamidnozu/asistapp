@@ -23,6 +23,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
   bool _activa = true;
   bool _notificacionesActivas = false;
+  bool _notificarAusenciaTotalDiaria = false;
   String _canalNotificacion = 'NONE';
   String _modoNotificacionAsistencia = 'MANUAL_ONLY';
   String? _horaDisparoNotificacion;
@@ -47,6 +48,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
       if (widget.institution!.configuraciones != null) {
         _notificacionesActivas = widget.institution!.configuraciones!.notificacionesActivas;
+        _notificarAusenciaTotalDiaria = widget.institution!.configuraciones!.notificarAusenciaTotalDiaria;
         _canalNotificacion = widget.institution!.configuraciones!.canalNotificacion;
         _modoNotificacionAsistencia = widget.institution!.configuraciones!.modoNotificacionAsistencia;
         _horaDisparoNotificacion = widget.institution!.configuraciones!.horaDisparoNotificacion;
@@ -97,6 +99,67 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 value: _activa,
                 onChanged: (value) => setState(() => _activa = value),
               ),
+              const Divider(height: 32),
+              const Text(
+                'Configuración de Notificaciones',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                title: const Text('Notificaciones Activas'),
+                subtitle: const Text('Habilitar envío de notificaciones'),
+                value: _notificacionesActivas,
+                onChanged: (value) => setState(() => _notificacionesActivas = value),
+              ),
+              if (_notificacionesActivas) ...[
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  title: const Text('Alerta de Ausencia Total'),
+                  subtitle: const Text('Notificar si falta a TODAS las clases del día'),
+                  value: _notificarAusenciaTotalDiaria,
+                  onChanged: (value) => setState(() => _notificarAusenciaTotalDiaria = value),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _canalNotificacion,
+                  decoration: const InputDecoration(
+                    labelText: 'Canal de Notificación',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'NONE', child: Text('Ninguno')),
+                    DropdownMenuItem(value: 'WHATSAPP', child: Text('WhatsApp')),
+                    DropdownMenuItem(value: 'SMS', child: Text('SMS')),
+                  ],
+                  onChanged: (value) => setState(() => _canalNotificacion = value ?? 'NONE'),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _modoNotificacionAsistencia,
+                  decoration: const InputDecoration(
+                    labelText: 'Modo de Notificación',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'MANUAL_ONLY', child: Text('Solo Manual')),
+                    DropdownMenuItem(value: 'INSTANT', child: Text('Instantáneo')),
+                    DropdownMenuItem(value: 'END_OF_DAY', child: Text('Fin del Día')),
+                  ],
+                  onChanged: (value) => setState(() => _modoNotificacionAsistencia = value ?? 'MANUAL_ONLY'),
+                ),
+                if (_modoNotificacionAsistencia == 'END_OF_DAY') ...[
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    initialValue: _horaDisparoNotificacion ?? '18:00',
+                    decoration: const InputDecoration(
+                      labelText: 'Hora de Envío',
+                      hintText: 'Ej: 18:00',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) => _horaDisparoNotificacion = value,
+                  ),
+                ],
+              ],
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
@@ -160,6 +223,7 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
           canalNotificacion: _canalNotificacion,
           modoNotificacionAsistencia: _modoNotificacionAsistencia,
           horaDisparoNotificacion: _horaDisparoNotificacion,
+          notificarAusenciaTotalDiaria: _notificarAusenciaTotalDiaria,
         );
       }
 

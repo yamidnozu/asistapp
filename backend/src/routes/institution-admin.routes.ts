@@ -8,10 +8,10 @@ import { authenticate, AuthenticatedRequest, authorize } from '../middleware/aut
  * Gestiona profesores y estudiantes de su institución
  */
 export default async function institutionAdminRoutes(fastify: FastifyInstance) {
-  console.log('🎓 institution-admin.routes.ts - FUNCIÓN EJECUTADA');
+  console.log('[INFO] institution-admin.routes.ts - FUNCIÓN EJECUTADA');
   
   fastify.register(async function (institutionAdminRoutes) {
-    console.log('🔧 institution-admin.routes.ts - REGISTER EJECUTADO');
+    console.log('[INFO] institution-admin.routes.ts - REGISTER EJECUTADO');
     
     // Todas las rutas requieren autenticación y rol admin_institucion
     institutionAdminRoutes.addHook('preHandler', authenticate);

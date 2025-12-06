@@ -283,7 +283,7 @@ export class InstitucionService {
         canalNotificacion: institution.configuraciones.canalNotificacion,
         modoNotificacionAsistencia: institution.configuraciones.modoNotificacionAsistencia,
         horaDisparoNotificacion: institution.configuraciones.horaDisparoNotificacion,
-        umbralFaltas: institution.configuraciones.umbralFaltas,
+        notificarAusenciaTotalDiaria: institution.configuraciones.notificarAusenciaTotalDiaria,
       } : null;
 
       const result = {

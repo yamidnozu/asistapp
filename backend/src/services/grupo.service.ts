@@ -98,10 +98,11 @@ export class GrupoService {
         where.seccion = filters.seccion;
       }
       if (filters?.search) {
-        where.nombre = {
-          contains: filters.search,
-          mode: 'insensitive',
-        };
+        where.OR = [
+          { nombre: { contains: filters.search, mode: 'insensitive' } },
+          { grado: { contains: filters.search, mode: 'insensitive' } },
+          { seccion: { contains: filters.search, mode: 'insensitive' } },
+        ];
       }
 
       // Obtener total de registros
@@ -717,7 +718,7 @@ export class GrupoService {
   /**
    * Obtiene estudiantes sin asignar a ningún grupo en el período académico activo
    */
-  public static async getEstudiantesSinGrupo(institucionId: string, pagination?: PaginationParams): Promise<PaginatedResponse<EstudianteGrupoResponse>> {
+  public static async getEstudiantesSinAsignar(institucionId: string, pagination?: PaginationParams, search?: string): Promise<PaginatedResponse<EstudianteGrupoResponse>> {
     try {
       // Validar parámetros de paginación
       const page = pagination?.page || 1;
@@ -752,30 +753,47 @@ export class GrupoService {
         };
       }
 
-      // Obtener estudiantes de la institución que no están asignados a ningún grupo del período activo
-      const estudiantesQuery = await prisma.estudiante.findMany({
-        where: {
-          usuario: {
-            usuarioInstituciones: {
-              some: {
-                institucionId: institucionId,
-                activo: true,
-              },
-            },
-          },
-          estudiantesGrupos: {
-            none: {
-              grupo: {
-                periodoId: periodoActivo.id,
-              },
+      // Construir filtro de búsqueda
+      const searchFilter: any = {};
+      if (search) {
+        searchFilter.OR = [
+          { usuario: { nombres: { contains: search, mode: 'insensitive' } } },
+          { usuario: { apellidos: { contains: search, mode: 'insensitive' } } },
+          { identificacion: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      const whereClause = {
+        usuario: {
+          usuarioInstituciones: {
+            some: {
+              institucionId: institucionId,
+              activo: true,
             },
           },
         },
+        estudiantesGrupos: {
+          none: {
+            grupo: {
+              periodoId: periodoActivo.id,
+            },
+          },
+        },
+        ...searchFilter,
+      };
+
+      // Obtener estudiantes de la institución que no están asignados a ningún grupo del período activo
+      const estudiantesQuery = await prisma.estudiante.findMany({
+        where: whereClause,
         include: {
           usuario: {
             select: {
+              id: true,
               nombres: true,
               apellidos: true,
+              email: true,
+              activo: true,
+              createdAt: true,
             },
           },
         },
@@ -789,23 +807,7 @@ export class GrupoService {
 
       // Obtener el total de estudiantes sin asignar
       const total = await prisma.estudiante.count({
-        where: {
-          usuario: {
-            usuarioInstituciones: {
-              some: {
-                institucionId: institucionId,
-                activo: true,
-              },
-            },
-          },
-          estudiantesGrupos: {
-            none: {
-              grupo: {
-                periodoId: periodoActivo.id,
-              },
-            },
-          },
-        },
+        where: whereClause,
       });
 
       const totalPages = Math.ceil(total / limit);

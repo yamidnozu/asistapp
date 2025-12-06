@@ -1,4 +1,6 @@
-// backend/prisma/seed.ts
+// backend/prisma/seed.js
+// Seed maestro completo para AsistApp (JavaScript version)
+// Sincronizado con seed.ts - Diciembre 2025
 
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
@@ -6,10 +8,15 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🚀 Iniciando seed maestro v2 para AsistApp...');
+  console.log('🚀 Iniciando seed maestro para AsistApp...');
+  console.log('📅 Fecha de ejecución:', new Date().toISOString());
 
-  // 1. Limpieza de datos en orden de dependencia
-  console.log('🧹 Limpiando base de datos...');
+  // ============================================================================
+  // 1. LIMPIEZA COMPLETA DE LA BASE DE DATOS
+  // ============================================================================
+  console.log('\n🧹 Limpiando base de datos...');
+  await prisma.logNotificacion.deleteMany();
+  await prisma.colaNotificacion.deleteMany();
   await prisma.asistencia.deleteMany();
   await prisma.horario.deleteMany();
   await prisma.estudianteGrupo.deleteMany();
@@ -17,186 +24,812 @@ async function main() {
   await prisma.grupo.deleteMany();
   await prisma.periodoAcademico.deleteMany();
   await prisma.usuarioInstitucion.deleteMany();
+  await prisma.refreshToken.deleteMany();
   await prisma.estudiante.deleteMany();
   await prisma.usuario.deleteMany();
+  await prisma.configuracion.deleteMany();
   await prisma.institucion.deleteMany();
   console.log('✅ Base de datos limpia.');
 
-  // 2. Creación de Instituciones
-  console.log('🏫 Creando instituciones...');
-  const sanJose = await prisma.institucion.create({
+  // Función para hashear contraseñas
+  const hashPassword = (password) => bcrypt.hashSync(password, 10);
+
+  // Número de teléfono de prueba para WhatsApp (REAL - registrado en Meta)
+  const TELEFONO_TEST = '+573103816321';
+
+  // ============================================================================
+  // 2. CREAR INSTITUCIONES
+  // ============================================================================
+  console.log('\n🏫 Creando instituciones...');
+
+  const colegioSanJose = await prisma.institucion.create({
     data: {
       nombre: 'Colegio San José',
+      direccion: 'Carrera 12 #45-67, Bogotá',
+      telefono: '+573215551234',
+      email: 'contacto@sanjose.edu.co',
       activa: true,
     },
   });
 
-  const santander = await prisma.institucion.create({
+  const liceoSantander = await prisma.institucion.create({
     data: {
-      nombre: 'IE Santander',
+      nombre: 'Liceo Santander',
+      direccion: 'Calle 9 #10-20, Bucaramanga',
+      telefono: '+573215551235',
+      email: 'contacto@santander.edu.co',
       activa: true,
     },
   });
 
-  const inactiva = await prisma.institucion.create({
+  const colegioBolivar = await prisma.institucion.create({
     data: {
-      nombre: 'Liceo del Pasado (Inactivo)',
+      nombre: 'Colegio Simón Bolívar',
+      direccion: 'Avenida Principal #100-50, Medellín',
+      telefono: '+573215551237',
+      email: 'contacto@bolivar.edu.co',
+      activa: true,
+    },
+  });
+
+  const institutoPasado = await prisma.institucion.create({
+    data: {
+      nombre: 'Instituto del Pasado (Inactivo)',
+      direccion: 'Avenida 1 #22-33, Ciudad',
+      telefono: '+573215551236',
+      email: 'contacto@institutopasado.edu.co',
       activa: false,
     },
   });
-  console.log('✅ Instituciones creadas.');
 
-  // 3. Creación de Periodos Académicos
-  console.log('📅 Creando periodos académicos...');
+  console.log('✅ 4 instituciones creadas (3 activas, 1 inactiva).');
+
+  // ============================================================================
+  // 3. CONFIGURACIÓN DE NOTIFICACIONES POR INSTITUCIÓN
+  // ============================================================================
+  console.log('\n⚙️ Configurando notificaciones por institución...');
+
+  await prisma.configuracion.createMany({
+    data: [
+      {
+        institucionId: colegioSanJose.id,
+        notificacionesActivas: true,
+        canalNotificacion: 'WHATSAPP',
+        modoNotificacionAsistencia: 'INSTANT',
+        horaDisparoNotificacion: '18:00:00',
+      },
+      {
+        institucionId: liceoSantander.id,
+        notificacionesActivas: true,
+        canalNotificacion: 'WHATSAPP',
+        modoNotificacionAsistencia: 'MANUAL_ONLY',
+        horaDisparoNotificacion: '17:00:00',
+      },
+      {
+        institucionId: colegioBolivar.id,
+        notificacionesActivas: true,
+        canalNotificacion: 'WHATSAPP',
+        modoNotificacionAsistencia: 'END_OF_DAY',
+        horaDisparoNotificacion: '16:00:00',
+      },
+      {
+        institucionId: institutoPasado.id,
+        notificacionesActivas: false,
+        canalNotificacion: 'NONE',
+        modoNotificacionAsistencia: 'MANUAL_ONLY',
+      },
+    ],
+  });
+
+  console.log('✅ Configuraciones de notificaciones creadas.');
+
+  // ============================================================================
+  // 4. CREAR USUARIOS
+  // ============================================================================
+  console.log('\n👥 Creando usuarios del sistema...');
+
+  // Super Admin
+  const superAdmin = await prisma.usuario.create({
+    data: {
+      email: 'superadmin@asistapp.com',
+      passwordHash: hashPassword('Admin123!'),
+      nombres: 'Super',
+      apellidos: 'Administrador',
+      identificacion: 'SA-001',
+      rol: 'super_admin',
+      activo: true,
+      telefono: '+573001234567',
+    },
+  });
+  console.log('   ✅ Super Admin: superadmin@asistapp.com / Admin123!');
+
+  // Admins de Institución
+  const adminSanJose = await prisma.usuario.create({
+    data: {
+      email: 'admin@sanjose.edu',
+      passwordHash: hashPassword('SanJose123!'),
+      nombres: 'Administrador',
+      apellidos: 'San José',
+      identificacion: 'ADM-SJ-001',
+      rol: 'admin_institucion',
+      activo: true,
+      telefono: '+573300123456',
+    },
+  });
+
+  const adminSantander = await prisma.usuario.create({
+    data: {
+      email: 'admin@santander.edu',
+      passwordHash: hashPassword('Santander123!'),
+      nombres: 'Administrador',
+      apellidos: 'Santander',
+      identificacion: 'ADM-ST-001',
+      rol: 'admin_institucion',
+      activo: true,
+      telefono: '+573300123457',
+    },
+  });
+
+  const adminMultiSede = await prisma.usuario.create({
+    data: {
+      email: 'multiadmin@asistapp.com',
+      passwordHash: hashPassword('Multi123!'),
+      nombres: 'Admin',
+      apellidos: 'Multi-Sede',
+      identificacion: 'ADM-MULTI-001',
+      rol: 'admin_institucion',
+      activo: true,
+      telefono: '+573300123458',
+    },
+  });
+
+  // Profesores
+  const profesorJuan = await prisma.usuario.create({
+    data: {
+      email: 'juan.perez@sanjose.edu',
+      passwordHash: hashPassword('Prof123!'),
+      nombres: 'Juan',
+      apellidos: 'Pérez',
+      identificacion: 'PROF-JP-001',
+      titulo: 'Licenciado en Matemáticas',
+      especialidad: 'Cálculo y Álgebra',
+      rol: 'profesor',
+      activo: true,
+      telefono: '+573101234567',
+    },
+  });
+
+  const profesorLaura = await prisma.usuario.create({
+    data: {
+      email: 'laura.gomez@sanjose.edu',
+      passwordHash: hashPassword('Prof123!'),
+      nombres: 'Laura',
+      apellidos: 'Gómez',
+      identificacion: 'PROF-LG-001',
+      titulo: 'Licenciada en Ciencias',
+      especialidad: 'Física y Química',
+      rol: 'profesor',
+      activo: true,
+      telefono: '+573101234568',
+    },
+  });
+
+  const profesorVacio = await prisma.usuario.create({
+    data: {
+      email: 'vacio.profe@sanjose.edu',
+      passwordHash: hashPassword('Prof123!'),
+      nombres: 'Pedro',
+      apellidos: 'Sin Clases',
+      identificacion: 'PROF-SC-001',
+      titulo: 'Licenciado en Educación',
+      especialidad: 'Educación Física',
+      rol: 'profesor',
+      activo: true,
+      telefono: '+573101234569',
+    },
+  });
+
+  const profesorCarlos = await prisma.usuario.create({
+    data: {
+      email: 'carlos.diaz@santander.edu',
+      passwordHash: hashPassword('Prof123!'),
+      nombres: 'Carlos',
+      apellidos: 'Díaz',
+      identificacion: 'PROF-CD-001',
+      titulo: 'Licenciado en Ciencias Sociales',
+      especialidad: 'Historia y Geografía',
+      rol: 'profesor',
+      activo: true,
+      telefono: '+573101234570',
+    },
+  });
+
+  // Estudiantes San José
+  const estudianteSantiago = await prisma.usuario.create({
+    data: {
+      email: 'santiago.mendoza@sanjose.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Santiago',
+      apellidos: 'Mendoza',
+      identificacion: 'EST-SM-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  const estudianteMateo = await prisma.usuario.create({
+    data: {
+      email: 'mateo.castro@sanjose.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Mateo',
+      apellidos: 'Castro',
+      identificacion: 'EST-MC-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  const estudianteValentina = await prisma.usuario.create({
+    data: {
+      email: 'valentina.rojas@sanjose.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Valentina',
+      apellidos: 'Rojas',
+      identificacion: 'EST-VR-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  const estudianteAndres = await prisma.usuario.create({
+    data: {
+      email: 'andres.lopez@sanjose.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Andrés',
+      apellidos: 'López',
+      identificacion: 'EST-AL-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  // Estudiantes Santander
+  const estudianteSofia = await prisma.usuario.create({
+    data: {
+      email: 'sofia.nunez@santander.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Sofía',
+      apellidos: 'Núñez',
+      identificacion: 'EST-SN-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  const estudianteDaniel = await prisma.usuario.create({
+    data: {
+      email: 'daniel.ruiz@santander.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Daniel',
+      apellidos: 'Ruiz',
+      identificacion: 'EST-DR-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  const estudiantePaula = await prisma.usuario.create({
+    data: {
+      email: 'paula.mendez@santander.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Paula',
+      apellidos: 'Méndez',
+      identificacion: 'EST-PM-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
+  console.log('✅ Todos los usuarios creados.');
+
+  // ============================================================================
+  // 5. VINCULAR USUARIOS A INSTITUCIONES
+  // ============================================================================
+  console.log('\n🔗 Vinculando usuarios a instituciones...');
+
+  await prisma.usuarioInstitucion.createMany({
+    data: [
+      // Admins
+      { usuarioId: adminSanJose.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' },
+      { usuarioId: adminSantander.id, institucionId: liceoSantander.id, rolEnInstitucion: 'admin' },
+      { usuarioId: adminMultiSede.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'admin' },
+      { usuarioId: adminMultiSede.id, institucionId: liceoSantander.id, rolEnInstitucion: 'admin' },
+      { usuarioId: adminMultiSede.id, institucionId: colegioBolivar.id, rolEnInstitucion: 'admin' },
+      // Profesores
+      { usuarioId: profesorJuan.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'profesor' },
+      { usuarioId: profesorLaura.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'profesor' },
+      { usuarioId: profesorVacio.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'profesor' },
+      { usuarioId: profesorCarlos.id, institucionId: liceoSantander.id, rolEnInstitucion: 'profesor' },
+      // Estudiantes San José
+      { usuarioId: estudianteSantiago.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteMateo.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteValentina.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteAndres.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      // Estudiantes Santander
+      { usuarioId: estudianteSofia.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteDaniel.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudiantePaula.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
+    ],
+  });
+
+  console.log('✅ Vínculos usuario-institución creados.');
+
+  // ============================================================================
+  // 6. ESTRUCTURA ACADÉMICA - PERÍODOS
+  // ============================================================================
+  console.log('\n📚 Creando estructura académica...');
+
+  const currentYear = new Date().getFullYear();
+
   const periodoSanJose = await prisma.periodoAcademico.create({
     data: {
-      nombre: 'Año Lectivo 2025',
-      fechaInicio: new Date('2025-01-20'),
-      fechaFin: new Date('2025-11-28'),
+      nombre: `Año Lectivo ${currentYear}`,
+      fechaInicio: new Date(`${currentYear}-01-15`),
+      fechaFin: new Date(`${currentYear}-12-15`),
       activo: true,
-      institucionId: sanJose.id,
+      institucionId: colegioSanJose.id,
     },
   });
 
   const periodoSantander = await prisma.periodoAcademico.create({
     data: {
-      nombre: 'Semestre 2025-1',
-      fechaInicio: new Date('2025-02-01'),
-      fechaFin: new Date('2025-06-15'),
+      nombre: `Año Lectivo ${currentYear}`,
+      fechaInicio: new Date(`${currentYear}-01-20`),
+      fechaFin: new Date(`${currentYear}-12-10`),
       activo: true,
-      institucionId: santander.id,
+      institucionId: liceoSantander.id,
     },
   });
-  console.log('✅ Periodos académicos creados.');
 
-  // 4. Creación de Usuarios
-  console.log('👥 Creando usuarios (admins, profesores, estudiantes)...');
-  const hash = (pass: string) => bcrypt.hashSync(pass, 10);
-
-  const usuarios = await prisma.usuario.createMany({
-    data: [
-      // Admins
-      { email: 'superadmin@asistapp.com', passwordHash: hash('Admin123!'), nombres: 'Super', apellidos: 'Admin', rol: 'super_admin', activo: true },
-      { email: 'admin@sanjose.edu', passwordHash: hash('SanJose123!'), nombres: 'Ana', apellidos: 'López', rol: 'admin_institucion', activo: true },
-      { email: 'admin@santander.edu', passwordHash: hash('Santander123!'), nombres: 'Luis', apellidos: 'Rojas', rol: 'admin_institucion', activo: true },
-      { email: 'multiadmin@asistapp.com', passwordHash: hash('Multi123!'), nombres: 'Pedro', apellidos: 'Páramo', rol: 'admin_institucion', activo: true },
-      // Profesores San José
-      { email: 'juan.perez@sanjose.edu', passwordHash: hash('Prof123!'), nombres: 'Juan', apellidos: 'Pérez', rol: 'profesor', activo: true },
-      { email: 'laura.gomez@sanjose.edu', passwordHash: hash('Prof123!'), nombres: 'Laura', apellidos: 'Gómez', rol: 'profesor', activo: true },
-      { email: 'vacio.profe@sanjose.edu', passwordHash: hash('Prof123!'), nombres: 'Profe', apellidos: 'Sin Clases', rol: 'profesor', activo: true },
-      // Profesores Santander
-      { email: 'carlos.diaz@santander.edu', passwordHash: hash('Prof123!'), nombres: 'Carlos', apellidos: 'Díaz', rol: 'profesor', activo: true },
-      // Estudiantes San José
-      { email: 'santiago.mendoza@sanjose.edu', passwordHash: hash('Est123!'), nombres: 'Santiago', apellidos: 'Mendoza', rol: 'estudiante', activo: true },
-      { email: 'valentina.rojas@sanjose.edu', passwordHash: hash('Est123!'), nombres: 'Valentina', apellidos: 'Rojas', rol: 'estudiante', activo: true },
-      { email: 'mateo.castro@sanjose.edu', passwordHash: hash('Est123!'), nombres: 'Mateo', apellidos: 'Castro', rol: 'estudiante', activo: true },
-      { email: 'camila.ortiz@sanjose.edu', passwordHash: hash('Est123!'), nombres: 'Camila', apellidos: 'Ortiz', rol: 'estudiante', activo: true },
-      // Estudiantes Santander
-      { email: 'sofia.nunez@santander.edu', passwordHash: hash('Est123!'), nombres: 'Sofía', apellidos: 'Núñez', rol: 'estudiante', activo: true },
-    ],
+  const periodoBolivar = await prisma.periodoAcademico.create({
+    data: {
+      nombre: `Año Lectivo ${currentYear}`,
+      fechaInicio: new Date(`${currentYear}-02-01`),
+      fechaFin: new Date(`${currentYear}-11-30`),
+      activo: true,
+      institucionId: colegioBolivar.id,
+    },
   });
-  console.log(`✅ ${usuarios.count} usuarios creados.`);
 
-  // Mapeo para fácil acceso
-  const findUser = async (email: string) => (await prisma.usuario.findUnique({ where: { email } }))!;
+  console.log('✅ 3 períodos académicos creados.');
 
-  const superAdmin = await findUser('superadmin@asistapp.com');
-  const adminSanJose = await findUser('admin@sanjose.edu');
-  const adminSantander = await findUser('admin@santander.edu');
-  const multiAdmin = await findUser('multiadmin@asistapp.com');
-  const profJuan = await findUser('juan.perez@sanjose.edu');
-  const profLaura = await findUser('laura.gomez@sanjose.edu');
-  const profVacio = await findUser('vacio.profe@sanjose.edu');
-  const profCarlos = await findUser('carlos.diaz@santander.edu');
-  const estSantiago = await findUser('santiago.mendoza@sanjose.edu');
-  const estValentina = await findUser('valentina.rojas@sanjose.edu');
-  const estMateo = await findUser('mateo.castro@sanjose.edu');
-  const estCamila = await findUser('camila.ortiz@sanjose.edu');
-  const estSofia = await findUser('sofia.nunez@santander.edu');
+  // ============================================================================
+  // 7. MATERIAS POR INSTITUCIÓN
+  // ============================================================================
+  console.log('\n📖 Creando materias...');
 
-  // 5. Vinculación Usuario-Institución
-  console.log('🔗 Vinculando usuarios a instituciones...');
-  await prisma.usuarioInstitucion.createMany({
-    data: [
-      { usuarioId: adminSanJose.id, institucionId: sanJose.id, rolEnInstitucion: 'admin' },
-      { usuarioId: adminSantander.id, institucionId: santander.id, rolEnInstitucion: 'admin' },
-      { usuarioId: multiAdmin.id, institucionId: sanJose.id, rolEnInstitucion: 'admin' },
-      { usuarioId: multiAdmin.id, institucionId: santander.id, rolEnInstitucion: 'admin' },
-      { usuarioId: profJuan.id, institucionId: sanJose.id, rolEnInstitucion: 'profesor' },
-      { usuarioId: profLaura.id, institucionId: sanJose.id, rolEnInstitucion: 'profesor' },
-      { usuarioId: profVacio.id, institucionId: sanJose.id, rolEnInstitucion: 'profesor' },
-      { usuarioId: profCarlos.id, institucionId: santander.id, rolEnInstitucion: 'profesor' },
-      { usuarioId: estSantiago.id, institucionId: sanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estValentina.id, institucionId: sanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estMateo.id, institucionId: sanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estCamila.id, institucionId: sanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estSofia.id, institucionId: santander.id, rolEnInstitucion: 'estudiante' },
-    ],
+  const materiasSanJose = await Promise.all([
+    prisma.materia.create({ data: { nombre: 'Cálculo', codigo: 'MAT-101', institucionId: colegioSanJose.id } }),
+    prisma.materia.create({ data: { nombre: 'Física', codigo: 'FIS-101', institucionId: colegioSanJose.id } }),
+    prisma.materia.create({ data: { nombre: 'Español', codigo: 'ESP-101', institucionId: colegioSanJose.id } }),
+    prisma.materia.create({ data: { nombre: 'Inglés', codigo: 'ING-101', institucionId: colegioSanJose.id } }),
+    prisma.materia.create({ data: { nombre: 'Química', codigo: 'QUI-101', institucionId: colegioSanJose.id } }),
+  ]);
+
+  const materiasSantander = await Promise.all([
+    prisma.materia.create({ data: { nombre: 'Ciencias Sociales', codigo: 'SOC-101', institucionId: liceoSantander.id } }),
+    prisma.materia.create({ data: { nombre: 'Matemáticas', codigo: 'MAT-101', institucionId: liceoSantander.id } }),
+    prisma.materia.create({ data: { nombre: 'Arte', codigo: 'ART-101', institucionId: liceoSantander.id } }),
+    prisma.materia.create({ data: { nombre: 'Educación Física', codigo: 'EFI-101', institucionId: liceoSantander.id } }),
+  ]);
+
+  console.log('✅ 9 materias creadas.');
+
+  // ============================================================================
+  // 8. GRUPOS POR INSTITUCIÓN
+  // ============================================================================
+  console.log('\n👥 Creando grupos...');
+
+  const grupo10A = await prisma.grupo.create({
+    data: {
+      nombre: 'Décimo A',
+      grado: '10',
+      seccion: 'A',
+      periodoId: periodoSanJose.id,
+      institucionId: colegioSanJose.id,
+    },
   });
-  console.log('✅ Vínculos creados.');
 
-  // 6. Creación de datos de Estudiantes
-  console.log('👨‍🎓 Creando perfiles de estudiante...');
-  const estudiantes = await prisma.estudiante.createMany({
-    data: [
-      { usuarioId: estSantiago.id, identificacion: '1001', codigoQr: 'QR-SANTIAGO' },
-      { usuarioId: estValentina.id, identificacion: '1002', codigoQr: 'QR-VALENTINA' },
-      { usuarioId: estMateo.id, identificacion: '1003', codigoQr: 'QR-MATEO' },
-      { usuarioId: estCamila.id, identificacion: '1004', codigoQr: 'QR-CAMILA' },
-      { usuarioId: estSofia.id, identificacion: '2001', codigoQr: 'QR-SOFIA' },
-    ],
+  const grupo11B = await prisma.grupo.create({
+    data: {
+      nombre: 'Once B',
+      grado: '11',
+      seccion: 'B',
+      periodoId: periodoSanJose.id,
+      institucionId: colegioSanJose.id,
+    },
   });
-  console.log(`✅ ${estudiantes.count} perfiles de estudiante creados.`);
-  const santiago = (await prisma.estudiante.findUnique({where: {usuarioId: estSantiago.id}}))!;
-  const valentina = (await prisma.estudiante.findUnique({where: {usuarioId: estValentina.id}}))!;
-  const mateo = (await prisma.estudiante.findUnique({where: {usuarioId: estMateo.id}}))!;
-  const camila = (await prisma.estudiante.findUnique({where: {usuarioId: estCamila.id}}))!;
-  const sofia = (await prisma.estudiante.findUnique({where: {usuarioId: estSofia.id}}))!;
 
-  // 7. Creación de Grupos y Materias
-  console.log('📚 Creando grupos y materias...');
-  const grupo10A = await prisma.grupo.create({ data: { nombre: 'Décimo A', grado: '10', seccion: 'A', periodoId: periodoSanJose.id, institucionId: sanJose.id } });
-  const grupo11B = await prisma.grupo.create({ data: { nombre: 'Once B', grado: '11', seccion: 'B', periodoId: periodoSanJose.id, institucionId: sanJose.id } });
-  const grupo6_1 = await prisma.grupo.create({ data: { nombre: 'Sexto Uno', grado: '6', seccion: '1', periodoId: periodoSantander.id, institucionId: santander.id } });
+  const grupo6_1 = await prisma.grupo.create({
+    data: {
+      nombre: 'Sexto Uno',
+      grado: '6',
+      seccion: '1',
+      periodoId: periodoSantander.id,
+      institucionId: liceoSantander.id,
+    },
+  });
 
-  const mat = await prisma.materia.create({ data: { nombre: 'Matemáticas', institucionId: sanJose.id } });
-  const fis = await prisma.materia.create({ data: { nombre: 'Física', institucionId: sanJose.id } });
-  const qui = await prisma.materia.create({ data: { nombre: 'Química', institucionId: sanJose.id } });
-  const esp = await prisma.materia.create({ data: { nombre: 'Español', institucionId: santander.id } });
-  const ing = await prisma.materia.create({ data: { nombre: 'Inglés', institucionId: santander.id } });
-  console.log('✅ Grupos y materias creados.');
+  const grupo7_2 = await prisma.grupo.create({
+    data: {
+      nombre: 'Séptimo Dos',
+      grado: '7',
+      seccion: '2',
+      periodoId: periodoSantander.id,
+      institucionId: liceoSantander.id,
+    },
+  });
 
-  // 8. Asignación de Estudiantes a Grupos
-  console.log('🔗 Asignando estudiantes a grupos...');
+  console.log('✅ 4 grupos creados.');
+
+  // ============================================================================
+  // 9. PERFILES DE ESTUDIANTES (con códigos QR y responsables)
+  // ============================================================================
+  console.log('\n🎓 Creando perfiles de estudiantes...');
+
+  const perfilSantiago = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteSantiago.id,
+      identificacion: 'TI-1001234567',
+      codigoQr: 'QR-SANTIAGO-001',
+      nombreResponsable: 'María Mendoza',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilMateo = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteMateo.id,
+      identificacion: 'TI-1001234568',
+      codigoQr: 'QR-MATEO-002',
+      nombreResponsable: 'Patricia Castro',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilValentina = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteValentina.id,
+      identificacion: 'TI-1001234569',
+      codigoQr: 'QR-VALENTINA-003',
+      // MISMO ACUDIENTE que Santiago (hermanos) - para probar consolidación
+      nombreResponsable: 'María Mendoza',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilAndres = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteAndres.id,
+      identificacion: 'TI-1001234570',
+      codigoQr: 'QR-ANDRES-004',
+      nombreResponsable: 'Carmen López',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: false, // No verificado - para probar este caso
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilSofia = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteSofia.id,
+      identificacion: 'TI-2001234567',
+      codigoQr: 'QR-SOFIA-005',
+      nombreResponsable: 'Carlos Núñez',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilDaniel = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteDaniel.id,
+      identificacion: 'TI-2001234568',
+      codigoQr: 'QR-DANIEL-006',
+      nombreResponsable: 'Isabel Ruiz',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
+  const perfilPaula = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudiantePaula.id,
+      identificacion: 'TI-2001234569',
+      codigoQr: 'QR-PAULA-007',
+      nombreResponsable: 'Fernando Méndez',
+      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: false, // No acepta notificaciones - para probar este caso
+    },
+  });
+
+  console.log('✅ 7 perfiles de estudiantes creados.');
+  console.log(`   📱 Teléfono de prueba: ${TELEFONO_TEST}`);
+
+  // ============================================================================
+  // 10. ASIGNAR ESTUDIANTES A GRUPOS
+  // ============================================================================
+  console.log('\n🔗 Asignando estudiantes a grupos...');
+
   await prisma.estudianteGrupo.createMany({
     data: [
-      { estudianteId: santiago.id, grupoId: grupo10A.id },
-      { estudianteId: valentina.id, grupoId: grupo10A.id },
-      { estudianteId: mateo.id, grupoId: grupo11B.id },
-      { estudianteId: camila.id, grupoId: grupo11B.id },
-      { estudianteId: sofia.id, grupoId: grupo6_1.id },
+      { estudianteId: perfilSantiago.id, grupoId: grupo10A.id },
+      { estudianteId: perfilValentina.id, grupoId: grupo10A.id },
+      { estudianteId: perfilAndres.id, grupoId: grupo10A.id },
+      { estudianteId: perfilMateo.id, grupoId: grupo11B.id },
+      { estudianteId: perfilSofia.id, grupoId: grupo6_1.id },
+      { estudianteId: perfilDaniel.id, grupoId: grupo6_1.id },
+      { estudianteId: perfilPaula.id, grupoId: grupo7_2.id },
     ],
   });
-  console.log('✅ Estudiantes asignados.');
 
-  // 9. Creación de Horarios
-  console.log('📅 Creando horarios...');
-  await prisma.horario.createMany({
-    data: [
-      // Horario San José - Grupo 10-A
-      { diaSemana: 1, horaInicio: '07:00', horaFin: '08:00', materiaId: mat.id, profesorId: profJuan.id, grupoId: grupo10A.id, periodoId: periodoSanJose.id, institucionId: sanJose.id },
-      { diaSemana: 1, horaInicio: '08:00', horaFin: '09:00', materiaId: fis.id, profesorId: profLaura.id, grupoId: grupo10A.id, periodoId: periodoSanJose.id, institucionId: sanJose.id },
-      { diaSemana: 3, horaInicio: '10:00', horaFin: '11:00', materiaId: mat.id, profesorId: profJuan.id, grupoId: grupo10A.id, periodoId: periodoSanJose.id, institucionId: sanJose.id },
-      // Horario San José - Grupo 11-B
-      { diaSemana: 2, horaInicio: '09:00', horaFin: '10:00', materiaId: qui.id, profesorId: profLaura.id, grupoId: grupo11B.id, periodoId: periodoSanJose.id, institucionId: sanJose.id },
-      // Horario Santander - Grupo 6-1
-      { diaSemana: 4, horaInicio: '11:00', horaFin: '12:00', materiaId: esp.id, profesorId: profCarlos.id, grupoId: grupo6_1.id, periodoId: periodoSantander.id, institucionId: santander.id },
-      { diaSemana: 5, horaInicio: '11:00', horaFin: '12:00', materiaId: ing.id, profesorId: profCarlos.id, grupoId: grupo6_1.id, periodoId: periodoSantander.id, institucionId: santander.id },
-    ],
+  console.log('✅ Estudiantes asignados a grupos.');
+
+  // ============================================================================
+  // 11. CREAR HORARIOS COMPLETOS (TODOS LOS DÍAS L-V)
+  // ============================================================================
+  console.log('\n📅 Creando horarios semanales...');
+
+  const horariosData = [];
+
+  // Horarios Grupo 10-A San José
+  for (let dia = 1; dia <= 5; dia++) {
+    horariosData.push(
+      {
+        diaSemana: dia,
+        horaInicio: '07:00',
+        horaFin: '08:00',
+        materiaId: materiasSanJose[0].id,
+        profesorId: profesorJuan.id,
+        grupoId: grupo10A.id,
+        periodoId: periodoSanJose.id,
+        institucionId: colegioSanJose.id,
+      },
+      {
+        diaSemana: dia,
+        horaInicio: '08:00',
+        horaFin: '09:00',
+        materiaId: materiasSanJose[1].id,
+        profesorId: profesorLaura.id,
+        grupoId: grupo10A.id,
+        periodoId: periodoSanJose.id,
+        institucionId: colegioSanJose.id,
+      },
+      {
+        diaSemana: dia,
+        horaInicio: '10:00',
+        horaFin: '11:00',
+        materiaId: materiasSanJose[2].id,
+        profesorId: profesorJuan.id,
+        grupoId: grupo10A.id,
+        periodoId: periodoSanJose.id,
+        institucionId: colegioSanJose.id,
+      },
+      {
+        diaSemana: dia,
+        horaInicio: '14:00',
+        horaFin: '15:00',
+        materiaId: materiasSanJose[3].id,
+        profesorId: profesorLaura.id,
+        grupoId: grupo10A.id,
+        periodoId: periodoSanJose.id,
+        institucionId: colegioSanJose.id,
+      }
+    );
+  }
+
+  // Horarios Grupo 11-B San José
+  for (let dia = 1; dia <= 5; dia++) {
+    horariosData.push({
+      diaSemana: dia,
+      horaInicio: '09:00',
+      horaFin: '10:00',
+      materiaId: materiasSanJose[4].id,
+      profesorId: profesorLaura.id,
+      grupoId: grupo11B.id,
+      periodoId: periodoSanJose.id,
+      institucionId: colegioSanJose.id,
+    });
+  }
+
+  // Horarios Grupo 6-1 Santander
+  for (let dia = 1; dia <= 5; dia++) {
+    horariosData.push(
+      {
+        diaSemana: dia,
+        horaInicio: '07:00',
+        horaFin: '08:00',
+        materiaId: materiasSantander[0].id,
+        profesorId: profesorCarlos.id,
+        grupoId: grupo6_1.id,
+        periodoId: periodoSantander.id,
+        institucionId: liceoSantander.id,
+      },
+      {
+        diaSemana: dia,
+        horaInicio: '08:00',
+        horaFin: '09:00',
+        materiaId: materiasSantander[1].id,
+        profesorId: profesorCarlos.id,
+        grupoId: grupo6_1.id,
+        periodoId: periodoSantander.id,
+        institucionId: liceoSantander.id,
+      }
+    );
+  }
+
+  await prisma.horario.createMany({ data: horariosData });
+  console.log(`✅ ${horariosData.length} horarios creados (clases todos los días L-V).`);
+
+  // ============================================================================
+  // 12. REGISTROS HISTÓRICOS DE ASISTENCIA
+  // ============================================================================
+  console.log('\n📋 Creando registros históricos de asistencia...');
+
+  const horarios = await prisma.horario.findMany({
+    where: { institucionId: colegioSanJose.id },
+    take: 5,
   });
-  console.log('✅ Horarios creados.');
 
-  console.log('\n🎉 Seed maestro completado exitosamente!');
+  const fechaAyer = new Date();
+  fechaAyer.setDate(fechaAyer.getDate() - 1);
+  fechaAyer.setHours(8, 0, 0, 0);
+
+  const fechaHace3Dias = new Date();
+  fechaHace3Dias.setDate(fechaHace3Dias.getDate() - 3);
+  fechaHace3Dias.setHours(8, 0, 0, 0);
+
+  const fechaHaceSemana = new Date();
+  fechaHaceSemana.setDate(fechaHaceSemana.getDate() - 7);
+  fechaHaceSemana.setHours(8, 0, 0, 0);
+
+  if (horarios.length > 0) {
+    await prisma.asistencia.createMany({
+      data: [
+        // Asistencias de ayer
+        {
+          fecha: fechaAyer,
+          estado: 'PRESENTE',
+          horarioId: horarios[0].id,
+          estudianteId: perfilSantiago.id,
+          profesorId: profesorJuan.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'QR',
+        },
+        {
+          fecha: fechaAyer,
+          estado: 'AUSENTE',
+          horarioId: horarios[0].id,
+          estudianteId: perfilValentina.id,
+          profesorId: profesorJuan.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'MANUAL',
+          observaciones: 'No asistió sin justificación',
+        },
+        {
+          fecha: fechaAyer,
+          estado: 'TARDANZA',
+          horarioId: horarios[0].id,
+          estudianteId: perfilAndres.id,
+          profesorId: profesorJuan.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'MANUAL',
+          observaciones: 'Llegó 15 minutos tarde',
+        },
+        // Asistencias de hace 3 días
+        {
+          fecha: fechaHace3Dias,
+          estado: 'PRESENTE',
+          horarioId: horarios.length > 1 ? horarios[1].id : horarios[0].id,
+          estudianteId: perfilSantiago.id,
+          profesorId: profesorLaura.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'QR',
+        },
+        {
+          fecha: fechaHace3Dias,
+          estado: 'PRESENTE',
+          horarioId: horarios.length > 1 ? horarios[1].id : horarios[0].id,
+          estudianteId: perfilValentina.id,
+          profesorId: profesorLaura.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'QR',
+        },
+        // Asistencias de hace una semana
+        {
+          fecha: fechaHaceSemana,
+          estado: 'JUSTIFICADO',
+          horarioId: horarios[0].id,
+          estudianteId: perfilSantiago.id,
+          profesorId: profesorJuan.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'MANUAL',
+          observaciones: 'Excusa médica presentada',
+        },
+        {
+          fecha: fechaHaceSemana,
+          estado: 'AUSENTE',
+          horarioId: horarios[0].id,
+          estudianteId: perfilAndres.id,
+          profesorId: profesorJuan.id,
+          institucionId: colegioSanJose.id,
+          tipoRegistro: 'MANUAL',
+        },
+      ],
+    });
+  }
+
+  console.log('✅ 7 registros históricos de asistencia creados.');
+
+  // ============================================================================
+  // RESUMEN FINAL
+  // ============================================================================
+  console.log('\n' + '='.repeat(70));
+  console.log('🎉 SEED COMPLETADO EXITOSAMENTE');
+  console.log('='.repeat(70));
+
+  console.log('\n📊 RESUMEN DE DATOS CREADOS:');
+  console.log('   • Instituciones: 4 (3 activas, 1 inactiva)');
+  console.log('   • Configuraciones: 4 (INSTANT, MANUAL_ONLY, END_OF_DAY, NONE)');
+  console.log('   • Usuarios: 15 total');
+  console.log('     - 1 Super Admin');
+  console.log('     - 3 Admins Institución (1 multi-sede)');
+  console.log('     - 4 Profesores (1 sin clases)');
+  console.log('     - 7 Estudiantes');
+  console.log('   • Períodos académicos: 3');
+  console.log('   • Materias: 9');
+  console.log('   • Grupos: 4');
+  console.log(`   • Horarios: ${horariosData.length} (clases L-V)`);
+  console.log('   • Asistencias históricas: 7');
+
+  console.log('\n🔐 CREDENCIALES DE ACCESO:');
+  console.log('   ┌────────────────────────────────────────────────────────────┐');
+  console.log('   │ ROL                │ EMAIL                    │ CONTRASEÑA │');
+  console.log('   ├────────────────────────────────────────────────────────────┤');
+  console.log('   │ 👑 Super Admin     │ superadmin@asistapp.com  │ Admin123!  │');
+  console.log('   ├────────────────────────────────────────────────────────────┤');
+  console.log('   │ 👨‍💼 Admin San José  │ admin@sanjose.edu        │ SanJose123!│');
+  console.log('   │ 👨‍💼 Admin Santander │ admin@santander.edu      │ Santander123!│');
+  console.log('   │ 👨‍💼 Admin Multi-Sede│ multiadmin@asistapp.com  │ Multi123!  │');
+  console.log('   ├────────────────────────────────────────────────────────────┤');
+  console.log('   │ 👨‍🏫 Juan Pérez      │ juan.perez@sanjose.edu   │ Prof123!   │');
+  console.log('   │ 👨‍🏫 Laura Gómez     │ laura.gomez@sanjose.edu  │ Prof123!   │');
+  console.log('   │ 👨‍🏫 Sin Clases      │ vacio.profe@sanjose.edu  │ Prof123!   │');
+  console.log('   │ 👨‍🏫 Carlos Díaz     │ carlos.diaz@santander.edu│ Prof123!   │');
+  console.log('   ├────────────────────────────────────────────────────────────┤');
+  console.log('   │ 👨‍🎓 Santiago        │ santiago.mendoza@sanjose.edu │ Est123!│');
+  console.log('   │ 👨‍🎓 Mateo           │ mateo.castro@sanjose.edu │ Est123!    │');
+  console.log('   │ 👨‍🎓 Valentina       │ valentina.rojas@sanjose.edu │ Est123! │');
+  console.log('   │ 👨‍🎓 Sofía           │ sofia.nunez@santander.edu│ Est123!    │');
+  console.log('   └────────────────────────────────────────────────────────────┘');
+
+  console.log('\n📱 CONFIGURACIÓN DE NOTIFICACIONES:');
+  console.log('   • San José: INSTANT (WhatsApp inmediato al registrar ausencia)');
+  console.log('   • Santander: MANUAL_ONLY (requiere botón para enviar)');
+  console.log('   • Bolívar: END_OF_DAY (resumen diario)');
+  console.log(`   • Teléfono de prueba: ${TELEFONO_TEST}`);
+
+  console.log('\n✅ Base de datos lista para pruebas!');
+  console.log('='.repeat(70) + '\n');
 }
 
 main()

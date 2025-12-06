@@ -48,33 +48,33 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     super.resetPagination();
   }
 
-  /// Carga todas las instituciones con paginación
+  /// Carga todas las instituciones con paginación.
+  /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
+  /// Los parámetros activa y search son opcionales y solo deben usarse para sobrescribir los filtros existentes.
   Future<void> loadInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
     if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
-    // Set filters
-    // Only update filters when explicit values are provided. If null, keep existing filters.
+    // Solo actualizar filtros si se proporcionan explícitamente como parámetros
+    // Si son null, mantener los filtros existentes del provider
     if (search != null) {
       if (search.isNotEmpty) {
-        setFilter('search', search);
+        filters['search'] = search;
       } else {
-        removeFilter('search');
+        filters.remove('search');
       }
     }
     if (activa != null) {
-      setFilter('activa', activa.toString());
+      filters['activa'] = activa.toString();
     }
+    // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
 
     try {
-      debugPrint('InstitutionProvider: Iniciando carga de instituciones...');
-      // Use provided search param if not null, otherwise fallback to provider filters
-      final effectiveSearch = search ?? (this.filters['search'] as String?);
+      debugPrint('InstitutionProvider: Iniciando carga de instituciones con filtros: $filters');
       await loadItems(
         accessToken,
         page: page ?? 1,
         limit: limit,
-        search: effectiveSearch,
         filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null,
       );
       // paginationInfo handled by base provider
@@ -208,6 +208,7 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     required String modoNotificacionAsistencia,
     String? horaDisparoNotificacion,
     int? umbralInasistenciasAlerta,
+    bool? notificarAusenciaTotalDiaria,
   }) async {
     try {
       final success = await _institutionService.updateNotificationConfig(
@@ -218,6 +219,7 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
         modoNotificacionAsistencia: modoNotificacionAsistencia,
         horaDisparoNotificacion: horaDisparoNotificacion,
         umbralInasistenciasAlerta: umbralInasistenciasAlerta,
+        notificarAusenciaTotalDiaria: notificarAusenciaTotalDiaria,
       );
 
       if (success) {
@@ -274,9 +276,10 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
 
   @override
   Future<PaginatedResponse<Institution>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final activeStr = this.filters['activa'];
+    final activeStr = this.filters['activa']?.toString();
     final active = activeStr == 'true';
-    final searchQuery = this.filters['search'] as String?;
+    final searchQuery = this.filters['search']?.toString();
+    debugPrint('InstitutionProvider.fetchPage - activa: $activeStr, search: $searchQuery');
     final response = await _institutionService.getAllInstitutions(accessToken, page: page, limit: limit, activa: activeStr != null ? active : null, search: searchQuery);
     if (response == null) return null;
     return PaginatedResponse(items: response.institutions, pagination: response.pagination);

@@ -7,8 +7,8 @@ part of 'institution_config.dart';
 // **************************************************************************
 
 InstitutionConfig _$InstitutionConfigFromJson(Map<String, dynamic> json) => InstitutionConfig(
-      id: json['id'] as String,
-      institucionId: json['institucionId'] as String,
+      id: json['id'] as String?,
+      institucionId: json['institucionId'] as String?,
       notificacionesActivas: json['notificacionesActivas'] as bool? ?? false,
       canalNotificacion: json['canalNotificacion'] as String? ?? 'NONE',
       modoNotificacionAsistencia: json['modoNotificacionAsistencia'] as String? ?? 'MANUAL_ONLY',

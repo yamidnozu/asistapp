@@ -87,10 +87,10 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   Future<void> _loadAdmins() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token != null) {
-  await pag.loadItems(token, page: 1, limit: 10, filters: {'institutionId': widget.institutionId});
+      await pag.loadAdmins(token, widget.institutionId, page: 1, limit: 10);
     }
   }
 
@@ -118,7 +118,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
       final success = await userProvider.removeAdminFromInstitution(token, widget.institutionId, user.id);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administrador removido correctamente')));
-  await pag.loadItems(token, page: 1, limit: 10, filters: {'institutionId': widget.institutionId});
+        await pag.loadAdmins(token, widget.institutionId, page: 1, limit: 10);
       }
     }
   }
@@ -434,9 +434,9 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     if (token == null) return;
     final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     if (pag.isLoadingMore || !pag.hasMoreData) return;
-    // Mantener assignment mode para cargar admins globales
-    pag.setFilter('institutionId', widget.institutionId);
-    pag.setFilter('assignment', 'true');
+    // Mantener assignment mode para cargar admins globales - acceso directo para evitar múltiples notifyListeners
+    pag.filters['institutionId'] = widget.institutionId;
+    pag.filters['assignment'] = 'true';
     await pag.loadNextPage(token);
   }
 
@@ -603,7 +603,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                                       ),
                                       const SizedBox(height: 2),
 
-                                      // Email
+                                      // Correo electrónico
                                       Text(
                                         user.email ?? '',
                                         style: TextStyle(

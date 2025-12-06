@@ -111,7 +111,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
         ),
         SizedBox(height: spacing.lg),
 
-        // Email
+        // Correo electrónico
         CustomTextFormField(
           key: const Key('emailUsuarioField'),
           fieldKey: widget.emailFieldKey,

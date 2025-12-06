@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../models/user.dart';
 import '../../theme/theme_extensions.dart';
 
@@ -95,7 +96,12 @@ class UserDetailScreen extends StatelessWidget {
               'Información del Sistema',
               [
                 _buildInfoItem('ID de Usuario', user.id),
-                _buildInfoItem('Fecha de Creación', 'No disponible'), // TODO: Agregar campo de fecha si existe
+                _buildInfoItem(
+                  'Fecha de Creación', 
+                  user.createdAt != null 
+                    ? DateFormat('dd/MM/yyyy HH:mm').format(user.createdAt!) 
+                    : 'No disponible'
+                ),
               ],
             ),
           ],

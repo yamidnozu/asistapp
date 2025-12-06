@@ -20,6 +20,7 @@ interface GetEstudiantesParams {
 interface GetEstudiantesSinAsignarQuery {
   page?: string;
   limit?: string;
+  search?: string;
 }
 
 interface AsignarEstudianteBody {
@@ -384,7 +385,7 @@ export class GrupoController {
         });
       }
 
-      const { page, limit } = request.query;
+      const { page, limit, search } = request.query;
 
       const pageNum = page ? parseInt(page, 10) : 1;
       const limitNum = limit ? parseInt(limit, 10) : 10;
@@ -398,7 +399,7 @@ export class GrupoController {
         limit: limitNum,
       };
 
-      const result = await GrupoService.getEstudiantesSinGrupo(usuarioInstitucion.institucionId, pagination);
+      const result = await GrupoService.getEstudiantesSinAsignar(usuarioInstitucion.institucionId, pagination, search);
 
       return reply.code(200).send({
         success: true,

@@ -13,7 +13,7 @@ class AsistenciaEstudiante {
   final String apellidos;
   final String identificacion;
   final String? estado; // null si no ha registrado asistencia
-  final String? observacion; // Comentarios adicionales sobre la asistencia
+  final String? observaciones; // Comentarios adicionales sobre la asistencia
   final DateTime? fechaRegistro;
 
   AsistenciaEstudiante({
@@ -23,7 +23,7 @@ class AsistenciaEstudiante {
     required this.apellidos,
     required this.identificacion,
     this.estado,
-    this.observacion,
+    this.observaciones,
     this.fechaRegistro,
   });
 

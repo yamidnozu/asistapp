@@ -48,6 +48,7 @@ export interface AsistenciaResponse {
 }
 
 export interface AsistenciaGrupoResponse {
+  id?: string | null; // ID de la asistencia (null si no hay registro)
   estudiante: {
     id: string;
     nombres: string;
@@ -55,6 +56,7 @@ export interface AsistenciaGrupoResponse {
     identificacion: string;
   };
   estado: string | null; // null si no ha registrado asistencia
+  observacion?: string | null; // Observación del registro
   fechaRegistro?: Date;
 }
 
@@ -270,12 +272,35 @@ export class AsistenciaService {
       // Obtener asistencias del día para ese horario
       const asistenciasHoy = await prisma.asistencia.findMany({
         where: { horarioId, fecha: hoy },
+        select: {
+          id: true,
+          estudianteId: true,
+          estado: true,
+          observaciones: true,
+          fecha: true,
+        },
       });
+
+      // DEBUG: Log asistencias encontradas
+      logger.info(`[getAsistenciasPorHorario] Buscando asistencias - horarioId: ${horarioId}, fecha: ${hoy.toISOString()}`);
+      logger.info(`[getAsistenciasPorHorario] Encontradas ${asistenciasHoy.length} asistencias para hoy`);
+      for (const a of asistenciasHoy) {
+        logger.info(`  - asistenciaId: ${a.id}, estudianteId: ${a.estudianteId}, estado: ${a.estado}`);
+      }
+      
+      // DEBUG: Log estudiantes del grupo
+      logger.info(`[getAsistenciasPorHorario] Estudiantes en el grupo: ${estudiantes.length}`);
+      for (const est of estudiantes) {
+        logger.info(`  - estudianteId: ${est.id}`);
+      }
 
       // Mapear estudiantes al formato de respuesta, incluyendo estado si existe
       const resultado: AsistenciaGrupoResponse[] = estudiantes.map((est: any) => {
         const asistencia = asistenciasHoy.find((a: any) => a.estudianteId === est.id);
+        logger.info(`  [MAP] est.id=${est.id}, asistencia encontrada=${!!asistencia}, asistencia.id=${asistencia?.id || 'null'}`);
         return {
+          // ID de la asistencia (si existe) - IMPORTANTE para poder actualizar
+          id: asistencia ? asistencia.id : null,
           estudiante: {
             id: est.id,
             nombres: est.usuario.nombres,
@@ -283,9 +308,16 @@ export class AsistenciaService {
             identificacion: est.identificacion,
           },
           estado: asistencia ? asistencia.estado : null,
+          observaciones: asistencia ? asistencia.observaciones : null,
           fechaRegistro: asistencia ? asistencia.fecha : undefined,
         } as AsistenciaGrupoResponse;
       });
+
+      // DEBUG: Log resultado final
+      logger.info(`[getAsistenciasPorHorario] Resultado final:`);
+      for (const r of resultado) {
+        logger.info(`  - id: ${r.id}, estudianteId: ${r.estudiante.id}, estado: ${r.estado}`);
+      }
 
       return resultado;
     } catch (error) {
@@ -346,12 +378,15 @@ export class AsistenciaService {
 
   /**
    * Registra la asistencia de un estudiante manualmente (sin QR)
-   * Usado por profesores para marcar presente a un estudiante ausente
+   * Ahora acepta estado personalizado para registro inteligente
    */
   public static async registrarAsistenciaManual(
     horarioId: string,
     estudianteId: string,
-    profesorId: string
+    profesorId: string,
+    estado?: string,
+    observacion?: string,
+    justificada?: boolean
   ): Promise<AsistenciaResponse> {
     try {
       // 1. Verificar que la clase (horarioId) exista y esté activa
@@ -415,16 +450,22 @@ export class AsistenciaService {
         throw new ValidationError('El estudiante ya tiene registrada su asistencia para esta clase hoy');
       }
 
-      // 5. Crear nueva entrada de asistencia
+      // 5. Determinar el estado final (usar el proporcionado o PRESENTE por defecto)
+      const estadoFinal = estado && Object.values(AttendanceStatus).includes(estado as AttendanceStatus)
+        ? (estado as AttendanceStatus)
+        : AttendanceStatus.PRESENTE;
+
+      // 6. Crear nueva entrada de asistencia con estado personalizado
       const nuevaAsistencia = await prisma.asistencia.create({
         data: {
           horarioId,
           estudianteId: estudiante.id,
           profesorId,
           fecha: hoy,
-          estado: AttendanceStatus.PRESENTE,
+          estado: estadoFinal,
           tipoRegistro: AttendanceType.MANUAL,
           institucionId: horario.institucionId,
+          observaciones: observacion || null,
         },
       });
 

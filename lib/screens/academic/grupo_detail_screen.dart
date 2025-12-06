@@ -46,7 +46,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     // Cargar estudiantes asignados al grupo (paginated provider)
     final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
     final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
-    await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+    await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
     await sinAsignar.loadItems(token, page: 1, limit: 10);
   // providers hold the items
 
@@ -84,7 +84,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success) {
-        await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+        await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
@@ -127,7 +127,7 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success) {
-        await byGrupo.loadItems(token, page: 1, limit: 10, filters: {'grupoId': widget.grupo.id});
+        await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
@@ -329,7 +329,6 @@ class AsignarEstudianteDialog extends StatefulWidget {
 
 class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   final TextEditingController _searchController = TextEditingController();
-  List<User> _filteredEstudiantes = [];
   Timer? _debounce;
   final ScrollController _scrollController = ScrollController();
   // ignore: prefer_final_fields - Este campo se modifica en _toggleSeleccion
@@ -346,11 +345,8 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
       if (token != null) {
         sinAsignar.loadItems(token, page: 1, limit: 10);
       }
-      setState(() {
-        _filteredEstudiantes = sinAsignar.items;
-      });
     });
-  _searchController.addListener(_filterEstudiantes);
+    _searchController.addListener(_filterEstudiantes);
     _scrollController.addListener(_onScroll);
   }
 
@@ -379,10 +375,6 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
       } else {
         sinAsignar.loadItems(token, page: 1, limit: 10, search: query);
       }
-      setState(() {
-        // Rely on provider to update items - still keep local _filteredEstudiantes for UI filtering
-        _filteredEstudiantes = sinAsignar.items;
-      });
     });
   }
 
@@ -461,7 +453,7 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
             Expanded(
               child: Builder(builder: (context) {
                 final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
-                final items = _searchController.text.isEmpty ? sinAsignar.items : _filteredEstudiantes.isNotEmpty ? _filteredEstudiantes : sinAsignar.items;
+                final items = sinAsignar.items;
                 if (sinAsignar.isLoading && items.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }

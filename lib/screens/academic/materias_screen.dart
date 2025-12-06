@@ -20,6 +20,7 @@ class _MateriasScreenState extends State<MateriasScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isSearching = false;
+  bool? _filterActivo;
 
   @override
   void initState() {
@@ -159,10 +160,54 @@ class _MateriasScreenState extends State<MateriasScreen> {
         onChanged: (value) => _onSearchChanged(),
       ),
       SizedBox(height: spacing.sm),
-      // TODO: Agregar filtros adicionales cuando estén disponibles
-      Text(
-        'Próximamente: Más filtros disponibles',
-        style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+      // Filtro por estado activo/inactivo
+      Row(
+        children: [
+          FilterChip(
+            label: const Text('Todas'),
+            selected: _filterActivo == null,
+            onSelected: (_) {
+              setState(() => _filterActivo = null);
+              _loadMaterias(search: _searchController.text.trim());
+            },
+            selectedColor: colors.primary.withValues(alpha: 0.2),
+            checkmarkColor: colors.primary,
+            labelStyle: TextStyle(
+              color: _filterActivo == null ? colors.primary : colors.textSecondary,
+              fontSize: 12,
+            ),
+          ),
+          SizedBox(width: spacing.sm),
+          FilterChip(
+            label: const Text('Activas'),
+            selected: _filterActivo == true,
+            onSelected: (_) {
+              setState(() => _filterActivo = true);
+              _loadMaterias(search: _searchController.text.trim());
+            },
+            selectedColor: colors.success.withValues(alpha: 0.2),
+            checkmarkColor: colors.success,
+            labelStyle: TextStyle(
+              color: _filterActivo == true ? colors.success : colors.textSecondary,
+              fontSize: 12,
+            ),
+          ),
+          SizedBox(width: spacing.sm),
+          FilterChip(
+            label: const Text('Inactivas'),
+            selected: _filterActivo == false,
+            onSelected: (_) {
+              setState(() => _filterActivo = false);
+              _loadMaterias(search: _searchController.text.trim());
+            },
+            selectedColor: colors.error.withValues(alpha: 0.2),
+            checkmarkColor: colors.error,
+            labelStyle: TextStyle(
+              color: _filterActivo == false ? colors.error : colors.textSecondary,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     ];
   }
@@ -317,11 +362,11 @@ class _MateriasScreenState extends State<MateriasScreen> {
   }
 
   void _navigateToMateriaDetail(Materia materia) {
-    // TODO: Implementar navegación a detalle de materia
+    // PENDIENTE: Implementar navegación a detalle de materia
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Detalle de materia: ${materia.nombre}')),
     );
   }
 }
 
-// NOTE: dialog classes were moved to lib/screens/academic/materia_dialogs.dart
+// NOTA: Las clases de diálogos fueron movidas a lib/screens/academic/materia_dialogs.dart

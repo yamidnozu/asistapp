@@ -83,13 +83,25 @@ class AsistenciaService {
   }
 
   /// Registra la asistencia de un estudiante manualmente (sin QR)
+  /// Ahora acepta estado personalizado para registro inteligente
   Future<bool> registrarAsistenciaManual({
     required String accessToken,
     required String horarioId,
     required String estudianteId,
+    String? estado,
+    String? observacion,
+    bool? justificada,
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
+
+      final body = <String, dynamic>{
+        'horarioId': horarioId,
+        'estudianteId': estudianteId,
+      };
+      if (estado != null) body['estado'] = estado;
+      if (observacion != null && observacion.isNotEmpty) body['observacion'] = observacion;
+      if (justificada != null) body['justificada'] = justificada;
 
       final response = await http
           .post(
@@ -98,10 +110,7 @@ class AsistenciaService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: jsonEncode({
-          'horarioId': horarioId,
-          'estudianteId': estudianteId,
-        }),
+        body: jsonEncode(body),
       )
           .timeout(
         const Duration(seconds: 15),
@@ -153,6 +162,9 @@ class AsistenciaService {
     }
   }
 
+  /// Obtiene la lista de estudiantes del grupo con su estado de asistencia para el día actual.
+  /// Usa el endpoint GET /horarios/:horarioId/asistencias que devuelve TODOS los estudiantes
+  /// del grupo, independientemente de si ya tienen asistencia registrada o no.
   Future<List<AsistenciaEstudiante>> getAsistencias({
     required String accessToken,
     required String horarioId,
@@ -160,16 +172,10 @@ class AsistenciaService {
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      // El endpoint correcto es GET /asistencias con query params
-      final queryParams = <String, String>{
-        'horarioId': horarioId,
-      };
-      if (date != null) {
-        queryParams['fecha'] = date.toIso8601String().split('T')[0];
-      }
-      final queryString =
-          queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
-      final url = '$baseUrlValue/asistencias?$queryString';
+      
+      // CORREGIDO: Usar la ruta de horarios que trae la lista de estudiantes del grupo
+      // independientemente de si ya tienen asistencia registrada o no.
+      final url = '$baseUrlValue/horarios/$horarioId/asistencias';
 
       final response = await http.get(
         Uri.parse(url),
@@ -183,17 +189,37 @@ class AsistenciaService {
         },
       );
 
-      debugPrint(
-          'GET /asistencias?horarioId=$horarioId - Status: ${response.statusCode}');
+      debugPrint('GET /horarios/$horarioId/asistencias - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           final List<dynamic> asistenciasJson = responseData['data'];
-          final asistencias = asistenciasJson
-              .map((json) => AsistenciaEstudiante.fromJson(json))
-              .toList();
-          debugPrint('✅ Obtenidas ${asistencias.length} asistencias');
+          
+          // DEBUG: Log raw response to verify id is being returned
+          for (var json in asistenciasJson) {
+            debugPrint('📥 Raw data - id: ${json['id']}, estudiante: ${json['estudiante']?['id']}, estado: ${json['estado']}');
+          }
+          
+          // Mapeo especial porque este endpoint devuelve una estructura diferente:
+          // { id: null/string, estudiante: {...}, estado: null/string, observacion: null/string, fechaRegistro: ... }
+          final asistencias = asistenciasJson.map<AsistenciaEstudiante>((json) {
+            final estudiante = json['estudiante'];
+            return AsistenciaEstudiante(
+              id: json['id'], // ID de la asistencia - null si no se ha tomado lista
+              estudianteId: estudiante['id'],
+              nombres: estudiante['nombres'] ?? '',
+              apellidos: estudiante['apellidos'] ?? '',
+              identificacion: estudiante['identificacion'] ?? '',
+              estado: json['estado'], // Será null si no se ha tomado lista
+              observaciones: json['observacion'], // Observación del registro
+              fechaRegistro: json['fechaRegistro'] != null 
+                  ? DateTime.parse(json['fechaRegistro'].toString()) 
+                  : null,
+            );
+          }).toList();
+
+          debugPrint('✅ Obtenidos ${asistencias.length} estudiantes para la lista');
           return asistencias;
         } else {
           throw Exception(
@@ -313,6 +339,47 @@ class AsistenciaService {
     } catch (e) {
       debugPrint('❌ Error al disparar notificaciones: $e');
       rethrow;
+    }
+  }
+
+  /// Obtiene las asistencias del estudiante autenticado
+  /// Endpoint: GET /asistencias/estudiante
+  Future<List<Map<String, dynamic>>?> getAsistenciasEstudiante({
+    required String accessToken,
+  }) async {
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+
+      final response = await http.get(
+        Uri.parse('$baseUrlValue/asistencias/estudiante'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugPrint('GET /asistencias/estudiante - Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          return (responseData['data'] as List)
+              .map((item) => item as Map<String, dynamic>)
+              .toList();
+        }
+        return null;
+      } else {
+        debugPrint('Error getting asistencias estudiante: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Error al obtener asistencias del estudiante: $e');
+      return null;
     }
   }
 }

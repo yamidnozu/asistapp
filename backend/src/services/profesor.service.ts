@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { NotFoundError, ValidationError } from '../types';
-import { UserRole } from '../constants/roles';
 import logger from '../utils/logger';
 
 const prisma = new PrismaClient();
@@ -53,6 +52,13 @@ export interface ClaseDelDiaResponse {
   institucion: {
     id: string;
     nombre: string;
+    configuraciones?: {
+      id: string;
+      notificacionesActivas: boolean;
+      canalNotificacion: string;
+      modoNotificacionAsistencia: string;
+      horaDisparoNotificacion: string | null;
+    } | null;
   };
 }
 
@@ -421,6 +427,15 @@ export class ProfesorService {
             select: {
               id: true,
               nombre: true,
+              configuraciones: {
+                select: {
+                  id: true,
+                  notificacionesActivas: true,
+                  canalNotificacion: true,
+                  modoNotificacionAsistencia: true,
+                  horaDisparoNotificacion: true,
+                },
+              },
             },
           },
         },
@@ -434,7 +449,11 @@ export class ProfesorService {
         grupo: clase.grupo,
         materia: clase.materia,
         periodoAcademico: clase.periodoAcademico,
-        institucion: clase.institucion,
+        institucion: {
+          id: clase.institucion.id,
+          nombre: clase.institucion.nombre,
+          configuraciones: clase.institucion.configuraciones,
+        },
       }));
     } catch (error) {
       logger.error('Error al obtener clases del día', error);
@@ -484,6 +503,15 @@ export class ProfesorService {
             select: {
               id: true,
               nombre: true,
+              configuraciones: {
+                select: {
+                  id: true,
+                  notificacionesActivas: true,
+                  canalNotificacion: true,
+                  modoNotificacionAsistencia: true,
+                  horaDisparoNotificacion: true,
+                },
+              },
             },
           },
         },
@@ -497,7 +525,11 @@ export class ProfesorService {
         grupo: clase.grupo,
         materia: clase.materia,
         periodoAcademico: clase.periodoAcademico,
-        institucion: clase.institucion,
+        institucion: {
+          id: clase.institucion.id,
+          nombre: clase.institucion.nombre,
+          configuraciones: clase.institucion.configuraciones,
+        },
       }));
     } catch (error) {
       logger.error('Error al obtener clases por día', error);
@@ -555,6 +587,15 @@ export class ProfesorService {
             select: {
               id: true,
               nombre: true,
+              configuraciones: {
+                select: {
+                  id: true,
+                  notificacionesActivas: true,
+                  canalNotificacion: true,
+                  modoNotificacionAsistencia: true,
+                  horaDisparoNotificacion: true,
+                },
+              },
             },
           },
         },
@@ -578,7 +619,11 @@ export class ProfesorService {
           grupo: clase.grupo,
           materia: clase.materia,
           periodoAcademico: clase.periodoAcademico,
-          institucion: clase.institucion,
+          institucion: {
+            id: clase.institucion.id,
+            nombre: clase.institucion.nombre,
+            configuraciones: clase.institucion.configuraciones,
+          },
         };
 
         horarioSemanal[clase.diaSemana].push(formatted);

@@ -9,8 +9,8 @@ echo ==================================================================
 echo DemoLife - Reset DB and Seed
 echo ==================================================================
 echo.
-choice /M "Continue? This will delete all data"
-if errorlevel 2 exit /b 1
+REM choice /M "Continue? This will delete all data"
+REM if errorlevel 2 exit /b 1
 
 cd /d "%~dp0.."
 

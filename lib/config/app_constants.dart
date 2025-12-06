@@ -88,9 +88,9 @@ class AppConstants {
 }
 
 enum ScreenType {
-  mobileSmall,    // <= 480px
-  mobileLarge,    // 481-768px
-  tablet,         // 769-1024px
-  desktop,        // 1025-1440px
-  largeDesktop,   // > 1440px
+  mobileSmall,    // Pantallas pequeñas (móviles antiguos, <= 480px)
+  mobileLarge,    // Móviles grandes (481-768px)
+  tablet,         // Tablets (769-1024px)
+  desktop,        // Escritorio (1025-1440px)
+  largeDesktop,   // Pantallas grandes (> 1440px)
 }

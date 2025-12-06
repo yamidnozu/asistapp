@@ -88,15 +88,26 @@ class AsistenciaProvider with ChangeNotifier {
   }
 
   /// Registra asistencia manual para un estudiante específico
-  Future<bool> registrarAsistenciaManual(String accessToken, String horarioId, String estudianteId) async {
+  /// Ahora acepta estado personalizado para registro inteligente
+  Future<bool> registrarAsistenciaManual(
+    String accessToken, 
+    String horarioId, 
+    String estudianteId, {
+    String? estado,
+    String? observacion,
+    bool? justificada,
+  }) async {
     try {
-      debugPrint('AsistenciaProvider: Registrando asistencia manual para estudiante: $estudianteId');
+      debugPrint('AsistenciaProvider: Registrando asistencia manual ($estado) para estudiante: $estudianteId');
       _setState(AsistenciaState.loading);
 
       final success = await _asistenciaService.registrarAsistenciaManual(
         accessToken: accessToken,
         horarioId: horarioId,
         estudianteId: estudianteId,
+        estado: estado,
+        observacion: observacion,
+        justificada: justificada,
       );
 
       if (success) {
