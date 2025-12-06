@@ -57,6 +57,8 @@ export class TwilioAdapter implements INotificationAdapter {
         // Production implementation using Twilio SDK
         if (process.env.NODE_ENV === 'production') {
             try {
+                // Using require() instead of import to lazy-load Twilio only when needed in production
+                // This avoids requiring the twilio package as a dependency in development environments
                 const twilio = require('twilio');
                 const client = twilio(this.accountSid, this.authToken);
                 const result = await client.messages.create({
@@ -121,6 +123,8 @@ export class EmailAdapter implements INotificationAdapter {
         // Production implementation using SendGrid
         if (process.env.NODE_ENV === 'production') {
             try {
+                // Using require() instead of import to lazy-load SendGrid only when needed in production
+                // This avoids requiring the @sendgrid/mail package as a dependency in development environments
                 const sgMail = require('@sendgrid/mail');
                 sgMail.setApiKey(this.apiKey);
                 
