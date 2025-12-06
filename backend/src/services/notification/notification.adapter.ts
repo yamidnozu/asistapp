@@ -54,31 +54,50 @@ export class TwilioAdapter implements INotificationAdapter {
     async send(message: NotificationMessage): Promise<NotificationResult> {
         console.log(`[TwilioAdapter] Sending SMS to ${message.to}: ${message.body}`);
 
-        // Mock implementation for development
+        // Production implementation using Twilio SDK
         if (process.env.NODE_ENV === 'production') {
-            // In production, use Twilio SDK
-            // const client = require('twilio')(this.accountSid, this.authToken);
-            // const result = await client.messages.create({
-            //     body: message.body,
-            //     from: this.fromNumber,
-            //     to: message.to
-            // });
-            // return {
-            //     success: true,
-            //     messageId: result.sid,
-            //     provider: 'SMS',
-            //     cost: parseFloat(result.price || '0')
-            // };
+            try {
+                const twilio = require('twilio');
+                const client = twilio(this.accountSid, this.authToken);
+                const result = await client.messages.create({
+                    body: message.body,
+                    from: this.fromNumber,
+                    to: message.to
+                });
+                
+                logger.info(`[TwilioAdapter] ✅ SMS sent successfully. SID: ${result.sid}`);
+                
+                return {
+                    success: true,
+                    messageId: result.sid,
+                    provider: 'SMS',
+                    rawResponse: {
+                        sid: result.sid,
+                        status: result.status,
+                        price: result.price,
+                        priceUnit: result.priceUnit
+                    }
+                };
+            } catch (error: any) {
+                logger.error(`[TwilioAdapter] ❌ Error sending SMS:`, error);
+                return {
+                    success: false,
+                    error: error.message || 'Failed to send SMS',
+                    provider: 'SMS',
+                    rawResponse: error.response?.data
+                };
+            }
         }
 
-        // Simulate network delay
+        // Mock implementation for development
+        logger.info(`[TwilioAdapter] 🔸 MOCK MODE - Would send SMS to ${message.to}`);
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Simulate success
         return {
             success: true,
-            messageId: `sms_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            provider: 'SMS'
+            messageId: `sms_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+            provider: 'SMS',
+            rawResponse: { mock: true }
         };
     }
 
@@ -99,33 +118,61 @@ export class EmailAdapter implements INotificationAdapter {
     async send(message: NotificationMessage): Promise<NotificationResult> {
         console.log(`[EmailAdapter] Sending email to ${message.to}: ${message.body}`);
 
-        // Mock implementation for development
+        // Production implementation using SendGrid
         if (process.env.NODE_ENV === 'production') {
-            // In production, use SendGrid or similar
-            // const sgMail = require('@sendgrid/mail');
-            // sgMail.setApiKey(this.apiKey);
-            // const msg = {
-            //     to: message.to,
-            //     from: this.fromEmail,
-            //     subject: 'Notificación de Asistencia',
-            //     text: message.body,
-            // };
-            // const result = await sgMail.send(msg);
-            // return {
-            //     success: true,
-            //     messageId: result[0].headers['x-message-id'],
-            //     provider: 'EMAIL'
-            // };
+            try {
+                const sgMail = require('@sendgrid/mail');
+                sgMail.setApiKey(this.apiKey);
+                
+                const msg = {
+                    to: message.to,
+                    from: this.fromEmail,
+                    subject: 'Notificación de Asistencia - AsistApp',
+                    text: message.body,
+                    html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #2c3e50;">Notificación de Asistencia</h2>
+                        <p>${message.body.replace(/\n/g, '<br>')}</p>
+                        <hr style="border: 1px solid #ecf0f1; margin: 20px 0;">
+                        <p style="color: #7f8c8d; font-size: 12px;">
+                            Este es un mensaje automático de AsistApp. Por favor no responda a este correo.
+                        </p>
+                    </div>`,
+                };
+                
+                const result = await sgMail.send(msg);
+                const messageId = result[0].headers['x-message-id'] || `email_${Date.now()}`;
+                
+                logger.info(`[EmailAdapter] ✅ Email sent successfully. ID: ${messageId}`);
+                
+                return {
+                    success: true,
+                    messageId: messageId,
+                    provider: 'EMAIL',
+                    rawResponse: {
+                        statusCode: result[0].statusCode,
+                        headers: result[0].headers
+                    }
+                };
+            } catch (error: any) {
+                logger.error(`[EmailAdapter] ❌ Error sending email:`, error);
+                return {
+                    success: false,
+                    error: error.message || 'Failed to send email',
+                    provider: 'EMAIL',
+                    rawResponse: error.response?.body
+                };
+            }
         }
 
-        // Simulate network delay
+        // Mock implementation for development
+        logger.info(`[EmailAdapter] 🔸 MOCK MODE - Would send email to ${message.to}`);
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        // Simulate success
         return {
             success: true,
-            messageId: `email_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            provider: 'EMAIL'
+            messageId: `email_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+            provider: 'EMAIL',
+            rawResponse: { mock: true }
         };
     }
 

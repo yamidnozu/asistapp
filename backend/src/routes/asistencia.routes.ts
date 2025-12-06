@@ -285,7 +285,6 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
         properties: {
           estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'] },
           observacion: { type: 'string' },
-          justificada: { type: 'boolean' },
         },
       },
       response: {

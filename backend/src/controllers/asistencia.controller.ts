@@ -373,13 +373,13 @@ export class AsistenciaController {
   public static async updateAsistencia(
     request: AuthenticatedRequest & FastifyRequest<{
       Params: { id: string },
-      Body: { estado?: string; observacion?: string; justificada?: boolean }
+      Body: { estado?: string; observacion?: string }
     }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
       const { id } = request.params;
-      const { estado, observacion, justificada } = request.body;
+      const { estado, observacion } = request.body;
       const usuario = request.user!;
 
       // Validar estado si se proporciona
@@ -396,7 +396,6 @@ export class AsistenciaController {
         {
           estado: estado as any,
           observacion,
-          justificada
         },
         usuario.id,
         usuario.rol

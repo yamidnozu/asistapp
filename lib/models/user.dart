@@ -18,6 +18,7 @@ class User {
   // Campos específicos para profesores
   final String? titulo;
   final String? especialidad;
+  final DateTime? createdAt;
 
   User({
     required this.id,
@@ -32,6 +33,7 @@ class User {
     this.estudiante,
     this.titulo,
     this.especialidad,
+    this.createdAt,
   }) : instituciones = instituciones ?? [];
 
   String get nombreCompleto => '$nombres $apellidos';
@@ -79,6 +81,7 @@ class User {
     StudentDetails? estudiante,
     String? titulo,
     String? especialidad,
+    DateTime? createdAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -93,6 +96,7 @@ class User {
       estudiante: estudiante ?? this.estudiante,
       titulo: titulo ?? this.titulo,
       especialidad: especialidad ?? this.especialidad,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
