@@ -1,7 +1,9 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
-// CI: small non-functional change to trigger Android release workflow.
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'config/app_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/institution_provider.dart';
@@ -15,6 +17,7 @@ import 'providers/grupo_provider.dart';
 import 'providers/materia_provider.dart';
 import 'providers/periodo_academico_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/acudiente_provider.dart';
 import 'managers/app_lifecycle_manager.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
@@ -27,9 +30,28 @@ import 'services/academic/materia_service.dart';
 import 'services/academic/horario_service.dart';
 import 'services/academic/periodo_service.dart';
 import 'services/user_service.dart' as user_service;
+import 'services/push_notification_service.dart';
+
+/// Helper para verificar si estamos en plataforma móvil
+bool get isMobilePlatform {
+  if (kIsWeb) return false;
+  try {
+    return Platform.isAndroid || Platform.isIOS;
+  } catch (e) {
+    return false;
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Firebase
+  try {
+    await Firebase.initializeApp();
+    debugPrint('✅ Firebase Core inicializado correctamente');
+  } catch (e) {
+    debugPrint('⚠️ Error inicializando Firebase: $e');
+  }
 
   // Inicializar configuración de la aplicación
   await AppConfig.initialize();
@@ -40,7 +62,7 @@ void main() async {
     systemNavigationBarColor: AppColors.instance.black,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
-  
+
   runApp(const MyApp());
 }
 
@@ -52,7 +74,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   late final AppLifecycleManager _lifecycleManager;
   late AppRouter _appRouter;
   late final AuthService _authService;
@@ -95,52 +116,82 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => _authProvider),
-        ChangeNotifierProvider(create: (_) => InstitutionProvider(institutionService: _institutionService)),
-        ChangeNotifierProvider(create: (_) => HorarioProvider(horarioService: _horarioService)),
-        ChangeNotifierProvider(create: (_) => AsistenciaProvider(asistenciaService: _asistenciaService)),
-        ChangeNotifierProvider(create: (_) => GrupoProvider(grupoService: _grupoService)),
-        ChangeNotifierProvider(create: (_) => MateriaProvider(materiaService: _materiaService)),
-        ChangeNotifierProvider(create: (_) => PeriodoAcademicoProvider(periodoService: _periodoService)),
-        ChangeNotifierProvider(create: (_) => UserProvider(userService: _userService)),
-        ChangeNotifierProvider(create: (_) => EstudiantesByGrupoPaginatedProvider(grupoService: _grupoService)),
-        ChangeNotifierProvider(create: (_) => EstudiantesSinAsignarPaginatedProvider(grupoService: _grupoService)),
-        ChangeNotifierProvider(create: (_) => InstitutionAdminsPaginatedProvider(userService: _userService)),
+        ChangeNotifierProvider(
+            create: (_) =>
+                InstitutionProvider(institutionService: _institutionService)),
+        ChangeNotifierProvider(
+            create: (_) => HorarioProvider(horarioService: _horarioService)),
+        ChangeNotifierProvider(
+            create: (_) =>
+                AsistenciaProvider(asistenciaService: _asistenciaService)),
+        ChangeNotifierProvider(
+            create: (_) => GrupoProvider(grupoService: _grupoService)),
+        ChangeNotifierProvider(
+            create: (_) => MateriaProvider(materiaService: _materiaService)),
+        ChangeNotifierProvider(
+            create: (_) =>
+                PeriodoAcademicoProvider(periodoService: _periodoService)),
+        ChangeNotifierProvider(
+            create: (_) => UserProvider(userService: _userService)),
+        ChangeNotifierProvider(
+            create: (_) => EstudiantesByGrupoPaginatedProvider(
+                grupoService: _grupoService)),
+        ChangeNotifierProvider(
+            create: (_) => EstudiantesSinAsignarPaginatedProvider(
+                grupoService: _grupoService)),
+        ChangeNotifierProvider(
+            create: (_) =>
+                InstitutionAdminsPaginatedProvider(userService: _userService)),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => AcudienteProvider()),
         ChangeNotifierProvider(create: (_) => _lifecycleManager),
       ],
       child: Builder(
         builder: (context) {
-
           _appRouter = AppRouter(
             authProvider: _authProvider,
           );
 
           // Register lifecycle callbacks for data refresh
-          final lifecycleManager = Provider.of<AppLifecycleManager>(context, listen: false);
-          final authProvider = Provider.of<AuthProvider>(context, listen: false);
-          final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
-          final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
-          final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
-          final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+          final lifecycleManager =
+              Provider.of<AppLifecycleManager>(context, listen: false);
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
+          final grupoProvider =
+              Provider.of<GrupoProvider>(context, listen: false);
+          final materiaProvider =
+              Provider.of<MateriaProvider>(context, listen: false);
+          final periodoProvider =
+              Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+          final horarioProvider =
+              Provider.of<HorarioProvider>(context, listen: false);
 
           lifecycleManager.addLifecycleCallback('data_refresh', () async {
             debugPrint('AppLifecycleManager: Refreshing data...');
             final token = authProvider.accessToken;
             if (token != null) {
-              debugPrint('AppLifecycleManager: Token available, refreshing periodos...');
+              debugPrint(
+                  'AppLifecycleManager: Token available, refreshing periodos...');
               await periodoProvider.loadPeriodosActivos(token);
-              debugPrint('AppLifecycleManager: Periodos refreshed, refreshing grupos...');
+              debugPrint(
+                  'AppLifecycleManager: Periodos refreshed, refreshing grupos...');
               await grupoProvider.loadGrupos(token);
-              debugPrint('AppLifecycleManager: Grupos refreshed, refreshing materias...');
+              debugPrint(
+                  'AppLifecycleManager: Grupos refreshed, refreshing materias...');
               await materiaProvider.loadMaterias(token);
-              debugPrint('AppLifecycleManager: Materias refreshed, checking for horario refresh...');
-              // Refresh horarios if there's a selected group and period
-              if (horarioProvider.selectedGrupoId != null && horarioProvider.selectedPeriodoId != null) {
-                debugPrint('AppLifecycleManager: Refreshing horarios for selected group/period...');
-                await horarioProvider.loadHorarios(token, grupoId: horarioProvider.selectedGrupoId, periodoId: horarioProvider.selectedPeriodoId);
+              debugPrint(
+                  'AppLifecycleManager: Materias refreshed, checking for horario refresh...');
+              if (horarioProvider.selectedGrupoId != null &&
+                  horarioProvider.selectedPeriodoId != null) {
+                debugPrint(
+                    'AppLifecycleManager: Refreshing horarios for selected group/period...');
+                await horarioProvider.loadHorarios(token,
+                    grupoId: horarioProvider.selectedGrupoId,
+                    periodoId: horarioProvider.selectedPeriodoId);
                 debugPrint('AppLifecycleManager: Horarios refreshed');
               } else {
-                debugPrint('AppLifecycleManager: No selected group/period for horario refresh');
+                debugPrint(
+                    'AppLifecycleManager: No selected group/period for horario refresh');
               }
               debugPrint('AppLifecycleManager: Data refresh completed');
             } else {
@@ -150,13 +201,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
           final settings = Provider.of<SettingsProvider>(context);
 
-          // Actualizar System UI Overlay para reflejar el tema seleccionado
           final useDark = settings.themeMode == ThemeMode.dark;
           SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
             statusBarColor: AppColors.instance.transparent,
-            statusBarIconBrightness: useDark ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness:
+                useDark ? Brightness.light : Brightness.dark,
             systemNavigationBarColor: AppColors.instance.black,
-            systemNavigationBarIconBrightness: useDark ? Brightness.light : Brightness.dark,
+            systemNavigationBarIconBrightness:
+                useDark ? Brightness.light : Brightness.dark,
           ));
 
           return MaterialApp.router(
@@ -167,7 +219,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             themeMode: settings.themeMode,
             routerConfig: _appRouter.router,
             builder: (context, child) {
-              // Use theme-aware text color. Avoid hard-coding white so light theme works.
               final textColor = Theme.of(context).colorScheme.onSurface;
               return DefaultTextStyle(
                 style: TextStyle(

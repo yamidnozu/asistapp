@@ -1,12 +1,16 @@
 name: asistapp
 description: "Aplicación de registro de asistencia escolar con escaneo QR"
-version: 1.0.12+13
+version: 1.0.13+14
 environment:
   sdk: ">=3.4.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  # Firebase (funciona en Android/iOS/Web - Windows local requiere comentar)
+  firebase_core: ^3.10.1
+  firebase_messaging: ^15.2.1
+  # UI
   flutter_animate: ^4.5.2
   flutter_dotenv: ^5.1.0
   flutter_speed_dial: ^7.0.0

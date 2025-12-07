@@ -31,6 +31,11 @@ import '../screens/student_notifications_screen.dart';
 import '../screens/my_qr_code_screen.dart';
 import '../screens/institution_selection_screen.dart';
 import '../screens/settings_screen.dart';
+// Acudiente screens
+import '../screens/acudiente/acudiente_dashboard_screen.dart';
+import '../screens/acudiente/estudiante_detail_screen.dart';
+import '../screens/acudiente/notificaciones_screen.dart';
+import '../screens/users/vincular_acudiente_screen.dart';
 
 // Global keys for navigation branches
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
@@ -263,6 +268,24 @@ class AppRouter {
                   child: StudentNotificationsScreen(),
                 ),
               ),
+              // Rutas del acudiente
+              GoRoute(
+                path: '/acudiente/hijos/:id',
+                name: 'acudiente-hijo-detail',
+                pageBuilder: (context, state) {
+                  final estudianteId = state.pathParameters['id']!;
+                  return MaterialPage(
+                    child: EstudianteDetailScreen(estudianteId: estudianteId),
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/acudiente/notificaciones',
+                name: 'acudiente-notificaciones',
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: NotificacionesScreen(),
+                ),
+              ),
             ],
           ),
 
@@ -332,6 +355,19 @@ class AppRouter {
                 ),
                 // Las rutas de formularios se movieron arriba
               ),
+              // Ruta para vincular acudientes a estudiantes
+              GoRoute(
+                path: '/users/vincular-acudiente/:estudianteId',
+                name: 'vincular-acudiente',
+                pageBuilder: (context, state) {
+                  final estudianteId = state.pathParameters['estudianteId']!;
+                  return MaterialPage(
+                    fullscreenDialog: true,
+                    name: 'Vincular Acudiente',
+                    child: VincularAcudienteScreen(estudianteId: estudianteId),
+                  );
+                },
+              ),
             ],
           ),
         ],
@@ -351,6 +387,8 @@ class AppRouter {
         return const TeacherDashboard();
       case 'estudiante':
         return const StudentDashboard();
+      case 'acudiente':
+        return const AcudienteDashboardScreen();
       default:
         // Rol desconocido, redirigir a login
         return const LoginScreen();

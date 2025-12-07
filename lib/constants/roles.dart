@@ -6,10 +6,11 @@ class UserRoles {
   static const String adminInstitucion = 'admin_institucion';
   static const String profesor = 'profesor';
   static const String estudiante = 'estudiante';
+  static const String acudiente = 'acudiente';
 
   /// Verifica si un string es un rol válido
   static bool isValidRole(String role) {
-    return [superAdmin, adminInstitucion, profesor, estudiante].contains(role);
+    return [superAdmin, adminInstitucion, profesor, estudiante, acudiente].contains(role);
   }
 
   /// Verifica si un rol tiene permisos de administración
@@ -20,6 +21,11 @@ class UserRoles {
   /// Verifica si un rol puede gestionar clases
   static bool canManageClasses(String role) {
     return isAdminRole(role) || role == profesor;
+  }
+
+  /// Verifica si un rol puede ver asistencias de estudiantes
+  static bool canViewStudentAttendance(String role) {
+    return isAdminRole(role) || role == profesor || role == acudiente;
   }
 
   /// Obtiene el nombre legible de un rol
@@ -33,6 +39,8 @@ class UserRoles {
         return 'Profesor';
       case estudiante:
         return 'Estudiante';
+      case acudiente:
+        return 'Acudiente';
       default:
         return 'Desconocido';
     }

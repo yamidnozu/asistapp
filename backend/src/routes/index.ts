@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { config } from '../config/app';
+import acudienteRoutes from './acudiente.routes';
 import asistenciaRoutes from './asistencia.routes';
 import authRoutes from './auth.routes';
 import estudianteRoutes from './estudiante.routes';
@@ -66,8 +67,19 @@ export default async function routes(fastify: FastifyInstance) {
     console.log('🎓 Registrando rutas del estudiante...');
   }
   await fastify.register(estudianteRoutes, { prefix: '/estudiantes' });
+
+  if (config.nodeEnv === 'development') {
+    console.log('👨‍👩‍👧 Registrando rutas del acudiente...');
+  }
+  await fastify.register(acudienteRoutes, { prefix: '/acudiente' });
+
+  // Rutas admin para gestionar acudientes
+  const adminAcudienteRoutes = (await import('./admin-acudiente.routes')).default;
+  await fastify.register(adminAcudienteRoutes, { prefix: '/admin' });
+
   if (config.nodeEnv === 'development') {
     console.log('✅ Rutas del estudiante registradas');
+    console.log('✅ Rutas del acudiente registradas');
     console.log('🎉 Todas las rutas registradas exitosamente');
   }
 }

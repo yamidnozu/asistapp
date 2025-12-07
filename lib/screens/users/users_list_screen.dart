@@ -288,6 +288,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
             label: 'Crear Estudiante',
             onTap: _navigateToCreateStudent,
           ),
+          SpeedDialChild(
+            key: const Key('createUser_acudiente'),
+            child: Icon(Icons.family_restroom,
+              color: colors.getTextColorForBackground(colors.primary)),
+            backgroundColor: colors.primary,
+            label: 'Crear Acudiente',
+            onTap: _navigateToCreateAcudiente,
+          ),
         ],
       );
     }
@@ -403,6 +411,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
         DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
         DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
+        DropdownMenuItem(value: 'acudiente', child: Text('Solo Acudientes', style: textStyles.bodyMedium)),
       ];
     } else {
       return [
@@ -683,6 +692,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
         return colors.primary;
       case 'super_admin':
         return colors.error;
+      case 'acudiente':
+        return colors.success;
       default:
         return colors.primary;
     }
@@ -830,6 +841,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   void _navigateToCreateSuperAdmin() {
     context.push('/users/create', extra: 'super_admin');
+  }
+
+  void _navigateToCreateAcudiente() {
+    context.push('/users/create', extra: 'acudiente');
   }
 
   void _navigateToUserEdit(User user) {

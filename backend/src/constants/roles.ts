@@ -8,6 +8,7 @@ export enum UserRole {
     ADMIN_INSTITUCION = 'admin_institucion',
     PROFESOR = 'profesor',
     ESTUDIANTE = 'estudiante',
+    ACUDIENTE = 'acudiente',
 }
 
 /**
@@ -32,6 +33,13 @@ export function canManageClasses(role: UserRole): boolean {
 }
 
 /**
+ * Verifica si un rol puede ver asistencias de estudiantes
+ */
+export function canViewStudentAttendance(role: UserRole): boolean {
+    return isAdminRole(role) || role === UserRole.PROFESOR || role === UserRole.ACUDIENTE;
+}
+
+/**
  * Obtiene el nombre legible de un rol
  */
 export function getRoleName(role: UserRole): string {
@@ -40,6 +48,7 @@ export function getRoleName(role: UserRole): string {
         [UserRole.ADMIN_INSTITUCION]: 'Administrador de Institución',
         [UserRole.PROFESOR]: 'Profesor',
         [UserRole.ESTUDIANTE]: 'Estudiante',
+        [UserRole.ACUDIENTE]: 'Acudiente',
     };
     return roleNames[role];
 }

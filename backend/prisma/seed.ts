@@ -15,6 +15,11 @@ async function main() {
   // 1. LIMPIEZA COMPLETA DE LA BASE DE DATOS
   // ============================================================================
   console.log('\n🧹 Limpiando base de datos...');
+  // Nuevas tablas para acudientes y notificaciones
+  await prisma.notificacionInApp.deleteMany();
+  await prisma.dispositivoFCM.deleteMany();
+  await prisma.acudienteEstudiante.deleteMany();
+  // Tablas existentes
   await prisma.logNotificacion.deleteMany();
   await prisma.colaNotificacion.deleteMany();
   await prisma.asistencia.deleteMany();
@@ -346,7 +351,66 @@ async function main() {
     },
   });
 
-  console.log('✅ Todos los usuarios creados.');
+  // -------------------- ACUDIENTES (PADRES/TUTORES) --------------------
+  console.log('\n   👨‍👩‍👧 Creando usuarios acudientes...');
+
+  const acudienteMaria = await prisma.usuario.create({
+    data: {
+      email: 'maria.mendoza@email.com',
+      passwordHash: hashPassword('Acu123!'),
+      nombres: 'María',
+      apellidos: 'Mendoza',
+      identificacion: 'ACU-MM-001',
+      rol: 'acudiente',
+      activo: true,
+      telefono: TELEFONO_TEST,
+    },
+  });
+  console.log('   ✅ Acudiente María Mendoza: maria.mendoza@email.com / Acu123!');
+
+  const acudientePatricia = await prisma.usuario.create({
+    data: {
+      email: 'patricia.castro@email.com',
+      passwordHash: hashPassword('Acu123!'),
+      nombres: 'Patricia',
+      apellidos: 'Castro',
+      identificacion: 'ACU-PC-001',
+      rol: 'acudiente',
+      activo: true,
+      telefono: '+573001112233',
+    },
+  });
+  console.log('   ✅ Acudiente Patricia Castro: patricia.castro@email.com / Acu123!');
+
+  const acudienteCarmen = await prisma.usuario.create({
+    data: {
+      email: 'carmen.lopez@email.com',
+      passwordHash: hashPassword('Acu123!'),
+      nombres: 'Carmen',
+      apellidos: 'López',
+      identificacion: 'ACU-CL-001',
+      rol: 'acudiente',
+      activo: true,
+      telefono: '+573002223344',
+    },
+  });
+  console.log('   ✅ Acudiente Carmen López: carmen.lopez@email.com / Acu123!');
+
+  const acudienteCarlosN = await prisma.usuario.create({
+    data: {
+      email: 'carlos.nunez@email.com',
+      passwordHash: hashPassword('Acu123!'),
+      nombres: 'Carlos',
+      apellidos: 'Núñez',
+      identificacion: 'ACU-CN-001',
+      rol: 'acudiente',
+      activo: true,
+      telefono: '+573003334455',
+    },
+  });
+  console.log('   ✅ Acudiente Carlos Núñez: carlos.nunez@email.com / Acu123!');
+
+  console.log('✅ Todos los usuarios creados (incluyendo 4 acudientes).');
 
   // ============================================================================
   // 5. VINCULAR USUARIOS A INSTITUCIONES
@@ -382,12 +446,21 @@ async function main() {
       { usuarioId: estudianteSofia.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
       { usuarioId: estudianteDaniel.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
       { usuarioId: estudiantePaula.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
+
+      // Acudientes San José
+      { usuarioId: acudienteMaria.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+      { usuarioId: acudientePatricia.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+      { usuarioId: acudienteCarmen.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+
+      // Acudientes Santander
+      { usuarioId: acudienteCarlosN.id, institucionId: liceoSantander.id, rolEnInstitucion: 'acudiente' },
     ],
   });
 
   console.log('✅ Vínculos usuario-institución creados.');
   console.log('   ℹ️  Super Admin tiene acceso global (sin vínculos explícitos)');
   console.log('   ℹ️  Admin Multi-Sede vinculado a 3 instituciones');
+  console.log('   ℹ️  4 Acudientes vinculados a instituciones');
 
   // ============================================================================
   // 6. ESTRUCTURA ACADÉMICA - PERÍODOS
@@ -639,6 +712,99 @@ async function main() {
   console.log('✅ Estudiantes asignados a grupos.');
 
   // ============================================================================
+  // 10.1 VINCULAR ACUDIENTES CON ESTUDIANTES
+  // ============================================================================
+  console.log('\n👨‍👩‍👧 Vinculando acudientes con estudiantes...');
+
+  await prisma.acudienteEstudiante.createMany({
+    data: [
+      // María Mendoza es madre de Santiago y Valentina (hermanos)
+      { acudienteId: acudienteMaria.id, estudianteId: perfilSantiago.id, parentesco: 'madre', esPrincipal: true, activo: true },
+      { acudienteId: acudienteMaria.id, estudianteId: perfilValentina.id, parentesco: 'madre', esPrincipal: true, activo: true },
+
+      // Patricia Castro es madre de Mateo
+      { acudienteId: acudientePatricia.id, estudianteId: perfilMateo.id, parentesco: 'madre', esPrincipal: true, activo: true },
+
+      // Carmen López es madre de Andrés
+      { acudienteId: acudienteCarmen.id, estudianteId: perfilAndres.id, parentesco: 'madre', esPrincipal: true, activo: true },
+
+      // Carlos Núñez es padre de Sofía
+      { acudienteId: acudienteCarlosN.id, estudianteId: perfilSofia.id, parentesco: 'padre', esPrincipal: true, activo: true },
+    ],
+  });
+
+  console.log('✅ 5 vínculos acudiente-estudiante creados.');
+  console.log('   ℹ️  María Mendoza tiene 2 hijos (Santiago y Valentina)');
+
+  // ============================================================================
+  // 10.2 CREAR NOTIFICACIONES IN-APP DE EJEMPLO
+  // ============================================================================
+  console.log('\n🔔 Creando notificaciones in-app de ejemplo...');
+
+  await prisma.notificacionInApp.createMany({
+    data: [
+      // Notificaciones para María (acudiente de Santiago y Valentina)
+      {
+        usuarioId: acudienteMaria.id,
+        titulo: '🚨 Ausencia reportada',
+        mensaje: 'Santiago Mendoza no asistió a la clase de Cálculo hoy.',
+        tipo: 'AUSENCIA',
+        leida: false,
+        estudianteId: perfilSantiago.id,
+      },
+      {
+        usuarioId: acudienteMaria.id,
+        titulo: '⏰ Tardanza registrada',
+        mensaje: 'Valentina Rojas llegó tarde a la clase de Física.',
+        tipo: 'TARDANZA',
+        leida: true,
+        estudianteId: perfilValentina.id,
+      },
+      {
+        usuarioId: acudienteMaria.id,
+        titulo: '🚨 Ausencia reportada',
+        mensaje: 'Valentina Rojas faltó a la clase de Español.',
+        tipo: 'AUSENCIA',
+        leida: false,
+        estudianteId: perfilValentina.id,
+      },
+
+      // Notificaciones para Patricia (acudiente de Mateo)
+      {
+        usuarioId: acudientePatricia.id,
+        titulo: '✅ Mensaje del sistema',
+        mensaje: 'Bienvenida a AsistApp. Ahora recibirás notificaciones sobre Mateo.',
+        tipo: 'SISTEMA',
+        leida: true,
+        estudianteId: perfilMateo.id,
+      },
+      {
+        usuarioId: acudientePatricia.id,
+        titulo: '⏰ Tardanza registrada',
+        mensaje: 'Mateo Castro llegó tarde a la clase de Química.',
+        tipo: 'TARDANZA',
+        leida: false,
+        estudianteId: perfilMateo.id,
+      },
+
+      // Notificaciones para Carlos (acudiente de Sofía)
+      {
+        usuarioId: acudienteCarlosN.id,
+        titulo: '🚨 Ausencia reportada',
+        mensaje: 'Sofía Núñez no asistió a la clase de Ciencias Sociales.',
+        tipo: 'AUSENCIA',
+        leida: false,
+        estudianteId: perfilSofia.id,
+      },
+    ],
+  });
+
+  console.log('✅ 6 notificaciones in-app creadas para acudientes.');
+  console.log('   ℹ️  María tiene 3 notificaciones (1 leída, 2 no leídas)');
+  console.log('   ℹ️  Patricia tiene 2 notificaciones (1 leída, 1 no leída)');
+  console.log('   ℹ️  Carlos tiene 1 notificación (no leída)');
+
+  // ============================================================================
   // 11. CREAR HORARIOS COMPLETOS (TODOS LOS DÍAS DE LA SEMANA)
   // ============================================================================
   console.log('\n📅 Creando horarios semanales...');
@@ -854,16 +1020,19 @@ async function main() {
   console.log('\n📊 RESUMEN DE DATOS CREADOS:');
   console.log('   • Instituciones: 4 (3 activas, 1 inactiva)');
   console.log('   • Configuraciones: 4 (INSTANT, MANUAL_ONLY, END_OF_DAY, NONE)');
-  console.log('   • Usuarios: 14 total');
+  console.log('   • Usuarios: 18 total');
   console.log('     - 1 Super Admin');
   console.log('     - 3 Admins Institución (1 multi-sede)');
   console.log('     - 4 Profesores (1 sin clases)');
   console.log('     - 7 Estudiantes');
+  console.log('     - 4 Acudientes (padres/tutores) ⭐ NUEVO');
   console.log('   • Períodos académicos: 3');
   console.log('   • Materias: 9');
   console.log('   • Grupos: 4');
   console.log(`   • Horarios: ${horariosData.length} (clases L-V)`);
   console.log('   • Asistencias históricas: 7');
+  console.log('   • Vínculos acudiente-estudiante: 5 ⭐ NUEVO');
+  console.log('   • Notificaciones in-app: 6 ⭐ NUEVO');
 
   console.log('\n🔐 CREDENCIALES DE ACCESO:');
   console.log('   ┌────────────────────────────────────────────────────────────┐');
@@ -884,13 +1053,29 @@ async function main() {
   console.log('   │ 👨‍🎓 Mateo           │ mateo.castro@sanjose.edu │ Est123!    │');
   console.log('   │ 👨‍🎓 Valentina       │ valentina.rojas@sanjose.edu │ Est123! │');
   console.log('   │ 👨‍🎓 Sofía           │ sofia.nunez@santander.edu│ Est123!    │');
+  console.log('   ├────────────────────────────────────────────────────────────┤');
+  console.log('   │ 👨‍👩‍👧 María Mendoza   │ maria.mendoza@email.com  │ Acu123!    │');
+  console.log('   │ 👨‍👩‍👧 Patricia Castro │ patricia.castro@email.com│ Acu123!    │');
+  console.log('   │ 👨‍👩‍👧 Carmen López    │ carmen.lopez@email.com   │ Acu123!    │');
+  console.log('   │ 👨‍👩‍👧 Carlos Núñez    │ carlos.nunez@email.com   │ Acu123!    │');
   console.log('   └────────────────────────────────────────────────────────────┘');
 
-  console.log('\n📱 CONFIGURACIÓN DE NOTIFICACIONES:');
+  console.log('\n�‍👩‍👧 RELACIONES ACUDIENTE-ESTUDIANTE:');
+  console.log('   • María Mendoza → Santiago Mendoza (madre) + Valentina Rojas (madre)');
+  console.log('   • Patricia Castro → Mateo Castro (madre)');
+  console.log('   • Carmen López → Andrés López (madre)');
+  console.log('   • Carlos Núñez → Sofía Núñez (padre)');
+
+  console.log('\n�📱 CONFIGURACIÓN DE NOTIFICACIONES:');
   console.log('   • San José: INSTANT (WhatsApp inmediato al registrar ausencia)');
   console.log('   • Santander: MANUAL_ONLY (requiere botón para enviar)');
   console.log('   • Bolívar: END_OF_DAY (resumen a las 16:00)');
   console.log(`   • Teléfono de prueba: ${TELEFONO_TEST}`);
+
+  console.log('\n🔔 NOTIFICACIONES IN-APP PRE-CREADAS:');
+  console.log('   • María: 3 notifs (2 no leídas, 1 leída)');
+  console.log('   • Patricia: 2 notifs (1 no leída, 1 leída)');
+  console.log('   • Carlos: 1 notif (no leída)');
 
   console.log('\n✅ Base de datos lista para pruebas!');
   console.log('='.repeat(70) + '\n');

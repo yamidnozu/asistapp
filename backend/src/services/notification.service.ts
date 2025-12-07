@@ -109,12 +109,17 @@ export class NotificationService {
                 return;
             }
 
+            // NUEVO: Siempre notificar a los acudientes in-app para AUSENTE o TARDANZA
+            if (attendance.estado === 'AUSENTE' || attendance.estado === 'TARDANZA') {
+                await this.notifyGuardiansInApp(attendance);
+            }
+
             // Obtener configuración de la institución
             const config = await this.getInstitutionConfig(attendance.institucionId);
 
-            // Verificar si las notificaciones están activas
+            // Verificar si las notificaciones WhatsApp/SMS están activas
             if (!config.enabled || config.channel === NotificationChannel.NONE) {
-                logger.debug(`[NotificationService] Notifications disabled for institution ${attendance.institucionId}`);
+                logger.debug(`[NotificationService] External notifications disabled for institution ${attendance.institucionId}`);
                 return;
             }
 
@@ -162,6 +167,76 @@ export class NotificationService {
             logger.error('[NotificationService] Error processing attendance notification', error);
         }
     }
+
+    /**
+     * 🔔 Notifica a los acudientes del estudiante via notificaciones in-app
+     * Estas notificaciones aparecen en la app del acudiente (push + in-app)
+     */
+    private async notifyGuardiansInApp(attendance: any): Promise<void> {
+        try {
+            const studentName = `${attendance.estudiante.usuario.nombres} ${attendance.estudiante.usuario.apellidos}`;
+            const materiaName = attendance.horario.materia?.nombre || 'una clase';
+            const horaInicio = attendance.horario.horaInicio || '';
+            const estado = attendance.estado;
+
+            // Buscar acudientes activos del estudiante
+            const acudientes = await prisma.acudienteEstudiante.findMany({
+                where: {
+                    estudianteId: attendance.estudiante.id,
+                    activo: true
+                },
+                select: {
+                    acudienteId: true,
+                    acudiente: {
+                        select: { nombres: true }
+                    }
+                }
+            });
+
+            if (acudientes.length === 0) {
+                logger.debug(`[NotificationService] No guardians found for student ${attendance.estudiante.id}`);
+                return;
+            }
+
+            // Construir notificación
+            const tipo = estado === 'AUSENTE' ? 'ausencia' : 'tardanza';
+            const titulo = estado === 'AUSENTE'
+                ? `⚠️ Ausencia de ${attendance.estudiante.usuario.nombres}`
+                : `⏰ Tardanza de ${attendance.estudiante.usuario.nombres}`;
+            const mensaje = estado === 'AUSENTE'
+                ? `${studentName} ha sido marcado como AUSENTE en ${materiaName}${horaInicio ? ` a las ${horaInicio}` : ''}.`
+                : `${studentName} llegó tarde a ${materiaName}${horaInicio ? ` (${horaInicio})` : ''}.`;
+
+            // Crear notificación in-app para cada acudiente
+            for (const acudiente of acudientes) {
+                await prisma.notificacionInApp.create({
+                    data: {
+                        usuarioId: acudiente.acudienteId,
+                        titulo,
+                        mensaje,
+                        tipo,
+                        estudianteId: attendance.estudiante.id,
+                        materiaId: attendance.horario.materiaId,
+                        asistenciaId: attendance.id,
+                        datos: {
+                            horaInicio,
+                            horaFin: attendance.horario.horaFin,
+                            fecha: attendance.fecha.toISOString(),
+                            institucionId: attendance.institucionId
+                        }
+                    }
+                });
+
+                logger.info(`[NotificationService] In-app notification created for guardian ${acudiente.acudienteId}`);
+            }
+
+            logger.info(`[NotificationService] Notified ${acudientes.length} guardians for student ${attendance.estudiante.id}`);
+
+        } catch (error) {
+            logger.error('[NotificationService] Error notifying guardians in-app', error);
+        }
+    }
+
 
     /**
      * 📲 ESTRATEGIA 1: Notificación Instantánea

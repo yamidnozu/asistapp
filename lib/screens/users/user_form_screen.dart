@@ -458,6 +458,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
         return 'Administrador de Institución';
       case 'super_admin':
         return 'Super Administrador';
+      case 'acudiente':
+        return 'Acudiente';
       default:
         return 'Usuario';
     }

@@ -177,6 +177,17 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
               responsive,
             ),
+
+            _buildUserCategory(
+              '👨‍👩‍👧 Acudientes (Padres/Tutores)',
+              [
+                _buildTestUserButton('María Mendoza', 'maria.mendoza@email.com', 'Acu123!', 'acudiente', 'Madre de Santiago y Valentina (2 hijos). Tiene notificaciones.', responsive),
+                _buildTestUserButton('Patricia Castro', 'patricia.castro@email.com', 'Acu123!', 'acudiente', 'Madre de Mateo. Tiene notificaciones.', responsive),
+                _buildTestUserButton('Carmen López', 'carmen.lopez@email.com', 'Acu123!', 'acudiente', 'Madre de Andrés.', responsive),
+                _buildTestUserButton('Carlos Núñez', 'carlos.nunez@email.com', 'Acu123!', 'acudiente', 'Padre de Sofía. Tiene notificación.', responsive),
+              ],
+              responsive,
+            ),
           ],
         );
       },

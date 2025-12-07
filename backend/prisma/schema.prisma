@@ -60,7 +60,7 @@ model UsuarioInstitucion {
   @@map("usuario_instituciones")
 }
 
-// 2. USUARIOS (Admins, Profesores, Estudiantes)
+// 2. USUARIOS (Admins, Profesores, Estudiantes, Acudientes)
 model Usuario {
   id             String   @id @default(uuid()) @db.Uuid
   email          String   @unique @db.VarChar(255)
@@ -71,7 +71,7 @@ model Usuario {
   // Campos específicos para profesores
   titulo         String?  @db.VarChar(255)
   especialidad   String?  @db.VarChar(255)
-  rol            String   @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante'
+  rol            String   @db.VarChar(50) // 'super_admin', 'admin_institucion', 'profesor', 'estudiante', 'acudiente'
   telefono       String?  @db.VarChar(20)
   activo         Boolean  @default(true)
   tokenVersion   Int      @default(1) @map("token_version") // Para revocación rápida de tokens
@@ -84,6 +84,10 @@ model Usuario {
   horarios             Horario[]
   asistencias          Asistencia[]
   refreshTokens        RefreshToken[]
+  // Relaciones para acudientes
+  hijosComoAcudiente   AcudienteEstudiante[] @relation("AcudienteRelation")
+  notificacionesInApp  NotificacionInApp[]
+  dispositivosFCM      DispositivoFCM[]
 
   @@map("usuarios")
 }
@@ -107,6 +111,7 @@ model Estudiante {
   asistencias        Asistencia[]
   logsNotificaciones LogNotificacion[]
   colaNotificaciones ColaNotificacion[]
+  acudientes         AcudienteEstudiante[]
 
   @@map("estudiantes")
 }
@@ -315,4 +320,72 @@ model RefreshToken {
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+// ============================================
+// MODELOS PARA SISTEMA DE ACUDIENTES
+// ============================================
+
+// 13. ACUDIENTES_ESTUDIANTES (Relación Acudiente-Estudiante)
+model AcudienteEstudiante {
+  id           String   @id @default(uuid()) @db.Uuid
+  acudienteId  String   @map("acudiente_id") @db.Uuid
+  estudianteId String   @map("estudiante_id") @db.Uuid
+  parentesco   String   @db.VarChar(50) // "padre", "madre", "tutor", "abuelo", "otro"
+  esPrincipal  Boolean  @default(false) @map("es_principal") // Acudiente principal para notificaciones prioritarias
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  acudiente  Usuario    @relation("AcudienteRelation", fields: [acudienteId], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  @@unique([acudienteId, estudianteId])
+  @@index([acudienteId])
+  @@index([estudianteId])
+  @@map("acudientes_estudiantes")
+}
+
+// 14. NOTIFICACIONES IN-APP (Para centro de notificaciones)
+model NotificacionInApp {
+  id           String   @id @default(uuid()) @db.Uuid
+  usuarioId    String   @map("usuario_id") @db.Uuid
+  titulo       String   @db.VarChar(255)
+  mensaje      String   @db.Text
+  tipo         String   @db.VarChar(50) // "ausencia", "tardanza", "justificado", "general", "sistema"
+  leida        Boolean  @default(false)
+  estudianteId String?  @map("estudiante_id") @db.Uuid // Referencia al estudiante (opcional)
+  materiaId    String?  @map("materia_id") @db.Uuid    // Referencia a la materia (opcional)
+  asistenciaId String?  @map("asistencia_id") @db.Uuid // Referencia a la asistencia (opcional)
+  datos        Json?    // Datos adicionales como JSON
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([leida])
+  @@index([createdAt])
+  @@map("notificaciones_in_app")
+}
+
+// 15. DISPOSITIVOS FCM (Para notificaciones push con Firebase)
+model DispositivoFCM {
+  id          String   @id @default(uuid()) @db.Uuid
+  usuarioId   String   @map("usuario_id") @db.Uuid
+  token       String   @db.Text // Token FCM del dispositivo
+  plataforma  String   @db.VarChar(20) // "android", "ios", "web"
+  modelo      String?  @db.VarChar(100) // Modelo del dispositivo (opcional)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, token])
+  @@index([usuarioId])
+  @@index([activo])
+  @@map("dispositivos_fcm")
 }

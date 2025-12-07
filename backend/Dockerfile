@@ -6,10 +6,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --include=dev
 COPY . .
+# Genera el cliente Prisma con los tipos
+RUN npx prisma generate
 # Compila el código de TypeScript a JavaScript
 RUN npm run build
 # Compila el archivo seed.ts a JavaScript
-RUN npx tsc prisma/seed.ts --outDir dist --module commonjs --target es2020 --esModuleInterop
+RUN npx tsc prisma/seed.ts --outDir dist --module commonjs --target es2020 --esModuleInterop --skipLibCheck
 
 # 2. Etapa de producción
 FROM node:18-alpine
