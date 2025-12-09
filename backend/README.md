@@ -140,4 +140,4 @@ LOG_LEVEL=info
 - ✅ **Prisma ORM** - Base de datos type-safe
 - ✅ **Fastify** - Framework rápido y eficiente
 
-> CI: Non-functional change to trigger backend workflow (no code or config changes).
+> CI: Non-functional change to trigger backend workflow (no code or config changes).# Deploy with Firebase and WhatsApp - lu.,  8 de dic. de 2025 21:17:33
