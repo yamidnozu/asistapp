@@ -217,30 +217,6 @@ class InstitutionProvider extends ChangeNotifier
     }
   }
 
-  /// Elimina una institución
-  Future<bool> deleteInstitution(String accessToken, String id) async {
-    if (isLoading) return false;
-
-    try {
-      await _institutionService.deleteInstitution(accessToken, id);
-
-      // Remover la institución de la lista
-      items.removeWhere((inst) => inst.id == id);
-
-      // Limpiar la institución seleccionada si es la misma
-      if (_selectedInstitution?.id == id) {
-        _selectedInstitution = null;
-      }
-
-      notifyListeners();
-      return true;
-    } catch (e) {
-      debugPrint('Error deleting institution: $e');
-      setError(e.toString());
-      return false;
-    }
-  }
-
   /// Selecciona una institución para edición
   void selectInstitution(Institution institution) {
     _selectedInstitution = institution;
