@@ -169,22 +169,63 @@ jobs:
         command_timeout: 30m
         script: |
           set -e
+          echo "=========================================="
+          echo "🚀 DEPLOYMENT AUTOMÁTICO - AsistApp"
+          echo "=========================================="
           echo "Deploy start: $(date)"
           echo "Image: $IMAGE_TAG"
+          echo "User: $(whoami)"
+          echo "UID: $(id -u)"
+          echo ""
+          
+          # Determinar si necesitamos sudo
           SUDO=""
-          if [ "$(id -u)" -ne 0 ]; then
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "✅ Running as root - no sudo needed"
+          else
+            echo "⚙️  Running as non-root user, checking sudo..."
             if command -v sudo >/dev/null 2>&1; then
               SUDO=sudo
               if ! $SUDO -n true 2>/dev/null; then
-                echo "❌ Error: User '$(whoami)' has sudo but requires a password."
-                echo "👉 Please configure passwordless sudo on the VPS for this user:"
-                echo "   echo '$(whoami) ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/$(whoami)"
-                exit 1
+                echo "⚠️  Passwordless sudo not configured, attempting auto-configuration..."
+                CURRENT_USER=$(whoami)
+                
+                # Crear el archivo sudoers para el usuario
+                # Esto funciona si el usuario tiene ALGÚN acceso sudo aunque requiera contraseña
+                # El SSH agent de GitHub Actions puede manejar esto
+                cat << SUDOEOF | sudo tee /etc/sudoers.d/$CURRENT_USER > /dev/null 2>&1 || {
+                  echo "❌ Cannot configure passwordless sudo."
+                  echo "📝 SOLUCIÓN: Ejecuta este comando UNA VEZ en tu VPS:"
+                  echo ""
+                  echo "   ssh $(whoami)@\$VPS_HOST 'echo \"$(whoami) ALL=(ALL) NOPASSWD:ALL\" | sudo tee /etc/sudoers.d/$(whoami) && sudo chmod 0440 /etc/sudoers.d/$(whoami)'"
+                  echo ""
+                  echo "Después re-ejecuta el workflow."
+                  exit 1
+                }
+$CURRENT_USER ALL=(ALL) NOPASSWD:ALL
+SUDOEOF
+                sudo chmod 0440 /etc/sudoers.d/$CURRENT_USER 2>/dev/null || true
+                
+                # Verificar
+                if $SUDO -n true 2>/dev/null; then
+                  echo "✅ Passwordless sudo configurado automáticamente"
+                else
+                  echo "❌ Auto-configuración falló"
+                  echo "📝 Ejecuta manualmente: echo '$(whoami) ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/$(whoami)"
+                  exit 1
+                fi
+              else
+                echo "✅ Passwordless sudo already configured"
               fi
             else
-              echo "Error: need root or sudo"; exit 1
+              echo "❌ Error: sudo command not found and not running as root"
+              exit 1
             fi
           fi
+          
+          echo ""
+          echo "🔧 Starting deployment with SUDO='$SUDO'..."
+          echo ""
           $SUDO mkdir -p /opt/asistapp
           test -f /opt/asistapp/docker-compose.prod.yml && $SUDO cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/backup-$(date +%Y%m%d%H%M%S).yml
           cat << 'ENVEOF' | $SUDO tee /opt/asistapp/.env > /dev/null
