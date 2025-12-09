@@ -37,7 +37,7 @@ export interface InstitutionResponse {
   activa: boolean;
   createdAt: string;
   updatedAt: string;
-  configuraciones?: any;
+  configuraciones?: any | null;
 }
 
 export class InstitucionService {
