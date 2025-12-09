@@ -12,22 +12,24 @@ import '../../theme/theme_extensions.dart';
 import '../../services/user_form_service.dart';
 import '../../services/user_service.dart';
 import '../../services/form_validation_service.dart';
+import '../../widgets/gestionar_acudientes_sheet.dart';
 import 'form_steps/index.dart';
 
 /// Resultado de la operación de guardado de usuario
 class _SaveResult {
   final bool success;
   final String? tempPassword;
-  
+
   _SaveResult({required this.success, this.tempPassword});
 }
 
 class UserFormScreen extends StatefulWidget {
   final String userRole; // 'profesor', 'estudiante', 'admin_institucion', etc.
-  final String? initialInstitutionId; // Optional: preselect institution for admin creation
+  final String?
+      initialInstitutionId; // Optional: preselect institution for admin creation
 
   const UserFormScreen({
-    super.key, 
+    super.key,
     required this.userRole,
     this.initialInstitutionId,
   });
@@ -40,7 +42,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int _currentStep = 0;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
-
 
   // Servicios
   final UserFormService _userFormService = UserFormService();
@@ -57,16 +58,26 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final FocusNode _nombreResponsableFocus = FocusNode();
   final FocusNode _telefonoResponsableFocus = FocusNode();
   // GlobalKeys for form fields to allow Scrollable.ensureVisible
-  final GlobalKey<FormFieldState<String>> _emailFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _institutionFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _nombresFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _apellidosFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _telefonoFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _identificacionFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _tituloFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _especialidadFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _nombreResponsableFieldKey = GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _telefonoResponsableFieldKey = GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _emailFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _institutionFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _nombresFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _apellidosFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _telefonoFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _identificacionFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _tituloFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _especialidadFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _nombreResponsableFieldKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _telefonoResponsableFieldKey =
+      GlobalKey<FormFieldState<String>>();
   final _nombresController = TextEditingController();
   final _apellidosController = TextEditingController();
   final _emailController = TextEditingController();
@@ -81,10 +92,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
   bool _isInitialLoading = false;
   bool _activo = true;
   User? _user; // Usuario cargado para edición
-  List<String> _selectedInstitutionIds = []; // Instituciones seleccionadas para admin_institucion (edición puede tener varias)
+  List<String> _selectedInstitutionIds =
+      []; // Instituciones seleccionadas para admin_institucion (edición puede tener varias)
   // Indica si el formulario está editando al usuario de la sesión
   bool _isSelfEditing = false;
-  
+
   String? _emailError;
 
   @override
@@ -97,7 +109,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
   }
 
   late List<GlobalKey<FormState>> _stepKeys;
-
 
   @override
   void didChangeDependencies() {
@@ -123,20 +134,21 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     final uri = GoRouterState.of(context).uri;
     final queryParams = uri.queryParameters;
-    
+
     // Captura el context antes del await
     final navigator = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
 
     setState(() => _isInitialLoading = true);
-    
+
     try {
-      final user = await _userFormService.loadUserForEditing(context, queryParams);
+      final user =
+          await _userFormService.loadUserForEditing(context, queryParams);
       if (user != null && mounted) {
         // Detectar si estamos editando al usuario de la sesión
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final sessionUserId = authProvider.user?['id']?.toString();
+        final sessionUserId = authProvider.user?['id']?.toString();
         setState(() {
           _user = user;
           _isSelfEditing = sessionUserId != null && sessionUserId == user.id;
@@ -169,9 +181,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
     await _userFormService.loadInstitutionsIfNeeded(context, widget.userRole);
     if (!mounted) return;
     // Preselect institution if provided
-    if (widget.initialInstitutionId != null && _selectedInstitutionIds.isEmpty) {
-      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-      final exists = institutionProvider.institutions.any((i) => i.id == widget.initialInstitutionId);
+    if (widget.initialInstitutionId != null &&
+        _selectedInstitutionIds.isEmpty) {
+      final institutionProvider =
+          Provider.of<InstitutionProvider>(context, listen: false);
+      final exists = institutionProvider.institutions
+          .any((i) => i.id == widget.initialInstitutionId);
       if (exists) _selectedInstitutionIds = [widget.initialInstitutionId!];
     }
   }
@@ -225,7 +240,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final navigator = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
-    
+
     // Antes de guardar, validar todos los steps
     if (!_userFormService.validateAllSteps(_stepKeys)) {
       setState(() => _autoValidateMode = AutovalidateMode.always);
@@ -247,7 +262,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
 
     // Validación adicional para admin_institucion
-    if (widget.userRole == 'admin_institucion' && _selectedInstitutionIds.isEmpty) {
+    if (widget.userRole == 'admin_institucion' &&
+        _selectedInstitutionIds.isEmpty) {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -348,19 +364,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
         if (token != null) {
           try {
             // IDs actuales en la entidad cargada
-            final existingIds = _user?.instituciones?.map((i) => i.id).toSet() ?? <String>{};
+            final existingIds =
+                _user?.instituciones?.map((i) => i.id).toSet() ?? <String>{};
             final selectedIds = _selectedInstitutionIds.toSet();
 
             // Asignar los que están en selectedIds pero no en existingIds
             final toAssign = selectedIds.difference(existingIds);
             for (final instId in toAssign) {
-              await userProvider.assignAdminToInstitution(token, instId, _user!.id);
+              await userProvider.assignAdminToInstitution(
+                  token, instId, _user!.id);
             }
 
             // Remover los que estaban y ya no están seleccionados
             final toRemove = existingIds.difference(selectedIds);
             for (final instId in toRemove) {
-              await userProvider.removeAdminFromInstitution(token, instId, _user!.id);
+              await userProvider.removeAdminFromInstitution(
+                  token, instId, _user!.id);
             }
           } catch (e) {
             debugPrint('Error sincronizando instituciones del usuario: $e');
@@ -385,7 +404,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
         especialidad: _especialidadController.text,
         nombreResponsable: _nombreResponsableController.text,
         telefonoResponsable: _telefonoResponsableController.text,
-        selectedInstitutionId: _selectedInstitutionIds.isNotEmpty ? _selectedInstitutionIds.first : null,
+        selectedInstitutionId: _selectedInstitutionIds.isNotEmpty
+            ? _selectedInstitutionIds.first
+            : null,
         authProvider: authProvider,
       );
 
@@ -396,8 +417,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
         updateRequest: null,
         userRole: widget.userRole,
       );
-      
-      return _SaveResult(success: success, tempPassword: success ? tempPassword : null);
+
+      return _SaveResult(
+          success: success, tempPassword: success ? tempPassword : null);
     }
   }
 
@@ -412,9 +434,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
+              const Text(
+                  'Se ha creado el usuario. Esta es la contraseña temporal (se mostrará sólo ahora):'),
               const SizedBox(height: 12),
-              SelectableText(tempPassword, style: Theme.of(context).textTheme.headlineSmall),
+              SelectableText(tempPassword,
+                  style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
               Text(
                 'Asegúrate de copiarla y entregarla al usuario. No se podrá volver a visualizar.',
@@ -435,6 +459,17 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ],
         );
       },
+    );
+  }
+
+  /// Abre el bottom sheet para gestionar acudientes del estudiante
+  void _openGestionarAcudientes() {
+    if (_user == null || _user!.estudiante?.id == null) return;
+
+    GestionarAcudientesSheet.show(
+      context,
+      _user!.estudiante!.id,
+      _user!.nombreCompleto,
     );
   }
 
@@ -507,7 +542,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
-    final title = _user != null ? 'Editar Usuario' : 'Crear ${_getRoleDisplayName(widget.userRole)}';
+    final title = _user != null
+        ? 'Editar Usuario'
+        : 'Crear ${_getRoleDisplayName(widget.userRole)}';
 
     if (_isInitialLoading) {
       return Scaffold(
@@ -550,7 +587,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           onStepTapped: (step) => setState(() => _currentStep = step),
           controlsBuilder: (context, details) {
             final isLastStep = details.currentStep == totalSteps - 1;
-            
+
             return Padding(
               padding: EdgeInsets.only(top: spacing.lg),
               child: Row(
@@ -563,7 +600,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                           padding: EdgeInsets.symmetric(vertical: spacing.md),
                           side: BorderSide(color: colors.primary),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(spacing.borderRadius),
+                            borderRadius:
+                                BorderRadius.circular(spacing.borderRadius),
                           ),
                         ),
                         child: Text(
@@ -583,20 +621,24 @@ class _UserFormScreenState extends State<UserFormScreen> {
                         backgroundColor: colors.primary,
                         foregroundColor: colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(spacing.borderRadius),
                         ),
                       ),
                       child: _isLoading
-                              ? SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(colors.white),
                               ),
                             )
                           : Text(
-                              isLastStep ? (_user != null ? 'Actualizar' : 'Crear') : 'Siguiente',
+                              isLastStep
+                                  ? (_user != null ? 'Actualizar' : 'Crear')
+                                  : 'Siguiente',
                               style: textStyles.button.withColor(colors.white),
                             ),
                     ),
@@ -610,7 +652,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                           padding: EdgeInsets.symmetric(vertical: spacing.md),
                           side: BorderSide(color: colors.error),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(spacing.borderRadius),
+                            borderRadius:
+                                BorderRadius.circular(spacing.borderRadius),
                           ),
                         ),
                         child: Text(
@@ -639,7 +682,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   }
 
   List<Step> _buildSteps() {
-  final steps = <Step>[
+    final steps = <Step>[
       // Step 1: Información de Cuenta
       Step(
         title: const Text('Cuenta'),
@@ -648,7 +691,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
           key: _stepKeys[0],
           child: Builder(
             builder: (ctx) {
-              final sessionRole = Provider.of<AuthProvider>(ctx, listen: false).user?['rol'] as String?;
+              final sessionRole = Provider.of<AuthProvider>(ctx, listen: false)
+                  .user?['rol'] as String?;
               // Permitir editar instituciones sólo si: (a) el role del formulario no es
               // 'admin_institucion' y no es un admin autoeditando su perfil, o (b)
               // si se trata de admin_institucion, sólo permitir a super_admin hacerlo.
@@ -656,18 +700,24 @@ class _UserFormScreenState extends State<UserFormScreen> {
               if (widget.userRole == 'admin_institucion') {
                 canEditInstitutions = sessionRole == 'super_admin';
               } else {
-                canEditInstitutions = !(_isSelfEditing && sessionRole == 'admin_institucion');
+                canEditInstitutions =
+                    !(_isSelfEditing && sessionRole == 'admin_institucion');
               }
               // Debug: imprimir el estado de permisos para ayudar a diagnosticar
-              debugPrint('UserFormScreen: sessionRole=$sessionRole, userRole=${widget.userRole}, isSelfEditing=$_isSelfEditing, canEditInstitutions=$canEditInstitutions');
+              debugPrint(
+                  'UserFormScreen: sessionRole=$sessionRole, userRole=${widget.userRole}, isSelfEditing=$_isSelfEditing, canEditInstitutions=$canEditInstitutions');
 
               return UserAccountStep(
                 emailController: _emailController,
                 userRole: widget.userRole,
                 // Para edición permitimos seleccionar múltiples instituciones
                 selectedInstitutionIds: _selectedInstitutionIds,
-                selectedInstitutionNames: _user != null && (_user!.instituciones?.isNotEmpty ?? false) ? _user!.instituciones!.map((i) => i.nombre).toList() : const [],
-                onInstitutionChanged: (ids) => setState(() => _selectedInstitutionIds = ids),
+                selectedInstitutionNames:
+                    _user != null && (_user!.instituciones?.isNotEmpty ?? false)
+                        ? _user!.instituciones!.map((i) => i.nombre).toList()
+                        : const [],
+                onInstitutionChanged: (ids) =>
+                    setState(() => _selectedInstitutionIds = ids),
                 // Control de bloqueo: el campo queda deshabilitado si no se permite editar instituciones
                 disableInstitution: !canEditInstitutions,
                 emailFocusNode: _emailFocus,
@@ -701,19 +751,24 @@ class _UserFormScreenState extends State<UserFormScreen> {
             // El switch de 'activo' debe ser de solo lectura si el usuario de sesión es
             // admin_institucion y está editando su propia cuenta.
             // Evaluamos el rol directamente desde AuthProvider en tiempo de build.
-            activoEditable: !(_isSelfEditing && (Provider.of<AuthProvider>(context, listen: false).user?['rol'] == 'admin_institucion')),
+            activoEditable: !(_isSelfEditing &&
+                (Provider.of<AuthProvider>(context, listen: false)
+                        .user?['rol'] ==
+                    'admin_institucion')),
             nombresFocusNode: _nombresFocus,
             apellidosFocusNode: _apellidosFocus,
             telefonoFocusNode: _telefonoFocus,
             identificacionFocusNode: _identificacionFocus,
-             nombresFieldKey: _nombresFieldKey,
-             apellidosFieldKey: _apellidosFieldKey,
-             telefonoFieldKey: _telefonoFieldKey,
-             identificacionFieldKey: _identificacionFieldKey,
+            nombresFieldKey: _nombresFieldKey,
+            apellidosFieldKey: _apellidosFieldKey,
+            telefonoFieldKey: _telefonoFieldKey,
+            identificacionFieldKey: _identificacionFieldKey,
           ),
         ),
         isActive: _currentStep >= 1,
-        state: _currentStep > 1 ? StepState.complete : (_currentStep == 1 ? StepState.indexed : StepState.disabled),
+        state: _currentStep > 1
+            ? StepState.complete
+            : (_currentStep == 1 ? StepState.indexed : StepState.disabled),
       ),
     ];
 
@@ -722,15 +777,25 @@ class _UserFormScreenState extends State<UserFormScreen> {
       steps.add(
         Step(
           title: const Text('Detalles'),
-          subtitle: Text(widget.userRole == 'profesor' ? 'Info académica' : 'Responsable'),
+          subtitle: Text(
+              widget.userRole == 'profesor' ? 'Info académica' : 'Responsable'),
           content: Form(
             key: _stepKeys[2],
             child: RoleSpecificDetailsStep(
               userRole: widget.userRole,
-              tituloController: (widget.userRole == 'profesor' || widget.userRole == 'admin_institucion') ? _tituloController : null,
-              especialidadController: widget.userRole == 'profesor' ? _especialidadController : null,
-              nombreResponsableController: widget.userRole == 'estudiante' ? _nombreResponsableController : null,
-              telefonoResponsableController: widget.userRole == 'estudiante' ? _telefonoResponsableController : null,
+              tituloController: (widget.userRole == 'profesor' ||
+                      widget.userRole == 'admin_institucion')
+                  ? _tituloController
+                  : null,
+              especialidadController: widget.userRole == 'profesor'
+                  ? _especialidadController
+                  : null,
+              nombreResponsableController: widget.userRole == 'estudiante'
+                  ? _nombreResponsableController
+                  : null,
+              telefonoResponsableController: widget.userRole == 'estudiante'
+                  ? _telefonoResponsableController
+                  : null,
               tituloFocusNode: _tituloFocus,
               especialidadFocusNode: _especialidadFocus,
               nombreResponsableFocusNode: _nombreResponsableFocus,
@@ -739,6 +804,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
               especialidadFieldKey: _especialidadFieldKey,
               nombreResponsableFieldKey: _nombreResponsableFieldKey,
               telefonoResponsableFieldKey: _telefonoResponsableFieldKey,
+              // Para gestión de acudientes (solo disponible en edición de estudiante)
+              estudianteId: (widget.userRole == 'estudiante' && _user != null)
+                  ? _user!.estudiante?.id
+                  : null,
+              onGestionarAcudientes: (widget.userRole == 'estudiante' &&
+                      _user != null &&
+                      _user!.estudiante?.id != null)
+                  ? () => _openGestionarAcudientes()
+                  : null,
             ),
           ),
           isActive: _currentStep >= 2,
@@ -750,12 +824,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
     return steps;
   }
 
-
   void _onStepContinue() {
     debugPrint('🔔 _onStepContinue CALLED! currentStep=$_currentStep');
     final totalSteps = _getTotalSteps();
     debugPrint('🔔 totalSteps=$totalSteps');
-    
+
     // Validar solo el step actual antes de continuar
     final stepState = _stepKeys[_currentStep].currentState;
     debugPrint('🔔 stepState for step $_currentStep: $stepState');
@@ -779,8 +852,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
         ),
       );
 
-  // Enfocar el primer campo inválido del step actual
-  _focusFirstInvalidField(_currentStep, context);
+      // Enfocar el primer campo inválido del step actual
+      _focusFirstInvalidField(_currentStep, context);
 
       return;
     }

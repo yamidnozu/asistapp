@@ -3,15 +3,15 @@ import 'dart:io' show Platform, File, Directory;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Configuración de la aplicación con soporte para múltiples entornos
-/// 
+///
 /// Uso con --dart-define:
 /// ```bash
 /// # Desarrollo local
-/// flutter run --dart-define=API_BASE_URL=http://192.168.1.100:3002
-/// 
+/// flutter run --dart-define=API_BASE_URL=http://192.168.1.100:3000
+///
 /// # Producción
 /// flutter build apk --dart-define=API_BASE_URL=https://api.asistapp.com
-/// 
+///
 /// # Staging
 /// flutter build apk --dart-define=API_BASE_URL=https://staging.asistapp.com --dart-define=ENVIRONMENT=staging
 /// ```
@@ -27,8 +27,9 @@ class AppConfig {
   static Future<void> initialize() async {
     // 1. Intentar obtener de --dart-define (tiempo de compilación)
     const dartDefineUrl = String.fromEnvironment('API_BASE_URL');
-    const dartDefineEnv = String.fromEnvironment('ENVIRONMENT', defaultValue: 'development');
-    
+    const dartDefineEnv =
+        String.fromEnvironment('ENVIRONMENT', defaultValue: 'development');
+
     if (dartDefineUrl.isNotEmpty) {
       _baseUrl = dartDefineUrl;
       _environment = dartDefineEnv;
@@ -108,7 +109,7 @@ class AppConfig {
 
       final envUrl = dotenv.env['API_BASE_URL'];
       final envEnvironment = dotenv.env['ENVIRONMENT'] ?? 'development';
-      
+
       if (envUrl != null && envUrl.isNotEmpty) {
         _baseUrl = envUrl;
         _environment = envEnvironment;
@@ -139,18 +140,18 @@ class AppConfig {
     // Android emulador usa 10.0.2.2 para conectar al localhost del host
     // iOS simulator usa localhost directamente
     // Dispositivos físicos necesitan la IP de la red local
-    
+
     if (kDebugMode) {
       // En desarrollo, intentar detectar la mejor opción
       if (Platform.isAndroid) {
         // Para emulador de Android
-        return 'http://10.0.2.2:3002';
+        return 'http://10.0.2.2:3000';
       } else if (Platform.isIOS) {
         // Para simulador de iOS
-        return 'http://localhost:3002';
+        return 'http://localhost:3000';
       }
     }
-    
+
     // Fallback: red local (ajustar según tu configuración)
     // Cambiado a puerto 3000 por defecto para que coincida con el backend en docker-compose
     return 'http://192.168.20.22:3000';
@@ -159,10 +160,8 @@ class AppConfig {
   /// Devuelve la URL base de la API
   static String get baseUrl {
     if (_baseUrl == null) {
-      throw StateError(
-        'AppConfig no ha sido inicializado. '
-        'Llama a AppConfig.initialize() antes de usar baseUrl.'
-      );
+      throw StateError('AppConfig no ha sido inicializado. '
+          'Llama a AppConfig.initialize() antes de usar baseUrl.');
     }
     return _baseUrl!;
   }
@@ -186,7 +185,8 @@ class AppConfig {
     if (isProduction) {
       return const Duration(seconds: 30);
     } else {
-      return const Duration(seconds: 60); // Más tiempo en desarrollo para debugging
+      return const Duration(
+          seconds: 60); // Más tiempo en desarrollo para debugging
     }
   }
 

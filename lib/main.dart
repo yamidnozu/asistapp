@@ -45,12 +45,16 @@ bool get isMobilePlatform {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase
-  try {
-    await Firebase.initializeApp();
-    debugPrint('✅ Firebase Core inicializado correctamente');
-  } catch (e) {
-    debugPrint('⚠️ Error inicializando Firebase: $e');
+  // Inicializar Firebase solo en plataformas móviles (no en Windows)
+  if (isMobilePlatform) {
+    try {
+      await Firebase.initializeApp();
+      debugPrint('✅ Firebase Core inicializado correctamente');
+    } catch (e) {
+      debugPrint('⚠️ Error inicializando Firebase: $e');
+    }
+  } else {
+    debugPrint('ℹ️ Firebase deshabilitado en plataforma no móvil');
   }
 
   // Inicializar configuración de la aplicación

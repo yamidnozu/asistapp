@@ -6,11 +6,11 @@ import '../../../widgets/components/clarity_components.dart';
 /// Step 3: Detalles Específicos por Rol (Profesor o Estudiante)
 class RoleSpecificDetailsStep extends StatelessWidget {
   final String userRole;
-  
+
   // Campos para Profesor
   final TextEditingController? tituloController;
   final TextEditingController? especialidadController;
-  
+
   // Campos para Estudiante
   final TextEditingController? nombreResponsableController;
   final TextEditingController? telefonoResponsableController;
@@ -19,6 +19,10 @@ class RoleSpecificDetailsStep extends StatelessWidget {
   final GlobalKey<FormFieldState<String>>? especialidadFieldKey;
   final GlobalKey<FormFieldState<String>>? nombreResponsableFieldKey;
   final GlobalKey<FormFieldState<String>>? telefonoResponsableFieldKey;
+
+  // Para gestión de acudientes (solo en edición de estudiante)
+  final String? estudianteId;
+  final VoidCallback? onGestionarAcudientes;
 
   const RoleSpecificDetailsStep({
     super.key,
@@ -35,6 +39,8 @@ class RoleSpecificDetailsStep extends StatelessWidget {
     this.especialidadFieldKey,
     this.nombreResponsableFieldKey,
     this.telefonoResponsableFieldKey,
+    this.estudianteId,
+    this.onGestionarAcudientes,
   });
 
   final FocusNode? tituloFocusNode;
@@ -74,7 +80,6 @@ class RoleSpecificDetailsStep extends StatelessWidget {
           ),
         ),
         SizedBox(height: spacing.lg),
-
         if (tituloController != null) ...[
           ClaritySection(
             title: 'Cargo Institucional',
@@ -123,7 +128,6 @@ class RoleSpecificDetailsStep extends StatelessWidget {
           ),
         ),
         SizedBox(height: spacing.lg),
-
         ClaritySection(
           title: 'Credenciales Académicas',
           child: Column(
@@ -136,8 +140,8 @@ class RoleSpecificDetailsStep extends StatelessWidget {
                           children: [
                             Expanded(
                               child: CustomTextFormField(
-                  fieldKey: tituloFieldKey,
-                  focusNode: tituloFocusNode,
+                                fieldKey: tituloFieldKey,
+                                focusNode: tituloFocusNode,
                                 controller: tituloController!,
                                 labelText: 'Título Académico',
                                 hintText: 'Licenciado en..., Magíster en...',
@@ -155,8 +159,8 @@ class RoleSpecificDetailsStep extends StatelessWidget {
                             SizedBox(width: spacing.md),
                             Expanded(
                               child: CustomTextFormField(
-                  fieldKey: especialidadFieldKey,
-                  focusNode: especialidadFocusNode,
+                                fieldKey: especialidadFieldKey,
+                                focusNode: especialidadFocusNode,
                                 controller: especialidadController!,
                                 labelText: 'Especialidad',
                                 hintText: 'Matemáticas, Física, etc.',
@@ -221,79 +225,62 @@ class RoleSpecificDetailsStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Sección de Acudientes (usuarios con acceso al sistema)
         Text(
-          'Información del Responsable',
+          'Acudientes',
           style: context.textStyles.headlineSmall,
         ),
         SizedBox(height: spacing.md),
         Text(
-          'Datos del padre, madre o tutor del estudiante (opcional)',
+          'Gestione los acudientes, padres o tutores que tendrán acceso a la plataforma para ver el seguimiento del estudiante.',
           style: context.textStyles.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
         ),
         SizedBox(height: spacing.lg),
 
-        ClaritySection(
-          title: 'Contacto de Emergencia',
-          child: Column(
-            children: [
-              CustomTextFormField(
-                fieldKey: nombreResponsableFieldKey,
-                focusNode: nombreResponsableFocusNode,
-                controller: nombreResponsableController!,
-                labelText: 'Nombre del Responsable',
-                hintText: 'Padre, madre o tutor',
-                validator: (value) {
-                  // El responsable es opcional para estudiantes
-                  return null;
-                },
-              ),
-              SizedBox(height: spacing.md),
-              CustomTextFormField(
-                fieldKey: telefonoResponsableFieldKey,
-                focusNode: telefonoResponsableFocusNode,
-                controller: telefonoResponsableController!,
-                labelText: 'Teléfono del Responsable',
-                hintText: '+57 300 123 4567',
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final phoneRegex = RegExp(r'^\+?[0-9\s\-\(\)]+$');
-                    if (!phoneRegex.hasMatch(value.trim())) {
-                      return 'Ingrese un teléfono válido';
-                    }
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(height: spacing.md),
-        Container(
-          padding: EdgeInsets.all(spacing.md),
-          decoration: BoxDecoration(
-            color: context.colors.info.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: context.colors.info.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.info_outline, color: context.colors.info, size: 20),
-              SizedBox(width: spacing.sm),
-              Expanded(
-                child: Text(
-                  'Esta información será utilizada para contacto en caso de emergencia.',
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colors.info,
+        // Mensaje si es modo creación
+        if (estudianteId == null) ...[
+          Container(
+            padding: EdgeInsets.all(spacing.md),
+            decoration: BoxDecoration(
+              color: context.colors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                  color: context.colors.warning.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber,
+                    color: context.colors.warning, size: 24),
+                SizedBox(width: spacing.sm),
+                Expanded(
+                  child: Text(
+                    'Para gestionar acudientes, primero debe guardar el estudiante. Después de crearlo, podrá asignar acudientes desde la pantalla de detalle o editando nuevamente.',
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colors.warning,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ] else ...[
+          // Botón para abrir gestión de acudientes
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onGestionarAcudientes,
+              icon: const Icon(Icons.family_restroom),
+              label: const Text('Gestionar Acudientes'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.info,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: spacing.md),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

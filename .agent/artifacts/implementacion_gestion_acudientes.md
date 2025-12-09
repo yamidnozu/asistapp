@@ -57,30 +57,6 @@ Implementar un flujo completo para vincular acudientes a estudiantes con facilid
 
 ## 🔔 Integración con Notificaciones
 
-El sistema ya tiene integración completa:
-
-1. **Automático**: Cuando se registra ausencia/tardanza → Se crea notificación in-app para cada acudiente vinculado
-2. **Endpoints del acudiente**:
-   - `GET /acudiente/notificaciones` - Ver notificaciones
-   - `GET /acudiente/notificaciones/no-leidas/count` - Contador no leídas
-   - `PUT /acudiente/notificaciones/:id/leer` - Marcar como leída
-   - `PUT /acudiente/notificaciones/leer-todas` - Marcar todas como leídas
-
----
-
-## 📱 Funcionalidades del Widget GestionarAcudientesSheet
-
-1. ✅ Ver acudientes vinculados al estudiante
-2. ✅ Buscar acudiente existente por email
-3. ✅ Crear nuevo acudiente con formulario inline
-4. ✅ Generar contraseña temporal automática
-5. ✅ Mostrar credenciales con opción copiar
-6. ✅ Selector de parentesco (padre, madre, tutor, etc.)
-7. ✅ Desvincular acudientes existentes
-
----
-
-## 🔐 Funcionalidades de Regeneración de Contraseña
 
 1. ✅ Botón "Regenerar Contraseña" en detalle de usuario
 2. ✅ Diálogo de confirmación antes de regenerar

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'dart:math';
 import '../config/app_config.dart';
 import '../models/user.dart';
 
@@ -22,12 +23,6 @@ class PaginatedUserResponse {
 }
 
 class UserService {
-  
-  
-  
-  
-  
-  
   Map<String, dynamic> _normalizeUserJson(Map<String, dynamic> raw) {
     final Map<String, dynamic> data = Map<String, dynamic>.from(raw);
 
@@ -35,7 +30,8 @@ class UserService {
     if (data.containsKey('instituciones')) return data;
 
     // Manejar `usuarioInstituciones` (forma relacional común)
-    if (data.containsKey('usuarioInstituciones') && data['usuarioInstituciones'] is List) {
+    if (data.containsKey('usuarioInstituciones') &&
+        data['usuarioInstituciones'] is List) {
       final List items = data['usuarioInstituciones'] as List;
       final List<Map<String, dynamic>> instituciones = [];
 
@@ -56,7 +52,8 @@ class UserService {
             instituciones.add({
               'id': id,
               'nombre': nombre,
-              'rolEnInstitucion': item['rolEnInstitucion'] ?? item['rol'] ?? null,
+              'rolEnInstitucion':
+                  item['rolEnInstitucion'] ?? item['rol'] ?? null,
               'activo': item['activo'] ?? true,
             });
           }
@@ -87,20 +84,26 @@ class UserService {
   }
   // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
-  
-  Future<PaginatedUserResponse?> getAllUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
+  Future<PaginatedUserResponse?> getAllUsers(String accessToken,
+      {int? page,
+      int? limit,
+      bool? activo,
+      String? search,
+      List<String>? roles}) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
       if (activo != null) queryParams['activo'] = activo.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
-      if (roles != null && roles.isNotEmpty) queryParams['rol'] = roles.join(',');
-      
-  final uri = Uri.parse('$baseUrlValue/usuarios').replace(queryParameters: queryParams);
+      if (roles != null && roles.isNotEmpty)
+        queryParams['rol'] = roles.join(',');
+
+      final uri = Uri.parse('$baseUrlValue/usuarios')
+          .replace(queryParameters: queryParams);
       debugPrint('UserService.getAllUsers URL: $uri');
-      
+
       final response = await http.get(
         uri,
         headers: {
@@ -119,14 +122,17 @@ class UserService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-      final users = (responseData['data'] as List)
-        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
-        .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          final users = (responseData['data'] as List)
+              .map((userJson) => User.fromJson(
+                  _normalizeUserJson(userJson as Map<String, dynamic>)))
+              .toList();
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting users: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting users: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -137,10 +143,9 @@ class UserService {
     return null;
   }
 
-  
   Future<User?> getUserById(String accessToken, String userId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
@@ -160,10 +165,12 @@ class UserService {
         final responseData = jsonDecode(response.body);
         debugPrint('GET /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
-          return User.fromJson(_normalizeUserJson(responseData['data'] as Map<String, dynamic>));
+          return User.fromJson(
+              _normalizeUserJson(responseData['data'] as Map<String, dynamic>));
         }
       } else {
-        debugPrint('Error getting user: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting user: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -175,7 +182,8 @@ class UserService {
   }
 
   /// Obtiene usuarios por rol con paginación
-  Future<PaginatedUserResponse?> getUsersByRole(String accessToken, String role, {int? page, int? limit, bool? activo, String? search}) async {
+  Future<PaginatedUserResponse?> getUsersByRole(String accessToken, String role,
+      {int? page, int? limit, bool? activo, String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
@@ -183,9 +191,10 @@ class UserService {
       if (limit != null) queryParams['limit'] = limit.toString();
       if (activo != null) queryParams['activo'] = activo.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
-      
-      final uri = Uri.parse('$baseUrlValue/usuarios/rol/$role').replace(queryParameters: queryParams);
-      
+
+      final uri = Uri.parse('$baseUrlValue/usuarios/rol/$role')
+          .replace(queryParameters: queryParams);
+
       final response = await http.get(
         uri,
         headers: {
@@ -204,14 +213,17 @@ class UserService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-      final users = (responseData['data'] as List)
-        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
-        .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          final users = (responseData['data'] as List)
+              .map((userJson) => User.fromJson(
+                  _normalizeUserJson(userJson as Map<String, dynamic>)))
+              .toList();
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting users by role: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting users by role: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -223,19 +235,26 @@ class UserService {
   }
 
   /// Obtiene usuarios por institución con paginación
-  Future<PaginatedUserResponse?> getUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5, String? role, bool? activo, String? search}) async {
+  Future<PaginatedUserResponse?> getUsersByInstitution(
+      String accessToken, String institutionId,
+      {int? page,
+      int limit = 5,
+      String? role,
+      bool? activo,
+      String? search}) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       queryParams['limit'] = limit.toString();
       if (role != null && role.isNotEmpty) queryParams['rol'] = role;
       if (activo != null) queryParams['activo'] = activo.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
-      
-      final uri = Uri.parse('$baseUrlValue/usuarios/institucion/$institutionId').replace(queryParameters: queryParams);
+
+      final uri = Uri.parse('$baseUrlValue/usuarios/institucion/$institutionId')
+          .replace(queryParameters: queryParams);
       debugPrint('UserService.getUsersByInstitution URL: $uri');
-      
+
       final response = await http.get(
         uri,
         headers: {
@@ -249,19 +268,23 @@ class UserService {
         },
       );
 
-      debugPrint('GET /usuarios/institucion/$institutionId - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /usuarios/institucion/$institutionId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-      final users = (responseData['data'] as List)
-        .map((userJson) => User.fromJson(_normalizeUserJson(userJson as Map<String, dynamic>)))
-        .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          final users = (responseData['data'] as List)
+              .map((userJson) => User.fromJson(
+                  _normalizeUserJson(userJson as Map<String, dynamic>)))
+              .toList();
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUserResponse(users: users, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting users by institution: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting users by institution: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -273,10 +296,12 @@ class UserService {
   }
 
   /// Obtiene administradores de una institución (sin paginación)
-  Future<List<User>?> getAdminsByInstitution(String accessToken, String institutionId) async {
+  Future<List<User>?> getAdminsByInstitution(
+      String accessToken, String institutionId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+      final baseUrlValue = AppConfig.baseUrl;
+      final uri =
+          Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
       final response = await http.get(
         uri,
@@ -335,19 +360,23 @@ class UserService {
   }
 
   /// Asigna un usuario existente como admin de institución
-  Future<User?> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+  Future<User?> assignAdminToInstitution(
+      String accessToken, String institutionId, String userId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
+      final baseUrlValue = AppConfig.baseUrl;
+      final uri =
+          Uri.parse('$baseUrlValue/instituciones/$institutionId/admins');
 
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode({'userId': userId}),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode({'userId': userId}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -368,10 +397,12 @@ class UserService {
   }
 
   /// Remueve un admin de institución
-  Future<bool?> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+  Future<bool?> removeAdminFromInstitution(
+      String accessToken, String institutionId, String userId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final uri = Uri.parse('$baseUrlValue/instituciones/$institutionId/admins/$userId');
+      final baseUrlValue = AppConfig.baseUrl;
+      final uri = Uri.parse(
+          '$baseUrlValue/instituciones/$institutionId/admins/$userId');
 
       final response = await http.delete(
         uri,
@@ -394,32 +425,37 @@ class UserService {
   }
 
   /// Cambia la contraseña de un usuario (solo para admins)
-  Future<bool> changePassword(String accessToken, String userId, String newPassword) async {
+  Future<bool> changePassword(
+      String accessToken, String userId, String newPassword) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final uri = Uri.parse('$baseUrlValue/usuarios/$userId/change-password');
 
-      final response = await http.patch(
+      final response = await http
+          .patch(
         uri,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({'newPassword': newPassword}),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('PATCH /usuarios/$userId/change-password - Status: ${response.statusCode}');
+      debugPrint(
+          'PATCH /usuarios/$userId/change-password - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error changePassword: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error changePassword: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, st) {
@@ -430,17 +466,20 @@ class UserService {
   }
 
   /// Crea un nuevo usuario
-  Future<User?> createUser(String accessToken, CreateUserRequest userData) async {
+  Future<User?> createUser(
+      String accessToken, CreateUserRequest userData) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/usuarios'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(userData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -452,12 +491,14 @@ class UserService {
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          return User.fromJson(_normalizeUserJson(responseData['data'] as Map<String, dynamic>));
+          return User.fromJson(
+              _normalizeUserJson(responseData['data'] as Map<String, dynamic>));
         }
       } else if (response.statusCode == 409) {
         throw EmailAlreadyExistsException('El email ya está en uso');
       } else {
-        debugPrint('Error creating user: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating user: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -469,17 +510,20 @@ class UserService {
   }
 
   /// Actualiza un usuario
-  Future<User?> updateUser(String accessToken, String userId, UpdateUserRequest userData) async {
+  Future<User?> updateUser(
+      String accessToken, String userId, UpdateUserRequest userData) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.put(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/usuarios/$userId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(userData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -490,7 +534,8 @@ class UserService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        debugPrint('PUT /usuarios/$userId - request: ${jsonEncode(userData.toJson())}');
+        debugPrint(
+            'PUT /usuarios/$userId - request: ${jsonEncode(userData.toJson())}');
         debugPrint('PUT /usuarios/$userId - body: ${response.body}');
         if (responseData['success'] == true) {
           // Use the API response as the source of truth and normalize user JSON
@@ -500,7 +545,8 @@ class UserService {
       } else if (response.statusCode == 409) {
         throw EmailAlreadyExistsException('El email ya está en uso');
       } else {
-        debugPrint('Error updating user: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating user: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -533,7 +579,8 @@ class UserService {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting user: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting user: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
@@ -541,5 +588,14 @@ class UserService {
       debugPrint('StackTrace: $stackTrace');
       return false;
     }
+  }
+
+  /// Genera una contraseña segura aleatoria
+  String generateSecurePassword({int length = 12}) {
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()';
+    final random = Random();
+    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
+        .join();
   }
 }
