@@ -43,12 +43,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      final institutionProvider =
+          Provider.of<InstitutionProvider>(context, listen: false);
 
       final token = authProvider.accessToken;
-      if (token != null && institutionProvider.hasMoreData && !institutionProvider.isLoadingMore) {
+      if (token != null &&
+          institutionProvider.hasMoreData &&
+          !institutionProvider.isLoadingMore) {
         institutionProvider.loadMoreInstitutions(token);
       }
     }
@@ -56,14 +60,18 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
   Future<void> _loadInstitutions() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token != null) {
-      debugPrint('Cargando instituciones con token: ${token.substring(0, 20)}...');
+      debugPrint(
+          'Cargando instituciones con token: ${token.substring(0, 20)}...');
       await institutionProvider.loadInstitutions(token);
-      debugPrint('Instituciones cargadas: ${institutionProvider.institutions.length}');
-      debugPrint('Estado del provider: isLoading=${institutionProvider.isLoading}, hasError=${institutionProvider.hasError}');
+      debugPrint(
+          'Instituciones cargadas: ${institutionProvider.institutions.length}');
+      debugPrint(
+          'Estado del provider: isLoading=${institutionProvider.isLoading}, hasError=${institutionProvider.hasError}');
       if (institutionProvider.hasError) {
         debugPrint('Error del provider: ${institutionProvider.errorMessage}');
       }
@@ -75,29 +83,31 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
   void _onSearchChanged(String query) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+      final institutionProvider =
+          Provider.of<InstitutionProvider>(context, listen: false);
       // Modificar el filtro directamente para evitar múltiples notifyListeners
       if (query.isNotEmpty) {
         institutionProvider.filters['search'] = query;
       } else {
         institutionProvider.filters.remove('search');
       }
-      institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
+      institutionProvider.refreshData(
+          Provider.of<AuthProvider>(context, listen: false).accessToken!);
     });
   }
 
   void _onStatusFilterChanged(bool? status) {
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     // Modificar el filtro directamente para evitar múltiples notifyListeners
     if (status != null) {
       institutionProvider.filters['activa'] = status.toString();
     } else {
       institutionProvider.filters.remove('activa');
     }
-    institutionProvider.refreshData(Provider.of<AuthProvider>(context, listen: false).accessToken!);
+    institutionProvider.refreshData(
+        Provider.of<AuthProvider>(context, listen: false).accessToken!);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -115,20 +125,24 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 children: [
-                  Icon(Icons.admin_panel_settings, size: 18, color: context.colors.primary),
+                  Icon(Icons.admin_panel_settings,
+                      size: 18, color: context.colors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Eres administrador de: $administrationName',
-                      style: context.textStyles.bodyMedium.copyWith(color: context.colors.textPrimary),
+                      style: context.textStyles.bodyMedium
+                          .copyWith(color: context.colors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Tooltip(
-                    message: 'Tu cuenta tiene permisos administrativos sobre esta institución',
-                    child: Icon(Icons.info_outline, size: 18, color: context.colors.textSecondary),
+                    message:
+                        'Tu cuenta tiene permisos administrativos sobre esta institución',
+                    child: Icon(Icons.info_outline,
+                        size: 18, color: context.colors.textSecondary),
                   ),
                 ],
               ),
@@ -144,40 +158,55 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           itemCount: institutionProvider.institutions.length,
           itemBuilder: (context, index) {
             final institution = institutionProvider.institutions[index];
-            return _buildInstitutionCard(institution, institutionProvider, context);
+            return _buildInstitutionCard(
+                institution, institutionProvider, context);
           },
           filterWidgets: _buildFilterWidgets(context),
-          statisticWidgets: _buildStatisticWidgets(context, institutionProvider),
+          statisticWidgets:
+              _buildStatisticWidgets(context, institutionProvider),
           onRefresh: _loadInstitutions,
           scrollController: _scrollController,
           hasMoreData: institutionProvider.hasMoreData,
           isLoadingMore: institutionProvider.isLoadingMore,
-      emptyStateWidget: (institutionProvider.institutions.isEmpty || institutionProvider.hasError) && administrationName != null
-        ? ClarityEmptyState(
-          icon: Icons.account_balance,
-          title: administrationName,
-          subtitle: institutionProvider.hasError
-            ? 'No tienes permiso para ver la lista completa de instituciones. Mostrando el nombre de la administración.'
-            : ((institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
-              ? 'No se encontraron instituciones para "${institutionProvider.filters['search']}". Mostrando la administración: $administrationName'
-              : 'No hay instituciones disponibles. Mostrando la administración: $administrationName'),
-        )
-        : ClarityEmptyState(
-          icon: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false ? Icons.search_off : Icons.business,
-          title: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
-            ? 'No se encontraron instituciones'
-            : 'No hay instituciones',
-          subtitle: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
-            ? 'Intenta con otros términos de búsqueda'
-            : 'Comienza creando tu primera institución',
-        ),
+          emptyStateWidget: (institutionProvider.institutions.isEmpty ||
+                      institutionProvider.hasError) &&
+                  administrationName != null
+              ? ClarityEmptyState(
+                  icon: Icons.account_balance,
+                  title: administrationName,
+                  subtitle: institutionProvider.hasError
+                      ? 'No tienes permiso para ver la lista completa de instituciones. Mostrando el nombre de la administración.'
+                      : ((institutionProvider.filters['search'] as String?)
+                                  ?.isNotEmpty ??
+                              false
+                          ? 'No se encontraron instituciones para "${institutionProvider.filters['search']}". Mostrando la administración: $administrationName'
+                          : 'No hay instituciones disponibles. Mostrando la administración: $administrationName'),
+                )
+              : ClarityEmptyState(
+                  icon: (institutionProvider.filters['search'] as String?)
+                              ?.isNotEmpty ??
+                          false
+                      ? Icons.search_off
+                      : Icons.business,
+                  title: (institutionProvider.filters['search'] as String?)
+                              ?.isNotEmpty ??
+                          false
+                      ? 'No se encontraron instituciones'
+                      : 'No hay instituciones',
+                  subtitle: (institutionProvider.filters['search'] as String?)
+                              ?.isNotEmpty ??
+                          false
+                      ? 'Intenta con otros términos de búsqueda'
+                      : 'Comienza creando tu primera institución',
+                ),
           floatingActionButton: canCreateInstitutions
               ? FloatingActionButton(
                   onPressed: () => _navigateToForm(context),
                   backgroundColor: context.colors.primary,
                   child: Icon(
                     Icons.add,
-                    color: context.colors.getTextColorForBackground(context.colors.primary),
+                    color: context.colors
+                        .getTextColorForBackground(context.colors.primary),
                   ),
                 )
               : null,
@@ -201,7 +230,9 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             hintText: 'Buscar por nombre, código o email...',
             hintStyle: textStyles.bodyMedium.withColor(colors.textMuted),
             prefixIcon: Icon(Icons.search, color: colors.textSecondary),
-            suffixIcon: (institutionProvider.filters['search'] as String?)?.isNotEmpty ?? false
+            suffixIcon: (institutionProvider.filters['search'] as String?)
+                        ?.isNotEmpty ??
+                    false
                 ? IconButton(
                     icon: Icon(Icons.clear, color: colors.textSecondary),
                     onPressed: () {
@@ -224,7 +255,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             ),
             filled: true,
             fillColor: colors.surface,
-            contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+            contentPadding: EdgeInsets.symmetric(
+                horizontal: spacing.md, vertical: spacing.sm),
           ),
           onChanged: _onSearchChanged,
         ),
@@ -264,7 +296,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     ];
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, InstitutionProvider provider) {
+  List<Widget> _buildStatisticWidgets(
+      BuildContext context, InstitutionProvider provider) {
     final colors = context.colors;
     return [
       ClarityCompactStat(
@@ -288,7 +321,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     ];
   }
 
-  Widget _buildInstitutionCard(Institution institution, InstitutionProvider provider, BuildContext context) {
+  Widget _buildInstitutionCard(Institution institution,
+      InstitutionProvider provider, BuildContext context) {
     final colors = context.colors;
 
     return Consumer<AuthProvider>(
@@ -309,7 +343,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               label: 'Gestionar Admins',
               icon: Icons.group,
               color: colors.info,
-              onPressed: () => context.push('/institutions/${institution.id}/admins'),
+              onPressed: () =>
+                  context.push('/institutions/${institution.id}/admins'),
             ),
           ],
           ClarityContextMenuAction(
@@ -322,7 +357,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             label: institution.activa ? 'Desactivar' : 'Activar',
             icon: institution.activa ? Icons.toggle_off : Icons.toggle_on,
             color: institution.activa ? colors.warning : colors.success,
-            onPressed: () => _handleMenuAction('toggle_status', institution, provider),
+            onPressed: () =>
+                _handleMenuAction('toggle_status', institution, provider),
           ),
           ClarityContextMenuAction(
             label: 'Eliminar',
@@ -345,14 +381,17 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               // Fila 1: Email/Teléfono
               Row(
                 children: [
-                  Icon(Icons.contact_mail, size: 14, color: colors.textSecondary),
+                  Icon(Icons.contact_mail,
+                      size: 14, color: colors.textSecondary),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      institution.email ?? institution.telefono ?? 'Sin contacto',
+                      institution.email ??
+                          institution.telefono ??
+                          'Sin contacto',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.textSecondary,
-                      ),
+                            color: colors.textSecondary,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -361,11 +400,14 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
               ),
               const SizedBox(height: 6),
               // Fila 2: Estado + Configuración de Notificaciones
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   // Chip de estado discreto
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: colors.surfaceVariant,
                       borderRadius: BorderRadius.circular(12),
@@ -381,28 +423,29 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: institution.activa 
-                              ? colors.primary.withValues(alpha: 0.7)
-                              : colors.textMuted,
+                            color: institution.activa
+                                ? colors.primary.withValues(alpha: 0.7)
+                                : colors.textMuted,
                             shape: BoxShape.circle,
                           ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           institution.activa ? 'Activa' : 'Inactiva',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: colors.textSecondary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Chip de Configuración de Notificaciones CLARA
+                  // Chip de Configuración de Notificaciones
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: institution.notificacionesActivas
                           ? colors.info.withValues(alpha: 0.1)
@@ -418,24 +461,25 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          institution.notificacionesActivas 
-                            ? Icons.notifications_active 
-                            : Icons.notifications_off,
+                          institution.notificacionesActivas
+                              ? Icons.notifications_active
+                              : Icons.notifications_off,
                           size: 12,
-                          color: institution.notificacionesActivas 
-                            ? colors.info 
-                            : colors.textMuted,
+                          color: institution.notificacionesActivas
+                              ? colors.info
+                              : colors.textMuted,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           institution.notificationConfigSummary,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: institution.notificacionesActivas 
-                              ? colors.info 
-                              : colors.textMuted,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: institution.notificacionesActivas
+                                        ? colors.info
+                                        : colors.textMuted,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 10,
+                                  ),
                         ),
                       ],
                     ),
@@ -451,15 +495,16 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     );
   }
 
-  void _handleMenuAction(String action, Institution institution, InstitutionProvider provider) async {
-  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final token = authProvider.accessToken;
+  void _handleMenuAction(String action, Institution institution,
+      InstitutionProvider provider) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.accessToken;
 
     switch (action) {
       case 'create_admin':
         _navigateToCreateInstitutionAdmin(institution);
         break;
-        
+
       case 'edit':
         _navigateToForm(context, institution: institution);
         break;
@@ -467,7 +512,9 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
       case 'toggle_status':
         final newStatus = !institution.activa;
         if (token == null) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para modificar la institución')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content:
+                  Text('Debes iniciar sesión para modificar la institución')));
           return;
         }
 
@@ -482,7 +529,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
             SnackBar(
               content: Text(
                 'Institución ${newStatus ? 'activada' : 'desactivada'} correctamente',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
               ),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
@@ -500,11 +550,13 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
     }
   }
 
-  void _showDeleteConfirmationDialog(Institution institution, InstitutionProvider provider) {
+  void _showDeleteConfirmationDialog(
+      Institution institution, InstitutionProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Institución', style: Theme.of(context).textTheme.headlineSmall),
+        title: Text('Eliminar Institución',
+            style: Theme.of(context).textTheme.headlineSmall),
         content: Text(
           '¿Estás seguro de que quieres eliminar "${institution.nombre}"?\n\n'
           'Esta acción no se puede deshacer.',
@@ -513,27 +565,35 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
+            child:
+                Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteInstitution(institution, provider);
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Eliminar', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.error)),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Eliminar',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteInstitution(Institution institution, InstitutionProvider provider) async {
+  Future<void> _deleteInstitution(
+      Institution institution, InstitutionProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final token = authProvider.accessToken;
 
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar la institución')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Debes iniciar sesión para eliminar la institución')));
       return;
     }
 
@@ -547,7 +607,10 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         SnackBar(
           content: Text(
             'Institución eliminada correctamente',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),

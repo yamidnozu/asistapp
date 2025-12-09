@@ -1,6 +1,6 @@
 name: asistapp
 description: "Aplicación de registro de asistencia escolar con escaneo QR"
-version: 1.0.16+17
+version: 1.0.17+18
 environment:
   sdk: ">=3.4.0 <4.0.0"
 

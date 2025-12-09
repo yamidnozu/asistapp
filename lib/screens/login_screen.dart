@@ -15,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   // En release los campos empiezan vacíos; en debug se pre-llenan para facilitar pruebas
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,10 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final shouldPreloadSuperAdmin = settings.showTestUsers && !kReleaseMode;
 
     if (_emailController.text.isEmpty) {
-      _emailController.text = shouldPreloadSuperAdmin ? 'superadmin@asistapp.com' : (kReleaseMode ? '' : 'superadmin@asistapp.com');
+      _emailController.text = shouldPreloadSuperAdmin
+          ? 'superadmin@asistapp.com'
+          : (kReleaseMode ? '' : 'superadmin@asistapp.com');
     }
     if (_passwordController.text.isEmpty) {
-      _passwordController.text = shouldPreloadSuperAdmin ? 'Admin123!' : (kReleaseMode ? '' : 'Admin123!');
+      _passwordController.text = shouldPreloadSuperAdmin
+          ? 'Admin123!'
+          : (kReleaseMode ? '' : 'Admin123!');
     }
   }
 
@@ -47,6 +50,58 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  /// Construye el logo de AsistApp con un diseño atractivo
+  Widget _buildLogo(Map<String, dynamic> responsive) {
+    final isSmallScreen = responsive['isSmallScreen'] as bool;
+    final logoSize = isSmallScreen ? 100.0 : 140.0;
+
+    return Container(
+      width: logoSize,
+      height: logoSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/icon/logo.jpg',
+          width: logoSize,
+          height: logoSize,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            // Fallback si no se puede cargar la imagen
+            return Container(
+              width: logoSize,
+              height: logoSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                ),
+              ),
+              child: Icon(
+                Icons.school_rounded,
+                size: logoSize * 0.5,
+                color: Colors.white,
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildMainTitle(Map<String, dynamic> responsive) {
@@ -138,53 +193,133 @@ class _LoginScreenState extends State<LoginScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-
             _buildUserCategory(
               '👑 Super Administradores',
               [
-                _buildTestUserButton('Super Admin', 'superadmin@asistapp.com', 'Admin123!', 'super_admin', 'Gestión de instituciones y admins.', responsive),
+                _buildTestUserButton(
+                    'Super Admin',
+                    'superadmin@asistapp.com',
+                    'Admin123!',
+                    'super_admin',
+                    'Gestión de instituciones y admins.',
+                    responsive),
               ],
               responsive,
             ),
-
             _buildUserCategory(
               '👨‍💼 Administradores de Institución',
               [
-                _buildTestUserButton('Admin San José', 'admin@sanjose.edu', 'SanJose123!', 'admin_institucion', 'Probar gestión académica (grupos, materias, horarios).', responsive),
-                _buildTestUserButton('Admin Santander', 'admin@santander.edu', 'Santander123!', 'admin_institucion', 'Probar en institución con menos datos.', responsive),
-                _buildTestUserButton('Admin Multi-Sede', 'multiadmin@asistapp.com', 'Multi123!', 'admin_institucion', 'Probar pantalla de selección de institución.', responsive),
+                _buildTestUserButton(
+                    'Admin San José',
+                    'admin@sanjose.edu',
+                    'SanJose123!',
+                    'admin_institucion',
+                    'Probar gestión académica (grupos, materias, horarios).',
+                    responsive),
+                _buildTestUserButton(
+                    'Admin Santander',
+                    'admin@santander.edu',
+                    'Santander123!',
+                    'admin_institucion',
+                    'Probar en institución con menos datos.',
+                    responsive),
+                _buildTestUserButton(
+                    'Admin Multi-Sede',
+                    'multiadmin@asistapp.com',
+                    'Multi123!',
+                    'admin_institucion',
+                    'Probar pantalla de selección de institución.',
+                    responsive),
               ],
               responsive,
             ),
-
             _buildUserCategory(
               '👨‍🏫 Profesores',
               [
-                _buildTestUserButton('Juan Pérez', 'juan.perez@sanjose.edu', 'Prof123!', 'profesor', 'San José - Tiene clases hoy para probar el dashboard.', responsive),
-                _buildTestUserButton('Laura Gómez', 'laura.gomez@sanjose.edu', 'Prof123!', 'profesor', 'San José - Tiene clases en diferentes grupos.', responsive),
-                _buildTestUserButton('Profe Sin Clases', 'vacio.profe@sanjose.edu', 'Prof123!', 'profesor', 'San José - Probar dashboard sin clases asignadas.', responsive),
-                _buildTestUserButton('Carlos Díaz', 'carlos.diaz@santander.edu', 'Prof123!', 'profesor', 'Santander - Probar dashboard en otra institución.', responsive),
+                _buildTestUserButton(
+                    'Juan Pérez',
+                    'juan.perez@sanjose.edu',
+                    'Prof123!',
+                    'profesor',
+                    'San José - Tiene clases hoy para probar el dashboard.',
+                    responsive),
+                _buildTestUserButton(
+                    'Laura Gómez',
+                    'laura.gomez@sanjose.edu',
+                    'Prof123!',
+                    'profesor',
+                    'San José - Tiene clases en diferentes grupos.',
+                    responsive),
+                _buildTestUserButton(
+                    'Profe Sin Clases',
+                    'vacio.profe@sanjose.edu',
+                    'Prof123!',
+                    'profesor',
+                    'San José - Probar dashboard sin clases asignadas.',
+                    responsive),
+                _buildTestUserButton(
+                    'Carlos Díaz',
+                    'carlos.diaz@santander.edu',
+                    'Prof123!',
+                    'profesor',
+                    'Santander - Probar dashboard en otra institución.',
+                    responsive),
               ],
               responsive,
             ),
-
             _buildUserCategory(
               '👨‍🎓 Estudiantes',
               [
-                _buildTestUserButton('Santiago Mendoza', 'santiago.mendoza@sanjose.edu', 'Est123!', 'estudiante', 'San José - Asignado al Grupo 10-A.', responsive),
-                _buildTestUserButton('Mateo Castro', 'mateo.castro@sanjose.edu', 'Est123!', 'estudiante', 'San José - Asignado al Grupo 11-B.', responsive),
-                _buildTestUserButton('Sofía Núñez', 'sofia.nunez@santander.edu', 'Est123!', 'estudiante', 'Santander - Asignada al Grupo 6-1.', responsive),
+                _buildTestUserButton(
+                    'Santiago Mendoza',
+                    'santiago.mendoza@sanjose.edu',
+                    'Est123!',
+                    'estudiante',
+                    'San José - Asignado al Grupo 10-A.',
+                    responsive),
+                _buildTestUserButton(
+                    'Mateo Castro',
+                    'mateo.castro@sanjose.edu',
+                    'Est123!',
+                    'estudiante',
+                    'San José - Asignado al Grupo 11-B.',
+                    responsive),
+                _buildTestUserButton(
+                    'Sofía Núñez',
+                    'sofia.nunez@santander.edu',
+                    'Est123!',
+                    'estudiante',
+                    'Santander - Asignada al Grupo 6-1.',
+                    responsive),
               ],
               responsive,
             ),
-
             _buildUserCategory(
               '👨‍👩‍👧 Acudientes (Padres/Tutores)',
               [
-                _buildTestUserButton('María Mendoza', 'maria.mendoza@email.com', 'Acu123!', 'acudiente', 'Madre de Santiago y Valentina (2 hijos). Tiene notificaciones.', responsive),
-                _buildTestUserButton('Patricia Castro', 'patricia.castro@email.com', 'Acu123!', 'acudiente', 'Madre de Mateo. Tiene notificaciones.', responsive),
-                _buildTestUserButton('Carmen López', 'carmen.lopez@email.com', 'Acu123!', 'acudiente', 'Madre de Andrés.', responsive),
-                _buildTestUserButton('Carlos Núñez', 'carlos.nunez@email.com', 'Acu123!', 'acudiente', 'Padre de Sofía. Tiene notificación.', responsive),
+                _buildTestUserButton(
+                    'María Mendoza',
+                    'maria.mendoza@email.com',
+                    'Acu123!',
+                    'acudiente',
+                    'Madre de Santiago y Valentina (2 hijos). Tiene notificaciones.',
+                    responsive),
+                _buildTestUserButton(
+                    'Patricia Castro',
+                    'patricia.castro@email.com',
+                    'Acu123!',
+                    'acudiente',
+                    'Madre de Mateo. Tiene notificaciones.',
+                    responsive),
+                _buildTestUserButton('Carmen López', 'carmen.lopez@email.com',
+                    'Acu123!', 'acudiente', 'Madre de Andrés.', responsive),
+                _buildTestUserButton(
+                    'Carlos Núñez',
+                    'carlos.nunez@email.com',
+                    'Acu123!',
+                    'acudiente',
+                    'Padre de Sofía. Tiene notificación.',
+                    responsive),
               ],
               responsive,
             ),
@@ -194,7 +329,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildUserCategory(String title, List<Widget> buttons, Map<String, dynamic> responsive) {
+  Widget _buildUserCategory(
+      String title, List<Widget> buttons, Map<String, dynamic> responsive) {
     return Builder(
       builder: (context) {
         final colors = context.colors;
@@ -295,7 +431,8 @@ class _LoginScreenState extends State<LoginScreen> {
         final colors = context.colors;
         return Text(
           _errorMessage!,
-          style: textStyles.bodyMedium.copyWith(color: colors.error),  // Usar estilo del tema
+          style: textStyles.bodyMedium
+              .copyWith(color: colors.error), // Usar estilo del tema
           textAlign: TextAlign.center,
         );
       },
@@ -327,6 +464,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Column(
                         children: [
+                          _buildLogo(responsive),
+                          SizedBox(height: responsive['elementSpacing']),
+
                           _buildMainTitle(responsive),
                           SizedBox(height: responsive['elementSpacing']),
 
@@ -368,8 +508,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Por favor complete todos los campos';
       });
@@ -408,7 +547,12 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         final parsed = jsonDecode(raw);
         if (parsed is Map<String, dynamic>) {
-          messageToShow = parsed['message'] ?? parsed['error'] ?? (parsed['data'] is Map ? (parsed['data']['message'] ?? parsed['data']['error']) : null) ?? raw;
+          messageToShow = parsed['message'] ??
+              parsed['error'] ??
+              (parsed['data'] is Map
+                  ? (parsed['data']['message'] ?? parsed['data']['error'])
+                  : null) ??
+              raw;
         }
       } catch (_) {
         // No JSON, mantener el texto crudo
