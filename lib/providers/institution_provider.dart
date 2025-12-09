@@ -8,7 +8,8 @@ import 'paginated_data_mixin.dart';
 
 // InstitutionState removed: rely on PaginatedDataMixin state
 
-class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institution> {
+class InstitutionProvider extends ChangeNotifier
+    with PaginatedDataMixin<Institution> {
   final InstitutionService _institutionService;
 
   InstitutionProvider({InstitutionService? institutionService})
@@ -31,10 +32,10 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
 
   // Computed properties
   List<Institution> get activeInstitutions =>
-    items.where((inst) => inst.activa).toList();
+      items.where((inst) => inst.activa).toList();
 
   List<Institution> get inactiveInstitutions =>
-    items.where((inst) => !inst.activa).toList();
+      items.where((inst) => !inst.activa).toList();
 
   int get totalInstitutions => items.length;
   int get activeInstitutionsCount => activeInstitutions.length;
@@ -51,7 +52,8 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
   /// Carga todas las instituciones con paginación.
   /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
   /// Los parámetros activa y search son opcionales y solo deben usarse para sobrescribir los filtros existentes.
-  Future<void> loadInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
+  Future<void> loadInstitutions(String accessToken,
+      {int? page, int? limit, bool? activa, String? search}) async {
     if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
@@ -70,12 +72,15 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
 
     try {
-      debugPrint('InstitutionProvider: Iniciando carga de instituciones con filtros: $filters');
+      debugPrint(
+          'InstitutionProvider: Iniciando carga de instituciones con filtros: $filters');
       await loadItems(
         accessToken,
         page: page ?? 1,
         limit: limit,
-        filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null,
+        filters: filters.isNotEmpty
+            ? filters.map((k, v) => MapEntry(k, v.toString()))
+            : null,
       );
       // paginationInfo handled by base provider
       notifyListeners();
@@ -92,8 +97,10 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     // are running (e.g. list loading). This avoids blocking detail fetches when
     // the provider is already fetching paginated list data.
     try {
-      final institution = await _institutionService.getInstitutionById(accessToken, id);
-      debugPrint('InstitutionProvider: loadInstitutionById - fetched: ${institution?.toString()}');
+      final institution =
+          await _institutionService.getInstitutionById(accessToken, id);
+      debugPrint(
+          'InstitutionProvider: loadInstitutionById - fetched: ${institution?.toString()}');
       _selectedInstitution = institution;
       notifyListeners();
     } catch (e) {
@@ -107,7 +114,7 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     String accessToken,
     Map<String, dynamic> institutionData,
   ) async {
-  if (isLoading) return false;
+    if (isLoading) return false;
 
     try {
       final newInstitution = await _institutionService.createInstitution(
@@ -141,8 +148,14 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     String? telefono,
     String? email,
     bool? activa,
+    // Configuración
+    bool? notificacionesActivas,
+    String? canalNotificacion,
+    String? modoNotificacionAsistencia,
+    String? horaDisparoNotificacion,
+    bool? notificarAusenciaTotalDiaria,
   }) async {
-  if (isLoading) return false;
+    if (isLoading) return false;
 
     try {
       final updatedInstitution = await _institutionService.updateInstitution(
@@ -153,12 +166,17 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
         telefono: telefono,
         email: email,
         activa: activa,
+        notificacionesActivas: notificacionesActivas,
+        canalNotificacion: canalNotificacion,
+        modoNotificacionAsistencia: modoNotificacionAsistencia,
+        horaDisparoNotificacion: horaDisparoNotificacion,
+        notificarAusenciaTotalDiaria: notificarAusenciaTotalDiaria,
       );
 
       // Actualizar la institución en la lista
-  final index = items.indexWhere((inst) => inst.id == id);
+      final index = items.indexWhere((inst) => inst.id == id);
       if (index != -1 && updatedInstitution != null) {
-  items[index] = updatedInstitution;
+        items[index] = updatedInstitution;
       }
 
       // Actualizar la institución seleccionada si es la misma
@@ -166,7 +184,7 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
         _selectedInstitution = updatedInstitution;
       }
 
-    notifyListeners();
+      notifyListeners();
       return true;
     } catch (e) {
       debugPrint('Error updating institution: $e');
@@ -183,14 +201,14 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
       await _institutionService.deleteInstitution(accessToken, id);
 
       // Remover la institución de la lista
-  items.removeWhere((inst) => inst.id == id);
+      items.removeWhere((inst) => inst.id == id);
 
       // Limpiar la institución seleccionada si es la misma
       if (_selectedInstitution?.id == id) {
         _selectedInstitution = null;
       }
 
-  notifyListeners();
+      notifyListeners();
       return true;
     } catch (e) {
       debugPrint('Error deleting institution: $e');
@@ -199,37 +217,25 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     }
   }
 
-  /// Actualiza la configuracion de notificaciones de una institucion
-  Future<bool> updateNotificationConfig(
-    String accessToken,
-    String institutionId, {
-    required bool notificacionesActivas,
-    required String canalNotificacion,
-    required String modoNotificacionAsistencia,
-    String? horaDisparoNotificacion,
-    int? umbralInasistenciasAlerta,
-    bool? notificarAusenciaTotalDiaria,
-  }) async {
-    try {
-      final success = await _institutionService.updateNotificationConfig(
-        accessToken,
-        institutionId,
-        notificacionesActivas: notificacionesActivas,
-        canalNotificacion: canalNotificacion,
-        modoNotificacionAsistencia: modoNotificacionAsistencia,
-        horaDisparoNotificacion: horaDisparoNotificacion,
-        umbralInasistenciasAlerta: umbralInasistenciasAlerta,
-        notificarAusenciaTotalDiaria: notificarAusenciaTotalDiaria,
-      );
+  /// Elimina una institución
+  Future<bool> deleteInstitution(String accessToken, String id) async {
+    if (isLoading) return false;
 
-      if (success) {
-        // Recargar la institucion para obtener la configuracion actualizada
-        await loadInstitutionById(accessToken, institutionId);
+    try {
+      await _institutionService.deleteInstitution(accessToken, id);
+
+      // Remover la institución de la lista
+      items.removeWhere((inst) => inst.id == id);
+
+      // Limpiar la institución seleccionada si es la misma
+      if (_selectedInstitution?.id == id) {
+        _selectedInstitution = null;
       }
 
-      return success;
+      notifyListeners();
+      return true;
     } catch (e) {
-      debugPrint('Error updating notification config: $e');
+      debugPrint('Error deleting institution: $e');
       setError(e.toString());
       return false;
     }
@@ -253,19 +259,21 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
     clearFilters();
     _selectedInstitution = null;
     clearError();
-  }  /// Recarga los datos (útil después de operaciones)
+  }
+
+  /// Recarga los datos (útil después de operaciones)
   Future<void> refreshData(String accessToken) async {
     await loadInstitutions(accessToken);
   }
 
   /// Busca instituciones por nombre o código
   List<Institution> searchInstitutions(String query) {
-  if (query.isEmpty) return items;
+    if (query.isEmpty) return items;
 
     final lowercaseQuery = query.toLowerCase();
-  return items.where((inst) {
+    return items.where((inst) {
       return inst.nombre.toLowerCase().contains(lowercaseQuery) ||
-             (inst.email?.toLowerCase().contains(lowercaseQuery) ?? false);
+          (inst.email?.toLowerCase().contains(lowercaseQuery) ?? false);
     }).toList();
   }
 
@@ -275,14 +283,24 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
   }
 
   @override
-  Future<PaginatedResponse<Institution>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<Institution>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     final activeStr = this.filters['activa']?.toString();
     final active = activeStr == 'true';
     final searchQuery = this.filters['search']?.toString();
-    debugPrint('InstitutionProvider.fetchPage - activa: $activeStr, search: $searchQuery');
-    final response = await _institutionService.getAllInstitutions(accessToken, page: page, limit: limit, activa: activeStr != null ? active : null, search: searchQuery);
+    debugPrint(
+        'InstitutionProvider.fetchPage - activa: $activeStr, search: $searchQuery');
+    final response = await _institutionService.getAllInstitutions(accessToken,
+        page: page,
+        limit: limit,
+        activa: activeStr != null ? active : null,
+        search: searchQuery);
     if (response == null) return null;
-    return PaginatedResponse(items: response.institutions, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.institutions, pagination: response.pagination);
   }
 
   @override
@@ -304,8 +322,11 @@ class InstitutionProvider extends ChangeNotifier with PaginatedDataMixin<Institu
   }
 
   @override
-  Future<Institution?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _institutionService.updateInstitution(accessToken, id,
+  Future<Institution?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
+    final updated = await _institutionService.updateInstitution(
+      accessToken,
+      id,
       nombre: data['nombre'] as String?,
       direccion: data['direccion'] as String?,
       telefono: data['telefono'] as String?,

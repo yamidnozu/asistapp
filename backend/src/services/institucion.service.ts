@@ -236,7 +236,7 @@ export class InstitucionService {
         }
       }
 
-  return { usuarioId: userId, institutionId, removed: true };
+      return { usuarioId: userId, institutionId, removed: true };
     } catch (error) {
       logger.error(`Error al remover admin ${userId} de institución ${institutionId}:`, error);
       throw error;
@@ -252,9 +252,9 @@ export class InstitucionService {
         throw new ValidationError('ID de institución inválido');
       }
 
-  // Include the first admin user (if any) to use as fallback for missing contact fields.
-  // This ensures that institutions without explicit contact info can still
-  // show a usable email/phone in the UI by using the admin's contact details.
+      // Include the first admin user (if any) to use as fallback for missing contact fields.
+      // This ensures that institutions without explicit contact info can still
+      // show a usable email/phone in the UI by using the admin's contact details.
       const institution = await prisma.institucion.findUnique({
         where: { id },
         include: {
@@ -273,9 +273,9 @@ export class InstitucionService {
 
       // Merge fallback from admin user if institution fields are null
       const fallbackAdmin = institution.usuarioInstituciones?.[0]?.usuario;
-  const direccion = institution.direccion ?? null; // no usuario.direccion field; keep null if missing
-  const telefono = institution.telefono ?? (fallbackAdmin?.telefono ?? null);
-  const email = institution.email ?? (fallbackAdmin?.email ?? null);
+      const direccion = institution.direccion ?? null; // no usuario.direccion field; keep null if missing
+      const telefono = institution.telefono ?? (fallbackAdmin?.telefono ?? null);
+      const email = institution.email ?? (fallbackAdmin?.email ?? null);
 
       // Mapear configuraciones de notificación si existen
       const configuraciones = institution.configuraciones ? {
@@ -326,6 +326,15 @@ export class InstitucionService {
         },
       });
 
+      // Mapear configuración actualizada
+      const configuraciones = institution.configuraciones ? {
+        notificacionesActivas: institution.configuraciones.notificacionesActivas,
+        canalNotificacion: institution.configuraciones.canalNotificacion,
+        modoNotificacionAsistencia: institution.configuraciones.modoNotificacionAsistencia,
+        horaDisparoNotificacion: institution.configuraciones.horaDisparoNotificacion,
+        notificarAusenciaTotalDiaria: institution.configuraciones.notificarAusenciaTotalDiaria,
+      } : null;
+
       return {
         id: institution.id,
         nombre: institution.nombre,
@@ -333,6 +342,7 @@ export class InstitucionService {
         telefono: institution.telefono,
         email: institution.email,
         activa: institution.activa,
+        configuraciones,
         createdAt: institution.createdAt.toISOString(),
         updatedAt: institution.updatedAt.toISOString(),
       };
@@ -342,81 +352,120 @@ export class InstitucionService {
     }
   }
 
+export interface UpdateInstitutionRequest {
+  nombre?: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+  activa?: boolean;
+  // Configuración de notificaciones
+  notificacionesActivas?: boolean;
+  canalNotificacion?: string;
+  modoNotificacionAsistencia?: string;
+  horaDisparoNotificacion?: string;
+  notificarAusenciaTotalDiaria?: boolean;
+}
+
   /**
    * Actualiza una institución
    */
-  public static async updateInstitution(id: string, data: UpdateInstitutionRequest): Promise<InstitutionResponse | null> {
-    try {
-      if (!id || typeof id !== 'string') {
-        throw new ValidationError('ID de institución inválido');
-      }
+  public static async updateInstitution(id: string, data: UpdateInstitutionRequest): Promise < InstitutionResponse | null > {
+  try {
+    if(!id || typeof id !== 'string') {
+  throw new ValidationError('ID de institución inválido');
+}
 
-      // Verificar si la institución existe
-      const existingInstitution = await this.getInstitutionById(id);
-      if (!existingInstitution) {
-        throw new ValidationError('Institución no encontrada');
-      }
+// Verificar si la institución existe
+const existingInstitution = await this.getInstitutionById(id);
+if (!existingInstitution) {
+  throw new ValidationError('Institución no encontrada');
+}
 
-      const institution = await prisma.institucion.update({
-        where: { id },
-        data: {
-          nombre: data.nombre,
-          direccion: data.direccion,
-          telefono: data.telefono,
-          email: data.email,
-          activa: data.activa,
-        },
-      });
+// Preparar datos para actualización de institución
+const institutionData: any = {
+  nombre: data.nombre,
+  direccion: data.direccion,
+  telefono: data.telefono,
+  email: data.email,
+  activa: data.activa,
+};
 
-      return {
-        id: institution.id,
-        nombre: institution.nombre,
-        direccion: institution.direccion,
-        telefono: institution.telefono,
-        email: institution.email,
-        activa: institution.activa,
-        createdAt: institution.createdAt.toISOString(),
-        updatedAt: institution.updatedAt.toISOString(),
-      };
+// Si vienen datos de configuración, incluirlos en la actualización
+if (
+  data.notificacionesActivas !== undefined ||
+  data.canalNotificacion !== undefined ||
+  data.modoNotificacionAsistencia !== undefined ||
+  data.horaDisparoNotificacion !== undefined ||
+  data.notificarAusenciaTotalDiaria !== undefined
+) {
+  institutionData.configuraciones = {
+    upsert: {
+      create: {
+        notificacionesActivas: data.notificacionesActivas ?? false,
+        canalNotificacion: data.canalNotificacion ?? 'NONE',
+        modoNotificacionAsistencia: data.modoNotificacionAsistencia ?? 'MANUAL_ONLY',
+        horaDisparoNotificacion: data.horaDisparoNotificacion,
+        notificarAusenciaTotalDiaria: data.notificarAusenciaTotalDiaria ?? false,
+      },
+      update: {
+        notificacionesActivas: data.notificacionesActivas,
+        canalNotificacion: data.canalNotificacion,
+        modoNotificacionAsistencia: data.modoNotificacionAsistencia,
+        horaDisparoNotificacion: data.horaDisparoNotificacion,
+        notificarAusenciaTotalDiaria: data.notificarAusenciaTotalDiaria,
+      },
+    },
+  };
+}
+
+const institution = await prisma.institucion.update({
+  where: { id },
+  direccion: institution.direccion,
+  telefono: institution.telefono,
+  email: institution.email,
+  activa: institution.activa,
+  createdAt: institution.createdAt.toISOString(),
+  updatedAt: institution.updatedAt.toISOString(),
+};
     } catch (error) {
-      logger.error(`Error al actualizar institución con ID ${id}:`, error);
-      throw error;
-    }
+  logger.error(`Error al actualizar institución con ID ${id}:`, error);
+  throw error;
+}
   }
 
   /**
    * Elimina una institución
    */
-  public static async deleteInstitution(id: string): Promise<boolean> {
-    try {
-      if (!id || typeof id !== 'string') {
-        throw new ValidationError('ID de institución inválido');
-      }
+  public static async deleteInstitution(id: string): Promise < boolean > {
+  try {
+    if(!id || typeof id !== 'string') {
+  throw new ValidationError('ID de institución inválido');
+}
 
-      // Verificar si la institución existe
-      const existingInstitution = await this.getInstitutionById(id);
-      if (!existingInstitution) {
-        throw new ValidationError('Institución no encontrada');
-      }
+// Verificar si la institución existe
+const existingInstitution = await this.getInstitutionById(id);
+if (!existingInstitution) {
+  throw new ValidationError('Institución no encontrada');
+}
 
-      // Verificar si tiene usuarios activos
-      const usuariosCount = await prisma.usuarioInstitucion.count({
-        where: { institucionId: id, activo: true },
-      });
+// Verificar si tiene usuarios activos
+const usuariosCount = await prisma.usuarioInstitucion.count({
+  where: { institucionId: id, activo: true },
+});
 
-      if (usuariosCount > 0) {
-        throw new ConflictError('No se puede eliminar la institución porque tiene usuarios activos asociados');
-      }
+if (usuariosCount > 0) {
+  throw new ConflictError('No se puede eliminar la institución porque tiene usuarios activos asociados');
+}
 
-      await prisma.institucion.delete({
-        where: { id },
-      });
+await prisma.institucion.delete({
+  where: { id },
+});
 
-      return true;
+return true;
     } catch (error) {
-      logger.error(`Error al eliminar institución con ID ${id}:`, error);
-      throw error;
-    }
+  logger.error(`Error al eliminar institución con ID ${id}:`, error);
+  throw error;
+}
   }
 }
 

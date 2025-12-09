@@ -19,17 +19,19 @@ class InstitutionService {
   // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   /// Obtiene todas las instituciones con paginación y filtros
-  Future<PaginatedInstitutionResponse?> getAllInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
+  Future<PaginatedInstitutionResponse?> getAllInstitutions(String accessToken,
+      {int? page, int? limit, bool? activa, String? search}) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
       if (activa != null) queryParams['activa'] = activa.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
-      
-      final uri = Uri.parse('$baseUrlValue/instituciones').replace(queryParameters: queryParams);
-      
+
+      final uri = Uri.parse('$baseUrlValue/instituciones')
+          .replace(queryParameters: queryParams);
+
       final response = await http.get(
         uri,
         headers: {
@@ -43,20 +45,24 @@ class InstitutionService {
         },
       );
 
-  debugPrint('GET /instituciones - Status: ${response.statusCode}');
+      debugPrint('GET /instituciones - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-    debugPrint('GET /instituciones - data[0]: ${(responseData['data'] as List).isNotEmpty ? (responseData['data'] as List)[0] : 'empty'}');
-    final institutions = (responseData['data'] as List)
+          debugPrint(
+              'GET /instituciones - data[0]: ${(responseData['data'] as List).isNotEmpty ? (responseData['data'] as List)[0] : 'empty'}');
+          final institutions = (responseData['data'] as List)
               .map((institutionJson) => Institution.fromJson(institutionJson))
               .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
-          return PaginatedInstitutionResponse(institutions: institutions, pagination: pagination);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedInstitutionResponse(
+              institutions: institutions, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting institutions: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting institutions: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -70,7 +76,7 @@ class InstitutionService {
   /// Obtiene una institución por ID
   Future<Institution?> getInstitutionById(String accessToken, String id) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -84,7 +90,7 @@ class InstitutionService {
         },
       );
 
-  debugPrint('GET /instituciones/$id - Status: ${response.statusCode}');
+      debugPrint('GET /instituciones/$id - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -93,7 +99,8 @@ class InstitutionService {
           return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error getting institution: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting institution: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -104,8 +111,6 @@ class InstitutionService {
     return null;
   }
 
-
-
   /// Crea una nueva institución
   Future<Institution?> createInstitution(
     String accessToken, {
@@ -115,8 +120,9 @@ class InstitutionService {
     String? email,
   }) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/instituciones'),
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +134,8 @@ class InstitutionService {
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -143,7 +150,8 @@ class InstitutionService {
           return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error creating institution: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating institution: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -163,10 +171,17 @@ class InstitutionService {
     String? telefono,
     String? email,
     bool? activa,
+    // Configuración Notificaciones
+    bool? notificacionesActivas,
+    String? canalNotificacion,
+    String? modoNotificacionAsistencia,
+    String? horaDisparoNotificacion,
+    bool? notificarAusenciaTotalDiaria,
   }) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.put(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
           'Content-Type': 'application/json',
@@ -178,8 +193,19 @@ class InstitutionService {
           if (telefono != null) 'telefono': telefono,
           if (email != null) 'email': email,
           if (activa != null) 'activa': activa,
+          // Configuración
+          if (notificacionesActivas != null)
+            'notificacionesActivas': notificacionesActivas,
+          if (canalNotificacion != null) 'canalNotificacion': canalNotificacion,
+          if (modoNotificacionAsistencia != null)
+            'modoNotificacionAsistencia': modoNotificacionAsistencia,
+          if (horaDisparoNotificacion != null)
+            'horaDisparoNotificacion': horaDisparoNotificacion,
+          if (notificarAusenciaTotalDiaria != null)
+            'notificarAusenciaTotalDiaria': notificarAusenciaTotalDiaria,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -194,7 +220,8 @@ class InstitutionService {
           return Institution.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error updating institution: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating institution: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -208,7 +235,7 @@ class InstitutionService {
   /// Elimina una institución (desactivación lógica)
   Future<bool> deleteInstitution(String accessToken, String id) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/instituciones/$id'),
         headers: {
@@ -227,64 +254,12 @@ class InstitutionService {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting institution: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting institution: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
       debugPrint('Error deleting institution: $e');
-      debugPrint('StackTrace: $stackTrace');
-      return false;
-    }
-  }
-
-  /// Actualiza la configuracion de notificaciones de una institucion
-  Future<bool> updateNotificationConfig(
-    String accessToken,
-    String institutionId, {
-    required bool notificacionesActivas,
-    required String canalNotificacion,
-    required String modoNotificacionAsistencia,
-    String? horaDisparoNotificacion,
-    int? umbralInasistenciasAlerta,
-    bool? notificarAusenciaTotalDiaria,
-  }) async {
-    try {
-      final baseUrlValue = AppConfig.baseUrl;
-      // La ruta de notificaciones usa /api/institutions (no /instituciones)
-      final url = '$baseUrlValue/api/institutions/$institutionId/notification-config';
-      
-      final response = await http.put(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode({
-          'notificacionesActivas': notificacionesActivas,
-          'canalNotificacion': canalNotificacion,
-          'modoNotificacionAsistencia': modoNotificacionAsistencia,
-          if (horaDisparoNotificacion != null) 'horaDisparoNotificacion': horaDisparoNotificacion,
-          if (umbralInasistenciasAlerta != null) 'umbralInasistenciasAlerta': umbralInasistenciasAlerta,
-          if (notificarAusenciaTotalDiaria != null) 'notificarAusenciaTotalDiaria': notificarAusenciaTotalDiaria,
-        }),
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Timeout: El servidor no responde');
-        },
-      );
-
-      debugPrint('PUT $url - Status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        return responseData['success'] == true;
-      } else {
-        debugPrint('Error updating notification config: ${response.statusCode} - ${response.body}');
-        return false;
-      }
-    } catch (e, stackTrace) {
-      debugPrint('Error updating notification config: $e');
       debugPrint('StackTrace: $stackTrace');
       return false;
     }

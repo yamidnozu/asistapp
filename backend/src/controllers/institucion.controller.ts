@@ -20,6 +20,10 @@ interface UpdateInstitucionBody {
   telefono?: string;
   email?: string;
   activa?: boolean;
+  notificacionesActivas?: boolean;
+  canalNotificacion?: string;
+  modoNotificacionAsistencia?: string;
+  horaDisparoNotificacion?: string;
 }
 
 export class InstitucionController {
