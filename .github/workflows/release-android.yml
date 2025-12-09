@@ -144,12 +144,18 @@ jobs:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
           set -e
-          # Use API_BASE_URL from secrets if provided; fall back to a sane default
+          # API_BASE_URL DEBE venir de secrets - no hay valores hardcodeados
           if [ -z "$API_BASE_URL" ]; then
-            echo "Warning: API_BASE_URL secret is empty - falling back to default (https://srv974201.hstgr.cloud)"
-            API_BASE_URL="https://srv974201.hstgr.cloud"
+            echo "❌ ERROR: API_BASE_URL secret is not configured!"
+            echo ""
+            echo "Para configurar:"
+            echo "  1. Ve a Settings → Secrets and variables → Actions"
+            echo "  2. Agrega un nuevo secret llamado 'API_BASE_URL'"
+            echo "  3. Valor: https://tu-dominio-de-produccion.com"
+            echo ""
+            exit 1
           fi
-          echo "Using API_BASE_URL: $API_BASE_URL"
+          echo "✅ Using API_BASE_URL: $API_BASE_URL"
           flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=ENVIRONMENT=production
 
       - name: Dump AAB manifest and validate package name

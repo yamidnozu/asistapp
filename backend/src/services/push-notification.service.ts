@@ -6,6 +6,7 @@
 
 import { prisma } from '../config/database';
 import { NotFoundError, ValidationError } from '../types';
+import { getMessaging, isFirebaseReady } from '../config/firebase';
 
 // Tipos para las notificaciones
 export interface CreateNotificacionInAppData {
@@ -36,6 +37,19 @@ export interface RegistrarDispositivoData {
     token: string;
     plataforma: 'android' | 'ios' | 'web';
     modelo?: string;
+}
+
+export interface PushNotificationData {
+    titulo: string;
+    mensaje: string;
+    tipo: string;
+    datos?: Record<string, string>;
+}
+
+export interface PushNotificationResult {
+    enviados: number;
+    fallidos: number;
+    tokensInvalidos: string[];
 }
 
 class PushNotificationService {
@@ -108,7 +122,7 @@ class PushNotificationService {
         ]);
 
         return {
-            notificaciones: notificaciones.map((n) => ({
+            notificaciones: notificaciones.map((n: typeof notificaciones[0]) => ({
                 id: n.id,
                 titulo: n.titulo,
                 mensaje: n.mensaje,
@@ -231,12 +245,12 @@ class PushNotificationService {
             select: { token: true },
         });
 
-        return dispositivos.map((d) => d.token);
+        return dispositivos.map((d: typeof dispositivos[0]) => d.token);
     }
 
     /**
      * Envía notificación a todos los acudientes de un estudiante
-     * Crea notificaciones in-app y prepara para push
+     * Crea notificaciones in-app y envía push notifications reales
      */
     public static async notificarAcudientes(
         estudianteId: string,
@@ -248,7 +262,7 @@ class PushNotificationService {
             hora?: string;
             asistenciaId?: string;
         }
-    ): Promise<{ notificados: number; tokens: string[] }> {
+    ): Promise<{ notificados: number; tokens: string[]; pushEnviados: number; pushFallidos: number }> {
         // Obtener el estudiante con sus acudientes
         const estudiante = await prisma.estudiante.findUnique({
             where: { id: estudianteId },
@@ -334,7 +348,28 @@ class PushNotificationService {
             }
         }
 
-        return { notificados, tokens };
+        // 🚀 ENVIAR NOTIFICACIONES PUSH REALES
+        // Este es el paso crítico que hace que el teléfono vibre/suene
+        let pushResult: PushNotificationResult = { enviados: 0, fallidos: 0, tokensInvalidos: [] };
+        if (tokens.length > 0) {
+            pushResult = await this.enviarPushNotification(tokens, {
+                titulo,
+                mensaje,
+                tipo,
+                datos: {
+                    estudianteId,
+                    ...(datosAdicionales.materiaId ? { materiaId: datosAdicionales.materiaId } : {}),
+                    ...(datosAdicionales.asistenciaId ? { asistenciaId: datosAdicionales.asistenciaId } : {}),
+                },
+            });
+        }
+
+        return {
+            notificados,
+            tokens,
+            pushEnviados: pushResult.enviados,
+            pushFallidos: pushResult.fallidos,
+        };
     }
 
     /**
@@ -344,6 +379,166 @@ class PushNotificationService {
         return prisma.notificacionInApp.count({
             where: { usuarioId, leida: false },
         });
+    }
+
+    /**
+     * Envía notificaciones push reales a través de Firebase Cloud Messaging
+     * Este es el método que realmente hace que el teléfono vibre/suene
+     * 
+     * @param tokens - Lista de tokens FCM a los que enviar
+     * @param data - Datos de la notificación (título, mensaje, tipo)
+     * @returns Resultado del envío con conteo de enviados/fallidos
+     */
+    public static async enviarPushNotification(
+        tokens: string[],
+        data: PushNotificationData
+    ): Promise<PushNotificationResult> {
+        const result: PushNotificationResult = {
+            enviados: 0,
+            fallidos: 0,
+            tokensInvalidos: [],
+        };
+
+        if (tokens.length === 0) {
+            console.log('📱 Push: No hay tokens para enviar notificaciones');
+            return result;
+        }
+
+        // Verificar si Firebase está listo
+        if (!isFirebaseReady()) {
+            console.warn('⚠️ Push: Firebase no está inicializado. Las notificaciones push no se enviarán.');
+            console.warn('   Configure las credenciales de Firebase para habilitar push notifications.');
+            result.fallidos = tokens.length;
+            return result;
+        }
+
+        const messaging = getMessaging();
+        if (!messaging) {
+            console.error('❌ Push: No se pudo obtener instancia de Firebase Messaging');
+            result.fallidos = tokens.length;
+            return result;
+        }
+
+        try {
+            console.log(`📱 Push: Enviando notificación a ${tokens.length} dispositivo(s)...`);
+            console.log(`   Título: ${data.titulo}`);
+            console.log(`   Mensaje: ${data.mensaje}`);
+
+            // Preparar el mensaje para múltiples dispositivos
+            const message = {
+                tokens: tokens,
+                notification: {
+                    title: data.titulo,
+                    body: data.mensaje,
+                },
+                data: {
+                    tipo: data.tipo,
+                    click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                    ...(data.datos || {}),
+                },
+                android: {
+                    priority: 'high' as const,
+                    notification: {
+                        channelId: 'asistapp_notifications',
+                        priority: 'high' as const,
+                        defaultSound: true,
+                        defaultVibrateTimings: true,
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            alert: {
+                                title: data.titulo,
+                                body: data.mensaje,
+                            },
+                            sound: 'default',
+                            badge: 1,
+                        },
+                    },
+                },
+            };
+
+            // Enviar a múltiples dispositivos
+            const response = await messaging.sendEachForMulticast(message);
+
+            result.enviados = response.successCount;
+            result.fallidos = response.failureCount;
+
+            console.log(`✅ Push: ${response.successCount} enviados, ${response.failureCount} fallidos`);
+
+            // Procesar tokens inválidos para desactivarlos
+            response.responses.forEach((resp: { success: boolean; error?: { code: string; message: string } }, idx: number) => {
+                if (!resp.success && resp.error) {
+                    const errorCode = resp.error.code;
+                    // Estos códigos indican que el token ya no es válido
+                    if (
+                        errorCode === 'messaging/invalid-registration-token' ||
+                        errorCode === 'messaging/registration-token-not-registered' ||
+                        errorCode === 'messaging/invalid-argument'
+                    ) {
+                        result.tokensInvalidos.push(tokens[idx]);
+                        console.warn(`⚠️ Push: Token inválido detectado: ${tokens[idx].substring(0, 20)}...`);
+                    } else {
+                        console.error(`❌ Push: Error enviando a token ${idx}:`, resp.error.message);
+                    }
+                }
+            });
+
+            // Desactivar tokens inválidos en la base de datos
+            if (result.tokensInvalidos.length > 0) {
+                await this.desactivarTokensInvalidos(result.tokensInvalidos);
+            }
+
+        } catch (error) {
+            console.error('❌ Push: Error general enviando notificaciones:', error);
+            result.fallidos = tokens.length;
+        }
+
+        return result;
+    }
+
+    /**
+     * Desactiva tokens FCM que ya no son válidos
+     */
+    private static async desactivarTokensInvalidos(tokens: string[]): Promise<void> {
+        if (tokens.length === 0) return;
+
+        try {
+            const updated = await prisma.dispositivoFCM.updateMany({
+                where: { token: { in: tokens } },
+                data: { activo: false },
+            });
+            console.log(`🗑️ Push: ${updated.count} token(s) inválido(s) desactivado(s)`);
+        } catch (error) {
+            console.error('Error desactivando tokens inválidos:', error);
+        }
+    }
+
+    /**
+     * Envía notificación push a un usuario específico
+     * Combina crear notificación in-app + enviar push real
+     */
+    public static async enviarNotificacionCompleta(
+        usuarioId: string,
+        data: PushNotificationData
+    ): Promise<{ inApp: NotificacionResponse; push: PushNotificationResult }> {
+        // 1. Crear notificación in-app
+        const inApp = await this.crearNotificacionInApp({
+            usuarioId,
+            titulo: data.titulo,
+            mensaje: data.mensaje,
+            tipo: data.tipo as 'ausencia' | 'tardanza' | 'justificado' | 'general' | 'sistema',
+            datos: data.datos as Record<string, unknown>,
+        });
+
+        // 2. Obtener tokens del usuario
+        const tokens = await this.obtenerTokensFCM(usuarioId);
+
+        // 3. Enviar push real
+        const push = await this.enviarPushNotification(tokens, data);
+
+        return { inApp, push };
     }
 
     /**

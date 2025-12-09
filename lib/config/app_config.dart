@@ -128,14 +128,16 @@ class AppConfig {
 
     // 3. Usar valores por defecto
     _baseUrl = _getDefaultUrl();
-    _environment = 'development';
+    // En release mode, el entorno por defecto es producción
+    _environment = kDebugMode ? 'development' : 'production';
     debugPrint('AppConfig: Usando configuración por defecto');
     debugPrint('  - API_BASE_URL: $_baseUrl');
     debugPrint('  - ENVIRONMENT: $_environment');
     debugPrint('  - Plataforma: ${Platform.operatingSystem}');
+    debugPrint('  - Modo: ${kDebugMode ? "DEBUG" : "RELEASE"}');
   }
 
-  /// Determina la URL por defecto según la plataforma
+  /// Determina la URL por defecto según la plataforma y el modo de compilación
   static String _getDefaultUrl() {
     // Android emulador usa 10.0.2.2 para conectar al localhost del host
     // iOS simulator usa localhost directamente
@@ -149,12 +151,24 @@ class AppConfig {
       } else if (Platform.isIOS) {
         // Para simulador de iOS
         return 'http://localhost:3000';
+      } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        // Para desarrollo en escritorio
+        return 'http://localhost:3000';
       }
+      // Fallback para debug en dispositivo físico: usar localhost
+      // El desarrollador debe configurar .env con su IP local si es necesario
+      return 'http://localhost:3000';
     }
 
-    // Fallback: red local (ajustar según tu configuración)
-    // Cambiado a puerto 3000 por defecto para que coincida con el backend en docker-compose
-    return 'http://192.168.20.22:3000';
+    // En modo RELEASE (producción), NO hay valor por defecto
+    // La URL DEBE ser configurada via --dart-define o .env
+    throw StateError(
+      'AppConfig: No se encontró API_BASE_URL para modo producción.\n'
+      'Debes configurar la URL de la API mediante:\n'
+      '  1. --dart-define=API_BASE_URL=https://tu-dominio.com (recomendado para builds)\n'
+      '  2. Archivo .env con API_BASE_URL=https://tu-dominio.com\n'
+      'Revisa la documentación en .env.example para más detalles.',
+    );
   }
 
   /// Devuelve la URL base de la API

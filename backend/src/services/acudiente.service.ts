@@ -274,7 +274,7 @@ class AcudienteService {
         ]);
 
         return {
-            asistencias: asistencias.map((a) => ({
+            asistencias: asistencias.map((a: typeof asistencias[0]) => ({
                 id: a.id,
                 fecha: a.fecha,
                 estado: a.estado,
@@ -330,10 +330,10 @@ class AcudienteService {
         // Calcular resumen general
         const resumen = {
             totalClases: asistencias.length,
-            presentes: asistencias.filter((a) => a.estado === 'PRESENTE').length,
-            ausentes: asistencias.filter((a) => a.estado === 'AUSENTE').length,
-            tardanzas: asistencias.filter((a) => a.estado === 'TARDANZA').length,
-            justificados: asistencias.filter((a) => a.estado === 'JUSTIFICADO').length,
+            presentes: asistencias.filter((a: typeof asistencias[0]) => a.estado === 'PRESENTE').length,
+            ausentes: asistencias.filter((a: typeof asistencias[0]) => a.estado === 'AUSENTE').length,
+            tardanzas: asistencias.filter((a: typeof asistencias[0]) => a.estado === 'TARDANZA').length,
+            justificados: asistencias.filter((a: typeof asistencias[0]) => a.estado === 'JUSTIFICADO').length,
             porcentajeAsistencia: 0,
         };
         resumen.porcentajeAsistencia =
@@ -359,7 +359,7 @@ class AcudienteService {
         }
 
         const porMateria = Array.from(materiaMap.values())
-            .map((m) => ({
+            .map((m: { id: string; nombre: string; total: number; ausentes: number; tardanzas: number }) => ({
                 materiaId: m.id,
                 materiaNombre: m.nombre,
                 totalClases: m.total,
@@ -367,7 +367,7 @@ class AcudienteService {
                 tardanzas: m.tardanzas,
                 porcentajeAsistencia: m.total > 0 ? Math.round(((m.total - m.ausentes) / m.total) * 100) : 100,
             }))
-            .sort((a, b) => a.porcentajeAsistencia - b.porcentajeAsistencia); // Ordenar por peor asistencia
+            .sort((a: { porcentajeAsistencia: number }, b: { porcentajeAsistencia: number }) => a.porcentajeAsistencia - b.porcentajeAsistencia); // Ordenar por peor asistencia
 
         // Tendencia semanal (últimas 4 semanas)
         const tendenciaSemanal: Array<{ semana: string; presentes: number; ausentes: number; tardanzas: number }> = [];
@@ -383,23 +383,23 @@ class AcudienteService {
             finSemana.setHours(23, 59, 59, 999);
 
             const asistenciasSemana = asistencias.filter(
-                (a) => a.fecha >= inicioSemana && a.fecha <= finSemana
+                (a: typeof asistencias[0]) => a.fecha >= inicioSemana && a.fecha <= finSemana
             );
 
             tendenciaSemanal.push({
                 semana: `Semana ${inicioSemana.toLocaleDateString('es', { day: '2-digit', month: 'short' })}`,
-                presentes: asistenciasSemana.filter((a) => a.estado === 'PRESENTE').length,
-                ausentes: asistenciasSemana.filter((a) => a.estado === 'AUSENTE').length,
-                tardanzas: asistenciasSemana.filter((a) => a.estado === 'TARDANZA').length,
+                presentes: asistenciasSemana.filter((a: typeof asistencias[0]) => a.estado === 'PRESENTE').length,
+                ausentes: asistenciasSemana.filter((a: typeof asistencias[0]) => a.estado === 'AUSENTE').length,
+                tardanzas: asistenciasSemana.filter((a: typeof asistencias[0]) => a.estado === 'TARDANZA').length,
             });
         }
 
         // Últimas 5 faltas
         const ultimasFaltas = asistencias
-            .filter((a) => a.estado === 'AUSENTE' || a.estado === 'TARDANZA')
-            .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
+            .filter((a: typeof asistencias[0]) => a.estado === 'AUSENTE' || a.estado === 'TARDANZA')
+            .sort((a: typeof asistencias[0], b: typeof asistencias[0]) => b.fecha.getTime() - a.fecha.getTime())
             .slice(0, 5)
-            .map((a) => ({
+            .map((a: typeof asistencias[0]) => ({
                 id: a.id,
                 fecha: a.fecha,
                 estado: a.estado,
@@ -519,7 +519,7 @@ class AcudienteService {
             },
         });
 
-        return relaciones.map((r) => ({
+        return relaciones.map((r: typeof relaciones[0]) => ({
             id: r.acudiente.id,
             nombres: r.acudiente.nombres,
             apellidos: r.acudiente.apellidos,

@@ -4,6 +4,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import { config } from './config/app';
 import { databaseService } from './config/database';
+import { initializeFirebase } from './config/firebase';
 import { authenticate } from './middleware/auth';
 import setupErrorHandler from './middleware/errorHandler';
 import routes from './routes';
@@ -49,6 +50,12 @@ const start = async () => {
 
     // Initialize Cron Jobs
     CronService.init();
+
+    // Initialize Firebase Admin SDK for push notifications
+    const firebaseReady = initializeFirebase();
+    if (!firebaseReady && config.nodeEnv === 'production') {
+      console.warn('⚠️ Firebase no está configurado. Las notificaciones push no funcionarán.');
+    }
 
     if (config.nodeEnv === 'development') {
       console.log('🌐 Iniciando servidor...');

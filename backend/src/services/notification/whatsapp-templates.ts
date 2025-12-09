@@ -68,14 +68,19 @@ export function getStatusEmoji(status: string): string {
 /**
  * Genera un template de notificación de asistencia
  * 
- * Template en Meta debe tener estructura similar a:
- * "Hola {{1}}, le informamos que {{2}} registró {{3}} en la clase de {{4}} el día {{5}}."
+ * Template APROBADO en Meta (asistapp_asistencia):
+ * 📚 AsistApp - Notificación de Asistencia
+ * Hola {{1}}, {{2}} registró {{3}} en la clase de {{4}}.
+ * 📅 Fecha: {{5}}
+ * Para mayor información contacte a la institución.
  * 
- * @param guardianName - Nombre del acudiente
- * @param studentName - Nombre del estudiante
- * @param status - Estado de asistencia (Presente, Ausente, Tardanza)
- * @param subjectName - Nombre de la materia
- * @param date - Fecha formateada
+ * NOTA: Este template está configurado en inglés en Meta (en_US)
+ * 
+ * @param guardianName - Nombre del acudiente ({{1}})
+ * @param studentName - Nombre del estudiante ({{2}})
+ * @param status - Estado de asistencia ({{3}})
+ * @param subjectName - Nombre de la materia ({{4}})
+ * @param date - Fecha formateada ({{5}})
  */
 export function buildAttendanceTemplate(
     guardianName: string,
@@ -85,8 +90,8 @@ export function buildAttendanceTemplate(
     date: string
 ): WhatsAppTemplateConfig {
     return {
-        name: 'asistencia_notificacion', // Debe coincidir con el template creado en Meta
-        language: { code: 'es_CO' }, // Español (Colombia) - debe coincidir con configuración en Meta
+        name: 'asistapp_asistencia', // Template aprobado en Meta
+        language: { code: 'en_US' }, // Configurado en inglés en Meta
         components: [
             {
                 type: 'body',
@@ -105,27 +110,27 @@ export function buildAttendanceTemplate(
 /**
  * Genera un template de resumen diario de asistencia
  * 
- * Template en Meta debe tener estructura similar a:
- * "Hola {{1}}, resumen de asistencia de {{2}} para hoy:\n{{3}}"
+ * Template APROBADO en Meta (asistapp_resumen):
+ * 📚 AsistApp - Reporte de Asistencia
+ * Hola {{1}},
+ * {{2}}
+ * Para más información, contacte a la institución.
  * 
- * @param guardianName - Nombre del acudiente
- * @param studentName - Nombre del estudiante
- * @param summary - Resumen de clases y estados
+ * @param guardianName - Nombre del acudiente ({{1}})
+ * @param summary - Resumen de asistencias ({{2}})
  */
 export function buildDailySummaryTemplate(
     guardianName: string,
-    studentName: string,
     summary: string
 ): WhatsAppTemplateConfig {
     return {
-        name: 'resumen_diario_asistencia',
-        language: { code: 'es_CO' },
+        name: 'asistapp_resumen', // Template aprobado en Meta
+        language: { code: 'es' }, // Español
         components: [
             {
                 type: 'body',
                 parameters: [
                     { type: 'text', text: guardianName },
-                    { type: 'text', text: studentName },
                     { type: 'text', text: summary }
                 ]
             }
@@ -224,8 +229,9 @@ export function getStatusText(status: string): string {
 /**
  * Genera un template de resumen consolidado (para múltiples hijos)
  * 
- * Template en Meta debe tener estructura similar a:
- * "Hola {{1}}, resumen de asistencia:\n{{2}}"
+ * Usa el mismo template aprobado: asistapp_resumen
+ * {{1}} = guardianName
+ * {{2}} = consolidatedSummary (todos los hijos y sus asistencias)
  * 
  * @param guardianName - Nombre del acudiente
  * @param consolidatedSummary - Resumen con todos los hijos y sus asistencias
@@ -235,8 +241,8 @@ export function buildConsolidatedSummaryTemplate(
     consolidatedSummary: string
 ): WhatsAppTemplateConfig {
     return {
-        name: 'resumen_consolidado_asistencia',
-        language: { code: 'es_CO' },
+        name: 'asistapp_resumen', // Mismo template aprobado en Meta
+        language: { code: 'es' },
         components: [
             {
                 type: 'body',
