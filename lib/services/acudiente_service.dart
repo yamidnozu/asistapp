@@ -39,8 +39,10 @@ class HijoResponse {
       identificacion: json['identificacion'] as String,
       parentesco: json['parentesco'] as String,
       esPrincipal: json['esPrincipal'] as bool? ?? false,
-      grupo: json['grupo'] != null ? GrupoResumen.fromJson(json['grupo']) : null,
-      estadisticasResumen: EstadisticasResumen.fromJson(json['estadisticasResumen']),
+      grupo:
+          json['grupo'] != null ? GrupoResumen.fromJson(json['grupo']) : null,
+      estadisticasResumen:
+          EstadisticasResumen.fromJson(json['estadisticasResumen']),
     );
   }
 }
@@ -154,7 +156,8 @@ class ProfesorResumen {
   final String nombres;
   final String apellidos;
 
-  ProfesorResumen({required this.id, required this.nombres, required this.apellidos});
+  ProfesorResumen(
+      {required this.id, required this.nombres, required this.apellidos});
 
   String get nombreCompleto => '$nombres $apellidos';
 
@@ -300,7 +303,8 @@ class AcudienteService {
   }
 
   /// Obtiene el detalle de un hijo
-  Future<HijoResponse?> getHijoDetalle(String accessToken, String estudianteId) async {
+  Future<HijoResponse?> getHijoDetalle(
+      String accessToken, String estudianteId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
@@ -316,7 +320,8 @@ class AcudienteService {
         },
       );
 
-      debugPrint('GET /acudiente/hijos/$estudianteId - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /acudiente/hijos/$estudianteId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -333,7 +338,8 @@ class AcudienteService {
   }
 
   /// Obtiene el historial de asistencias de un hijo
-  Future<({List<AsistenciaHistorialItem> asistencias, int total})?> getHistorialAsistencias(
+  Future<({List<AsistenciaHistorialItem> asistencias, int total})?>
+      getHistorialAsistencias(
     String accessToken,
     String estudianteId, {
     int page = 1,
@@ -359,8 +365,9 @@ class AcudienteService {
         queryParams['estado'] = estado;
       }
 
-      final uri = Uri.parse('$baseUrlValue/acudiente/hijos/$estudianteId/asistencias')
-          .replace(queryParameters: queryParams);
+      final uri =
+          Uri.parse('$baseUrlValue/acudiente/hijos/$estudianteId/asistencias')
+              .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -375,7 +382,8 @@ class AcudienteService {
         },
       );
 
-      debugPrint('GET /acudiente/hijos/$estudianteId/asistencias - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /acudiente/hijos/$estudianteId/asistencias - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -396,7 +404,8 @@ class AcudienteService {
   }
 
   /// Obtiene estadísticas completas de un hijo
-  Future<EstadisticasCompletas?> getEstadisticas(String accessToken, String estudianteId) async {
+  Future<EstadisticasCompletas?> getEstadisticas(
+      String accessToken, String estudianteId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
@@ -412,7 +421,8 @@ class AcudienteService {
         },
       );
 
-      debugPrint('GET /acudiente/hijos/$estudianteId/estadisticas - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /acudiente/hijos/$estudianteId/estadisticas - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -429,7 +439,8 @@ class AcudienteService {
   }
 
   /// Obtiene las notificaciones del acudiente
-  Future<({List<NotificacionInApp> notificaciones, int noLeidas, int total})?> getNotificaciones(
+  Future<({List<NotificacionInApp> notificaciones, int noLeidas, int total})?>
+      getNotificaciones(
     String accessToken, {
     int page = 1,
     int limit = 20,
@@ -459,7 +470,8 @@ class AcudienteService {
         },
       );
 
-      debugPrint('GET /acudiente/notificaciones - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /acudiente/notificaciones - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -469,7 +481,11 @@ class AcudienteService {
               .toList();
           final noLeidas = responseData['noLeidas'] as int? ?? 0;
           final total = responseData['pagination']['total'] as int? ?? 0;
-          return (notificaciones: notificaciones, noLeidas: noLeidas, total: total);
+          return (
+            notificaciones: notificaciones,
+            noLeidas: noLeidas,
+            total: total
+          );
         }
       }
       return null;
@@ -511,11 +527,13 @@ class AcudienteService {
   }
 
   /// Marca una notificación como leída
-  Future<bool> marcarComoLeida(String accessToken, String notificacionId) async {
+  Future<bool> marcarComoLeida(
+      String accessToken, String notificacionId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.put(
-        Uri.parse('$baseUrlValue/acudiente/notificaciones/$notificacionId/leer'),
+        Uri.parse(
+            '$baseUrlValue/acudiente/notificaciones/$notificacionId/leer'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -571,7 +589,8 @@ class AcudienteService {
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/acudiente/dispositivo'),
         headers: {
           'Content-Type': 'application/json',
@@ -582,7 +601,8 @@ class AcudienteService {
           'plataforma': plataforma,
           if (modelo != null) 'modelo': modelo,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -608,7 +628,8 @@ class AcudienteService {
     String parentesco,
   ) async {
     final baseUrlValue = AppConfig.baseUrl;
-    final response = await http.post(
+    final response = await http
+        .post(
       Uri.parse('$baseUrlValue/admin/acudientes/$acudienteId/vincular'),
       headers: {
         'Content-Type': 'application/json',
@@ -618,7 +639,8 @@ class AcudienteService {
         'estudianteId': estudianteId,
         'parentesco': parentesco,
       }),
-    ).timeout(
+    )
+        .timeout(
       const Duration(seconds: 10),
       onTimeout: () {
         throw Exception('Timeout: El servidor no responde');
@@ -639,7 +661,8 @@ class AcudienteService {
   ) async {
     final baseUrlValue = AppConfig.baseUrl;
     final response = await http.delete(
-      Uri.parse('$baseUrlValue/admin/acudientes/$acudienteId/desvincular/$estudianteId'),
+      Uri.parse(
+          '$baseUrlValue/admin/acudientes/$acudienteId/desvincular/$estudianteId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -677,7 +700,8 @@ class AcudienteService {
         },
       );
 
-      debugPrint('GET /admin/estudiantes/$estudianteId/acudientes - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /admin/estudiantes/$estudianteId/acudientes - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -701,6 +725,8 @@ class AcudienteVinculadoResponse {
   final String id;
   final String nombres;
   final String apellidos;
+  final String? email;
+  final String? telefono;
   final String parentesco;
   final bool esPrincipal;
 
@@ -708,6 +734,8 @@ class AcudienteVinculadoResponse {
     required this.id,
     required this.nombres,
     required this.apellidos,
+    this.email,
+    this.telefono,
     required this.parentesco,
     required this.esPrincipal,
   });
@@ -720,9 +748,10 @@ class AcudienteVinculadoResponse {
       id: acudiente?['id'] ?? json['acudienteId'] ?? '',
       nombres: acudiente?['nombres'] ?? json['nombres'] ?? '',
       apellidos: acudiente?['apellidos'] ?? json['apellidos'] ?? '',
+      email: acudiente?['email'] ?? json['email'],
+      telefono: acudiente?['telefono'] ?? json['telefono'],
       parentesco: json['parentesco'] ?? 'otro',
       esPrincipal: json['esPrincipal'] ?? false,
     );
   }
 }
-

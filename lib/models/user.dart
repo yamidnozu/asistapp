@@ -42,6 +42,7 @@ class User {
   bool get esEstudiante => rol == UserRoles.estudiante;
   bool get esAdminInstitucion => rol == UserRoles.adminInstitucion;
   bool get esSuperAdmin => rol == UserRoles.superAdmin;
+  bool get esAcudiente => rol == UserRoles.acudiente;
 
   /// Obtiene la inicial del usuario para mostrar en avatares
   String get inicial {
@@ -49,17 +50,17 @@ class User {
     if (nombres.isNotEmpty) {
       return nombres[0].toUpperCase();
     }
-    
+
     // Si nombres está vacío, usar la primera letra del nombre completo
     if (nombreCompleto.isNotEmpty && nombreCompleto != ' ') {
       return nombreCompleto[0].toUpperCase();
     }
-    
+
     // Si nombre completo también está vacío, usar la primera letra del email
     if (email != null && email!.isNotEmpty) {
       return email![0].toUpperCase();
     }
-    
+
     // Último recurso
     return '?';
   }
@@ -115,7 +116,8 @@ class UserInstitution {
     required this.activo,
   });
 
-  factory UserInstitution.fromJson(Map<String, dynamic> json) => _$UserInstitutionFromJson(json);
+  factory UserInstitution.fromJson(Map<String, dynamic> json) =>
+      _$UserInstitutionFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserInstitutionToJson(this);
 }
@@ -136,7 +138,8 @@ class StudentDetails {
     this.telefonoResponsable,
   });
 
-  factory StudentDetails.fromJson(Map<String, dynamic> json) => _$StudentDetailsFromJson(json);
+  factory StudentDetails.fromJson(Map<String, dynamic> json) =>
+      _$StudentDetailsFromJson(json);
 
   Map<String, dynamic> toJson() => _$StudentDetailsToJson(this);
 }
@@ -190,8 +193,10 @@ class CreateUserRequest {
     // Campos específicos para estudiantes
     if (rol == UserRoles.estudiante) {
       if (identificacion != null) data['identificacion'] = identificacion;
-      if (nombreResponsable != null) data['nombreResponsable'] = nombreResponsable;
-      if (telefonoResponsable != null) data['telefonoResponsable'] = telefonoResponsable;
+      if (nombreResponsable != null)
+        data['nombreResponsable'] = nombreResponsable;
+      if (telefonoResponsable != null)
+        data['telefonoResponsable'] = telefonoResponsable;
     }
 
     // Campos específicos para profesores
@@ -240,8 +245,10 @@ class UpdateUserRequest {
     if (telefono != null) data['telefono'] = telefono;
     if (activo != null) data['activo'] = activo;
     if (identificacion != null) data['identificacion'] = identificacion;
-    if (nombreResponsable != null) data['nombreResponsable'] = nombreResponsable;
-    if (telefonoResponsable != null) data['telefonoResponsable'] = telefonoResponsable;
+    if (nombreResponsable != null)
+      data['nombreResponsable'] = nombreResponsable;
+    if (telefonoResponsable != null)
+      data['telefonoResponsable'] = telefonoResponsable;
     if (titulo != null) data['titulo'] = titulo;
     if (especialidad != null) data['especialidad'] = especialidad;
 
@@ -267,7 +274,8 @@ class PaginationInfo {
     required this.hasPrev,
   });
 
-  factory PaginationInfo.fromJson(Map<String, dynamic> json) => _$PaginationInfoFromJson(json);
+  factory PaginationInfo.fromJson(Map<String, dynamic> json) =>
+      _$PaginationInfoFromJson(json);
 
   Map<String, dynamic> toJson() => _$PaginationInfoToJson(this);
 }
