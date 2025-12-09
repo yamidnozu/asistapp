@@ -193,7 +193,9 @@ jobs:
                 # Crear el archivo sudoers para el usuario
                 # Esto funciona si el usuario tiene ALGÚN acceso sudo aunque requiera contraseña
                 # El SSH agent de GitHub Actions puede manejar esto
-                cat << SUDOEOF | sudo tee /etc/sudoers.d/$CURRENT_USER > /dev/null 2>&1 || {
+                if ! cat << SUDOEOF | sudo tee /etc/sudoers.d/$CURRENT_USER > /dev/null 2>&1; then
+$CURRENT_USER ALL=(ALL) NOPASSWD:ALL
+SUDOEOF
                   echo "❌ Cannot configure passwordless sudo."
                   echo "📝 SOLUCIÓN: Ejecuta este comando UNA VEZ en tu VPS:"
                   echo ""
@@ -201,9 +203,7 @@ jobs:
                   echo ""
                   echo "Después re-ejecuta el workflow."
                   exit 1
-                }
-$CURRENT_USER ALL=(ALL) NOPASSWD:ALL
-SUDOEOF
+                fi
                 sudo chmod 0440 /etc/sudoers.d/$CURRENT_USER 2>/dev/null || true
                 
                 # Verificar
