@@ -44,7 +44,7 @@ export class InstitucionService {
   /**
    * Obtiene todas las instituciones con paginación y filtros
    */
-  public static async getAllInstitutions(pagination?: PaginationParams, filters?: InstitutionFilters): Promise<PaginatedResponse<InstitutionResponse>> {
+  public static async getAllInstitutions(pagination?: PaginationParams, filters?: InstitutionFilters): Promise<any> {
     try {
       // Validar parámetros de paginación
       const page = pagination?.page || 1;
@@ -253,7 +253,7 @@ export class InstitucionService {
   /**
    * Obtiene una institución por ID
    */
-  public static async getInstitutionById(id: string): Promise<InstitutionResponse | null> {
+  public static async getInstitutionById(id: string): Promise<any | null> {
     try {
       if (!id || typeof id !== 'string') {
         throw new ValidationError('ID de institución inválido');
@@ -317,7 +317,7 @@ export class InstitucionService {
   /**
    * Crea una nueva institución
    */
-  public static async createInstitution(data: CreateInstitutionRequest): Promise<InstitutionResponse> {
+  public static async createInstitution(data: CreateInstitutionRequest): Promise<any> {
     try {
       // Validaciones
       if (!data.nombre) {
@@ -364,7 +364,7 @@ export class InstitucionService {
   /**
    * Actualiza una institución
    */
-  public static async updateInstitution(id: string, data: UpdateInstitutionRequest): Promise<InstitutionResponse | null> {
+  public static async updateInstitution(id: string, data: UpdateInstitutionRequest): Promise<any | null> {
     try {
       if (!id || typeof id !== 'string') {
         throw new ValidationError('ID de institución inválido');
