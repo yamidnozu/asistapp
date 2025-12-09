@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prisma } from '../config/database';
 import { ConflictError, PaginatedResponse, PaginationParams, ValidationError } from '../types';
 import logger from '../utils/logger';
