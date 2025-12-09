@@ -105,7 +105,13 @@ jobs:
           echo "    OR under the 'production' environment if using environment-level secrets"
           exit 1
         fi
-        echo "✅ All secrets validated successfully"
+        echo "✅ All required secrets validated successfully"
+        echo ""
+        echo "📋 Optional secrets status:"
+        [ -z "${{ secrets.WHATSAPP_API_TOKEN }}" ] && echo "⚠️  WHATSAPP_API_TOKEN not set (notifications won't work)" || echo "✅ WHATSAPP_API_TOKEN set"
+        [ -z "${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}" ] && echo "⚠️  WHATSAPP_PHONE_NUMBER_ID not set" || echo "✅ WHATSAPP_PHONE_NUMBER_ID set"
+        [ -z "${{ secrets.WHATSAPP_BUSINESS_ACCOUNT_ID }}" ] && echo "⚠️  WHATSAPP_BUSINESS_ACCOUNT_ID not set" || echo "✅ WHATSAPP_BUSINESS_ACCOUNT_ID set"
+        [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" ] && echo "⚠️  FIREBASE_SERVICE_ACCOUNT_JSON not set (push notifications won't work)" || echo "✅ FIREBASE_SERVICE_ACCOUNT_JSON set"
 
     - name: Load SSH key into ssh-agent
       uses: webfactory/ssh-agent@v0.7.0
@@ -150,11 +156,16 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         RUN_SEED: ${{ github.event.inputs.run_seed || 'false' }}
         RESET_DB: ${{ github.event.inputs.reset_db || 'false' }}
+        WHATSAPP_API_TOKEN: ${{ secrets.WHATSAPP_API_TOKEN }}
+        WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+        WHATSAPP_BUSINESS_ACCOUNT_ID: ${{ secrets.WHATSAPP_BUSINESS_ACCOUNT_ID }}
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'asistapp-1c728' }}
+        FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR,RUN_SEED,RESET_DB
+        envs: DOMAIN,EMAIL,DB_USER,DB_PASS,DB_NAME,DB_PORT,JWT_SECRET,IMAGE_TAG,GITHUB_TOKEN,GITHUB_ACTOR,RUN_SEED,RESET_DB,WHATSAPP_API_TOKEN,WHATSAPP_PHONE_NUMBER_ID,WHATSAPP_BUSINESS_ACCOUNT_ID,FIREBASE_PROJECT_ID,FIREBASE_SERVICE_ACCOUNT_JSON
         command_timeout: 30m
         script: |
           set -e
@@ -176,7 +187,79 @@ jobs:
           fi
           $SUDO mkdir -p /opt/asistapp
           test -f /opt/asistapp/docker-compose.prod.yml && $SUDO cp /opt/asistapp/docker-compose.prod.yml /opt/asistapp/backup-$(date +%Y%m%d%H%M%S).yml
-          printf "DB_USER=%s\nDB_PASS=%s\nDB_NAME=%s\nDB_PORT=%s\nJWT_SECRET=%s\nDOMAIN=%s\nIMAGE_TAG=%s\n" "$DB_USER" "$DB_PASS" "$DB_NAME" "$DB_PORT" "$JWT_SECRET" "$DOMAIN" "$IMAGE_TAG" | $SUDO tee /opt/asistapp/.env > /dev/null
+          
+          # Generar archivo .env completo con todas las variables
+          cat << ENVEOF | $SUDO tee /opt/asistapp/.env > /dev/null
+# ============================================
+# CONFIGURACIÓN DE BASE DE DATOS
+# ============================================
+DB_USER=$DB_USER
+DB_PASS=$DB_PASS
+DB_NAME=$DB_NAME
+DB_PORT=$DB_PORT
+DB_HOST=db
+
+# ============================================
+# CONFIGURACIÓN JWT
+# ============================================
+JWT_SECRET=$JWT_SECRET
+JWT_EXPIRES_IN=24h
+
+# ============================================
+# CONFIGURACIÓN DEL SERVIDOR
+# ============================================
+PORT=3000
+HOST=0.0.0.0
+NODE_ENV=production
+LOG_LEVEL=info
+
+# ============================================
+# URL DE LA API
+# ============================================
+API_BASE_URL=https://$DOMAIN
+
+# ============================================
+# DOMINIO
+# ============================================
+DOMAIN=$DOMAIN
+
+# ============================================
+# IMAGEN DOCKER
+# ============================================
+IMAGE_TAG=$IMAGE_TAG
+
+# ============================================
+# WhatsApp Cloud API (Meta Business)
+# ============================================
+WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN:-}
+WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID:-}
+WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID:-}
+
+# ============================================
+# FIREBASE CLOUD MESSAGING
+# ============================================
+FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-}
+GOOGLE_APPLICATION_CREDENTIALS=/opt/asistapp/firebase-service-account.json
+
+# ============================================
+# OPCIONALES
+# ============================================
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
+SENDGRID_API_KEY=
+FROM_EMAIL=noreply@asistapp.com
+ENVEOF
+
+          # Configurar Firebase Service Account si está disponible
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "🔥 Configurando Firebase Service Account..."
+            echo "$FIREBASE_SERVICE_ACCOUNT_JSON" | $SUDO tee /opt/asistapp/firebase-service-account.json > /dev/null
+            $SUDO chmod 600 /opt/asistapp/firebase-service-account.json
+            echo "✅ Firebase Service Account configurado"
+          else
+            echo "⚠️  FIREBASE_SERVICE_ACCOUNT_JSON no configurado, push notifications no funcionarán"
+          fi
           $SUDO tee /opt/asistapp/docker-compose.prod.yml > /dev/null << 'EOF'
           version: '3.8'
           services:
@@ -208,13 +291,21 @@ jobs:
               environment:
                 DATABASE_URL: postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}?schema=public
                 JWT_SECRET: ${JWT_SECRET}
+                JWT_EXPIRES_IN: 24h
                 PORT: 3000
                 HOST: 0.0.0.0
                 NODE_ENV: production
                 LOG_LEVEL: info
                 API_BASE_URL: https://${DOMAIN}
+                WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN}
+                WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+                WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID}
+                FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+                GOOGLE_APPLICATION_CREDENTIALS: /app/firebase-service-account.json
               ports:
                 - "127.0.0.1:3002:3000"
+              volumes:
+                - /opt/asistapp/firebase-service-account.json:/app/firebase-service-account.json:ro
               depends_on:
                 db:
                   condition: service_healthy
