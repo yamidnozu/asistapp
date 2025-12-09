@@ -194,8 +194,8 @@ jobs:
                 # Esto funciona si el usuario tiene ALGÚN acceso sudo aunque requiera contraseña
                 # El SSH agent de GitHub Actions puede manejar esto
                 if ! cat << SUDOEOF | sudo tee /etc/sudoers.d/$CURRENT_USER > /dev/null 2>&1; then
-$CURRENT_USER ALL=(ALL) NOPASSWD:ALL
-SUDOEOF
+                  $CURRENT_USER ALL=(ALL) NOPASSWD:ALL
+                  SUDOEOF
                   echo "❌ Cannot configure passwordless sudo."
                   echo "📝 SOLUCIÓN: Ejecuta este comando UNA VEZ en tu VPS:"
                   echo ""
