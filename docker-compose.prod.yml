@@ -1,59 +1,63 @@
 version: '3.8'
-
 services:
   db:
     image: postgres:15
     container_name: asistapp_db
     restart: always
+    env_file: .env
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - asistapp-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-
   app:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ${IMAGE_TAG}
     container_name: backend-app-v3
     restart: always
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 24h
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      LOG_LEVEL: info
+      API_BASE_URL: https://${DOMAIN}
+      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID}
+      WHATSAPP_FALLBACK_TEMPLATE: ${WHATSAPP_FALLBACK_TEMPLATE}
+      WHATSAPP_FALLBACK_TEMPLATE_LANG: ${WHATSAPP_FALLBACK_TEMPLATE_LANG}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /app/firebase-service-account.json
     ports:
       - "127.0.0.1:3002:3000"
-    environment:
-      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}?schema=public"
-      PORT: "${PORT:-3000}"
-      HOST: "${HOST:-0.0.0.0}"
-      JWT_SECRET: "${JWT_SECRET}"
-      JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-24h}"
-      NODE_ENV: "${NODE_ENV:-production}"
-      LOG_LEVEL: "${LOG_LEVEL:-info}"
-      API_BASE_URL: "${API_BASE_URL}"
+    volumes:
+      - /opt/asistapp/firebase-service-account.json:/app/firebase-service-account.json:ro
     depends_on:
       db:
         condition: service_healthy
     networks:
       - asistapp-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-3000}/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
 volumes:
   postgres_data:
-
 networks:
   asistapp-network:
     driver: bridge

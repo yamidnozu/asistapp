@@ -91,7 +91,7 @@ export function buildAttendanceTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'asistapp_asistencia', // Template aprobado en Meta
-        language: { code: 'en_US' }, // Configurado en inglés en Meta
+        language: { code: 'en' }, // Configurado en inglés en Meta
         components: [
             {
                 type: 'body',
@@ -125,7 +125,7 @@ export function buildDailySummaryTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'asistapp_resumen', // Template aprobado en Meta
-        language: { code: 'es' }, // Español
+        language: { code: 'es_CO' }, // Español
         components: [
             {
                 type: 'body',
@@ -242,7 +242,7 @@ export function buildConsolidatedSummaryTemplate(
 ): WhatsAppTemplateConfig {
     return {
         name: 'asistapp_resumen', // Mismo template aprobado en Meta
-        language: { code: 'es' },
+        language: { code: 'es_CO' },
         components: [
             {
                 type: 'body',
