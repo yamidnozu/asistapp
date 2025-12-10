@@ -664,67 +664,39 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
 
     try {
+      // FIX: Primero, recargar la lista para asegurar que tenemos el estado más reciente del estudiante (y su asistencia.id si existe)
+      await _loadAsistencias();
+      
+      // Encontrar la versión más actualizada del estudiante en la lista recién cargada
+      final estudianteActualizado = asistenciaProvider.asistencias.firstWhere(
+        (a) => a.estudianteId == estudiante.estudianteId,
+        orElse: () => estudiante, // Si no se encuentra, usar el original (poco probable)
+      );
+
       bool success = false;
       
-      if (estudiante.id != null && estudiante.id!.isNotEmpty) {
+      // Lógica simple y robusta: si tiene ID, actualiza; si no, crea.
+      if (estudianteActualizado.id != null && estudianteActualizado.id!.isNotEmpty) {
         // Tiene ID de asistencia -> Actualizar registro existente
-        debugPrint('🔄 Actualizando asistencia existente: ${estudiante.id}');
+        debugPrint('🔄 QUICK-MARK: Actualizando asistencia existente: ${estudianteActualizado.id} a estado $estado');
         success = await asistenciaProvider.updateAsistencia(
           token,
-          estudiante.id!,
+          estudianteActualizado.id!,
           estado,
         );
       } else {
-        // No tiene ID -> Intentar crear, si falla por duplicado, buscar y actualizar
-        debugPrint('➕ Creando nueva asistencia para: ${estudiante.estudianteId}');
-        try {
-          success = await asistenciaProvider.registrarAsistenciaManual(
-            token,
-            widget.clase.id,
-            estudiante.estudianteId,
-            estado: estado,
-          );
-        } catch (e) {
-          // Si falla porque ya existe, recargar lista y reintentar como actualización
-          if (e.toString().contains('ya tiene registrada')) {
-            debugPrint('⚠️ Ya existe asistencia, recargando lista y actualizando...');
-            // Recargar la lista para obtener el ID correcto
-            await _loadAsistencias();
-            
-            // DEBUG: Log all students after reload
-            debugPrint('📋 Lista recargada, buscando estudianteId: ${estudiante.estudianteId}');
-            for (var a in asistenciaProvider.asistencias) {
-              debugPrint('   - ${a.estudianteId} -> id: ${a.id}, estado: ${a.estado}');
-            }
-            
-            // Buscar el estudiante actualizado con su ID de asistencia
-            final estudianteActualizado = asistenciaProvider.asistencias.firstWhere(
-              (a) => a.estudianteId == estudiante.estudianteId,
-              orElse: () => estudiante,
-            );
-            
-            debugPrint('🔍 Estudiante encontrado: id=${estudianteActualizado.id}, estado=${estudianteActualizado.estado}');
-            
-            if (estudianteActualizado.id != null && estudianteActualizado.id!.isNotEmpty) {
-              debugPrint('🔄 Reintentando como actualización: ${estudianteActualizado.id}');
-              success = await asistenciaProvider.updateAsistencia(
-                token,
-                estudianteActualizado.id!,
-                estado,
-              );
-            } else {
-              debugPrint('❌ No se encontró ID de asistencia después de recargar');
-              // Si aún no tiene ID, relanzar el error original
-              rethrow;
-            }
-          } else {
-            rethrow;
-          }
-        }
+        // No tiene ID -> Crear nuevo registro
+        debugPrint('➕ QUICK-MARK: Creando nueva asistencia para: ${estudianteActualizado.estudianteId} con estado $estado');
+        success = await asistenciaProvider.registrarAsistenciaManual(
+          token,
+          widget.clase.id,
+          estudianteActualizado.estudianteId,
+          estado: estado,
+        );
       }
 
       if (mounted && success) {
-        // Recargar la lista para reflejar cambios
+        // Recargar la lista para reflejar el cambio visualmente
         await _loadAsistencias();
         
         final emoji = estado == 'PRESENTE' ? '✓' : (estado == 'AUSENTE' ? '✗' : '⏰');
