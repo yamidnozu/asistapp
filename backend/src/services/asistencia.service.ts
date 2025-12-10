@@ -864,6 +864,11 @@ export class AsistenciaService {
         },
       });
 
+      // DISCOVERY AND FIX: Trigger notification on update as well
+      notificationService.notifyAttendanceCreated(asistenciaActualizada.id).catch(err => {
+        logger.error('Error triggering notification on update:', err);
+      });
+
       // 4. Formatear respuesta
       // Use 'any' cast to avoid strict type checking issues with included relations if inference fails
       const result: any = asistenciaActualizada;
