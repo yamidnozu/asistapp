@@ -255,8 +255,10 @@ export class WhatsAppAdapter implements INotificationAdapter {
         originalBody: string,
         templateParams?: NotificationMessage['templateParams']
     ): Promise<NotificationResult> {
+        logger.debug('[WhatsAppAdapter] Entered sendWithFallbackTemplate. Params:', { formattedPhone, templateParams });
+
         if (!this.fallbackTemplateName) {
-            logger.warn(`[WhatsAppAdapter] ⚠️ No fallback template configured. Message will fail.`);
+            logger.error(`[WhatsAppAdapter] ⚠️ No fallback template configured. Cannot send message to ${formattedPhone}.`);
             return {
                 success: false,
                 error: 'Mensaje no enviado: El destinatario no ha interactuado en las últimas 24 horas y no hay template de fallback configurado.',
@@ -269,7 +271,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
             };
         }
 
-        logger.info(`[WhatsAppAdapter] 🔄 Attempting fallback template: ${this.fallbackTemplateName}...`);
+        logger.info(`[WhatsAppAdapter] 🔄 Attempting fallback template sending for ${formattedPhone}. Template: ${this.fallbackTemplateName}`);
 
         // Construir payload con parámetros si están disponibles
         const payload: any = {
@@ -301,9 +303,10 @@ export class WhatsAppAdapter implements INotificationAdapter {
                     ? templateParams.summary.substring(0, 997) + '...'
                     : templateParams.summary;
                 parameters.push({ type: 'text', text: summaryText });
-                logger.info(`[WhatsAppAdapter] 📋 Consolidated template with summary (${summaryText.length} chars)`);
+                logger.debug(`[WhatsAppAdapter] 📋 Building consolidated template with summary (${summaryText.length} chars)`);
             } else {
                 // Mensaje individual: agregar resto de parámetros
+                logger.debug('[WhatsAppAdapter] 📋 Building individual template with detailed params.');
                 if (templateParams.studentName) {
                     parameters.push({ type: 'text', text: templateParams.studentName });
                 }
@@ -323,9 +326,11 @@ export class WhatsAppAdapter implements INotificationAdapter {
                     type: 'body',
                     parameters: parameters
                 }];
-                logger.info(`[WhatsAppAdapter] 📋 Template params count: ${parameters.length}`);
+                logger.debug(`[WhatsAppAdapter] 📋 Final template params count: ${parameters.length}`);
             }
         }
+
+        logger.debug('[WhatsAppAdapter] Attempting to send fallback template with payload:', JSON.stringify(payload, null, 2));
 
         try {
             const response = await axios.post(this.apiUrl, payload, {
@@ -337,7 +342,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
             });
 
             const messageId = response.data.messages?.[0]?.id;
-            logger.info(`[WhatsAppAdapter] ✅ Fallback template sent successfully. ID: ${messageId}`);
+            logger.info(`[WhatsAppAdapter] ✅ Fallback template sent successfully to ${formattedPhone}. ID: ${messageId}`);
 
             return {
                 success: true,
@@ -352,7 +357,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
             };
         } catch (fallbackError: any) {
             const errorData = fallbackError.response?.data?.error || fallbackError.message;
-            logger.error(`[WhatsAppAdapter] ❌ Fallback template failed:`, errorData);
+            logger.error(`[WhatsAppAdapter] ❌ Fallback template to ${formattedPhone} failed. Full error:`, errorData);
 
             return {
                 success: false,
@@ -365,10 +370,12 @@ export class WhatsAppAdapter implements INotificationAdapter {
 
 
     async send(message: NotificationMessage): Promise<NotificationResult> {
+        logger.debug('[WhatsAppAdapter] Received new send request.', { to: message.to, body: message.body.substring(0,30)+'...', template: message.template ? message.template.name : 'none' });
+        
         // Si no hay configuración, usar modo mock en desarrollo
         if (!this.token || !this.phoneNumberId) {
             if (process.env.NODE_ENV !== 'production') {
-                logger.info(`[WhatsAppAdapter] 🔸 MOCK MODE - Would send to ${message.to}: ${message.body}`);
+                logger.warn(`[WhatsAppAdapter] 🔸 MOCK MODE - Would send to ${message.to}: ${message.body}`);
                 return {
                     success: true,
                     messageId: `wa_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
@@ -376,6 +383,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
                     rawResponse: { mock: true, reason: 'Missing credentials in non-production' }
                 };
             }
+            logger.error('[WhatsAppAdapter] CRITICAL - Cannot send message, WhatsApp credentials not configured.');
             return {
                 success: false,
                 error: 'WhatsApp credentials not configured',
@@ -386,7 +394,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
         try {
             // Normalizar número de teléfono al formato E.164 (sin +)
             const formattedPhone = normalizePhoneNumber(message.to);
-            logger.info(`[WhatsAppAdapter] 📤 Sending to ${formattedPhone}...`);
+            logger.info(`[WhatsAppAdapter] 📤 Normalizing phone and preparing to send to ${formattedPhone}...`);
 
             // ===================================================================
             // ESTRATEGIA SIMPLIFICADA: Siempre intentar TEXTO LIBRE primero
@@ -405,7 +413,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
                 }
             };
 
-            logger.info(`[WhatsAppAdapter] 💬 Attempting text message (personalized)...`);
+            logger.debug('[WhatsAppAdapter] 💬 STEP 1: Attempting to send text message with payload:', JSON.stringify(textPayload, null, 2));
 
             try {
                 const response = await axios.post(this.apiUrl, textPayload, {
@@ -417,7 +425,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
                 });
 
                 const messageId = response.data.messages?.[0]?.id;
-                logger.info(`[WhatsAppAdapter] ✅ Text message sent successfully. ID: ${messageId}`);
+                logger.info(`[WhatsAppAdapter] ✅ SUCCESS: Text message sent successfully to ${formattedPhone}. ID: ${messageId}`);
 
                 return {
                     success: true,
@@ -429,15 +437,18 @@ export class WhatsAppAdapter implements INotificationAdapter {
             } catch (textError: any) {
                 const errorCode = textError.response?.data?.error?.code;
                 const errorMessage = textError.response?.data?.error?.message || textError.message;
+                logger.warn(`[WhatsAppAdapter] ⚠️ INFO: Text message attempt to ${formattedPhone} failed.`, { error: textError.response?.data || textError.message });
+                logger.info(`[WhatsAppAdapter] Detected error code: ${errorCode}`);
 
                 // Error 131047: Re-engagement message (fuera de ventana 24h)
                 // Intentar con template de fallback si está configurado
                 if (errorCode === 131047) {
-                    logger.warn(`[WhatsAppAdapter] ⚠️ Text failed: Outside 24h window. Trying fallback template...`);
+                    logger.warn(`[WhatsAppAdapter] ⚠️ Reason: Outside 24h window. STEP 2: Initiating fallback to template for ${formattedPhone}.`);
                     return await this.sendWithFallbackTemplate(formattedPhone, message.body, message.templateParams);
                 }
 
                 // Otros errores: propagar
+                logger.error(`[WhatsAppAdapter] ❌ An unhandled error occurred during the text message attempt (not a 24h window error).`);
                 throw textError;
             }
 
@@ -446,7 +457,7 @@ export class WhatsAppAdapter implements INotificationAdapter {
             const errorData = error.response?.data?.error || error.response?.data || error.message;
             const statusCode = error.response?.status;
 
-            logger.error(`[WhatsAppAdapter] ❌ Error sending message (HTTP ${statusCode}):`, errorData);
+            logger.error(`[WhatsAppAdapter] ❌ FINAL ERROR: Unrecoverable error sending message (HTTP ${statusCode}):`, errorData);
 
             // Errores comunes de WhatsApp Cloud API:
             // - 131030: Recipient not in allowed list (sandbox)
