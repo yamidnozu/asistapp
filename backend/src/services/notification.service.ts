@@ -86,6 +86,7 @@ export class NotificationService {
      * Se llama automáticamente cuando se registra una asistencia
      */
     public async notifyAttendanceCreated(attendanceId: string): Promise<void> {
+        logger.info(`[NotificationService] Entered notifyAttendanceCreated for attendanceId: ${attendanceId}`);
         try {
             const attendance = await prisma.asistencia.findUnique({
                 where: { id: attendanceId },
@@ -105,42 +106,51 @@ export class NotificationService {
             });
 
             if (!attendance) {
-                logger.warn(`[NotificationService] Attendance ${attendanceId} not found`);
+                logger.warn(`[NotificationService] Attendance ${attendanceId} not found, exiting.`);
                 return;
             }
+            logger.debug(`[NotificationService] Attendance found. State: ${attendance.estado}, StudentId: ${attendance.estudianteId}`);
 
             // NUEVO: Siempre notificar a los acudientes in-app para AUSENTE o TARDANZA
             if (attendance.estado === 'AUSENTE' || attendance.estado === 'TARDANZA') {
+                logger.info(`[NotificationService] Notifying guardians in-app for state: ${attendance.estado}`);
                 await this.notifyGuardiansInApp(attendance);
             }
 
             // Obtener configuración de la institución
             const config = await this.getInstitutionConfig(attendance.institucionId);
+            logger.debug(`[NotificationService] Institution config loaded. Enabled: ${config.enabled}, Channel: ${config.channel}, Strategy: ${config.strategy}`);
 
             // Verificar si las notificaciones WhatsApp/SMS están activas
             if (!config.enabled || config.channel === NotificationChannel.NONE) {
-                logger.debug(`[NotificationService] External notifications disabled for institution ${attendance.institucionId}`);
+                logger.warn(`[NotificationService] External notifications disabled for institution ${attendance.institucionId}, exiting.`);
                 return;
             }
+            logger.debug(`[NotificationService] External notifications are enabled and channel is not NONE.`);
 
             const student = attendance.estudiante;
 
             // Verificar que el estudiante acepta notificaciones y tiene teléfono de responsable
             if (!student.aceptaNotificaciones) {
-                logger.debug(`[NotificationService] Student ${student.id} has notifications disabled`);
+                logger.warn(`[NotificationService] Student ${student.id} has notifications disabled, exiting.`);
                 return;
             }
+            logger.debug(`[NotificationService] Student ${student.id} accepts notifications.`);
+
 
             if (!student.telefonoResponsable) {
-                logger.warn(`[NotificationService] Student ${student.id} has no guardian phone number`);
+                logger.warn(`[NotificationService] Student ${student.id} has no guardian phone number, exiting.`);
                 return;
             }
+            logger.debug(`[NotificationService] Student ${student.id} has guardian phone number: ${student.telefonoResponsable}.`);
 
             // Aplicar estrategia según configuración
+            logger.info(`[NotificationService] Applying notification strategy: ${config.strategy}`);
             switch (config.strategy) {
                 case NotificationStrategy.INSTANT:
                     // Solo notificar instantáneamente si es AUSENTE o TARDANZA
                     if (attendance.estado === 'AUSENTE' || attendance.estado === 'TARDANZA') {
+                        logger.info(`[NotificationService] INSTANT mode: Triggering instant notification for state: ${attendance.estado}`);
                         await this.sendInstantNotification(attendance, student, config.channel);
                     } else {
                         logger.debug(`[NotificationService] INSTANT mode: Skipping notification for state ${attendance.estado} (only AUSENTE/TARDANZA trigger notifications)`);
@@ -148,20 +158,23 @@ export class NotificationService {
                     break;
 
                 case NotificationStrategy.END_OF_DAY:
+                    logger.info(`[NotificationService] END_OF_DAY mode: Queuing attendance ${attendance.id} for end of day.`);
                     await this.queueForEndOfDay(attendance, config.scheduledTime);
                     break;
 
                 case NotificationStrategy.MANUAL_ONLY:
                 default:
-                    logger.debug(`[NotificationService] Manual mode - attendance queued but not auto-sent`);
+                    logger.info(`[NotificationService] MANUAL_ONLY mode: Notification will not be auto-sent.`);
                     // Opcionalmente encolar para revisión manual
                     break;
             }
 
             // Verificar umbral de faltas para alertas especiales
             if (attendance.estado === 'AUSENTE') {
+                logger.debug(`[NotificationService] Checking absence threshold for student ${student.id}.`);
                 await this.checkAbsenceThreshold(student.id, attendance.institucionId, config);
             }
+            logger.info(`[NotificationService] Finished processing notifyAttendanceCreated for attendanceId: ${attendanceId}`);
 
         } catch (error) {
             logger.error('[NotificationService] Error processing attendance notification', error);
