@@ -60,25 +60,6 @@ export async function acudienteRoutes(fastify: FastifyInstance) {
      */
     fastify.get('/hijos', async (request: AuthenticatedRequest, reply: FastifyReply) => {
         try {
-            // =================================================================
-            // DIAGNOSTIC CODE - TEMPORARY
-            // =================================================================
-            request.log.info('<<<< DIAGNOSTICO: Entrando a GET /hijos, intentando registrar token falso...');
-            try {
-                await PushNotificationService.registrarDispositivo({
-                    usuarioId: request.user!.id,
-                    token: 'FAKE_TOKEN_FROM_HIJOS_ROUTE',
-                    plataforma: 'android',
-                    modelo: 'DIAGNOSTIC_TEST',
-                });
-                request.log.info('<<<< DIAGNOSTICO:  llamada a registrarDispositivo completada SIN ERROR.');
-            } catch (diagError) {
-                request.log.error(diagError, '<<<< DIAGNOSTICO: ERROR durante la llamada a registrarDispositivo.');
-            }
-            // =================================================================
-            // END DIAGNOSTIC CODE
-            // =================================================================
-
             const acudienteId = request.user!.id;
             const hijos = await AcudienteService.getHijos(acudienteId);
 
