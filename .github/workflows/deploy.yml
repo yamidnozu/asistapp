@@ -382,31 +382,44 @@ jobs:
               $SUDO ufw allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
             fi
             # Enable ufw if not already enabled
-            if $SUDO ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
+          $SUDO ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
               $SUDO ufw --force enable || echo "Warning: ufw enable failed" >&2
             else
-              echo "ufw already active"
+              echo "✅ ufw already active"
             fi
           else
-            echo "ufw not present"
+            echo "ℹ️ ufw not present on the system."
           fi
+          
+          echo "✍️  Writing Nginx configuration for domain '$DOMAIN'..."
           $SUDO tee /etc/nginx/sites-available/asistapp > /dev/null << 'NGINX'
           server {
             listen 80;
             listen [::]:80;
             server_name DVAR www.DVAR;
+            
+            # ACME Challenge Handler
             location /.well-known/acme-challenge/ {
               root /var/www/letsencrypt;
             }
-            return 301 https://$server_name$request_uri;
+            
+            # Redirect all HTTP to HTTPS
+            location / {
+              return 301 https://$server_name$request_uri;
+            }
           }
           server {
             listen 443 ssl http2;
             listen [::]:443 ssl http2;
             server_name DVAR www.DVAR;
+            
+            # SSL Config
             ssl_certificate /etc/letsencrypt/live/DVAR/fullchain.pem;
             ssl_certificate_key /etc/letsencrypt/live/DVAR/privkey.pem;
             ssl_protocols TLSv1.2 TLSv1.3;
+            ssl_prefer_server_ciphers off;
+
+            # General proxy configuration
             location / {
               proxy_pass http://127.0.0.1:3002;
               proxy_http_version 1.1;
@@ -416,16 +429,50 @@ jobs:
               proxy_set_header X-Real-IP $remote_addr;
               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
               proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_read_timeout 90;
             }
           }
           NGINX
+          
+          echo "🔄 Replacing placeholder 'DVAR' with actual domain '$DOMAIN'..."
           $SUDO sed -i "s/DVAR/$DOMAIN/g" /etc/nginx/sites-available/asistapp
+          
+          echo "📄 --- Generated Nginx Config ---"
+          $SUDO cat /etc/nginx/sites-available/asistapp
+          echo "📄 -----------------------------"
+
+          echo "🔗 Enabling the site and removing default..."
           $SUDO ln -sf /etc/nginx/sites-available/asistapp /etc/nginx/sites-enabled/
           $SUDO rm -f /etc/nginx/sites-enabled/default
+          
+          echo "🌐 Preparing webroot for SSL certificate..."
           $SUDO mkdir -p /var/www/letsencrypt
-          test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email || echo "Warning: certbot failed, SSL not obtained"
-          $SUDO nginx -t && $SUDO systemctl reload nginx || echo "Warning: nginx reload failed"
-          echo "$GITHUB_TOKEN" | $SUDO docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "Warning: docker login failed"
+
+          echo "🔐 Requesting/renewing SSL certificate with Certbot..."
+          # We add || true so the script doesn't fail if certs already exist and don't need renewal.
+          test -d /etc/letsencrypt/live/$DOMAIN || $SUDO certbot certonly --webroot -w /var/www/letsencrypt -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive --no-eff-email --quiet || echo "✅ Certbot check completed or certs already exist."
+
+          echo "🧪 Testing Nginx configuration..."
+          if $SUDO nginx -t; then
+            echo "✅ Nginx configuration is OK."
+            echo "🔄 Reloading Nginx to apply changes..."
+            if $SUDO systemctl reload nginx; then
+              echo "✅ Nginx reloaded successfully."
+            else
+              echo "❌ ERROR: Nginx reload FAILED."
+              exit 1
+            fi
+          else
+            echo "❌ ERROR: Nginx configuration test FAILED."
+            echo "--- Problematic Nginx Config ---"
+            $SUDO cat /etc/nginx/sites-available/asistapp
+            echo "--------------------------------"
+            exit 1
+          fi
+          
+          echo "🐳 Logging into container registry..."
+          echo "$GITHUB_TOKEN" | $SUDO docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin || echo "⚠️ Warning: docker login failed"
+          
           cd /opt/asistapp
           
           if [ "$RESET_DB" = "true" ]; then
