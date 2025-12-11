@@ -31,7 +31,7 @@ export async function diagnosticRoutes(fastify: FastifyInstance) {
             await PushNotificationService.registrarDispositivo({
                 usuarioId: testUserId,
                 token: testToken,
-                plataforma: 'diagnostic',
+                plataforma: 'android',
                 modelo: 'controlled-test',
             });
             request.log.info(`<<<< DIAGNOSTICO: La llamada a registrarDispositivo finalizó SIN errores.`);
