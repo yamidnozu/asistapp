@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { authenticate } from '../middleware/auth';
-import { AuthenticatedRequest } from '../types';
+import { AuthenticatedRequest } from '../middleware/auth'; // CORREGIDO: Importar desde auth
 
 export async function diagnosticRoutes(fastify: FastifyInstance) {
 
@@ -16,14 +16,16 @@ export async function diagnosticRoutes(fastify: FastifyInstance) {
      */
     fastify.get('/whoami', {
         preHandler: [authenticate]
-    }, async (request: AuthenticatedRequest, reply: FastifyReply) => {
+    }, async (request: FastifyRequest, reply: FastifyReply) => { // CORREGIDO: Usar FastifyRequest genérico
         
-        request.log.info(request.user, '<<<< DIAGNOSTICO /whoami: Usuario autenticado correctamente.');
+        const user = (request as AuthenticatedRequest).user; // CORREGIDO: Castear para acceder a 'user'
+
+        request.log.info(user, '<<<< DIAGNOSTICO /whoami: Usuario autenticado correctamente.');
 
         return reply.send({
             success: true,
             message: 'Si ves esto, tu token JWT es válido y la autenticación funciona.',
-            user: request.user,
+            user: user,
         });
     });
 }
