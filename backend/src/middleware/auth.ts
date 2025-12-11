@@ -12,15 +12,18 @@ export interface AuthenticatedRequest extends FastifyRequest {
  * Verifica que el token JWT sea válido
  */
 export const authenticate = async (request: AuthenticatedRequest, reply: FastifyReply) => {
+  request.log.info(`<<<< AUTHENTICATE: Iniciando autenticación para ruta: ${request.raw.url}`);
   try {
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      request.log.warn(`<<<< AUTHENTICATE: Fallo - No hay header 'Bearer '`);
       throw new AuthenticationError('Token no proporcionado');
     }
 
     const token = authHeader.substring(7);
     const decoded = await AuthService.verifyToken(token);
+    request.log.info({ user: decoded }, `<<<< AUTHENTICATE: Token decodificado exitosamente.`);
 
     // Verificar si el usuario sigue activo en la DB
     const userStatus = await prisma.usuario.findUnique({
@@ -29,6 +32,7 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
     });
 
     if (!userStatus || !userStatus.activo) {
+      request.log.warn({ userId: decoded.id }, `<<<< AUTHENTICATE: Fallo - Usuario inactivo en DB.`);
       throw new AuthenticationError('Su usuario ha sido desactivado. Contacte al administrador.');
     }
 
@@ -43,12 +47,15 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
       });
       
       if (!institucionActiva) {
+        request.log.warn({ userId: decoded.id }, `<<<< AUTHENTICATE: Fallo - Institución inactiva o sin acceso para admin.`);
         throw new AuthenticationError('Su institución ha sido inhabilitada o su acceso revocado.');
       }
     }
 
+    request.log.info({ userId: decoded.id }, `<<<< AUTHENTICATE: Autenticación completada exitosamente.`);
     request.user = decoded;
   } catch (error) {
+    request.log.error(error, `<<<< AUTHENTICATE: Excepción atrapada en middleware de autenticación.`);
     if (error instanceof AuthenticationError) {
       return reply.code(401).send({
         success: false,
@@ -70,22 +77,21 @@ export const authenticate = async (request: AuthenticatedRequest, reply: Fastify
  */
 export const authorize = (allowedRoles: UserRole[]) => {
   return async (request: AuthenticatedRequest, reply: FastifyReply) => {
+    request.log.info({ user: request.user, allowedRoles }, `<<<< AUTHORIZE: Verificando autorización para ruta: ${request.raw.url}`);
     try {
-      // console.log(`🔐 Verificando autorización - Usuario: ${ request.user?.rol }, Roles permitidos: ${ allowedRoles.join(', ') } `);
-
       if (!request.user) {
-        // console.log('❌ Usuario no autenticado en middleware de autorización');
+        request.log.warn('<<<< AUTHORIZE: Fallo - No hay objeto user en la petición (debe correr después de authenticate).');
         throw new AuthenticationError('Usuario no autenticado');
       }
 
       if (!allowedRoles.includes(request.user.rol)) {
-        // console.log(`❌ Acceso denegado: rol '${request.user.rol}' no está en ${ allowedRoles.join(', ') } `);
+        request.log.warn(`<<<< AUTHORIZE: Acceso denegado. Rol del usuario '${request.user.rol}' no está en la lista de permitidos: [${allowedRoles.join(', ')}]`);
         throw new AuthorizationError('Acceso denegado: rol insuficiente');
       }
 
-      // console.log(`✅ Autorización exitosa para rol '${request.user.rol}'`);
+      request.log.info(`<<<< AUTHORIZE: Autorización exitosa para rol '${request.user.rol}'`);
     } catch (error) {
-      // console.log(`💥 Error en middleware de autorización: ${ (error as Error).message } `);
+      request.log.error(error, `<<<< AUTHORIZE: Excepción atrapada en middleware de autorización.`);
       if (error instanceof AuthenticationError || error instanceof AuthorizationError) {
         return reply.code(error.statusCode).send({
           success: false,

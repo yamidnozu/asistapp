@@ -13,6 +13,7 @@ import notificationRoutes from './notification.routes';
 import periodoAcademicoRoutes from './periodo-academico.routes';
 import profesorRoutes from './profesor.routes';
 import userRoutes from './usuario.routes';
+import diagnosticRoutes from './diagnostic.routes';
 
 
 
@@ -62,6 +63,7 @@ export default async function routes(fastify: FastifyInstance) {
   await fastify.register(profesorRoutes, { prefix: '/profesores' });
   await fastify.register(asistenciaRoutes, { prefix: '/asistencias' });
   await fastify.register(notificationRoutes, { prefix: '/api' });
+  await fastify.register(diagnosticRoutes, { prefix: '/diag' });
 
   if (config.nodeEnv === 'development') {
     console.log('🎓 Registrando rutas del estudiante...');
