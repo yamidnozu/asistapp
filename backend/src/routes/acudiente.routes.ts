@@ -295,6 +295,7 @@ export async function acudienteRoutes(fastify: FastifyInstance) {
      * Registra un dispositivo para recibir notificaciones push
      */
     fastify.post('/dispositivo', async (request: AuthenticatedRequest, reply: FastifyReply) => {
+        request.log.info({ body: request.body, user: request.user }, '<<<< INICIO de registro de dispositivo');
         try {
             const usuarioId = request.user!.id;
             const body = request.body as RegistrarDispositivoBody;
@@ -311,7 +312,7 @@ export async function acudienteRoutes(fastify: FastifyInstance) {
                 message: 'Dispositivo registrado exitosamente',
             });
         } catch (error) {
-            request.log.error(error);
+            request.log.error(error, 'Error al registrar dispositivo');
             const err = error as Error;
             return reply.status(400).send({
                 success: false,
