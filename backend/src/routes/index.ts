@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify';
-console.log('<<<<< EXECUTING LATEST INDEX.TS >>>>');
 import { config } from '../config/app';
 import acudienteRoutes from './acudiente.routes';
 import asistenciaRoutes from './asistencia.routes';
