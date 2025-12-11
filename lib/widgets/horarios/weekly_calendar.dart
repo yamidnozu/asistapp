@@ -72,7 +72,8 @@ class WeeklyCalendar extends StatelessWidget {
                 _buildHeader(context, cellHeight, hourColumnWidth),
                 const Divider(height: 0),
                 // Contenedor principal con Stack para manejar bloques multi-hora
-                _buildCalendarBody(context, cellHeight, hourColumnWidth, isMobile),
+                _buildCalendarBody(
+                    context, cellHeight, hourColumnWidth, isMobile),
               ],
             ),
           ),
@@ -81,7 +82,8 @@ class WeeklyCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, double cellHeight, double hourColumnWidth) {
+  Widget _buildHeader(
+      BuildContext context, double cellHeight, double hourColumnWidth) {
     final spacing = context.spacing;
 
     return Row(
@@ -95,7 +97,8 @@ class WeeklyCalendar extends StatelessWidget {
                   horizontal: spacing.md / 2,
                 ),
                 decoration: BoxDecoration(
-                  border: Border(left: BorderSide(color: context.colors.borderLight)),
+                  border: Border(
+                      left: BorderSide(color: context.colors.borderLight)),
                 ),
                 child: Center(
                   child: Text(
@@ -113,7 +116,8 @@ class WeeklyCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildCalendarBody(BuildContext context, double cellHeight, double hourColumnWidth, bool isMobile) {
+  Widget _buildCalendarBody(BuildContext context, double cellHeight,
+      double hourColumnWidth, bool isMobile) {
     final horarios = horarioProvider.horariosDelGrupoSeleccionado;
     final totalHeight = cellHeight * horas.length;
 
@@ -126,14 +130,18 @@ class WeeklyCalendar extends StatelessWidget {
           SizedBox(
             width: hourColumnWidth,
             child: Column(
-              children: horas.map((hora) => _buildHourLabel(context, hora, cellHeight, hourColumnWidth)).toList(),
+              children: horas
+                  .map((hora) => _buildHourLabel(
+                      context, hora, cellHeight, hourColumnWidth))
+                  .toList(),
             ),
           ),
           // Columnas de días con Stack para bloques
           ...List.generate(diasSemana.length, (dayIndex) {
             final diaSemana = diasSemanaValues[dayIndex];
             return Expanded(
-              child: _buildDayColumn(context, diaSemana, horarios, cellHeight, isMobile),
+              child: _buildDayColumn(
+                  context, diaSemana, horarios, cellHeight, isMobile),
             );
           }),
         ],
@@ -141,7 +149,8 @@ class WeeklyCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildHourLabel(BuildContext context, String hora, double cellHeight, double hourColumnWidth) {
+  Widget _buildHourLabel(BuildContext context, String hora, double cellHeight,
+      double hourColumnWidth) {
     return Container(
       width: hourColumnWidth,
       height: cellHeight,
@@ -166,9 +175,11 @@ class WeeklyCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildDayColumn(BuildContext context, int diaSemana, List<Horario> horarios, double cellHeight, bool isMobile) {
+  Widget _buildDayColumn(BuildContext context, int diaSemana,
+      List<Horario> horarios, double cellHeight, bool isMobile) {
     // Filtrar horarios de este día
-    final horariosDelDia = horarios.where((h) => h.diaSemana == diaSemana).toList();
+    final horariosDelDia =
+        horarios.where((h) => h.diaSemana == diaSemana).toList();
 
     return Stack(
       children: [
@@ -177,10 +188,11 @@ class WeeklyCalendar extends StatelessWidget {
           children: horas.asMap().entries.map((entry) {
             final horaIndex = entry.key;
             final hora = entry.value;
-            
+
             // Verificar si esta celda está ocupada por un bloque que empezó antes
-            final estaOcupada = _estaCeldaOcupadaPorBloquePrevio(hora, diaSemana, horariosDelDia);
-            
+            final estaOcupada = _estaCeldaOcupadaPorBloquePrevio(
+                hora, diaSemana, horariosDelDia);
+
             return InkWell(
               onTap: estaOcupada ? null : () => onEmptyCellTap(hora, diaSemana),
               child: Container(
@@ -192,8 +204,8 @@ class WeeklyCalendar extends StatelessWidget {
                   ),
                   color: estaOcupada ? Colors.transparent : null,
                 ),
-                child: estaOcupada 
-                    ? null 
+                child: estaOcupada
+                    ? null
                     : Center(
                         child: Icon(
                           Icons.add,
@@ -209,8 +221,9 @@ class WeeklyCalendar extends StatelessWidget {
         ...horariosDelDia.map((horario) {
           final startIndex = _getHourIndex(horario.horaInicio);
           if (startIndex < 0) return const SizedBox.shrink();
-          
-          final duracionHoras = _calcularDuracionEnHoras(horario.horaInicio, horario.horaFin);
+
+          final duracionHoras =
+              _calcularDuracionEnHoras(horario.horaInicio, horario.horaFin);
           final alturaBloque = cellHeight * duracionHoras;
           final topPosition = startIndex * cellHeight;
 
@@ -225,9 +238,10 @@ class WeeklyCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildHorarioBlock(BuildContext context, Horario horario, double altura, bool isMobile) {
+  Widget _buildHorarioBlock(
+      BuildContext context, Horario horario, double altura, bool isMobile) {
     final color = _getMateriaColor(horario.materia.nombre);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -247,7 +261,8 @@ class WeeklyCalendar extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.all(isMobile ? context.spacing.xs : context.spacing.sm),
+            padding: EdgeInsets.all(
+                isMobile ? context.spacing.xs : context.spacing.sm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -304,17 +319,18 @@ class WeeklyCalendar extends StatelessWidget {
     return -1;
   }
 
-  bool _estaCeldaOcupadaPorBloquePrevio(String hora, int diaSemana, List<Horario> horarios) {
+  bool _estaCeldaOcupadaPorBloquePrevio(
+      String hora, int diaSemana, List<Horario> horarios) {
     final horaActualInt = _horaToInt(hora);
-    
+
     for (final horario in horarios) {
       if (horario.diaSemana == diaSemana) {
         // Si la hora actual es la hora de inicio, no está ocupada por un bloque previo
         if (horario.horaInicio == hora) continue;
-        
+
         final horaInicioInt = _horaToInt(horario.horaInicio);
         final horaFinInt = _horaToInt(horario.horaFin);
-        
+
         // Si la hora actual está entre el inicio y fin de este horario
         if (horaInicioInt < horaActualInt && horaFinInt > horaActualInt) {
           return true;
@@ -345,11 +361,11 @@ Color _getMateriaColor(String materiaNombre) {
   if (_materiaColorMap.containsKey(materiaNombre)) {
     return _materiaColorMap[materiaNombre]!;
   }
-  
+
   // Asignar el siguiente color disponible de la paleta
   final colorIndex = _materiaColorMap.length % _materiaColors.length;
   final color = _materiaColors[colorIndex];
   _materiaColorMap[materiaNombre] = color;
-  
+
   return color;
 }

@@ -32,7 +32,6 @@ class InstitutionContactStep extends StatelessWidget {
           ),
         ),
         SizedBox(height: spacing.lg),
-
         CustomTextFormField(
           key: const Key('direccionInstitucionField'),
           controller: direccionController,
@@ -46,7 +45,6 @@ class InstitutionContactStep extends StatelessWidget {
           },
         ),
         SizedBox(height: spacing.md),
-
         CustomTextFormField(
           key: const Key('telefonoInstitucionField'),
           controller: telefonoController,
@@ -64,14 +62,14 @@ class InstitutionContactStep extends StatelessWidget {
             return null;
           },
         ),
-
         SizedBox(height: spacing.md),
         Container(
           padding: EdgeInsets.all(spacing.md),
           decoration: BoxDecoration(
             color: context.colors.info.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: context.colors.info.withValues(alpha: 0.3)),
+            border:
+                Border.all(color: context.colors.info.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [

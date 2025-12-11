@@ -53,14 +53,16 @@ class _MateriasScreenState extends State<MateriasScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       _loadMoreMaterias();
     }
   }
 
   Future<void> _loadMaterias({String? search}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token != null) {
@@ -70,7 +72,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
 
   Future<void> _loadMoreMaterias() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token != null) {
@@ -103,11 +106,11 @@ class _MateriasScreenState extends State<MateriasScreen> {
           emptyStateWidget: ClarityEmptyState(
             icon: _isSearching ? Icons.search_off : Icons.subject,
             title: _isSearching
-              ? 'No se encontraron resultados'
-              : 'Aún no has creado ninguna materia',
+                ? 'No se encontraron resultados'
+                : 'Aún no has creado ninguna materia',
             subtitle: _isSearching
-              ? 'Intenta con otros términos de búsqueda'
-              : 'Comienza creando tu primera materia académica',
+                ? 'Intenta con otros términos de búsqueda'
+                : 'Comienza creando tu primera materia académica',
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCreateMateriaDialog(context),
@@ -155,7 +158,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
           ),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
         ),
         onChanged: (value) => _onSearchChanged(),
       ),
@@ -173,7 +177,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
             selectedColor: colors.primary.withValues(alpha: 0.2),
             checkmarkColor: colors.primary,
             labelStyle: TextStyle(
-              color: _filterActivo == null ? colors.primary : colors.textSecondary,
+              color:
+                  _filterActivo == null ? colors.primary : colors.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -188,7 +193,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
             selectedColor: colors.success.withValues(alpha: 0.2),
             checkmarkColor: colors.success,
             labelStyle: TextStyle(
-              color: _filterActivo == true ? colors.success : colors.textSecondary,
+              color:
+                  _filterActivo == true ? colors.success : colors.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -203,7 +209,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
             selectedColor: colors.error.withValues(alpha: 0.2),
             checkmarkColor: colors.error,
             labelStyle: TextStyle(
-              color: _filterActivo == false ? colors.error : colors.textSecondary,
+              color:
+                  _filterActivo == false ? colors.error : colors.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -212,7 +219,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
     ];
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, MateriaProvider provider) {
+  List<Widget> _buildStatisticWidgets(
+      BuildContext context, MateriaProvider provider) {
     final stats = provider.getMateriasStatistics();
     final colors = context.colors;
 
@@ -238,7 +246,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
     ];
   }
 
-  Widget _buildMateriaCard(Materia materia, MateriaProvider provider, BuildContext context) {
+  Widget _buildMateriaCard(
+      Materia materia, MateriaProvider provider, BuildContext context) {
     final colors = context.colors;
 
     final List<ClarityContextMenuAction> contextActions = [
@@ -265,7 +274,9 @@ class _MateriasScreenState extends State<MateriasScreen> {
         ),
       ),
       title: materia.nombre,
-      subtitle: materia.codigo != null ? 'Código: ${materia.codigo}' : 'Sin código asignado',
+      subtitle: materia.codigo != null
+          ? 'Código: ${materia.codigo}'
+          : 'Sin código asignado',
       contextActions: contextActions,
       onTap: () => _navigateToMateriaDetail(materia),
     );
@@ -293,11 +304,13 @@ class _MateriasScreenState extends State<MateriasScreen> {
     });
   }
 
-  void _showDeleteConfirmationDialog(Materia materia, MateriaProvider provider) {
+  void _showDeleteConfirmationDialog(
+      Materia materia, MateriaProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Materia', style: Theme.of(context).textTheme.headlineSmall),
+        title: Text('Eliminar Materia',
+            style: Theme.of(context).textTheme.headlineSmall),
         content: Text(
           '¿Estás seguro de que quieres eliminar "${materia.nombre}"?\n\n'
           'Esta acción no se puede deshacer.',
@@ -306,15 +319,21 @@ class _MateriasScreenState extends State<MateriasScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
+            child:
+                Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteMateria(materia, provider);
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Eliminar', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.error)),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Eliminar',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -326,7 +345,8 @@ class _MateriasScreenState extends State<MateriasScreen> {
 
     final token = authProvider.accessToken;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar una materia')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Debes iniciar sesión para eliminar una materia')));
       return;
     }
 
@@ -342,7 +362,10 @@ class _MateriasScreenState extends State<MateriasScreen> {
         SnackBar(
           content: Text(
             'Materia eliminada correctamente',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
@@ -353,7 +376,10 @@ class _MateriasScreenState extends State<MateriasScreen> {
         SnackBar(
           content: Text(
             provider.errorMessage ?? 'Error al eliminar materia',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onError),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),

@@ -4,17 +4,24 @@ import 'paginated_data_mixin.dart';
 import '../services/academic/grupo_service.dart';
 import '../models/user.dart';
 
-class EstudiantesSinAsignarPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<User> {
+class EstudiantesSinAsignarPaginatedProvider extends ChangeNotifier
+    with PaginatedDataMixin<User> {
   final GrupoService _grupoService;
 
   EstudiantesSinAsignarPaginatedProvider({GrupoService? grupoService})
       : _grupoService = grupoService ?? GrupoService();
 
   @override
-  Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-    final response = await _grupoService.getEstudiantesSinAsignar(accessToken, page: page, limit: limit, search: search);
+  Future<PaginatedResponse<User>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
+    final response = await _grupoService.getEstudiantesSinAsignar(accessToken,
+        page: page, limit: limit, search: search);
     if (response == null) return null;
-    return PaginatedResponse(items: response.users, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.users, pagination: response.pagination);
   }
 
   @override
@@ -28,7 +35,8 @@ class EstudiantesSinAsignarPaginatedProvider extends ChangeNotifier with Paginat
   }
 
   @override
-  Future<User?> updateItemApi(String accessToken, String id, dynamic data) async {
+  Future<User?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
     return null;
   }
 }

@@ -27,11 +27,11 @@ class UserAccountStep extends StatefulWidget {
     super.key,
     required this.emailController,
     required this.userRole,
-  required this.selectedInstitutionIds,
-  required this.selectedInstitutionNames,
-  required this.onInstitutionChanged,
-  this.isEditMode = false,
-  this.disableInstitution = false,
+    required this.selectedInstitutionIds,
+    required this.selectedInstitutionNames,
+    required this.onInstitutionChanged,
+    this.isEditMode = false,
+    this.disableInstitution = false,
     this.emailFocusNode,
     this.institutionFocusNode,
     this.emailFieldKey,
@@ -63,7 +63,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
   }
 
   void _updateInstitutionController() {
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     // Mostrar las instituciones seleccionadas como una única cadena separada por comas
     if (widget.selectedInstitutionIds.isNotEmpty) {
       // Intentar mapear ids a nombres usando el provider; si no hay coincidencia, usar los nombres pasados
@@ -71,12 +72,19 @@ class _UserAccountStepState extends State<UserAccountStep> {
       for (final id in widget.selectedInstitutionIds) {
         final match = institutionProvider.institutions.firstWhere(
           (i) => i.id == id,
-          orElse: () => Institution(id: id, nombre: '', direccion: null, telefono: null, email: null, activa: true),
+          orElse: () => Institution(
+              id: id,
+              nombre: '',
+              direccion: null,
+              telefono: null,
+              email: null,
+              activa: true),
         );
         if (match.nombre.isNotEmpty) names.add(match.nombre);
       }
       if (names.isEmpty && widget.selectedInstitutionNames.isNotEmpty) {
-        _institutionController.text = widget.selectedInstitutionNames.join(', ');
+        _institutionController.text =
+            widget.selectedInstitutionNames.join(', ');
       } else {
         _institutionController.text = names.join(', ');
       }
@@ -121,16 +129,16 @@ class _UserAccountStepState extends State<UserAccountStep> {
           hintText: '${widget.userRole}@ejemplo.com',
           keyboardType: TextInputType.emailAddress,
           enabled: !widget.isEditMode, // No editable en modo edición
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'El email es requerido';
-              }
-              final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-              if (!emailRegex.hasMatch(value.trim())) {
-                return 'Ingrese un email válido';
-              }
-              return null;
-            },
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'El email es requerido';
+            }
+            final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+            if (!emailRegex.hasMatch(value.trim())) {
+              return 'Ingrese un email válido';
+            }
+            return null;
+          },
           errorText: widget.errorEmail,
         ),
         SizedBox(height: spacing.md),
@@ -144,7 +152,9 @@ class _UserAccountStepState extends State<UserAccountStep> {
               if (widget.disableInstitution) {
                 final names = widget.selectedInstitutionNames.isNotEmpty
                     ? widget.selectedInstitutionNames
-                    : (authProvider.administrationName != null ? [authProvider.administrationName!] : ['—']);
+                    : (authProvider.administrationName != null
+                        ? [authProvider.administrationName!]
+                        : ['—']);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,18 +163,21 @@ class _UserAccountStepState extends State<UserAccountStep> {
                     SizedBox(height: spacing.sm),
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: spacing.md, vertical: spacing.sm),
                       decoration: BoxDecoration(
                         color: context.colors.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: context.colors.borderLight),
                       ),
-                      child: Text(names.join(', '), style: context.textStyles.bodyMedium),
+                      child: Text(names.join(', '),
+                          style: context.textStyles.bodyMedium),
                     ),
                     SizedBox(height: spacing.sm),
                     Text(
                       'No puedes cambiar las instituciones de tu propia cuenta',
-                      style: context.textStyles.bodySmall.copyWith(color: context.colors.textSecondary),
+                      style: context.textStyles.bodySmall
+                          .copyWith(color: context.colors.textSecondary),
                     ),
                     SizedBox(height: spacing.md),
                   ],
@@ -179,7 +192,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
                   children: [
                     Text(
                       'No se encontraron instituciones.',
-                      style: context.textStyles.bodyMedium.copyWith(color: context.colors.textSecondary),
+                      style: context.textStyles.bodyMedium
+                          .copyWith(color: context.colors.textSecondary),
                     ),
                     SizedBox(height: spacing.sm),
                     Row(
@@ -192,24 +206,35 @@ class _UserAccountStepState extends State<UserAccountStep> {
                                   if (token != null) {
                                     setState(() => _isReloading = true);
                                     try {
-                                      await institutionProvider.loadInstitutions(token, page: 1, limit: 100);
+                                      await institutionProvider
+                                          .loadInstitutions(token,
+                                              page: 1, limit: 100);
                                     } finally {
-                                      if (mounted) setState(() => _isReloading = false);
+                                      if (mounted)
+                                        setState(() => _isReloading = false);
                                     }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('No hay sesión activa para recargar instituciones')),
+                                      const SnackBar(
+                                          content: Text(
+                                              'No hay sesión activa para recargar instituciones')),
                                     );
                                   }
                                 },
                           child: _isReloading
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
                               : const Text('Recargar instituciones'),
                         ),
                         SizedBox(width: spacing.md),
                         TextButton(
                           onPressed: () {},
-                          child: Text('Contactar soporte', style: context.textStyles.bodySmall.withColor(context.colors.info)),
+                          child: Text('Contactar soporte',
+                              style: context.textStyles.bodySmall
+                                  .withColor(context.colors.info)),
                         ),
                       ],
                     ),
@@ -230,7 +255,10 @@ class _UserAccountStepState extends State<UserAccountStep> {
                   ),
                 ),
                 readOnly: true,
-                onTap: widget.disableInstitution ? null : () => _showInstitutionSelectionModal(context, institutionProvider, authProvider),
+                onTap: widget.disableInstitution
+                    ? null
+                    : () => _showInstitutionSelectionModal(
+                        context, institutionProvider, authProvider),
                 validator: (value) {
                   if (widget.selectedInstitutionIds.isEmpty) {
                     return 'Debe seleccionar al menos una institución';
@@ -249,7 +277,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
             decoration: BoxDecoration(
               color: context.colors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.colors.info.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: context.colors.info.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -271,7 +300,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
     );
   }
 
-  void _showInstitutionSelectionModal(BuildContext context, InstitutionProvider institutionProvider, AuthProvider authProvider) {
+  void _showInstitutionSelectionModal(BuildContext context,
+      InstitutionProvider institutionProvider, AuthProvider authProvider) {
     final TextEditingController searchController = TextEditingController();
     List<Institution> filteredInstitutions = institutionProvider.institutions;
     bool isLoading = institutionProvider.isLoading;
@@ -288,8 +318,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
-      return StatefulBuilder(
-        builder: (context, setModalState) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
             void updateFiltered() {
               final query = searchController.text.toLowerCase();
               setModalState(() {
@@ -304,7 +334,8 @@ class _UserAccountStepState extends State<UserAccountStep> {
               if (token != null) {
                 setModalState(() => isLoading = true);
                 try {
-                  await institutionProvider.loadInstitutions(token, page: 1, limit: 100);
+                  await institutionProvider.loadInstitutions(token,
+                      page: 1, limit: 100);
                   setModalState(() {
                     filteredInstitutions = institutionProvider.institutions;
                     isLoading = false;
@@ -329,8 +360,10 @@ class _UserAccountStepState extends State<UserAccountStep> {
                       Text(
                         'Cargando instituciones...',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -347,25 +380,33 @@ class _UserAccountStepState extends State<UserAccountStep> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          hasSearchQuery ? Icons.search_off : Icons.business_outlined,
+                          hasSearchQuery
+                              ? Icons.search_off
+                              : Icons.business_outlined,
                           size: 64,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           hasSearchQuery
-                            ? 'No se encontraron instituciones'
-                            : 'Sin instituciones disponibles',
+                              ? 'No se encontraron instituciones'
+                              : 'Sin instituciones disponibles',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           hasSearchQuery
-                            ? 'Intenta con otros términos de búsqueda'
-                            : 'No hay instituciones activas en el sistema',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                              ? 'Intenta con otros términos de búsqueda'
+                              : 'No hay instituciones activas en el sistema',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -404,12 +445,23 @@ class _UserAccountStepState extends State<UserAccountStep> {
                           value: isSelected,
                           onChanged: (v) {
                             setModalState(() {
-                              if (v == true) selectedIds.add(institution.id);
-                              else selectedIds.remove(institution.id);
+                              if (v == true)
+                                selectedIds.add(institution.id);
+                              else
+                                selectedIds.remove(institution.id);
                             });
                           },
-                          title: Text(institution.nombre, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                          subtitle: Text(institution.email ?? institution.telefono ?? 'Sin contacto', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          title: Text(institution.nombre,
+                              style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal)),
+                          subtitle: Text(
+                              institution.email ??
+                                  institution.telefono ??
+                                  'Sin contacto',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                           secondary: CircleAvatar(child: Icon(Icons.business)),
                         );
                       },
@@ -434,7 +486,10 @@ class _UserAccountStepState extends State<UserAccountStep> {
                               // Confirmar selección
                               widget.onInstitutionChanged(selectedIds.toList());
                               // Actualizar el controlador visible con los nombres seleccionados
-                              final names = institutionProvider.institutions.where((i) => selectedIds.contains(i.id)).map((i) => i.nombre).toList();
+                              final names = institutionProvider.institutions
+                                  .where((i) => selectedIds.contains(i.id))
+                                  .map((i) => i.nombre)
+                                  .toList();
                               _institutionController.text = names.join(', ');
                               Navigator.of(modalContext).pop();
                             },
@@ -459,7 +514,10 @@ class _UserAccountStepState extends State<UserAccountStep> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -490,14 +548,14 @@ class _UserAccountStepState extends State<UserAccountStep> {
                         hintText: 'Buscar institución...',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                searchController.clear();
-                                updateFiltered();
-                              },
-                            )
-                          : null,
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  searchController.clear();
+                                  updateFiltered();
+                                },
+                              )
+                            : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -510,14 +568,18 @@ class _UserAccountStepState extends State<UserAccountStep> {
                   // Contador de resultados
                   if (!isLoading && filteredInstitutions.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           '${filteredInstitutions.length} institución${filteredInstitutions.length == 1 ? '' : 'es'}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                         ),
                       ),
                     ),

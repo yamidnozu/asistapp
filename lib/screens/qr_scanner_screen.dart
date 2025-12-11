@@ -140,7 +140,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     if (_lastScanTime != null) {
       final difference = now.difference(_lastScanTime!);
       if (difference.inMilliseconds < 500) {
-        debugPrint('⚠️ Escaneo muy rápido, ignorando (${difference.inMilliseconds}ms)');
+        debugPrint(
+            '⚠️ Escaneo muy rápido, ignorando (${difference.inMilliseconds}ms)');
         return;
       }
     }
@@ -159,7 +160,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     try {
       // Obtener el token de autenticación
       // ignore: use_build_context_synchronously
-      final authProvider = Provider.of<AuthProvider>(currentContext, listen: false);
+      final authProvider =
+          Provider.of<AuthProvider>(currentContext, listen: false);
       final token = authProvider.accessToken;
 
       if (token == null) {
@@ -179,7 +181,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           SnackBar(
             content: Row(
               children: [
-                CircularProgressIndicator(color: Theme.of(currentContext).colorScheme.onPrimary),
+                CircularProgressIndicator(
+                    color: Theme.of(currentContext).colorScheme.onPrimary),
                 const SizedBox(width: 16),
                 const Expanded(child: Text('Registrando asistencia...')),
               ],
@@ -211,20 +214,27 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         // Mostrar éxito en la parte superior
         final successSnackBarContext = context; // Capturar context localmente
         // ignore: use_build_context_synchronously
-        final successScreenHeight = MediaQuery.of(successSnackBarContext).size.height;
+        final successScreenHeight =
+            MediaQuery.of(successSnackBarContext).size.height;
         // ignore: use_build_context_synchronously
-        final successTopPadding = MediaQuery.of(successSnackBarContext).padding.top;
+        final successTopPadding =
+            MediaQuery.of(successSnackBarContext).padding.top;
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(successSnackBarContext).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: Theme.of(successSnackBarContext).colorScheme.onSecondary),
+                Icon(Icons.check_circle,
+                    color: Theme.of(successSnackBarContext)
+                        .colorScheme
+                        .onSecondary),
                 const SizedBox(width: 8),
-                const Expanded(child: Text('¡Asistencia registrada exitosamente!')),
+                const Expanded(
+                    child: Text('¡Asistencia registrada exitosamente!')),
               ],
             ),
-            backgroundColor: Theme.of(successSnackBarContext).colorScheme.secondary,
+            backgroundColor:
+                Theme.of(successSnackBarContext).colorScheme.secondary,
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             margin: EdgeInsets.only(
@@ -252,10 +262,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
         // Mostrar error
         _showErrorSnackBar(e.toString());
-        
+
         // Reiniciar el scanner para permitir escanear de nuevo
         await _safeStartScanner();
-        
+
         // Limpiar el código escaneado después de un delay para permitir reintentos
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
@@ -277,7 +287,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-            content: Row(
+        content: Row(
           children: [
             Icon(Icons.error, color: context.colors.white),
             const SizedBox(width: 8),
@@ -360,8 +370,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    top: BorderSide(color: context.colors.primary, width: 4),
-                                    left: BorderSide(color: context.colors.primary, width: 4),
+                                    top: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
+                                    left: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
                                   ),
                                 ),
                               ),
@@ -374,8 +388,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    top: BorderSide(color: context.colors.primary, width: 4),
-                                    right: BorderSide(color: context.colors.primary, width: 4),
+                                    top: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
+                                    right: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
                                   ),
                                 ),
                               ),
@@ -388,8 +406,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(color: context.colors.primary, width: 4),
-                                    left: BorderSide(color: context.colors.primary, width: 4),
+                                    bottom: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
+                                    left: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
                                   ),
                                 ),
                               ),
@@ -402,8 +424,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(color: context.colors.primary, width: 4),
-                                    right: BorderSide(color: context.colors.primary, width: 4),
+                                    bottom: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
+                                    right: BorderSide(
+                                        color: context.colors.primary,
+                                        width: 4),
                                   ),
                                 ),
                               ),
@@ -447,7 +473,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                         onPressed: () => Navigator.of(context).pop(false),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.error,
-                          foregroundColor: Theme.of(context).colorScheme.onError,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onError,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -455,7 +482,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                         ),
                         child: Text(
                           'Cancelar',
-                          style: context.textStyles.bodyLarge.copyWith(fontSize: 18, color: Theme.of(context).colorScheme.onError),
+                          style: context.textStyles.bodyLarge.copyWith(
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.onError),
                         ),
                       ),
                     ),
@@ -475,7 +504,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               Text(
                                 'Procesando...',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontSize: 16,
                                 ),
                               ),

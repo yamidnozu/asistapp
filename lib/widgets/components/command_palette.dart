@@ -30,7 +30,7 @@ class _CommandPaletteState extends State<CommandPalette> {
     super.initState();
     _filteredItems = widget.items;
     _searchController.addListener(_filterItems);
-    
+
     // Focus en search input al abrir
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(FocusNode());
@@ -65,9 +65,9 @@ class _CommandPaletteState extends State<CommandPalette> {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
-  final textStyles = context.textStyles;
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -80,8 +80,8 @@ class _CommandPaletteState extends State<CommandPalette> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: spacing.xl),
-        Container(
-      constraints: const BoxConstraints(maxWidth: 600),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 600),
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -103,22 +103,26 @@ class _CommandPaletteState extends State<CommandPalette> {
                   child: KeyboardListener(
                     focusNode: FocusNode(),
                     onKeyEvent: (KeyEvent event) {
-                      if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
+                      if (HardwareKeyboard.instance
+                          .isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
                         Navigator.of(context).pop();
                         widget.onDismiss?.call();
-                      } else if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.arrowDown)) {
+                      } else if (HardwareKeyboard.instance
+                          .isLogicalKeyPressed(LogicalKeyboardKey.arrowDown)) {
                         setState(() {
                           if (_selectedIndex < _filteredItems.length - 1) {
                             _selectedIndex++;
                           }
                         });
-                      } else if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.arrowUp)) {
+                      } else if (HardwareKeyboard.instance
+                          .isLogicalKeyPressed(LogicalKeyboardKey.arrowUp)) {
                         setState(() {
                           if (_selectedIndex > 0) {
                             _selectedIndex--;
                           }
                         });
-                      } else if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
+                      } else if (HardwareKeyboard.instance
+                          .isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
                         _executeCommand();
                       }
                     },
@@ -129,12 +133,15 @@ class _CommandPaletteState extends State<CommandPalette> {
                         hintText: 'Escribe para buscar (Esc para cerrar)...',
                         prefixIcon: Icon(Icons.search, color: colors.primary),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(spacing.borderRadius),
                           borderSide: BorderSide(color: colors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(spacing.borderRadius),
-                          borderSide: BorderSide(color: colors.primary, width: 2),
+                          borderRadius:
+                              BorderRadius.circular(spacing.borderRadius),
+                          borderSide:
+                              BorderSide(color: colors.primary, width: 2),
                         ),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: spacing.md,
@@ -228,8 +235,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: colors.surfaceLight,
-                                            borderRadius:
-                                                BorderRadius.circular(
+                                            borderRadius: BorderRadius.circular(
                                               spacing.borderRadius / 2,
                                             ),
                                             border: Border.all(
@@ -238,8 +244,8 @@ class _CommandPaletteState extends State<CommandPalette> {
                                           ),
                                           child: Text(
                                             item.shortcut!,
-                                            style: textStyles.labelSmall
-                                                .copyWith(
+                                            style:
+                                                textStyles.labelSmall.copyWith(
                                               color: colors.textMuted,
                                             ),
                                           ),
@@ -283,14 +289,16 @@ class CommandPaletteItem {
 
 /// Mixin para agregar Command Palette a app_shell.dart
 mixin CommandPaletteMixin {
-  static void showCommandPalette(BuildContext context, List<CommandPaletteItem> items) {
+  static void showCommandPalette(
+      BuildContext context, List<CommandPaletteItem> items) {
     showDialog(
       context: context,
       builder: (context) => CommandPalette(items: items),
     );
   }
 
-  static void setupCommandPaletteShortcut(BuildContext context, List<CommandPaletteItem> items) {
+  static void setupCommandPaletteShortcut(
+      BuildContext context, List<CommandPaletteItem> items) {
     // Se puede usar aquí para setup global de Ctrl+K
     // Implementar en app_shell.dart o main.dart
   }

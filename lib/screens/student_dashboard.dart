@@ -33,12 +33,12 @@ Widget _buildMenuActionItem(
         ),
         child: Row(
           children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Icon(icon, color: color, size: 20),
             ),
             SizedBox(width: spacing.md),
@@ -103,7 +103,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   Future<void> _loadStats() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoadingStats = true;
     });
@@ -146,13 +146,13 @@ class _StudentDashboardState extends State<StudentDashboard> {
       if (horarios != null && horarios.isNotEmpty) {
         final materiaIds = <String>{};
         final hoy = DateTime.now().weekday; // 1=Monday, 7=Sunday
-        
+
         for (final horario in horarios) {
           final materia = horario['materia'] as Map<String, dynamic>?;
           if (materia != null && materia['id'] != null) {
             materiaIds.add(materia['id'] as String);
           }
-          
+
           // Count classes for today
           final diaSemana = horario['diaSemana'] as int?;
           if (diaSemana == hoy) {
@@ -196,77 +196,80 @@ class _StudentDashboardState extends State<StudentDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              // 1. Saludo Sutil
-              Text('¡Hola, $userName!', style: textStyles.displayMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-              SizedBox(height: spacing.sm),
-              Text(
-                'Bienvenido al panel estudiantil.',
-                style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            // 1. Saludo Sutil
+            Text('¡Hola, $userName!',
+                style: textStyles.displayMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
+            SizedBox(height: spacing.sm),
+            Text(
+              'Bienvenido al panel estudiantil.',
+              style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: spacing.xl),
+
+            // 2. Barra de Estadísticas con datos reales
+            _buildCompactStatsBar(context),
+
+            SizedBox(height: spacing.xl),
+
+            // 3. Acciones principales en lista compacta (estilo Admin)
+            Text('Acciones Principales', style: textStyles.headlineSmall),
+            SizedBox(height: spacing.md),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(spacing.borderRadius),
+                border: Border.all(color: colors.borderLight),
               ),
-              SizedBox(height: spacing.xl),
-
-              // 2. Barra de Estadísticas con datos reales
-              _buildCompactStatsBar(context),
-
-              SizedBox(height: spacing.xl),
-
-              // 3. Acciones principales en lista compacta (estilo Admin)
-              Text('Acciones Principales', style: textStyles.headlineSmall),
-              SizedBox(height: spacing.md),
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  border: Border.all(color: colors.borderLight),
-                ),
-                child: Column(
-                  children: [
-                    _buildMenuActionItem(
-                      context,
-                      icon: Icons.qr_code_2_rounded,
-                      label: 'Mi Código QR',
-                      value: 'Para registrar asistencia',
-                      color: colors.primary,
-                      onTap: () => context.go('/student/qr'),
-                      isFirst: true,
-                    ),
-                    Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                    _buildMenuActionItem(
-                      context,
-                      icon: Icons.calendar_today_outlined,
-                      label: 'Mi Horario',
-                      value: 'Ver mis clases',
-                      color: const Color(0xFF06B6D4),
-                      onTap: () => context.go('/student/schedule'),
-                    ),
-                    Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                    _buildMenuActionItem(
-                      context,
-                      icon: Icons.check_circle_outline_rounded,
-                      label: 'Mi Asistencia',
-                      value: 'Historial y estadísticas',
-                      color: colors.success,
-                      onTap: () => context.go('/student/attendance'),
-                    ),
-                    Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                    _buildMenuActionItem(
-                      context,
-                      icon: Icons.notifications_outlined,
-                      label: 'Notificaciones',
-                      value: 'Ver mensajes',
-                      color: colors.warning,
-                      onTap: () => context.go('/student/notifications'),
-                      isLast: true,
-                    ),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.qr_code_2_rounded,
+                    label: 'Mi Código QR',
+                    value: 'Para registrar asistencia',
+                    color: colors.primary,
+                    onTap: () => context.go('/student/qr'),
+                    isFirst: true,
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Mi Horario',
+                    value: 'Ver mis clases',
+                    color: const Color(0xFF06B6D4),
+                    onTap: () => context.go('/student/schedule'),
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Mi Asistencia',
+                    value: 'Historial y estadísticas',
+                    color: colors.success,
+                    onTap: () => context.go('/student/attendance'),
+                  ),
+                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
+                  _buildMenuActionItem(
+                    context,
+                    icon: Icons.notifications_outlined,
+                    label: 'Notificaciones',
+                    value: 'Ver mensajes',
+                    color: colors.warning,
+                    onTap: () => context.go('/student/notifications'),
+                    isLast: true,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   // Widget para la barra de estadísticas con datos reales
@@ -275,7 +278,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
     final spacing = context.spacing;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
+      padding:
+          EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -304,10 +308,10 @@ class _StudentDashboardState extends State<StudentDashboard> {
                     value: '$_asistenciaPercentage%',
                     title: 'Asistencia',
                     icon: Icons.check_circle,
-                    color: _asistenciaPercentage >= 80 
-                        ? colors.success 
-                        : _asistenciaPercentage >= 60 
-                            ? colors.warning 
+                    color: _asistenciaPercentage >= 80
+                        ? colors.success
+                        : _asistenciaPercentage >= 60
+                            ? colors.warning
                             : colors.error,
                   ),
                   SizedBox(width: spacing.lg),

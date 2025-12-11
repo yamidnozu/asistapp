@@ -22,7 +22,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
   Future<void> _loadData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    final horarioProvider =
+        Provider.of<HorarioProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token != null) {
       await horarioProvider.cargarClasesDelDia(token);
@@ -58,7 +59,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: colors.primary.withValues(alpha: 0.1),
-                        child: Icon(Icons.person, color: colors.primary, size: 24),
+                        child:
+                            Icon(Icons.person, color: colors.primary, size: 24),
                       ),
                       SizedBox(width: spacing.md),
                       Expanded(
@@ -76,14 +78,16 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                             ),
                             Text(
                               _getFormattedDate(),
-                              style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                              style: textStyles.bodySmall
+                                  .copyWith(color: colors.textMuted),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
                         onPressed: _loadData,
-                        icon: Icon(Icons.refresh, color: colors.textMuted, size: 20),
+                        icon: Icon(Icons.refresh,
+                            color: colors.textMuted, size: 20),
                         tooltip: 'Actualizar',
                       ),
                     ],
@@ -107,10 +111,12 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                     ),
                     SizedBox(width: spacing.sm),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: spacing.sm, vertical: spacing.xs),
                       decoration: BoxDecoration(
                         color: colors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                       child: Text(
                         '${horarioProvider.clasesDelDiaCount}',
@@ -191,7 +197,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             SizedBox(height: spacing.xs),
             Text(
               'No tienes clases programadas para hoy',
-              style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
+              style:
+                  textStyles.bodyMedium.copyWith(color: colors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -203,7 +210,20 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   String _getFormattedDate() {
     final now = DateTime.now();
     final dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    final meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    final meses = [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
+    ];
     return '${dias[now.weekday % 7]}, ${now.day} ${meses[now.month - 1]}';
   }
 }
@@ -284,7 +304,8 @@ class _ClaseCard extends StatelessWidget {
                     SizedBox(height: spacing.xs),
                     Text(
                       clase.grupo.nombreCompleto,
-                      style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+                      style: textStyles.bodySmall
+                          .copyWith(color: colors.textSecondary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

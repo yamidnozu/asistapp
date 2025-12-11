@@ -22,10 +22,10 @@ class ClarityFormDialog extends StatefulWidget {
     super.key,
     required this.title,
     this.formKey,
-  this.onSave,
-  this.saveLabel = 'Guardar',
-  this.cancelLabel = 'Cancelar',
-  required this.children,
+    this.onSave,
+    this.saveLabel = 'Guardar',
+    this.cancelLabel = 'Cancelar',
+    required this.children,
   });
 
   @override
@@ -53,7 +53,7 @@ class _ClarityFormDialogState extends State<ClarityFormDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')), 
+          SnackBar(content: Text('Error: ${e.toString()}')),
         );
       }
     } finally {
@@ -63,7 +63,7 @@ class _ClarityFormDialogState extends State<ClarityFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-  // theme helpers are available via context but not needed here
+    // theme helpers are available via context but not needed here
 
     return AlertDialog(
       title: widget.title,
@@ -81,8 +81,11 @@ class _ClarityFormDialogState extends State<ClarityFormDialog> {
         ),
         ElevatedButton(
           onPressed: _isSaving ? null : _handleSave,
-      child: _isSaving
-        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
               : Text(widget.saveLabel),
         ),
       ],

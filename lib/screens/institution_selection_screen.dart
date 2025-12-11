@@ -9,10 +9,12 @@ class InstitutionSelectionScreen extends StatefulWidget {
   const InstitutionSelectionScreen({super.key});
 
   @override
-  State<InstitutionSelectionScreen> createState() => _InstitutionSelectionScreenState();
+  State<InstitutionSelectionScreen> createState() =>
+      _InstitutionSelectionScreenState();
 }
 
-class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> {
+class _InstitutionSelectionScreenState
+    extends State<InstitutionSelectionScreen> {
   String? _selectedInstitutionId;
   bool _isLoading = false;
 
@@ -52,7 +54,8 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
     );
   }
 
-  Widget _buildInstitutionList(List<Institution> institutions, Map<String, dynamic> responsive) {
+  Widget _buildInstitutionList(
+      List<Institution> institutions, Map<String, dynamic> responsive) {
     final bodyFontSize = responsive['bodyFontSize'] as double;
 
     return ListView.builder(
@@ -64,7 +67,9 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surface,
           child: ListTile(
             leading: Radio<String>(
               value: institution.id,
@@ -79,11 +84,14 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
               institution.name,
               style: TextStyle(
                 fontSize: bodyFontSize,
-                color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.onPrimaryContainer
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             subtitle: institution.role != null
-                ? Text('Rol: ${institution.role}', style: TextStyle(fontSize: bodyFontSize * 0.9))
+                ? Text('Rol: ${institution.role}',
+                    style: TextStyle(fontSize: bodyFontSize * 0.9))
                 : null,
             onTap: () {
               setState(() {
@@ -102,7 +110,8 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
     return SizedBox(
       width: buttonWidth,
       child: ElevatedButton(
-        onPressed: _isLoading || _selectedInstitutionId == null ? null : _continue,
+        onPressed:
+            _isLoading || _selectedInstitutionId == null ? null : _continue,
         child: Text(_isLoading ? 'Continuando...' : 'Continuar'),
       ),
     );
@@ -135,19 +144,17 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final responsive = _getResponsiveValues(constraints);
-                    final elementSpacing = responsive['elementSpacing'] as double;
+                    final elementSpacing =
+                        responsive['elementSpacing'] as double;
 
                     return Column(
                       children: [
                         _buildMainTitle(responsive),
                         SizedBox(height: elementSpacing),
-
                         _buildSubtitle(responsive, colors.textMuted),
                         SizedBox(height: elementSpacing * 1.5),
-
                         _buildInstitutionList(institutions, responsive),
                         SizedBox(height: elementSpacing * 2),
-
                         _buildContinueButton(responsive),
                       ],
                     );

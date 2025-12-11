@@ -38,18 +38,20 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     // no local loading flags: use paginated providers
 
     try {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
       final token = authProvider.accessToken;
       if (token == null) return;
 
-    // Cargar estudiantes asignados al grupo (paginated provider)
-    final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
-    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
-    await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
-    await sinAsignar.loadItems(token, page: 1, limit: 10);
-  // providers hold the items
-
+      // Cargar estudiantes asignados al grupo (paginated provider)
+      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context,
+          listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+          context,
+          listen: false);
+      await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
+      await sinAsignar.loadItems(token, page: 1, limit: 10);
+      // providers hold the items
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,14 +67,17 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       }
     }
   }
+
 // Providers are looked up inside methods when needed.
   Future<void> _asignarEstudiante(User estudiante) async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
-      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
-      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
-      
+      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context,
+          listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+          context,
+          listen: false);
 
       final token = authProvider.accessToken;
       if (token == null) return;
@@ -84,7 +89,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success) {
-        await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
+        await byGrupo.loadEstudiantes(token, widget.grupo.id,
+            page: 1, limit: 10);
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
@@ -113,8 +119,11 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
-      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context, listen: false);
-      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context,
+          listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+          context,
+          listen: false);
       // paginated providers used after success to refresh data
 
       final token = authProvider.accessToken;
@@ -127,7 +136,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
       );
 
       if (success) {
-        await byGrupo.loadEstudiantes(token, widget.grupo.id, page: 1, limit: 10);
+        await byGrupo.loadEstudiantes(token, widget.grupo.id,
+            page: 1, limit: 10);
         await sinAsignar.loadItems(token, page: 1, limit: 10);
         setState(() {});
 
@@ -177,7 +187,8 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colors.getTextColorForBackground(colors.primary)),
+          icon: Icon(Icons.arrow_back,
+              color: colors.getTextColorForBackground(colors.primary)),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -188,129 +199,136 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
         ),
       ),
       body: Builder(builder: (context) {
-        final byGrupo = Provider.of<EstudiantesByGrupoPaginatedProvider>(context);
-        final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
+        final byGrupo =
+            Provider.of<EstudiantesByGrupoPaginatedProvider>(context);
+        final sinAsignar =
+            Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
         final isLoading = (byGrupo.isLoading || sinAsignar.isLoading) &&
             (byGrupo.items.isEmpty && sinAsignar.items.isEmpty);
 
         return isLoading
             ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            padding: EdgeInsets.all(spacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Información del grupo
-                ClarityCard(
-                  title: Text(
-                    'Información del Grupo',
-                    style: textStyles.titleMedium.bold,
-                  ),
-                  leading: Icon(
-                    Icons.group,
-                    color: colors.primary,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.grupo.nombre,
-                        style: textStyles.headlineMedium.bold,
-                      ),
-                      SizedBox(height: spacing.sm),
-                      Text(
-                        'Estudiantes: ${byGrupo.items.length}',
-                        style: textStyles.bodyMedium,
-                      ),
-                      Text(
-                        'Horarios: ${widget.grupo.horariosCount}',
-                        style: textStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: spacing.xl),
-
-                // Estudiantes asignados
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            : SingleChildScrollView(
+                padding: EdgeInsets.all(spacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Estudiantes Asignados',
-                      style: textStyles.headlineMedium.bold,
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _showAsignarEstudianteDialog,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Asignar Estudiante'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.onPrimary,
+                    // Información del grupo
+                    ClarityCard(
+                      title: Text(
+                        'Información del Grupo',
+                        style: textStyles.titleMedium.bold,
+                      ),
+                      leading: Icon(
+                        Icons.group,
+                        color: colors.primary,
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.grupo.nombre,
+                            style: textStyles.headlineMedium.bold,
+                          ),
+                          SizedBox(height: spacing.sm),
+                          Text(
+                            'Estudiantes: ${byGrupo.items.length}',
+                            style: textStyles.bodyMedium,
+                          ),
+                          Text(
+                            'Horarios: ${widget.grupo.horariosCount}',
+                            style: textStyles.bodyMedium,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
 
-                SizedBox(height: spacing.lg),
+                    SizedBox(height: spacing.xl),
 
-                byGrupo.items.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.xl),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.group_off,
-                              size: 64,
-                              color: colors.textSecondary,
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'No hay estudiantes asignados',
-                              style: textStyles.bodyLarge.withColor(colors.textSecondary),
-                            ),
-                            SizedBox(height: spacing.md),
-                            Text(
-                              'Asigna estudiantes para que puedan registrar asistencia',
-                              style: textStyles.bodyMedium.withColor(colors.textSecondary),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                    // Estudiantes asignados
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Estudiantes Asignados',
+                          style: textStyles.headlineMedium.bold,
                         ),
-                      ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: byGrupo.items.length,
-                      itemBuilder: (context, index) {
-                        final estudiante = byGrupo.items[index];
-                        return Card(
-                          margin: EdgeInsets.only(bottom: spacing.sm),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: colors.primary,
-                              child: Text(
-                                estudiante.inicial,
-                                style: textStyles.button.withColor(colors.onPrimary),
+                        ElevatedButton.icon(
+                          onPressed: _showAsignarEstudianteDialog,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Asignar Estudiante'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.onPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: spacing.lg),
+
+                    byGrupo.items.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(spacing.xl),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.group_off,
+                                    size: 64,
+                                    color: colors.textSecondary,
+                                  ),
+                                  SizedBox(height: spacing.md),
+                                  Text(
+                                    'No hay estudiantes asignados',
+                                    style: textStyles.bodyLarge
+                                        .withColor(colors.textSecondary),
+                                  ),
+                                  SizedBox(height: spacing.md),
+                                  Text(
+                                    'Asigna estudiantes para que puedan registrar asistencia',
+                                    style: textStyles.bodyMedium
+                                        .withColor(colors.textSecondary),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
-                            title: Text(estudiante.nombreCompleto),
-                            subtitle: Text(estudiante.email ?? ''),
-                            trailing: IconButton(
-                              icon: Icon(Icons.remove_circle, color: colors.error),
-                              onPressed: () => _desasignarEstudiante(estudiante),
-                              tooltip: 'Remover del grupo',
-                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: byGrupo.items.length,
+                            itemBuilder: (context, index) {
+                              final estudiante = byGrupo.items[index];
+                              return Card(
+                                margin: EdgeInsets.only(bottom: spacing.sm),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: colors.primary,
+                                    child: Text(
+                                      estudiante.inicial,
+                                      style: textStyles.button
+                                          .withColor(colors.onPrimary),
+                                    ),
+                                  ),
+                                  title: Text(estudiante.nombreCompleto),
+                                  subtitle: Text(estudiante.email ?? ''),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.remove_circle,
+                                        color: colors.error),
+                                    onPressed: () =>
+                                        _desasignarEstudiante(estudiante),
+                                    tooltip: 'Remover del grupo',
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-              ],
-            ),
-      );
-    }),
+                  ],
+                ),
+              );
+      }),
     );
   }
 }
@@ -324,7 +342,8 @@ class AsignarEstudianteDialog extends StatefulWidget {
   });
 
   @override
-  State<AsignarEstudianteDialog> createState() => _AsignarEstudianteDialogState();
+  State<AsignarEstudianteDialog> createState() =>
+      _AsignarEstudianteDialogState();
 }
 
 class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
@@ -341,7 +360,9 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final token = authProvider.accessToken;
-      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+      final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+          context,
+          listen: false);
       if (token != null) {
         sinAsignar.loadItems(token, page: 1, limit: 10);
       }
@@ -362,7 +383,9 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   void _filterEstudiantes() {
     final query = _searchController.text.toLowerCase();
     // Cuando hay un texto de búsqueda, delegamos al proveedor para búsqueda remota
-    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+        context,
+        listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final token = authProvider.accessToken;
     // Cancel previous debounce
@@ -389,7 +412,9 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   }
 
   void _asignarSeleccionados() {
-    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+        context,
+        listen: false);
     final estudiantesSeleccionados = sinAsignar.items
         .where((estudiante) => _selectedEstudiantes.contains(estudiante.id))
         .toList();
@@ -412,11 +437,11 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
         width: double.maxFinite,
         height: 400,
         child: Column(
-            children: [
+          children: [
             // Campo de búsqueda
             TextField(
               controller: _searchController,
-                decoration: InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Buscar estudiantes...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
@@ -433,7 +458,8 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
             // Contador de seleccionados
             if (_selectedEstudiantes.isNotEmpty)
               Container(
-                padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 4),
+                padding:
+                    EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 4),
                 decoration: BoxDecoration(
                   color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(spacing.borderRadius / 2),
@@ -452,121 +478,141 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
             // Lista de estudiantes (usando provider para búsqueda remota y paginación)
             Expanded(
               child: Builder(builder: (context) {
-                final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context);
+                final sinAsignar =
+                    Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+                        context);
                 final items = sinAsignar.items;
                 if (sinAsignar.isLoading && items.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 return items.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.person_search,
-                          size: 48,
-                          color: colors.textMuted,
-                        ),
-                        SizedBox(height: spacing.md),
-                        Text(
-                          _searchController.text.isEmpty
-                            ? 'No hay estudiantes disponibles'
-                            : 'No se encontraron estudiantes',
-                          style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: items.length + (sinAsignar.hasMoreData ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= items.length) {
-                        // Load more placeholder
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: sinAsignar.isLoadingMore || !sinAsignar.hasMoreData
-                                  ? null
-                                  : () {
-                                      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
-                                      if (token != null) sinAsignar.loadNextPage(token);
-                                    },
-                              child: Text(sinAsignar.isLoadingMore ? 'Cargando...' : 'Cargar más'),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_search,
+                              size: 48,
+                              color: colors.textMuted,
                             ),
-                          ),
-                        );
-                      }
-
-                      final estudiante = items[index];
-                      final isSelected = _selectedEstudiantes.contains(estudiante.id);
-
-                      return Card(
-                        margin: EdgeInsets.only(bottom: spacing.xs),
-                        color: isSelected ? colors.primary.withValues(alpha: 0.05) : null,
-                        child: InkWell(
-                          onTap: () => _toggleSeleccion(estudiante.id),
-                          child: Padding(
-                            padding: EdgeInsets.all(spacing.sm),
-                            child: Row(
-                              children: [
-                                Checkbox(
-                                  value: isSelected,
-                                  onChanged: (value) => _toggleSeleccion(estudiante.id),
-                                  activeColor: colors.primary,
-                                ),
-                                SizedBox(width: spacing.sm),
-                                CircleAvatar(
-                                  backgroundColor: colors.primary,
-                                  radius: 20,
-                                  child: Text(
-                                    estudiante.inicial,
-                                    style: textStyles.button.copyWith(color: colors.onPrimary),
-                                  ),
-                                ),
-                                SizedBox(width: spacing.md),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        estudiante.nombreCompleto,
-                                        style: textStyles.bodyMedium.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: colors.textPrimary,
-                                        ),
-                                      ),
-                                      Text(
-                                        estudiante.email ?? '',
-                                        style: textStyles.bodySmall.copyWith(
-                                          color: colors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            SizedBox(height: spacing.md),
+                            Text(
+                              _searchController.text.isEmpty
+                                  ? 'No hay estudiantes disponibles'
+                                  : 'No se encontraron estudiantes',
+                              style: textStyles.bodyMedium
+                                  .copyWith(color: colors.textSecondary),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
+                          ],
                         ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        itemCount:
+                            items.length + (sinAsignar.hasMoreData ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= items.length) {
+                            // Load more placeholder
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Center(
+                                child: ElevatedButton(
+                                  onPressed: sinAsignar.isLoadingMore ||
+                                          !sinAsignar.hasMoreData
+                                      ? null
+                                      : () {
+                                          final token =
+                                              Provider.of<AuthProvider>(context,
+                                                      listen: false)
+                                                  .accessToken;
+                                          if (token != null)
+                                            sinAsignar.loadNextPage(token);
+                                        },
+                                  child: Text(sinAsignar.isLoadingMore
+                                      ? 'Cargando...'
+                                      : 'Cargar más'),
+                                ),
+                              ),
+                            );
+                          }
+
+                          final estudiante = items[index];
+                          final isSelected =
+                              _selectedEstudiantes.contains(estudiante.id);
+
+                          return Card(
+                            margin: EdgeInsets.only(bottom: spacing.xs),
+                            color: isSelected
+                                ? colors.primary.withValues(alpha: 0.05)
+                                : null,
+                            child: InkWell(
+                              onTap: () => _toggleSeleccion(estudiante.id),
+                              child: Padding(
+                                padding: EdgeInsets.all(spacing.sm),
+                                child: Row(
+                                  children: [
+                                    Checkbox(
+                                      value: isSelected,
+                                      onChanged: (value) =>
+                                          _toggleSeleccion(estudiante.id),
+                                      activeColor: colors.primary,
+                                    ),
+                                    SizedBox(width: spacing.sm),
+                                    CircleAvatar(
+                                      backgroundColor: colors.primary,
+                                      radius: 20,
+                                      child: Text(
+                                        estudiante.inicial,
+                                        style: textStyles.button
+                                            .copyWith(color: colors.onPrimary),
+                                      ),
+                                    ),
+                                    SizedBox(width: spacing.md),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            estudiante.nombreCompleto,
+                                            style:
+                                                textStyles.bodyMedium.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: colors.textPrimary,
+                                            ),
+                                          ),
+                                          Text(
+                                            estudiante.email ?? '',
+                                            style:
+                                                textStyles.bodySmall.copyWith(
+                                              color: colors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
-                    },
-        );
-      }),
+              }),
             ),
           ],
         ),
       ),
-        actions: [
+      actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _selectedEstudiantes.isEmpty ? null : _asignarSeleccionados,
+          onPressed:
+              _selectedEstudiantes.isEmpty ? null : _asignarSeleccionados,
           style: ElevatedButton.styleFrom(
             backgroundColor: colors.primary,
             foregroundColor: colors.onPrimary,
@@ -578,12 +624,17 @@ class _AsignarEstudianteDialogState extends State<AsignarEstudianteDialog> {
   }
 
   void _onScroll() {
-    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(context, listen: false);
+    final sinAsignar = Provider.of<EstudiantesSinAsignarPaginatedProvider>(
+        context,
+        listen: false);
     if (!_scrollController.hasClients) return;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    if (currentScroll >= (maxScroll - 100) && sinAsignar.hasMoreData && !sinAsignar.isLoadingMore) {
-      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+    if (currentScroll >= (maxScroll - 100) &&
+        sinAsignar.hasMoreData &&
+        !sinAsignar.isLoadingMore) {
+      final token =
+          Provider.of<AuthProvider>(context, listen: false).accessToken;
       if (token != null) sinAsignar.loadNextPage(token);
     }
   }

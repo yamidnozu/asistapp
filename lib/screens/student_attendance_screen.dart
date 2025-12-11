@@ -9,7 +9,8 @@ class StudentAttendanceScreen extends StatefulWidget {
   const StudentAttendanceScreen({super.key});
 
   @override
-  State<StudentAttendanceScreen> createState() => _StudentAttendanceScreenState();
+  State<StudentAttendanceScreen> createState() =>
+      _StudentAttendanceScreenState();
 }
 
 class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
@@ -103,7 +104,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
   void _nextMonth() {
     final nextMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 1);
-    if (nextMonth.isBefore(DateTime.now()) || nextMonth.month == DateTime.now().month) {
+    if (nextMonth.isBefore(DateTime.now()) ||
+        nextMonth.month == DateTime.now().month) {
       setState(() {
         _selectedDate = nextMonth;
       });
@@ -209,7 +211,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
             SizedBox(height: spacing.lg),
             Text(
               'No hay registros de asistencia',
-              style: textStyles.headlineSmall.copyWith(color: colors.textSecondary),
+              style: textStyles.headlineSmall
+                  .copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: spacing.sm),
             Text(
@@ -224,16 +227,17 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
     // Calcular estadísticas
     final total = _asistencias.length;
-    final presentes = _asistencias.where((a) => 
-      a['estado'] == 'PRESENTE' || a['estado'] == 'presente'
-    ).length;
-    final ausentes = _asistencias.where((a) => 
-      a['estado'] == 'AUSENTE' || a['estado'] == 'ausente'
-    ).length;
-    final tardanzas = _asistencias.where((a) => 
-      a['estado'] == 'TARDANZA' || a['estado'] == 'tardanza'
-    ).length;
-    final porcentajeAsistencia = total > 0 ? ((presentes + tardanzas) / total * 100).round() : 0;
+    final presentes = _asistencias
+        .where((a) => a['estado'] == 'PRESENTE' || a['estado'] == 'presente')
+        .length;
+    final ausentes = _asistencias
+        .where((a) => a['estado'] == 'AUSENTE' || a['estado'] == 'ausente')
+        .length;
+    final tardanzas = _asistencias
+        .where((a) => a['estado'] == 'TARDANZA' || a['estado'] == 'tardanza')
+        .length;
+    final porcentajeAsistencia =
+        total > 0 ? ((presentes + tardanzas) / total * 100).round() : 0;
 
     return RefreshIndicator(
       onRefresh: _loadAsistencias,
@@ -257,10 +261,14 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatItem('Total', total.toString(), colors.textPrimary),
-                      _buildStatItem('Presente', presentes.toString(), colors.success),
-                      _buildStatItem('Ausente', ausentes.toString(), colors.error),
-                      _buildStatItem('Tardanza', tardanzas.toString(), colors.warning),
+                      _buildStatItem(
+                          'Total', total.toString(), colors.textPrimary),
+                      _buildStatItem(
+                          'Presente', presentes.toString(), colors.success),
+                      _buildStatItem(
+                          'Ausente', ausentes.toString(), colors.error),
+                      _buildStatItem(
+                          'Tardanza', tardanzas.toString(), colors.warning),
                     ],
                   ),
                   SizedBox(height: spacing.md),
@@ -328,19 +336,20 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     final horario = asistencia['horario'] as Map<String, dynamic>?;
     final materia = horario?['materia'] as Map<String, dynamic>?;
     final profesor = horario?['profesor'] as Map<String, dynamic>?;
-    
-    final estado = (asistencia['estado'] as String?)?.toUpperCase() ?? 'DESCONOCIDO';
+
+    final estado =
+        (asistencia['estado'] as String?)?.toUpperCase() ?? 'DESCONOCIDO';
     final fecha = asistencia['fecha'] ?? asistencia['createdAt'] ?? '';
-    
+
     // Determinar colores y iconos según estado
     final isPresente = estado == 'PRESENTE';
     final isTardanza = estado == 'TARDANZA';
     final isJustificado = estado == 'JUSTIFICADO';
-    
+
     Color statusColor;
     IconData statusIcon;
     String statusText;
-    
+
     if (isPresente) {
       statusColor = colors.success;
       statusIcon = Icons.check_circle;
@@ -395,10 +404,12 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 2),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: spacing.sm, vertical: 2),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(spacing.borderRadius / 2),
+                          borderRadius:
+                              BorderRadius.circular(spacing.borderRadius / 2),
                         ),
                         child: Text(
                           statusText,
@@ -414,7 +425,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   if (profesor != null)
                     Text(
                       'Prof. ${profesor['nombres'] ?? ''} ${profesor['apellidos'] ?? ''}',
-                      style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
+                      style: textStyles.bodyMedium
+                          .copyWith(color: colors.textSecondary),
                     ),
                   SizedBox(height: spacing.xs),
                   Row(
@@ -427,7 +439,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(fecha),
-                        style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                        style: textStyles.bodySmall
+                            .copyWith(color: colors.textMuted),
                       ),
                     ],
                   ),
@@ -443,7 +456,20 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
-      final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      final months = [
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dic'
+      ];
       return '${date.day} ${months[date.month - 1]} ${date.year}';
     } catch (e) {
       return dateStr;
@@ -452,8 +478,18 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
     ];
     return months[month - 1];
   }

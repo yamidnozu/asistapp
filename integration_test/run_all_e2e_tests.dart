@@ -13,10 +13,10 @@
 import 'dart:io';
 
 void main() async {
-  print('\n' + '═'*70);
+  print('\n' + '═' * 70);
   print('🚀 EJECUTANDO SUITE COMPLETA DE TESTS E2E');
-  print('═'*70);
-  
+  print('═' * 70);
+
   final tests = [
     'integration_test/e2e_crud_instituciones_test.dart',
     'integration_test/e2e_crud_usuarios_test.dart',
@@ -29,8 +29,8 @@ void main() async {
 
   for (final test in tests) {
     print('\n📋 Ejecutando: $test');
-    print('─'*50);
-    
+    print('─' * 50);
+
     final result = await Process.run(
       'flutter',
       ['test', test, '-d', 'windows'],
@@ -48,13 +48,14 @@ void main() async {
     }
   }
 
-  print('\n' + '═'*70);
+  print('\n' + '═' * 70);
   print('📊 RESUMEN FINAL');
-  print('═'*70);
+  print('═' * 70);
   print('✅ Pasaron: $passed/${tests.length}');
   print('❌ Fallaron: $failed/${tests.length}');
-  print('📈 Tasa de éxito: ${(passed / tests.length * 100).toStringAsFixed(1)}%');
-  print('═'*70);
+  print(
+      '📈 Tasa de éxito: ${(passed / tests.length * 100).toStringAsFixed(1)}%');
+  print('═' * 70);
 
   exit(failed > 0 ? 1 : 0);
 }

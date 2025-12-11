@@ -11,10 +11,12 @@ class StudentNotificationsScreen extends StatefulWidget {
   const StudentNotificationsScreen({super.key});
 
   @override
-  State<StudentNotificationsScreen> createState() => _StudentNotificationsScreenState();
+  State<StudentNotificationsScreen> createState() =>
+      _StudentNotificationsScreenState();
 }
 
-class _StudentNotificationsScreenState extends State<StudentNotificationsScreen> {
+class _StudentNotificationsScreenState
+    extends State<StudentNotificationsScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _notificaciones = [];
   String? _errorMessage;
@@ -184,7 +186,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
             SizedBox(height: spacing.lg),
             Text(
               'No tienes notificaciones',
-              style: textStyles.headlineSmall.copyWith(color: colors.textSecondary),
+              style: textStyles.headlineSmall
+                  .copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: spacing.sm),
             Text(
@@ -197,7 +200,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
       );
     }
 
-    final unreadCount = _notificaciones.where((n) => !(n['leida'] as bool)).length;
+    final unreadCount =
+        _notificaciones.where((n) => !(n['leida'] as bool)).length;
 
     return RefreshIndicator(
       onRefresh: _loadNotificaciones,
@@ -206,7 +210,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
         children: [
           if (unreadCount > 0)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+              padding: EdgeInsets.symmetric(
+                  horizontal: spacing.md, vertical: spacing.sm),
               decoration: BoxDecoration(
                 color: colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -220,7 +225,6 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
               ),
             ),
           if (unreadCount > 0) SizedBox(height: spacing.lg),
-
           ..._notificaciones.map((notif) => _buildNotificationCard(notif)),
         ],
       ),
@@ -270,7 +274,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _getNotificationColor(tipo, colors).withValues(alpha: 0.1),
+                    color: _getNotificationColor(tipo, colors)
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(spacing.borderRadius),
                   ),
                   child: Icon(
@@ -297,7 +302,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
                           ),
                           if (importante)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: colors.error.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
@@ -332,7 +338,8 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
                       SizedBox(height: spacing.sm),
                       Text(
                         _formatDate(notificacion['fecha']),
-                        style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                        style: textStyles.bodySmall
+                            .copyWith(color: colors.textMuted),
                       ),
                     ],
                   ),
@@ -347,21 +354,31 @@ class _StudentNotificationsScreenState extends State<StudentNotificationsScreen>
 
   Color _getNotificationColor(String tipo, dynamic colors) {
     switch (tipo) {
-      case 'tarea': return colors.primary;
-      case 'horario': return colors.warning;
-      case 'recordatorio': return colors.info;
-      case 'anuncio': return colors.success;
-      default: return colors.textSecondary;
+      case 'tarea':
+        return colors.primary;
+      case 'horario':
+        return colors.warning;
+      case 'recordatorio':
+        return colors.info;
+      case 'anuncio':
+        return colors.success;
+      default:
+        return colors.textSecondary;
     }
   }
 
   IconData _getNotificationIcon(String tipo) {
     switch (tipo) {
-      case 'tarea': return Icons.assignment;
-      case 'horario': return Icons.schedule;
-      case 'recordatorio': return Icons.notifications;
-      case 'anuncio': return Icons.campaign;
-      default: return Icons.notifications_none;
+      case 'tarea':
+        return Icons.assignment;
+      case 'horario':
+        return Icons.schedule;
+      case 'recordatorio':
+        return Icons.notifications;
+      case 'anuncio':
+        return Icons.campaign;
+      default:
+        return Icons.notifications_none;
     }
   }
 

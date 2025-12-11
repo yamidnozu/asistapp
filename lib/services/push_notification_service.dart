@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'acudiente_service.dart';
 
 /// Helper para verificar si estamos en plataforma móvil
@@ -14,6 +15,19 @@ bool get _isMobilePlatform {
     return false;
   }
 }
+
+// Definir el canal de notificación para Android (debe coincidir con el backend)
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'asistapp_notifications', // ID
+  'Notificaciones de AsistApp', // Title
+  description:
+      'Canal para notificaciones importantes de AsistApp.', // Description
+  importance: Importance.high,
+);
+
+// Instancia del plugin de notificaciones locales
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 /// Handler para mensajes en background (debe ser función top-level)
 @pragma('vm:entry-point')
@@ -62,6 +76,21 @@ class PushNotificationService {
       await Firebase.initializeApp();
       // Configurar handler de mensajes en background
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+      // Crear el canal de notificaciones en Android
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      // Configurar Firebase para mostrar notificaciones en foreground
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
       debugPrint('✅ Firebase inicializado para push notifications');
     } catch (e) {
       debugPrint('⚠️ Error inicializando Firebase: $e');
@@ -172,6 +201,26 @@ class PushNotificationService {
     _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
       debugPrint('📩 Mensaje en foreground: ${message.notification?.title}');
       onForegroundMessage?.call(message);
+
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      // Mostrar notificación en foreground usando flutter_local_notifications
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channelDescription: channel.description,
+              icon: 'launch_background',
+            ),
+          ),
+        );
+      }
     });
 
     // Mensaje que abrió la app desde background

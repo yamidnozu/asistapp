@@ -11,13 +11,22 @@ class DummyItem {
 }
 
 class FakePaginatedProvider extends PaginatedDataProvider<DummyItem> {
-
   @override
-  Future<PaginatedResponse<DummyItem>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
-  // Simulate page fetch
+  Future<PaginatedResponse<DummyItem>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
+    // Simulate page fetch
     // single page with 2 items, next page when page==1
     final items = [DummyItem('1', 'One'), DummyItem('2', 'Two')];
-  final pagination = PaginationInfo(page: page, limit: limit ?? 10, total: 2, totalPages: 1, hasNext: page < 2, hasPrev: page > 1);
+    final pagination = PaginationInfo(
+        page: page,
+        limit: limit ?? 10,
+        total: 2,
+        totalPages: 1,
+        hasNext: page < 2,
+        hasPrev: page > 1);
     return PaginatedResponse(items: items, pagination: pagination);
   }
 
@@ -32,7 +41,8 @@ class FakePaginatedProvider extends PaginatedDataProvider<DummyItem> {
   }
 
   @override
-  Future<DummyItem?> updateItemApi(String accessToken, String id, dynamic data) async {
+  Future<DummyItem?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
     return DummyItem(id, 'Updated');
   }
 }
@@ -44,9 +54,9 @@ void main() {
     expect(provider.items.length, 2);
     expect(provider.paginationInfo?.page, 1);
 
-  await provider.loadNextPage('token');
-  // Our fake returns the same items for page 2, so they will be appended
-  expect(provider.items.length, 4);
+    await provider.loadNextPage('token');
+    // Our fake returns the same items for page 2, so they will be appended
+    expect(provider.items.length, 4);
 
     // crear item
     final result = await provider.createItem('token', {});

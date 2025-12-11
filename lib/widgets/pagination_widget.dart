@@ -9,7 +9,7 @@ import '../config/app_constants.dart';
 typedef OnPageChangeCallback = Future<void> Function(int page);
 
 /// Widget reutilizable de paginación
-/// 
+///
 /// Uso:
 /// ```dart
 /// PaginationWidget(
@@ -101,7 +101,8 @@ class PaginationWidget extends StatelessWidget {
     final textStyles = context.textStyles;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+      margin:
+          EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -119,7 +120,8 @@ class PaginationWidget extends StatelessWidget {
         children: [
           // Header con información de página
           Container(
-            padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+            padding: EdgeInsets.symmetric(
+                horizontal: spacing.md, vertical: spacing.sm),
             decoration: BoxDecoration(
               color: colors.primaryContainer.withValues(alpha: 0.3),
               borderRadius: const BorderRadius.only(
@@ -138,11 +140,13 @@ class PaginationWidget extends StatelessWidget {
                 SizedBox(width: spacing.xs),
                 Text(
                   'Página $currentPage de $totalPages',
-                  style: textStyles.bodyMedium.bold.copyWith(color: colors.primary),
+                  style: textStyles.bodyMedium.bold
+                      .copyWith(color: colors.primary),
                 ),
                 SizedBox(width: spacing.sm),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 2),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: spacing.sm, vertical: 2),
                   decoration: BoxDecoration(
                     color: colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -158,7 +162,7 @@ class PaginationWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Contenido principal
           Padding(
             padding: EdgeInsets.all(spacing.md),
@@ -167,9 +171,9 @@ class PaginationWidget extends StatelessWidget {
               children: [
                 // Selector de página con números
                 _buildPageSelector(colors, spacing, textStyles),
-                
+
                 SizedBox(height: spacing.md),
-                
+
                 // Botones de navegación
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -185,9 +189,9 @@ class PaginationWidget extends StatelessWidget {
                       textStyles: textStyles,
                       compact: true,
                     ),
-                    
+
                     SizedBox(width: spacing.sm),
-                    
+
                     // Botón Anterior
                     _buildNavigationButton(
                       icon: Icons.chevron_left,
@@ -198,9 +202,9 @@ class PaginationWidget extends StatelessWidget {
                       spacing: spacing,
                       textStyles: textStyles,
                     ),
-                    
+
                     SizedBox(width: spacing.md),
-                    
+
                     // Botón Siguiente
                     _buildNavigationButton(
                       icon: Icons.chevron_right,
@@ -212,9 +216,9 @@ class PaginationWidget extends StatelessWidget {
                       textStyles: textStyles,
                       iconOnRight: true,
                     ),
-                    
+
                     SizedBox(width: spacing.sm),
-                    
+
                     // Botón Última Página
                     _buildNavigationButton(
                       icon: Icons.last_page,
@@ -229,7 +233,7 @@ class PaginationWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 // Indicador de carga
                 if (isLoading) ...[
                   SizedBox(height: spacing.sm),
@@ -241,13 +245,15 @@ class PaginationWidget extends StatelessWidget {
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(colors.primary),
                         ),
                       ),
                       SizedBox(width: spacing.sm),
                       Text(
                         'Cargando...',
-                        style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+                        style: textStyles.bodySmall
+                            .copyWith(color: colors.textSecondary),
                       ),
                     ],
                   ),
@@ -292,7 +298,9 @@ class PaginationWidget extends StatelessWidget {
           ),
         ).copyWith(
           overlayColor: WidgetStateProperty.all(
-            colors.getTextColorForBackground(colors.primary).withValues(alpha: 0.1),
+            colors
+                .getTextColorForBackground(colors.primary)
+                .withValues(alpha: 0.1),
           ),
         ),
         child: Row(
@@ -317,7 +325,8 @@ class PaginationWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPageSelector(AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildPageSelector(
+      AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
     if (totalPages <= 1) {
       return const SizedBox.shrink();
     }
@@ -325,7 +334,8 @@ class PaginationWidget extends StatelessWidget {
     final pages = _getVisiblePages();
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+      padding:
+          EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
       decoration: BoxDecoration(
         color: colors.backgroundLight,
         borderRadius: BorderRadius.circular(8),
@@ -362,8 +372,8 @@ class PaginationWidget extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: !isLoading && !isCurrentPage 
-            ? () => _handlePageChange(pageNumber) 
+        onTap: !isLoading && !isCurrentPage
+            ? () => _handlePageChange(pageNumber)
             : null,
         borderRadius: BorderRadius.circular(8),
         splashColor: colors.primary.withValues(alpha: 0.1),
@@ -380,13 +390,11 @@ class PaginationWidget extends StatelessWidget {
             vertical: spacing.xs,
           ),
           decoration: BoxDecoration(
-            color: isCurrentPage 
-                ? colors.primary 
-                : Colors.transparent,
+            color: isCurrentPage ? colors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isCurrentPage 
-                  ? colors.primary 
+              color: isCurrentPage
+                  ? colors.primary
                   : colors.borderLight.withValues(alpha: 0.3),
               width: isCurrentPage ? 2 : 1,
             ),

@@ -18,7 +18,6 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
   @override
   void initState() {
     super.initState();
-
   }
 
   void addLog(String message) {
@@ -73,7 +72,9 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
               ),
             ],
           ),
-          child: _isExpanded ? _buildExpandedView(context) : _buildCollapsedView(context),
+          child: _isExpanded
+              ? _buildExpandedView(context)
+              : _buildCollapsedView(context),
         ),
       ),
     );
@@ -124,7 +125,6 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
 
     return Column(
       children: [
-
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
@@ -158,7 +158,6 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
             ],
           ),
         ),
-
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(8),
@@ -172,7 +171,9 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
                 : ListView.builder(
                     itemCount: _logs.length,
                     itemBuilder: (context, index) {
-                      final log = _logs[_logs.length - 1 - index]; // Mostrar los más recientes primero
+                      final log = _logs[_logs.length -
+                          1 -
+                          index]; // Mostrar los más recientes primero
                       final isError = log.contains('ERROR');
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
@@ -180,7 +181,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
                           log,
                           style: TextStyle(
                             fontSize: 10,
-                            color: isError ? colors.error : colors.textSecondary,
+                            color:
+                                isError ? colors.error : colors.textSecondary,
                             fontFamily: 'monospace',
                           ),
                         ),
@@ -195,7 +197,8 @@ class ErrorLoggerWidgetState extends State<ErrorLoggerWidget> {
 }
 
 /// Función global para agregar logs desde cualquier parte de la app
-final GlobalKey<ErrorLoggerWidgetState> errorLoggerKey = GlobalKey<ErrorLoggerWidgetState>();
+final GlobalKey<ErrorLoggerWidgetState> errorLoggerKey =
+    GlobalKey<ErrorLoggerWidgetState>();
 
 void addDebugLog(String message) {
   debugPrint(message);

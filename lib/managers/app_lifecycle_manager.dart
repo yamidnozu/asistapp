@@ -25,7 +25,8 @@ class AppLifecycleManager extends ChangeNotifier {
 
   AppState get currentState => _currentState;
   bool get isInForeground => _currentState == AppState.resumed;
-  bool get isInBackground => _currentState == AppState.paused || _currentState == AppState.hidden;
+  bool get isInBackground =>
+      _currentState == AppState.paused || _currentState == AppState.hidden;
 
   AppLifecycleManager() {
     WidgetsBinding.instance.addObserver(_AppLifecycleObserver(this));
@@ -60,9 +61,12 @@ class AppLifecycleManager extends ChangeNotifier {
 
   void _handleAppResumed(AppState previousState) {
     final now = DateTime.now();
-    final timeInBackground = _lastPausedTime != null ? now.difference(_lastPausedTime!) : Duration.zero;
+    final timeInBackground = _lastPausedTime != null
+        ? now.difference(_lastPausedTime!)
+        : Duration.zero;
 
-    debugPrint('AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
+    debugPrint(
+        'AppLifecycleManager: App resumed after ${timeInBackground.inSeconds}s in background');
 
     if (_isFirstResume) {
       _isFirstResume = false;
@@ -70,7 +74,8 @@ class AppLifecycleManager extends ChangeNotifier {
     }
 
     if (timeInBackground.inSeconds > 30) {
-      debugPrint('AppLifecycleManager: Long background time, triggering data refresh');
+      debugPrint(
+          'AppLifecycleManager: Long background time, triggering data refresh');
       _triggerDataRefresh();
     } else {
       debugPrint('AppLifecycleManager: Quick resume, using cached data');
@@ -131,7 +136,6 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
         mappedState = AppState.detached;
         break;
       case AppLifecycleState.inactive:
-
         mappedState = AppState.paused;
         break;
     }

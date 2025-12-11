@@ -29,9 +29,7 @@ class ConflictError {
           try {
             final metaString = parts.sublist(4).join(' - ');
             if (metaString.startsWith('{') && metaString.endsWith('}')) {
-              meta = Map<String, dynamic>.from(
-                jsonDecode(metaString) as Map
-              );
+              meta = Map<String, dynamic>.from(jsonDecode(metaString) as Map);
             }
           } catch (_) {
             // Si no se puede parsear el meta, continuar sin él

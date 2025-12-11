@@ -4,21 +4,28 @@ import '../models/pagination_types.dart';
 import '../services/user_service.dart' as user_service;
 import '../models/user.dart';
 
-class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<User> {
+class InstitutionAdminsPaginatedProvider extends ChangeNotifier
+    with PaginatedDataMixin<User> {
   final user_service.UserService _userService;
 
   InstitutionAdminsPaginatedProvider({user_service.UserService? userService})
       : _userService = userService ?? user_service.UserService();
 
   /// Loads admins for a specific institution
-  Future<void> loadAdmins(String accessToken, String institutionId, {int page = 1, int? limit}) async {
+  Future<void> loadAdmins(String accessToken, String institutionId,
+      {int page = 1, int? limit}) async {
     setFilter('institutionId', institutionId);
-    await loadItems(accessToken, page: page, limit: limit, filters: {'institutionId': institutionId});
+    await loadItems(accessToken,
+        page: page, limit: limit, filters: {'institutionId': institutionId});
   }
 
   /// Expected filters: 'institutionId'
   @override
-  Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<User>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     final institutionId = filters?['institutionId'];
     final assignmentMode = filters?['assignment'] == 'true';
 
@@ -34,7 +41,8 @@ class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDa
         roles: ['admin_institucion'],
       );
       if (response == null) return null;
-      return PaginatedResponse(items: response.users, pagination: response.pagination);
+      return PaginatedResponse(
+          items: response.users, pagination: response.pagination);
     }
 
     if (institutionId == null || institutionId.isEmpty) return null;
@@ -48,7 +56,8 @@ class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDa
       search: search,
     );
     if (response == null) return null;
-    return PaginatedResponse(items: response.users, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.users, pagination: response.pagination);
   }
 
   @override
@@ -62,7 +71,8 @@ class InstitutionAdminsPaginatedProvider extends ChangeNotifier with PaginatedDa
   }
 
   @override
-  Future<User?> updateItemApi(String accessToken, String id, dynamic data) async {
+  Future<User?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
     return null;
   }
 }

@@ -13,7 +13,9 @@ Grupo _$GrupoFromJson(Map<String, dynamic> json) => Grupo(
       seccion: json['seccion'] as String?,
       periodoId: json['periodoId'] as String?,
       institucionId: json['institucionId'] as String?,
-      createdAt: json['createdAt'] == null ? null : _dateTimeFromJson(json['createdAt'] as String),
+      createdAt: json['createdAt'] == null
+          ? null
+          : _dateTimeFromJson(json['createdAt'] as String),
       periodoAcademico: json['periodoAcademico'] == null
           ? PeriodoAcademico(
               id: json['periodoId'] as String? ?? '',
@@ -22,8 +24,11 @@ Grupo _$GrupoFromJson(Map<String, dynamic> json) => Grupo(
               fechaFin: DateTime.now(),
               activo: false,
             )
-          : PeriodoAcademico.fromJson(json['periodoAcademico'] as Map<String, dynamic>),
-      count: json['_count'] == null ? null : GrupoCount.fromJson(json['_count'] as Map<String, dynamic>),
+          : PeriodoAcademico.fromJson(
+              json['periodoAcademico'] as Map<String, dynamic>),
+      count: json['_count'] == null
+          ? null
+          : GrupoCount.fromJson(json['_count'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GrupoToJson(Grupo instance) => <String, dynamic>{
@@ -33,7 +38,9 @@ Map<String, dynamic> _$GrupoToJson(Grupo instance) => <String, dynamic>{
       'seccion': instance.seccion,
       'periodoId': instance.periodoId,
       'institucionId': instance.institucionId,
-      'createdAt': instance.createdAt == null ? null : _dateTimeToJson(instance.createdAt!),
+      'createdAt': instance.createdAt == null
+          ? null
+          : _dateTimeToJson(instance.createdAt!),
       'periodoAcademico': instance.periodoAcademico,
       '_count': instance.count,
     };

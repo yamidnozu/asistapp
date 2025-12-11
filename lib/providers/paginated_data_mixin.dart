@@ -22,14 +22,20 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
   Map<String, dynamic> get filters => _filters;
+
   /// Consider the provider loaded when it's not loading, has no error and has items.
   /// Subclasses can override if they need a different semantics.
   bool get isLoaded => !_isLoading && !hasError && _items.isNotEmpty;
 
   /// Override to fetch a page of items. [filters] may include additional query params.
-  Future<PaginatedResponse<T>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters});
+  Future<PaginatedResponse<T>?> fetchPage(String accessToken,
+      {int page = 1, int? limit, String? search, Map<String, String>? filters});
 
-  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<void> loadItems(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     if (_isLoading) return;
     _isLoading = true;
     _errorMessage = null;
@@ -37,7 +43,8 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await fetchPage(accessToken, page: page, limit: limit, search: search, filters: filters);
+      final response = await fetchPage(accessToken,
+          page: page, limit: limit, search: search, filters: filters);
       if (response != null) {
         _items = response.items;
         _paginationInfo = response.pagination;
@@ -54,13 +61,21 @@ mixin PaginatedDataMixin<T> on ChangeNotifier {
   }
 
   Future<void> loadNextPage(String accessToken) async {
-    if (_paginationInfo == null || !_paginationInfo!.hasNext || _isLoading || _isLoadingMore) return;
+    if (_paginationInfo == null ||
+        !_paginationInfo!.hasNext ||
+        _isLoading ||
+        _isLoadingMore) return;
     _isLoadingMore = true;
     notifyListeners();
 
     try {
       final nextPage = _paginationInfo!.page + 1;
-      final response = await fetchPage(accessToken, page: nextPage, limit: _paginationInfo!.limit, filters: _filters.isNotEmpty ? _filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      final response = await fetchPage(accessToken,
+          page: nextPage,
+          limit: _paginationInfo!.limit,
+          filters: _filters.isNotEmpty
+              ? _filters.map((k, v) => MapEntry(k, v.toString()))
+              : null);
       if (response != null) {
         _items.addAll(response.items);
         _paginationInfo = response.pagination;

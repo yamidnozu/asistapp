@@ -15,20 +15,21 @@ class VincularAcudienteScreen extends StatefulWidget {
   const VincularAcudienteScreen({super.key, required this.estudianteId});
 
   @override
-  State<VincularAcudienteScreen> createState() => _VincularAcudienteScreenState();
+  State<VincularAcudienteScreen> createState() =>
+      _VincularAcudienteScreenState();
 }
 
 class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
   final AcudienteService _acudienteService = AcudienteService();
-  
+
   bool _isLoading = true;
   bool _isSaving = false;
   String? _error;
-  
+
   User? _estudiante;
   List<User> _acudientesDisponibles = [];
   List<AcudienteVinculadoResponse> _acudientesVinculados = [];
-  
+
   String _parentescoSeleccionado = 'padre';
   String? _acudienteSeleccionadoId;
 
@@ -71,7 +72,8 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
       // Cargar acudientes disponibles (usuarios con rol acudiente)
       userProvider.setFilter('role', 'acudiente');
       await userProvider.loadUsers(token);
-      _acudientesDisponibles = userProvider.users.where((u) => u.rol == 'acudiente').toList();
+      _acudientesDisponibles =
+          userProvider.users.where((u) => u.rol == 'acudiente').toList();
       userProvider.removeFilter('role');
 
       // Cargar acudientes ya vinculados
@@ -200,9 +202,9 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_estudiante != null 
-          ? 'Acudientes de ${_estudiante!.nombres}'
-          : 'Vincular Acudientes'),
+        title: Text(_estudiante != null
+            ? 'Acudientes de ${_estudiante!.nombres}'
+            : 'Vincular Acudientes'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -320,7 +322,7 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
               style: context.textStyles.titleMedium,
             ),
             SizedBox(height: context.spacing.md),
-            
+
             // Dropdown de acudientes
             DropdownButtonFormField<String>(
               value: _acudienteSeleccionadoId,
@@ -329,14 +331,22 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
                 prefixIcon: Icon(Icons.family_restroom),
               ),
               items: disponibles.isEmpty
-                  ? [const DropdownMenuItem(value: null, child: Text('No hay acudientes disponibles'))]
-                  : disponibles.map((a) => DropdownMenuItem(
-                      value: a.id,
-                      child: Text('${a.nombres} ${a.apellidos}'),
-                    )).toList(),
-              onChanged: disponibles.isEmpty ? null : (value) {
-                setState(() => _acudienteSeleccionadoId = value);
-              },
+                  ? [
+                      const DropdownMenuItem(
+                          value: null,
+                          child: Text('No hay acudientes disponibles'))
+                    ]
+                  : disponibles
+                      .map((a) => DropdownMenuItem(
+                            value: a.id,
+                            child: Text('${a.nombres} ${a.apellidos}'),
+                          ))
+                      .toList(),
+              onChanged: disponibles.isEmpty
+                  ? null
+                  : (value) {
+                      setState(() => _acudienteSeleccionadoId = value);
+                    },
             ),
             SizedBox(height: context.spacing.md),
 
@@ -347,10 +357,13 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
                 labelText: 'Parentesco',
                 prefixIcon: Icon(Icons.people),
               ),
-              items: _opcionesParentesco.map((p) => DropdownMenuItem(
-                value: p,
-                child: Text(p.substring(0, 1).toUpperCase() + p.substring(1)),
-              )).toList(),
+              items: _opcionesParentesco
+                  .map((p) => DropdownMenuItem(
+                        value: p,
+                        child: Text(
+                            p.substring(0, 1).toUpperCase() + p.substring(1)),
+                      ))
+                  .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() => _parentescoSeleccionado = value);
@@ -391,7 +404,6 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
           style: context.textStyles.titleMedium,
         ),
         SizedBox(height: context.spacing.md),
-
         if (_acudientesVinculados.isEmpty)
           Card(
             child: Padding(
@@ -402,7 +414,8 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
                     Icon(
                       Icons.family_restroom,
                       size: 48,
-                      color: context.colors.textSecondary.withValues(alpha: 0.5),
+                      color:
+                          context.colors.textSecondary.withValues(alpha: 0.5),
                     ),
                     SizedBox(height: context.spacing.sm),
                     Text(
@@ -440,10 +453,10 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
         trailing: IconButton(
           icon: Icon(Icons.link_off, color: Colors.red.shade300),
           tooltip: 'Desvincular',
-          onPressed: _isSaving ? null : () => _desvincularAcudiente(acudiente.id),
+          onPressed:
+              _isSaving ? null : () => _desvincularAcudiente(acudiente.id),
         ),
       ),
     );
   }
 }
-

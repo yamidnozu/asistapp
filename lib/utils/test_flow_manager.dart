@@ -42,7 +42,8 @@ class TestFlowManager {
     // Simular login
     await authProvider.login(testSuperAdminEmail, testSuperAdminPassword);
 
-    if (authProvider.isAuthenticated && authProvider.user?['rol'] == 'super_admin') {
+    if (authProvider.isAuthenticated &&
+        authProvider.user?['rol'] == 'super_admin') {
       debugPrint('✅ Login exitoso como Super Admin');
       router.go('/dashboard');
     } else {
@@ -55,7 +56,8 @@ class TestFlowManager {
     debugPrint('🧪 PASO 2: Creando institución de prueba');
 
     final router = GoRouter.of(context);
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar a lista de instituciones
@@ -73,9 +75,10 @@ class TestFlowManager {
     };
 
     // Crear institución
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
-    final success = await institutionProvider.createInstitution(token, institutionData);
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
+    final success =
+        await institutionProvider.createInstitution(token, institutionData);
 
     if (success) {
       debugPrint('✅ Institución creada exitosamente');
@@ -95,7 +98,8 @@ class TestFlowManager {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Obtener primera institución disponible
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     final institutions = institutionProvider.institutions;
     if (institutions.isEmpty) {
       throw Exception('❌ No hay instituciones disponibles');
@@ -119,8 +123,8 @@ class TestFlowManager {
     );
 
     // Crear administrador
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
     final success = await userProvider.createUser(token, adminData);
 
     if (success) {
@@ -140,7 +144,8 @@ class TestFlowManager {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Obtener primera institución disponible
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     final institutions = institutionProvider.institutions;
     if (institutions.isEmpty) {
       throw Exception('❌ No hay instituciones disponibles');
@@ -177,14 +182,15 @@ class TestFlowManager {
       ),
     ];
 
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final profesorData in profesoresData) {
       final success = await userProvider.createUser(token, profesorData);
       if (success) {
-        debugPrint('✅ Profesor creado: ${profesorData.nombres} ${profesorData.apellidos}');
+        debugPrint(
+            '✅ Profesor creado: ${profesorData.nombres} ${profesorData.apellidos}');
         created++;
       } else {
         debugPrint('❌ Error creando profesor: ${profesorData.nombres}');
@@ -205,7 +211,8 @@ class TestFlowManager {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Obtener primera institución disponible
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     final institutions = institutionProvider.institutions;
     if (institutions.isEmpty) {
       throw Exception('❌ No hay instituciones disponibles');
@@ -240,14 +247,15 @@ class TestFlowManager {
       ),
     ];
 
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final estudianteData in estudiantesData) {
       final success = await userProvider.createUser(token, estudianteData);
       if (success) {
-        debugPrint('✅ Estudiante creado: ${estudianteData.nombres} ${estudianteData.apellidos}');
+        debugPrint(
+            '✅ Estudiante creado: ${estudianteData.nombres} ${estudianteData.apellidos}');
         created++;
       } else {
         debugPrint('❌ Error creando estudiante: ${estudianteData.nombres}');
@@ -265,11 +273,13 @@ class TestFlowManager {
     debugPrint('🧪 PASO 6: Creando materias');
 
     final router = GoRouter.of(context);
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Obtener primera institución disponible
-    final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    final institutionProvider =
+        Provider.of<InstitutionProvider>(context, listen: false);
     final institutions = institutionProvider.institutions;
     if (institutions.isEmpty) {
       throw Exception('❌ No hay instituciones disponibles');
@@ -291,8 +301,8 @@ class TestFlowManager {
       ),
     ];
 
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
     int created = 0;
 
     for (final materiaData in materiasData) {
@@ -316,7 +326,7 @@ class TestFlowManager {
     debugPrint('🧪 PASO 7: Verificando sistema de grupos');
 
     final router = GoRouter.of(context);
-  final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
+    final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar a grupos
@@ -325,11 +335,12 @@ class TestFlowManager {
 
     // Por ahora solo verificamos que el provider está disponible
     // La creación de grupos requiere periodoId que no tenemos
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
-  await grupoProvider.loadItems(token);
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
+    await grupoProvider.loadItems(token);
 
-  debugPrint('✅ Sistema de grupos verificado - ${grupoProvider.items.length} grupos disponibles');
+    debugPrint(
+        '✅ Sistema de grupos verificado - ${grupoProvider.items.length} grupos disponibles');
   }
 
   /// PASO 8: Crear Horarios (simplificado)
@@ -337,7 +348,8 @@ class TestFlowManager {
     debugPrint('🧪 PASO 8: Verificando sistema de horarios');
 
     final router = GoRouter.of(context);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    final horarioProvider =
+        Provider.of<HorarioProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar a horarios
@@ -346,22 +358,25 @@ class TestFlowManager {
 
     // Por ahora solo verificamos que el provider está disponible
     // La creación de horarios requiere periodoId que no tenemos
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
-  await horarioProvider.loadHorarios(token);
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
+    await horarioProvider.loadHorarios(token);
 
-    debugPrint('✅ Sistema de horarios verificado - ${horarioProvider.horarios.length} horarios disponibles');
+    debugPrint(
+        '✅ Sistema de horarios verificado - ${horarioProvider.horarios.length} horarios disponibles');
   }
 
   /// PASO 9: Simular Verificación de Asistencias
   static Future<void> step9VerificarAsistencias(BuildContext context) async {
     debugPrint('🧪 PASO 9: Verificando sistema de asistencias');
 
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Obtener horarios disponibles
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    final horarioProvider =
+        Provider.of<HorarioProvider>(context, listen: false);
     final horarios = horarioProvider.horarios;
     if (horarios.isEmpty) {
       debugPrint('⚠️ No hay horarios disponibles para verificar asistencias');
@@ -369,11 +384,12 @@ class TestFlowManager {
     }
 
     // Intentar cargar asistencias para el primer horario
-  final token = authProvider.accessToken;
-  if (token == null) throw Exception('No hay sesión activa');
-  await asistenciaProvider.fetchAsistencias(token, horarios.first.id);
+    final token = authProvider.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
+    await asistenciaProvider.fetchAsistencias(token, horarios.first.id);
 
-    debugPrint('✅ Sistema de asistencias verificado - ${asistenciaProvider.asistencias.length} estudiantes listos');
+    debugPrint(
+        '✅ Sistema de asistencias verificado - ${asistenciaProvider.asistencias.length} estudiantes listos');
   }
 
   /// PASO 10: Verificar Dashboards
@@ -412,35 +428,35 @@ class TestFlowManager {
     debugPrint('=' * 50);
 
     try {
-  // PASO 1: Login Super Admin
-  await step1LoginSuperAdmin(context);
+      // PASO 1: Login Super Admin
+      await step1LoginSuperAdmin(context);
 
-  // PASO 2: Crear Institución
-  await step2CrearInstitucion(context);
+      // PASO 2: Crear Institución
+      await step2CrearInstitucion(context);
 
-  // PASO 3: Crear Admin de Institución
-  await step3CrearAdminInstitucion(context);
+      // PASO 3: Crear Admin de Institución
+      await step3CrearAdminInstitucion(context);
 
-  // PASO 4: Crear Profesores
-  await step4CrearProfesores(context);
+      // PASO 4: Crear Profesores
+      await step4CrearProfesores(context);
 
-  // PASO 5: Crear Estudiantes
-  await step5CrearEstudiantes(context);
+      // PASO 5: Crear Estudiantes
+      await step5CrearEstudiantes(context);
 
-  // PASO 6: Crear Materias
-  await step6CrearMaterias(context);
+      // PASO 6: Crear Materias
+      await step6CrearMaterias(context);
 
-  // PASO 7: Crear Grupos
-  await step7CrearGrupos(context);
+      // PASO 7: Crear Grupos
+      await step7CrearGrupos(context);
 
-  // PASO 8: Crear Horarios
-  await step8CrearHorarios(context);
+      // PASO 8: Crear Horarios
+      await step8CrearHorarios(context);
 
-  // PASO 9: Verificar Asistencias
-  await step9VerificarAsistencias(context);
+      // PASO 9: Verificar Asistencias
+      await step9VerificarAsistencias(context);
 
-  // PASO 10: Verificar Dashboards
-  await step10VerificarDashboards(context);
+      // PASO 10: Verificar Dashboards
+      await step10VerificarDashboards(context);
 
       debugPrint('=' * 50);
       debugPrint('🎉 FLUJO COMPLETO DE PRUEBAS FINALIZADO EXITOSAMENTE');
@@ -452,7 +468,6 @@ class TestFlowManager {
       debugPrint('   • Sistema de asistencias con QR');
       debugPrint('   • Dashboards por rol');
       debugPrint('   • Navegación y UI/UX');
-
     } catch (e) {
       debugPrint('❌ ERROR en el flujo de pruebas: $e');
       rethrow;
@@ -474,7 +489,6 @@ class TestFlowManager {
       await _probarDashboards(context);
 
       debugPrint('✅ Pruebas de UI completadas');
-
     } catch (e) {
       debugPrint('❌ Error en pruebas UI: $e');
       rethrow;

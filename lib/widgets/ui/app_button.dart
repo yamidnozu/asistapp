@@ -48,7 +48,8 @@ class _AppButtonState extends State<AppButton> {
         color: widget.isEnabled
             ? (_isPressed ? colors.primaryDark : colors.primary)
             : colors.grey300,
-        borderRadius: BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
+        borderRadius:
+            BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
       ),
       child: Center(
         child: widget.isLoading
@@ -139,7 +140,8 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
           color: widget.isEnabled ? colors.primary : colors.grey300,
           width: AppConstants.instance.borderWidthNormal,
         ),
-        borderRadius: BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
+        borderRadius:
+            BorderRadius.circular(AppConstants.instance.buttonBorderRadius),
         color: _isPressed && widget.isEnabled
             ? colors.surfaceLight
             : colors.transparent,
@@ -157,18 +159,16 @@ class _AppSecondaryButtonState extends State<AppSecondaryButton> {
     );
 
     return GestureDetector(
-      onTapDown: widget.isEnabled
-          ? (_) => setState(() => _isPressed = true)
-          : null,
+      onTapDown:
+          widget.isEnabled ? (_) => setState(() => _isPressed = true) : null,
       onTapUp: widget.isEnabled
           ? (_) {
               setState(() => _isPressed = false);
               widget.onPressed();
             }
           : null,
-      onTapCancel: widget.isEnabled
-          ? () => setState(() => _isPressed = false)
-          : null,
+      onTapCancel:
+          widget.isEnabled ? () => setState(() => _isPressed = false) : null,
       child: buttonChild,
     );
   }

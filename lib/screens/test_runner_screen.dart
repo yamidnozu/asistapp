@@ -77,7 +77,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     }
   }
 
-  Future<void> _runIndividualStep(String stepName, Future<void> Function() stepFunction) async {
+  Future<void> _runIndividualStep(
+      String stepName, Future<void> Function() stepFunction) async {
     if (_isRunning) return;
 
     setState(() {
@@ -102,9 +103,9 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -141,7 +142,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                 decoration: BoxDecoration(
                   color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+                  border:
+                      Border.all(color: colors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -150,14 +152,16 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(colors.primary),
                       ),
                     ),
                     SizedBox(width: spacing.md),
                     Expanded(
                       child: Text(
                         _currentStep,
-                        style: textStyles.bodyMedium.copyWith(color: colors.primary),
+                        style: textStyles.bodyMedium
+                            .copyWith(color: colors.primary),
                       ),
                     ),
                   ],
@@ -179,7 +183,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isRunning ? null : _runFullFlow,
                 icon: Icon(_isRunning ? Icons.hourglass_top : Icons.play_arrow),
-                label: Text(_isRunning ? 'Ejecutando...' : 'Ejecutar Flujo Completo'),
+                label: Text(
+                    _isRunning ? 'Ejecutando...' : 'Ejecutar Flujo Completo'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                   foregroundColor: colors.white,
@@ -223,16 +228,28 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildStepButton('1. Login Super Admin', () => TestFlowManager.step1LoginSuperAdmin(context)),
-                  _buildStepButton('2. Crear Institución', () => TestFlowManager.step2CrearInstitucion(context)),
-                  _buildStepButton('3. Crear Admin Institución', () => TestFlowManager.step3CrearAdminInstitucion(context)),
-                  _buildStepButton('4. Crear Profesores', () => TestFlowManager.step4CrearProfesores(context)),
-                  _buildStepButton('5. Crear Estudiantes', () => TestFlowManager.step5CrearEstudiantes(context)),
-                  _buildStepButton('6. Crear Materias', () => TestFlowManager.step6CrearMaterias(context)),
-                  _buildStepButton('7. Crear Grupos', () => TestFlowManager.step7CrearGrupos(context)),
-                  _buildStepButton('8. Crear Horarios', () => TestFlowManager.step8CrearHorarios(context)),
-                  _buildStepButton('9. Verificar Asistencias', () => TestFlowManager.step9VerificarAsistencias(context)),
-                  _buildStepButton('10. Verificar Dashboards', () => TestFlowManager.step10VerificarDashboards(context)),
+                  _buildStepButton('1. Login Super Admin',
+                      () => TestFlowManager.step1LoginSuperAdmin(context)),
+                  _buildStepButton('2. Crear Institución',
+                      () => TestFlowManager.step2CrearInstitucion(context)),
+                  _buildStepButton(
+                      '3. Crear Admin Institución',
+                      () =>
+                          TestFlowManager.step3CrearAdminInstitucion(context)),
+                  _buildStepButton('4. Crear Profesores',
+                      () => TestFlowManager.step4CrearProfesores(context)),
+                  _buildStepButton('5. Crear Estudiantes',
+                      () => TestFlowManager.step5CrearEstudiantes(context)),
+                  _buildStepButton('6. Crear Materias',
+                      () => TestFlowManager.step6CrearMaterias(context)),
+                  _buildStepButton('7. Crear Grupos',
+                      () => TestFlowManager.step7CrearGrupos(context)),
+                  _buildStepButton('8. Crear Horarios',
+                      () => TestFlowManager.step8CrearHorarios(context)),
+                  _buildStepButton('9. Verificar Asistencias',
+                      () => TestFlowManager.step9VerificarAsistencias(context)),
+                  _buildStepButton('10. Verificar Dashboards',
+                      () => TestFlowManager.step10VerificarDashboards(context)),
                 ],
               ),
             ),
@@ -284,18 +301,20 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   }
 
   Widget _buildStepButton(String title, Future<void> Function() onPressed) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Padding(
       padding: EdgeInsets.only(bottom: spacing.sm),
       child: SizedBox(
         width: double.infinity,
         child: TextButton(
-          onPressed: _isRunning ? null : () => _runIndividualStep(title, onPressed),
+          onPressed:
+              _isRunning ? null : () => _runIndividualStep(title, onPressed),
           style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: spacing.md, horizontal: spacing.lg),
+            padding: EdgeInsets.symmetric(
+                vertical: spacing.md, horizontal: spacing.lg),
             alignment: Alignment.centerLeft,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(spacing.borderRadius),

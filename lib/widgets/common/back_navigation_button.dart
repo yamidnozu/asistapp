@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Widget helper para navegación hacia atrás consistente en toda la app.
-/// 
+///
 /// Comportamiento:
 /// 1. Si hay historial de navegación (canPop), hace pop()
 /// 2. Si no hay historial, navega a la ruta de fallback especificada
@@ -10,13 +10,13 @@ import 'package:go_router/go_router.dart';
 class BackNavigationButton extends StatelessWidget {
   /// Ruta de fallback si no se puede hacer pop (ej: '/dashboard')
   final String fallbackRoute;
-  
+
   /// Color del icono (por defecto usa el foreground del AppBar)
   final Color? iconColor;
-  
+
   /// Icono personalizado (por defecto es arrow_back)
   final IconData icon;
-  
+
   /// Tooltip personalizado
   final String tooltip;
 
@@ -48,7 +48,8 @@ class BackNavigationButton extends StatelessWidget {
   }
 
   /// Método estático para usar directamente sin crear el widget
-  static void navigateBack(BuildContext context, {String fallbackRoute = '/dashboard'}) {
+  static void navigateBack(BuildContext context,
+      {String fallbackRoute = '/dashboard'}) {
     if (context.canPop()) {
       context.pop();
     } else {
@@ -58,7 +59,8 @@ class BackNavigationButton extends StatelessWidget {
 }
 
 /// AppBar preconfigurado con navegación de retorno consistente
-class AppBarWithBackNavigation extends StatelessWidget implements PreferredSizeWidget {
+class AppBarWithBackNavigation extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final String fallbackRoute;
   final List<Widget>? actions;
@@ -81,14 +83,17 @@ class AppBarWithBackNavigation extends StatelessWidget implements PreferredSizeW
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveBackgroundColor = backgroundColor ?? theme.colorScheme.surface;
-    final effectiveForegroundColor = foregroundColor ?? theme.colorScheme.onSurface;
+    final effectiveBackgroundColor =
+        backgroundColor ?? theme.colorScheme.surface;
+    final effectiveForegroundColor =
+        foregroundColor ?? theme.colorScheme.onSurface;
 
     return AppBar(
-      title: titleWidget ?? Text(
-        title,
-        style: TextStyle(color: effectiveForegroundColor),
-      ),
+      title: titleWidget ??
+          Text(
+            title,
+            style: TextStyle(color: effectiveForegroundColor),
+          ),
       backgroundColor: effectiveBackgroundColor,
       foregroundColor: effectiveForegroundColor,
       elevation: 0,

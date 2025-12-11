@@ -43,20 +43,22 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionHeader(context, 'Apariencia', Icons.palette_outlined),
+                _buildSectionHeader(
+                    context, 'Apariencia', Icons.palette_outlined),
                 SizedBox(height: spacing.md),
                 _buildAppearanceSection(context, settings),
                 SizedBox(height: spacing.md),
-
                 if (isSuperAdmin) ...[
                   SizedBox(height: spacing.xl),
-                  _buildSectionHeader(context, 'Desarrollo', Icons.developer_mode_outlined),
+                  _buildSectionHeader(
+                      context, 'Desarrollo', Icons.developer_mode_outlined),
                   SizedBox(height: spacing.md),
                   _buildDevelopmentSection(context, settings),
                   SizedBox(height: spacing.md),
                   Text(
                     'Opciones para facilitar las pruebas durante el desarrollo.',
-                    style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                    style:
+                        textStyles.bodySmall.copyWith(color: colors.textMuted),
                   ),
                 ],
                 SizedBox(height: spacing.xxl),
@@ -68,7 +70,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, IconData icon) {
     final colors = context.colors;
     final textStyles = context.textStyles;
     final spacing = context.spacing;
@@ -95,7 +98,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsCard(BuildContext context, {required List<Widget> children}) {
+  Widget _buildSettingsCard(BuildContext context,
+      {required List<Widget> children}) {
     final colors = context.colors;
     final spacing = context.spacing;
 
@@ -111,9 +115,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-
-
-  Widget _buildAppearanceSection(BuildContext context, SettingsProvider settings) {
+  Widget _buildAppearanceSection(
+      BuildContext context, SettingsProvider settings) {
     return _buildSettingsCard(
       context,
       children: [
@@ -130,14 +133,16 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDevelopmentSection(BuildContext context, SettingsProvider settings) {
+  Widget _buildDevelopmentSection(
+      BuildContext context, SettingsProvider settings) {
     return _buildSettingsCard(
       context,
       children: [
         _buildSwitchTile(
           context,
           title: 'Mostrar Usuarios de Prueba',
-          subtitle: 'Habilita la visualización de usuarios de prueba en la pantalla de login',
+          subtitle:
+              'Habilita la visualización de usuarios de prueba en la pantalla de login',
           value: settings.showTestUsers,
           onChanged: (_) => settings.setShowTestUsers(!settings.showTestUsers),
           icon: Icons.bug_report_outlined,
@@ -161,7 +166,8 @@ class SettingsScreen extends StatelessWidget {
     final spacing = context.spacing;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+      padding:
+          EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
       child: Row(
         children: [
           Icon(icon, color: colors.textSecondary, size: 22),
@@ -196,10 +202,6 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-
-  
-
-  
 
   // Divider helper removed (not needed for single toggle screen)
 

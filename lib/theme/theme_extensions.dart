@@ -7,9 +7,10 @@ import 'app_text_styles.dart';
 extension ThemeExtensions on BuildContext {
   /// Acceso rápido a colores del theme
   AppColors get colors => AppColors.fromBrightness(Theme.of(this).brightness);
-  
+
   /// Return theme-aware colors (light/dark) based on Theme's brightness
-  AppColors get themeColors => AppColors.fromBrightness(Theme.of(this).brightness);
+  AppColors get themeColors =>
+      AppColors.fromBrightness(Theme.of(this).brightness);
 
   /// Acceso rápido a estilos de texto
   AppTextStyles get textStyles => AppTextStyles.instance;
@@ -50,13 +51,17 @@ extension EdgeInsetsExtensions on EdgeInsets {
   static EdgeInsets get lg => EdgeInsets.all(AppSpacing.instance.lg);
   static EdgeInsets get xl => EdgeInsets.all(AppSpacing.instance.xl);
 
-  static EdgeInsets horizontal(double value) => EdgeInsets.symmetric(horizontal: value);
-  static EdgeInsets vertical(double value) => EdgeInsets.symmetric(vertical: value);
+  static EdgeInsets horizontal(double value) =>
+      EdgeInsets.symmetric(horizontal: value);
+  static EdgeInsets vertical(double value) =>
+      EdgeInsets.symmetric(vertical: value);
 
-  static EdgeInsets get cardPadding => EdgeInsets.all(AppSpacing.instance.cardPadding);
-  static EdgeInsets get screenPadding => EdgeInsets.all(AppSpacing.instance.screenPadding);
+  static EdgeInsets get cardPadding =>
+      EdgeInsets.all(AppSpacing.instance.cardPadding);
+  static EdgeInsets get screenPadding =>
+      EdgeInsets.all(AppSpacing.instance.screenPadding);
   static EdgeInsets get buttonPadding => EdgeInsets.symmetric(
-    horizontal: AppSpacing.instance.buttonPadding,
-    vertical: AppSpacing.instance.sm,
-  );
+        horizontal: AppSpacing.instance.buttonPadding,
+        vertical: AppSpacing.instance.sm,
+      );
 }

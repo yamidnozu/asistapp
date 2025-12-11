@@ -32,7 +32,8 @@ class AcudienteProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   List<HijoResponse> get hijos => _hijos;
   HijoResponse? get hijoSeleccionado => _hijoSeleccionado;
-  List<AsistenciaHistorialItem> get historialAsistencias => _historialAsistencias;
+  List<AsistenciaHistorialItem> get historialAsistencias =>
+      _historialAsistencias;
   int get totalAsistencias => _totalAsistencias;
   EstadisticasCompletas? get estadisticas => _estadisticas;
   List<NotificacionInApp> get notificaciones => _notificaciones;
@@ -72,7 +73,8 @@ class AcudienteProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final hijo = await _acudienteService.getHijoDetalle(accessToken, estudianteId);
+      final hijo =
+          await _acudienteService.getHijoDetalle(accessToken, estudianteId);
       if (hijo != null) {
         _hijoSeleccionado = hijo;
       } else {
@@ -141,13 +143,15 @@ class AcudienteProvider extends ChangeNotifier {
   }
 
   /// Carga las estadísticas de un hijo
-  Future<void> cargarEstadisticas(String accessToken, String estudianteId) async {
+  Future<void> cargarEstadisticas(
+      String accessToken, String estudianteId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final estadisticas = await _acudienteService.getEstadisticas(accessToken, estudianteId);
+      final estadisticas =
+          await _acudienteService.getEstadisticas(accessToken, estudianteId);
       if (estadisticas != null) {
         _estadisticas = estadisticas;
       } else {
@@ -214,9 +218,11 @@ class AcudienteProvider extends ChangeNotifier {
   }
 
   /// Marca una notificación como leída
-  Future<bool> marcarNotificacionComoLeida(String accessToken, String notificacionId) async {
+  Future<bool> marcarNotificacionComoLeida(
+      String accessToken, String notificacionId) async {
     try {
-      final success = await _acudienteService.marcarComoLeida(accessToken, notificacionId);
+      final success =
+          await _acudienteService.marcarComoLeida(accessToken, notificacionId);
       if (success) {
         // Actualizar la notificación localmente
         final index = _notificaciones.indexWhere((n) => n.id == notificacionId);
@@ -241,7 +247,8 @@ class AcudienteProvider extends ChangeNotifier {
       final count = await _acudienteService.marcarTodasComoLeidas(accessToken);
       if (count > 0) {
         // Actualizar todas las notificaciones localmente
-        _notificaciones = _notificaciones.map((n) => n.copyWith(leida: true)).toList();
+        _notificaciones =
+            _notificaciones.map((n) => n.copyWith(leida: true)).toList();
         _notificacionesNoLeidas = 0;
         notifyListeners();
       }

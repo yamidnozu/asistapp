@@ -12,7 +12,7 @@ class PhoneInputFormatter extends TextInputFormatter {
   ) {
     // Solo permite: +, números (0-9), espacios, guiones y paréntesis
     final newText = newValue.text.replaceAll(RegExp(r'[^\+0-9\s\-\(\)]'), '');
-    
+
     // Solo permite un + al inicio
     String formatted = newText;
     if (formatted.contains('+')) {
@@ -25,11 +25,12 @@ class PhoneInputFormatter extends TextInputFormatter {
         formatted = '+${formatted.substring(1).replaceAll('+', '')}';
       }
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(
-        offset: formatted.length.clamp(0, newValue.selection.end.clamp(0, formatted.length)),
+        offset: formatted.length
+            .clamp(0, newValue.selection.end.clamp(0, formatted.length)),
       ),
     );
   }
@@ -226,10 +227,11 @@ class UserPersonalInfoStep extends StatelessWidget {
                           hintText: 'Cédula o documento',
                           validator: (value) {
                             // Identificación es opcional para admin_institucion y super_admin
-                            if (userRole == 'admin_institucion' || userRole == 'super_admin') {
+                            if (userRole == 'admin_institucion' ||
+                                userRole == 'super_admin') {
                               return null;
                             }
-                            
+
                             if (value == null || value.trim().isEmpty) {
                               return 'La identificación es requerida';
                             }
@@ -277,10 +279,11 @@ class UserPersonalInfoStep extends StatelessWidget {
                         hintText: 'Cédula o documento',
                         validator: (value) {
                           // Identificación es opcional para admin_institucion y super_admin
-                          if (userRole == 'admin_institucion' || userRole == 'super_admin') {
+                          if (userRole == 'admin_institucion' ||
+                              userRole == 'super_admin') {
                             return null;
                           }
-                          
+
                           if (value == null || value.trim().isEmpty) {
                             return 'La identificación es requerida';
                           }
@@ -300,7 +303,9 @@ class UserPersonalInfoStep extends StatelessWidget {
         SwitchListTile(
           title: const Text('Usuario Activo'),
           subtitle: Text(
-            activo ? 'El usuario puede iniciar sesión' : 'El usuario está deshabilitado',
+            activo
+                ? 'El usuario puede iniciar sesión'
+                : 'El usuario está deshabilitado',
             style: context.textStyles.bodySmall.copyWith(
               color: context.colors.textSecondary,
             ),

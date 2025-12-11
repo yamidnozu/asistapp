@@ -10,7 +10,8 @@ class UserRoles {
 
   /// Verifica si un string es un rol válido
   static bool isValidRole(String role) {
-    return [superAdmin, adminInstitucion, profesor, estudiante, acudiente].contains(role);
+    return [superAdmin, adminInstitucion, profesor, estudiante, acudiente]
+        .contains(role);
   }
 
   /// Verifica si un rol tiene permisos de administración

@@ -12,7 +12,8 @@ class AcudienteDashboardScreen extends StatefulWidget {
   const AcudienteDashboardScreen({super.key});
 
   @override
-  State<AcudienteDashboardScreen> createState() => _AcudienteDashboardScreenState();
+  State<AcudienteDashboardScreen> createState() =>
+      _AcudienteDashboardScreenState();
 }
 
 class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
@@ -30,7 +31,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
 
     if (authProvider.accessToken != null) {
       await acudienteProvider.cargarHijos(authProvider.accessToken!);
-      await acudienteProvider.actualizarConteoNoLeidas(authProvider.accessToken!);
+      await acudienteProvider
+          .actualizarConteoNoLeidas(authProvider.accessToken!);
     }
 
     if (mounted) {
@@ -62,7 +64,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                        constraints:
+                            const BoxConstraints(minWidth: 18, minHeight: 18),
                         child: Text(
                           '${provider.notificacionesNoLeidas}',
                           style: const TextStyle(
@@ -136,7 +139,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
     final promedioAsistencia = provider.hijos.isNotEmpty
         ? provider.hijos.fold<int>(
               0,
-              (sum, hijo) => sum + hijo.estadisticasResumen.porcentajeAsistencia,
+              (sum, hijo) =>
+                  sum + hijo.estadisticasResumen.porcentajeAsistencia,
             ) ~/
             provider.hijos.length
         : 100;
@@ -170,7 +174,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
               SizedBox(width: context.spacing.sm),
               Text(
                 'Resumen General',
-                style: context.textStyles.headlineSmall.copyWith(color: Colors.white),
+                style: context.textStyles.headlineSmall
+                    .copyWith(color: Colors.white),
               ),
             ],
           ),
@@ -259,7 +264,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                    backgroundColor:
+                        context.colors.primary.withValues(alpha: 0.1),
                     child: Text(
                       hijo.nombres.substring(0, 1).toUpperCase(),
                       style: TextStyle(
@@ -388,7 +394,8 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
     );
   }
 
-  Widget _buildMiniStat(String label, String value, IconData icon, {Color? color}) {
+  Widget _buildMiniStat(String label, String value, IconData icon,
+      {Color? color}) {
     return Column(
       children: [
         Row(

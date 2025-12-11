@@ -16,7 +16,8 @@ class SessionInfoFooter extends StatelessWidget {
         SnackBar(
           content: Text(
             'Token copiado al portapapeles',
-            style: TextStyle(color: colors.getTextColorForBackground(colors.success)),
+            style: TextStyle(
+                color: colors.getTextColorForBackground(colors.success)),
           ),
           duration: const Duration(seconds: 2),
           backgroundColor: colors.success,

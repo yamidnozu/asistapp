@@ -38,8 +38,7 @@ class _MultiStepFormScaffoldState extends State<MultiStepFormScaffold> {
     }
     if (!isLast) {
       setState(() => _currentStep++);
-    }
-    else {
+    } else {
       setState(() => _isLoading = true);
       await widget.onSave();
       if (mounted) setState(() => _isLoading = false);
@@ -80,9 +79,23 @@ class _MultiStepFormScaffoldState extends State<MultiStepFormScaffold> {
               padding: EdgeInsets.only(top: spacing.lg),
               child: Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: details.onStepCancel, child: Text(widget.previousLabel))),
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: details.onStepCancel,
+                          child: Text(widget.previousLabel))),
                   SizedBox(width: spacing.md),
-                  Expanded(child: ElevatedButton(onPressed: details.onStepContinue, child: _isLoading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : Text(isLast ? widget.submitLabel : widget.nextLabel))),
+                  Expanded(
+                      child: ElevatedButton(
+                          onPressed: details.onStepContinue,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
+                              : Text(isLast
+                                  ? widget.submitLabel
+                                  : widget.nextLabel))),
                 ],
               ),
             );

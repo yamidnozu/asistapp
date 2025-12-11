@@ -23,7 +23,8 @@ Institution _$InstitutionFromJson(Map<String, dynamic> json) => Institution(
       metadata: json['metadata'] as Map<String, dynamic>?,
       configuraciones: json['configuraciones'] == null
           ? null
-          : InstitutionConfig.fromJson(json['configuraciones'] as Map<String, dynamic>),
+          : InstitutionConfig.fromJson(
+              json['configuraciones'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$InstitutionToJson(Institution instance) =>

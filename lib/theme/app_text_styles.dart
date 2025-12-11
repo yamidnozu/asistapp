@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 /// Sistema de estilos de texto moderno - "Clarity UI"
 /// Tipografía escalable, accesible y profesional con Inter
 class AppTextStyles {
-
   AppTextStyles._();
 
   static final AppTextStyles instance = AppTextStyles._();
@@ -23,7 +22,7 @@ class AppTextStyles {
       fontWeight: fontWeight,
       height: height,
       letterSpacing: letterSpacing,
-    color: color,
+      color: color,
       decoration: decoration,
     );
   }
@@ -33,124 +32,124 @@ class AppTextStyles {
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get displayLarge => _createStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w700, // Bold para impacto
-    height: 1.2,
-    letterSpacing: -0.5, // Letter spacing negativo para títulos grandes
-  );
+        fontSize: 32,
+        fontWeight: FontWeight.w700, // Bold para impacto
+        height: 1.2,
+        letterSpacing: -0.5, // Letter spacing negativo para títulos grandes
+      );
 
   TextStyle get displayMedium => _createStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    height: 1.25,
-    letterSpacing: -0.4,
-  );
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+        letterSpacing: -0.4,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // HEADLINE - TÍTULOS PRINCIPALES
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get headlineLarge => _createStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600, // SemiBold para jerarquía
-    height: 1.3,
-    letterSpacing: -0.3,
-  );
+        fontSize: 24,
+        fontWeight: FontWeight.w600, // SemiBold para jerarquía
+        height: 1.3,
+        letterSpacing: -0.3,
+      );
 
   TextStyle get headlineMedium => _createStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: -0.2,
-  );
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+        letterSpacing: -0.2,
+      );
 
   TextStyle get headlineSmall => _createStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: -0.1,
-  );
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+        letterSpacing: -0.1,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // TITLE - SUBTÍTULOS Y ENCABEZADOS
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get titleLarge => _createStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: 0.0,
-  );
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+        letterSpacing: 0.0,
+      );
 
   TextStyle get titleMedium => _createStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.w500, // Medium para subtítulos
-    height: 1.5,
-    letterSpacing: 0.0,
-  );
+        fontSize: 15,
+        fontWeight: FontWeight.w500, // Medium para subtítulos
+        height: 1.5,
+        letterSpacing: 0.0,
+      );
 
   TextStyle get titleSmall => _createStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    height: 1.5,
-    letterSpacing: 0.1,
-  );
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.5,
+        letterSpacing: 0.1,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // BODY - TEXTO PRINCIPAL
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get bodyLarge => _createStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w400, // Regular para legibilidad
-    height: 1.5,
-    letterSpacing: 0.1,
-  color: null,
-  );
+        fontSize: 16,
+        fontWeight: FontWeight.w400, // Regular para legibilidad
+        height: 1.5,
+        letterSpacing: 0.1,
+        color: null,
+      );
 
   TextStyle get bodyMedium => _createStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.w400,
-    height: 1.5,
-    letterSpacing: 0.1,
-  color: null,
-  );
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+        letterSpacing: 0.1,
+        color: null,
+      );
 
   TextStyle get bodySmall => _createStyle(
-    fontSize: 13,
-    fontWeight: FontWeight.w400,
-    height: 1.4,
-    letterSpacing: 0.2,
-  color: null,
-  );
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        height: 1.4,
+        letterSpacing: 0.2,
+        color: null,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // LABEL - TEXTO PARA BOTONES Y ETIQUETAS
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get labelLarge => _createStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600, // SemiBold para botones
-    height: 1.4,
-    letterSpacing: 0.1,
-  color: null,
-  );
+        fontSize: 16,
+        fontWeight: FontWeight.w600, // SemiBold para botones
+        height: 1.4,
+        letterSpacing: 0.1,
+        color: null,
+      );
 
   TextStyle get labelMedium => _createStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    height: 1.4,
-    letterSpacing: 0.2,
-  color: null,
-  );
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.4,
+        letterSpacing: 0.2,
+        color: null,
+      );
 
   TextStyle get labelSmall => _createStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
-    height: 1.4,
-    letterSpacing: 0.5,
-  color: null,
-  );
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        height: 1.4,
+        letterSpacing: 0.5,
+        color: null,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ESTILOS ESPECIALES - CLARITY UI
@@ -158,101 +157,101 @@ class AppTextStyles {
 
   // Botones - optimizado para claridad
   TextStyle get button => labelLarge.copyWith(
-    color: null, // Usar foregroundColor del botón
-    letterSpacing: 0.2, // Mejor legibilidad en botones
-  );
+        color: null, // Usar foregroundColor del botón
+        letterSpacing: 0.2, // Mejor legibilidad en botones
+      );
 
   // Texto de navegación
   TextStyle get navigation => labelMedium.copyWith(
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-  );
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      );
 
   // Texto de navegación activo
   TextStyle get navigationActive => navigation.copyWith(
-    fontWeight: FontWeight.w600,
-  color: null,
-  );
+        fontWeight: FontWeight.w600,
+        color: null,
+      );
 
   // Texto de navegación inactivo
   TextStyle get navigationInactive => navigation.copyWith(
-  color: null,
-  );
+        color: null,
+      );
 
   // KPI y métricas - números grandes
   TextStyle get kpiNumber => _createStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    height: 1.2,
-    letterSpacing: -0.5,
-  color: null,
-  );
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        height: 1.2,
+        letterSpacing: -0.5,
+        color: null,
+      );
 
   // Etiquetas de KPI
   TextStyle get kpiLabel => labelSmall.copyWith(
-    fontSize: 10,
-    letterSpacing: 0.8,
-    fontWeight: FontWeight.w600,
-  );
+        fontSize: 10,
+        letterSpacing: 0.8,
+        fontWeight: FontWeight.w600,
+      );
 
   // Texto de estado (activo, inactivo, etc.)
   TextStyle get statusText => labelSmall.copyWith(
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-  );
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+      );
 
   // Texto de error en formularios
   TextStyle get errorText => bodySmall.copyWith(
-  color: null,
-    fontWeight: FontWeight.w500,
-  );
+        color: null,
+        fontWeight: FontWeight.w500,
+      );
 
   // Texto de ayuda
   TextStyle get helpText => bodySmall.copyWith(
-  color: null,
-    fontWeight: FontWeight.w400,
-  );
+        color: null,
+        fontWeight: FontWeight.w400,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // LEGACY - PARA COMPATIBILIDAD
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle get caption => bodySmall.copyWith(
-    fontSize: 12,
-  );
+        fontSize: 12,
+      );
 
   TextStyle get overline => labelSmall.copyWith(
-    fontSize: 10,
-    letterSpacing: 1.5,
-    fontWeight: FontWeight.w500,
-  );
+        fontSize: 10,
+        letterSpacing: 1.5,
+        fontWeight: FontWeight.w500,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODOS DE CONVENIENCIA
   // ═══════════════════════════════════════════════════════════════════════════
 
   TextStyle withColor(Color color) => _createStyle(
-    fontSize: 15, // default
-    fontWeight: FontWeight.normal,
-    height: 1.4,
-    letterSpacing: 0,
-    color: color,
-  );
+        fontSize: 15, // default
+        fontWeight: FontWeight.normal,
+        height: 1.4,
+        letterSpacing: 0,
+        color: color,
+      );
 
   TextStyle withWeight(FontWeight weight) => _createStyle(
-    fontSize: 15, // default
-    fontWeight: weight,
-    height: 1.4,
-    letterSpacing: 0,
-  );
+        fontSize: 15, // default
+        fontWeight: weight,
+        height: 1.4,
+        letterSpacing: 0,
+      );
 
   TextStyle withSize(double size) => _createStyle(
-    fontSize: size,
-    fontWeight: FontWeight.normal,
-    height: 1.4,
-    letterSpacing: 0,
-  );
+        fontSize: size,
+        fontWeight: FontWeight.normal,
+        height: 1.4,
+        letterSpacing: 0,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // GUÍA DE USO - CLARITY UI

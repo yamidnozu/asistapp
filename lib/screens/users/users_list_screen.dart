@@ -28,22 +28,23 @@ class _UsersListScreenState extends State<UsersListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    
+
     // Configurar filtro automático para admin_institucion
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       _userProvider = Provider.of<UserProvider>(context, listen: false);
       final userRole = authProvider.user?['rol'] as String?;
-      
+
       debugPrint('UsersListScreen initState - userRole: $userRole');
-      debugPrint('UsersListScreen initState - Filtros iniciales: ${_userProvider!.filters}');
-      
+      debugPrint(
+          'UsersListScreen initState - Filtros iniciales: ${_userProvider!.filters}');
+
       // Limpiar filtros previos y configurar los nuevos
       _userProvider!.filters.clear();
-      
+
       // Inicializar filtro de estado activo por defecto
       _userProvider!.filters['activo'] = 'true';
-      
+
       if (userRole == 'admin_institucion') {
         // Para admin_institucion, no establecer filtro de rol
         debugPrint('UsersListScreen initState - admin_institucion detectado');
@@ -51,8 +52,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
         // Para super_admin, los roles se establecen en _loadUsers
         debugPrint('UsersListScreen initState - super_admin detectado');
       }
-      
-      debugPrint('UsersListScreen initState - Filtros configurados: ${_userProvider!.filters}');
+
+      debugPrint(
+          'UsersListScreen initState - Filtros configurados: ${_userProvider!.filters}');
       _loadUsers();
     });
   }
@@ -95,11 +97,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   void _onScroll() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (_hasActiveSearch(userProvider)) return; // No cargar más durante búsqueda
-    
+    if (_hasActiveSearch(userProvider))
+      return; // No cargar más durante búsqueda
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
       final userRole = authProvider.user?['rol'] as String?;
       final token = authProvider.accessToken;
       _loadMoreUsers(userProvider, token, userRole);
@@ -120,13 +124,15 @@ class _UsersListScreenState extends State<UsersListScreen> {
     // Obtener filtros del provider para determinar los roles a buscar
     final selectedRoleFilter = _getSelectedRole(userProvider);
 
-    debugPrint('_loadUsers - userRole: $userRole, selectedRoleFilter: $selectedRoleFilter');
+    debugPrint(
+        '_loadUsers - userRole: $userRole, selectedRoleFilter: $selectedRoleFilter');
     debugPrint('_loadUsers - Filtros actuales ANTES: ${userProvider.filters}');
 
     // Lógica diferenciada por rol
     if (userRole == 'super_admin') {
       // El super_admin solo ve admin_institucion y super_admin
-      debugPrint('Cargando usuarios (admin_institucion y super_admin) como super_admin...');
+      debugPrint(
+          'Cargando usuarios (admin_institucion y super_admin) como super_admin...');
       // Determinar roles según el filtro de UI: si no hay filtro, enviar ambos roles
       if (selectedRoleFilter.isEmpty) {
         userProvider.filters['roles'] = 'super_admin,admin_institucion';
@@ -134,7 +140,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
         userProvider.filters['roles'] = selectedRoleFilter;
       }
 
-      debugPrint('_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
+      debugPrint(
+          '_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
 
       await userProvider.loadUsers(
         token,
@@ -144,7 +151,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     } else if (userRole == 'admin_institucion') {
       // El admin_institucion carga solo usuarios de su institución seleccionada
       if (authProvider.selectedInstitutionId != null) {
-        debugPrint('Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
+        debugPrint(
+            'Cargando usuarios para la institución: ${authProvider.selectedInstitutionId}');
         // Configurar filtro de rol si está seleccionado
         if (selectedRoleFilter.isNotEmpty) {
           userProvider.filters['role'] = selectedRoleFilter;
@@ -152,7 +160,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
           userProvider.filters.remove('role');
         }
 
-        debugPrint('_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
+        debugPrint(
+            '_loadUsers - Filtros actuales DESPUÉS: ${userProvider.filters}');
 
         await userProvider.loadUsersByInstitution(
           token,
@@ -162,24 +171,28 @@ class _UsersListScreenState extends State<UsersListScreen> {
         );
       } else {
         // Caso de resguardo: si un admin no tiene institución, no se cargan datos.
-        debugPrint('Admin de institución sin institución seleccionada. No se cargarán usuarios.');
-        userProvider.clearData(); // Limpia la lista para mostrar el estado vacío.
+        debugPrint(
+            'Admin de institución sin institución seleccionada. No se cargarán usuarios.');
+        userProvider
+            .clearData(); // Limpia la lista para mostrar el estado vacío.
       }
     }
   }
 
-  Future<void> _loadMoreUsers(UserProvider provider, String? accessToken, String? userRole) async {
-    if (accessToken == null || provider.isLoadingMore || !provider.hasMoreData) return;
+  Future<void> _loadMoreUsers(
+      UserProvider provider, String? accessToken, String? userRole) async {
+    if (accessToken == null || provider.isLoadingMore || !provider.hasMoreData)
+      return;
     await provider.loadNextPage(accessToken);
   }
 
   void _onSearchChanged(String query) {
     // Cancelar el timer anterior si existe
     _searchDebounceTimer?.cancel();
-    
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // Iniciar un nuevo timer para debounced search
     _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
       // Modificar el filtro directamente para evitar múltiples notifyListeners
@@ -198,9 +211,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
       builder: (context, authProvider, userProvider, child) {
         final userRole = authProvider.user?['rol'] as String?;
         final title = userRole == 'admin_institucion'
-          ? 'Gestión de Usuarios de la Institución'
-          : 'Gestión de Usuarios';
-        final canCreateUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+            ? 'Gestión de Usuarios de la Institución'
+            : 'Gestión de Usuarios';
+        final canCreateUsers =
+            userRole == 'admin_institucion' || userRole == 'super_admin';
         final isSearching = _hasActiveSearch(userProvider);
 
         return ClarityManagementPage(
@@ -215,7 +229,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
           },
           // Reducir el espacio entre items para una lista más compacta
           itemSpacing: context.spacing.sm,
-          filterWidgets: _buildFilterWidgets(context, authProvider, userProvider),
+          filterWidgets:
+              _buildFilterWidgets(context, authProvider, userProvider),
           statisticWidgets: _buildStatisticWidgets(context, userProvider),
           onRefresh: _loadUsers,
           scrollController: _scrollController,
@@ -224,15 +239,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
           emptyStateWidget: ClarityEmptyState(
             icon: isSearching ? Icons.search_off : Icons.people,
             title: isSearching
-              ? 'No se encontraron resultados'
-              : 'Aún no has creado ningún usuario',
+                ? 'No se encontraron resultados'
+                : 'Aún no has creado ningún usuario',
             subtitle: isSearching
-              ? 'Intenta con otros términos de búsqueda'
-              : 'Comienza creando tu primer usuario',
+                ? 'Intenta con otros términos de búsqueda'
+                : 'Comienza creando tu primer usuario',
           ),
-          floatingActionButton: canCreateUsers
-              ? _buildSpeedDial(context, userRole!)
-              : null,
+          floatingActionButton:
+              canCreateUsers ? _buildSpeedDial(context, userRole!) : null,
         );
       },
     );
@@ -240,7 +254,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   Widget _buildSpeedDial(BuildContext context, String userRole) {
     final colors = context.colors;
-    
+
     if (userRole == 'super_admin') {
       return SpeedDial(
         icon: Icons.add,
@@ -250,14 +264,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
         children: [
           SpeedDialChild(
             child: Icon(Icons.admin_panel_settings,
-              color: colors.getTextColorForBackground(colors.primary)),
+                color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
             label: 'Crear Admin Institución',
             onTap: _navigateToCreateAdminInstitution,
           ),
           SpeedDialChild(
             child: Icon(Icons.shield,
-              color: colors.getTextColorForBackground(colors.primary)),
+                color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
             label: 'Crear Super Admin',
             onTap: _navigateToCreateSuperAdmin,
@@ -275,7 +289,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
           SpeedDialChild(
             key: const Key('createUser_professor'),
             child: Icon(Icons.school,
-              color: colors.getTextColorForBackground(colors.primary)),
+                color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
             label: 'Crear Profesor',
             onTap: _navigateToCreateProfessor,
@@ -283,7 +297,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
           SpeedDialChild(
             key: const Key('createUser_student'),
             child: Icon(Icons.person,
-              color: colors.getTextColorForBackground(colors.primary)),
+                color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
             label: 'Crear Estudiante',
             onTap: _navigateToCreateStudent,
@@ -291,7 +305,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
           SpeedDialChild(
             key: const Key('createUser_acudiente'),
             child: Icon(Icons.family_restroom,
-              color: colors.getTextColorForBackground(colors.primary)),
+                color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
             label: 'Crear Acudiente',
             onTap: _navigateToCreateAcudiente,
@@ -301,7 +315,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     }
   }
 
-  List<Widget> _buildFilterWidgets(BuildContext context, AuthProvider authProvider, UserProvider userProvider) {
+  List<Widget> _buildFilterWidgets(BuildContext context,
+      AuthProvider authProvider, UserProvider userProvider) {
     final colors = context.colors;
     final spacing = context.spacing;
     final textStyles = context.textStyles;
@@ -340,7 +355,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
           ),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
         ),
         onChanged: _onSearchChanged,
       ),
@@ -352,96 +368,129 @@ class _UsersListScreenState extends State<UsersListScreen> {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text('Mostrar:', style: textStyles.labelMedium),
-          _statusFilterChip(context,
+          _statusFilterChip(
+            context,
             label: 'Activos',
             selected: statusFilter == true && !isSearching,
             color: context.colors.success,
-            onTap: () => _onStatusFilterChanged(true, userProvider, authProvider),
+            onTap: () =>
+                _onStatusFilterChanged(true, userProvider, authProvider),
           ),
-          _statusFilterChip(context,
+          _statusFilterChip(
+            context,
             label: 'Inactivos',
             selected: statusFilter == false && !isSearching,
             color: context.colors.grey400,
-            onTap: () => _onStatusFilterChanged(false, userProvider, authProvider),
+            onTap: () =>
+                _onStatusFilterChanged(false, userProvider, authProvider),
           ),
-          _statusFilterChip(context,
+          _statusFilterChip(
+            context,
             label: 'Todos',
             selected: statusFilter == null && !isSearching,
             color: context.colors.grey400,
-            onTap: () => _onStatusFilterChanged(null, userProvider, authProvider),
+            onTap: () =>
+                _onStatusFilterChanged(null, userProvider, authProvider),
           ),
         ],
       ),
       SizedBox(height: spacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: selectedRoleFilter,
-                hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
-                items: _buildRoleDropdownItems(authProvider, textStyles),
-                onChanged: (value) => _onRoleFilterChanged(value, userProvider, authProvider),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+      Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: selectedRoleFilter,
+              hint: Text('Filtrar por rol', style: textStyles.bodyMedium),
+              items: _buildRoleDropdownItems(authProvider, textStyles),
+              onChanged: (value) =>
+                  _onRoleFilterChanged(value, userProvider, authProvider),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.borderRadius),
                 ),
-                isExpanded: true,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: spacing.md, vertical: spacing.sm),
               ),
+              isExpanded: true,
             ),
-          ],
-        ),
-      ];
+          ),
+        ],
+      ),
+    ];
   }
 
-  List<DropdownMenuItem<String>> _buildRoleDropdownItems(AuthProvider authProvider, dynamic textStyles) {
+  List<DropdownMenuItem<String>> _buildRoleDropdownItems(
+      AuthProvider authProvider, dynamic textStyles) {
     final userRole = authProvider.user?['rol'] as String?;
     final isAdminInstitucion = userRole == 'admin_institucion';
     final isSuperAdmin = userRole == 'super_admin';
 
     if (isSuperAdmin) {
       return [
-        DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'super_admin', child: Text('Super Admins', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: '',
+            child: Text('Todos los roles', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'admin_institucion',
+            child: Text('Admins Institución', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'super_admin',
+            child: Text('Super Admins', style: textStyles.bodyMedium)),
       ];
     } else if (isAdminInstitucion) {
       return [
-        DropdownMenuItem(value: '', child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'profesor', child: Text('Solo Profesores', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'estudiante', child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'acudiente', child: Text('Solo Acudientes', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: '',
+            child: Text('Todos los usuarios', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'profesor',
+            child: Text('Solo Profesores', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'estudiante',
+            child: Text('Solo Estudiantes', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'acudiente',
+            child: Text('Solo Acudientes', style: textStyles.bodyMedium)),
       ];
     } else {
       return [
-        DropdownMenuItem(value: '', child: Text('Todos los roles', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'profesor', child: Text('Profesores', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'estudiante', child: Text('Estudiantes', style: textStyles.bodyMedium)),
-        DropdownMenuItem(value: 'admin_institucion', child: Text('Admins Institución', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: '',
+            child: Text('Todos los roles', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'profesor',
+            child: Text('Profesores', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'estudiante',
+            child: Text('Estudiantes', style: textStyles.bodyMedium)),
+        DropdownMenuItem(
+            value: 'admin_institucion',
+            child: Text('Admins Institución', style: textStyles.bodyMedium)),
       ];
     }
   }
 
-  void _onStatusFilterChanged(bool? status, UserProvider provider, AuthProvider authProvider) {
+  void _onStatusFilterChanged(
+      bool? status, UserProvider provider, AuthProvider authProvider) {
     debugPrint('_onStatusFilterChanged llamado con status: $status');
     debugPrint('Filtros ANTES: ${provider.filters}');
-    
+
     // Modificar el filtro directamente para evitar múltiples notifyListeners
     if (status != null) {
       provider.filters['activo'] = status.toString();
     } else {
       provider.filters.remove('activo');
     }
-    
+
     debugPrint('Filtros DESPUÉS: ${provider.filters}');
     provider.refreshData(authProvider.accessToken!);
   }
 
-  void _onRoleFilterChanged(String? value, UserProvider provider, AuthProvider authProvider) {
+  void _onRoleFilterChanged(
+      String? value, UserProvider provider, AuthProvider authProvider) {
     final role = value ?? '';
     final userRole = authProvider.user?['rol'] as String?;
-    
+
     // Modificar el filtro directamente para evitar múltiples notifyListeners
     if (userRole == 'super_admin') {
       // Para super_admin usamos 'roles' (plural)
@@ -462,7 +511,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     provider.refreshData(authProvider.accessToken!);
   }
 
-  Widget _statusFilterChip(BuildContext context, {
+  Widget _statusFilterChip(
+    BuildContext context, {
     required String label,
     required bool selected,
     required Color color,
@@ -476,7 +526,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(spacing.borderRadius),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+        padding:
+            EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
         decoration: BoxDecoration(
           color: selected ? color.withValues(alpha: 0.1) : colors.surface,
           border: Border.all(
@@ -510,7 +561,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     );
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, UserProvider provider) {
+  List<Widget> _buildStatisticWidgets(
+      BuildContext context, UserProvider provider) {
     final stats = provider.getUserStatistics();
     final colors = context.colors;
 
@@ -542,14 +594,16 @@ class _UsersListScreenState extends State<UsersListScreen> {
     ];
   }
 
-  Widget _buildUserCard(User user, UserProvider provider, BuildContext context) {
+  Widget _buildUserCard(
+      User user, UserProvider provider, BuildContext context) {
     final colors = context.colors;
     final textStyles = context.textStyles;
-    
+
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final userRole = authProvider.user?['rol'] as String?;
-        final canEditUsers = userRole == 'admin_institucion' || userRole == 'super_admin';
+        final canEditUsers =
+            userRole == 'admin_institucion' || userRole == 'super_admin';
 
         // FASE 4: Acciones para el menú contextual
         // Evitar que un admin se desactive o elimine a sí mismo
@@ -567,16 +621,21 @@ class _UsersListScreenState extends State<UsersListScreen> {
                 if (!isSelf)
                   ClarityContextMenuAction(
                     label: (user.activo == true) ? 'Desactivar' : 'Activar',
-                    icon: (user.activo == true) ? Icons.toggle_off : Icons.toggle_on,
-                    color: (user.activo == true) ? colors.warning : colors.success,
-                    onPressed: () => _handleMenuAction('toggle_status', user, provider),
+                    icon: (user.activo == true)
+                        ? Icons.toggle_off
+                        : Icons.toggle_on,
+                    color:
+                        (user.activo == true) ? colors.warning : colors.success,
+                    onPressed: () =>
+                        _handleMenuAction('toggle_status', user, provider),
                   ),
                 if (!isSelf)
                   ClarityContextMenuAction(
                     label: 'Eliminar',
                     icon: Icons.delete,
                     color: colors.error,
-                    onPressed: () => _handleMenuAction('delete', user, provider),
+                    onPressed: () =>
+                        _handleMenuAction('delete', user, provider),
                   ),
               ]
             : [];
@@ -600,7 +659,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   Expanded(
                     child: Text(
                       user.email ?? '',
-                      style: textStyles.bodySmall.copyWith(color: context.colors.textPrimary),
+                      style: textStyles.bodySmall
+                          .copyWith(color: context.colors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -608,7 +668,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   const SizedBox(width: 8),
                   // Chip de estado discreto
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: context.colors.surfaceVariant,
                       borderRadius: BorderRadius.circular(12),
@@ -624,9 +685,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: (user.activo == true) 
-                              ? context.colors.primary.withValues(alpha: 0.7)
-                              : context.colors.textMuted,
+                            color: (user.activo == true)
+                                ? context.colors.primary.withValues(alpha: 0.7)
+                                : context.colors.textMuted,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -644,7 +705,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   ),
                 ],
               ),
-              if (user.rol == 'admin_institucion' && (user.instituciones?.isNotEmpty ?? false)) ...[
+              if (user.rol == 'admin_institucion' &&
+                  (user.instituciones?.isNotEmpty ?? false)) ...[
                 const SizedBox(height: 4),
                 // Mostrar instituciones en una línea aparte como cajitas compactas
                 Wrap(
@@ -652,11 +714,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   runSpacing: 2,
                   children: (user.instituciones ?? []).map((i) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: context.colors.surfaceVariant,
-                        borderRadius: const BorderRadius.all(Radius.circular(4)),
-                        border: Border.all(color: context.colors.border, width: 0.5),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(4)),
+                        border: Border.all(
+                            color: context.colors.border, width: 0.5),
                       ),
                       constraints: const BoxConstraints(maxWidth: 160),
                       child: Text(
@@ -699,7 +764,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     }
   }
 
-  void _handleMenuAction(String action, User user, UserProvider provider) async {
+  void _handleMenuAction(
+      String action, User user, UserProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     switch (action) {
@@ -711,7 +777,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
         final newStatus = !(user.activo == true);
         final token = authProvider.accessToken;
         if (token == null) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar usuarios')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Debes iniciar sesión para editar usuarios')));
           return;
         }
 
@@ -732,7 +799,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
             SnackBar(
               content: Text(
                 'Usuario ${newStatus ? 'activado' : 'desactivado'} correctamente',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
               ),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
@@ -745,7 +815,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
             SnackBar(
               content: Text(
                 provider.errorMessage ?? 'Error al cambiar estado del usuario',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Theme.of(context).colorScheme.onError),
               ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
@@ -763,7 +836,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Usuario', style: Theme.of(context).textTheme.headlineSmall),
+        title: Text('Eliminar Usuario',
+            style: Theme.of(context).textTheme.headlineSmall),
         content: Text(
           '¿Estás seguro de que quieres eliminar "${user.nombreCompleto}"?\n\n'
           'Esta acción no se puede deshacer.',
@@ -772,15 +846,21 @@ class _UsersListScreenState extends State<UsersListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
+            child:
+                Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteUser(user, provider);
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Eliminar', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.error)),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Eliminar',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -792,7 +872,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
     final token = authProvider.accessToken;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar usuarios')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Debes iniciar sesión para eliminar usuarios')));
       return;
     }
 
@@ -806,7 +887,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
         SnackBar(
           content: Text(
             'Usuario eliminado correctamente',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
@@ -819,7 +903,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
         SnackBar(
           content: Text(
             provider.errorMessage ?? 'Error al eliminar usuario',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onError),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),

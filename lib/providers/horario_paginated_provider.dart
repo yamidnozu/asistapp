@@ -4,7 +4,8 @@ import 'paginated_data_mixin.dart';
 import '../services/academic/horario_service.dart';
 import '../models/horario.dart';
 
-class HorarioPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<Horario> {
+class HorarioPaginatedProvider extends ChangeNotifier
+    with PaginatedDataMixin<Horario> {
   final HorarioService _horarioService;
 
   HorarioPaginatedProvider({HorarioService? horarioService})
@@ -12,18 +13,25 @@ class HorarioPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<Ho
 
   /// Support filters: 'grupoId' and 'periodoId'
   @override
-  Future<PaginatedResponse<Horario>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<Horario>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     final grupoId = filters?['grupoId'];
     final periodoId = filters?['periodoId'];
 
-  final response = await _horarioService.getHorarios(accessToken, page: page, limit: limit, grupoId: grupoId, periodoId: periodoId);
+    final response = await _horarioService.getHorarios(accessToken,
+        page: page, limit: limit, grupoId: grupoId, periodoId: periodoId);
     if (response == null) return null;
-    return PaginatedResponse(items: response.horarios, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.horarios, pagination: response.pagination);
   }
 
   @override
   Future<Horario?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _horarioService.createHorario(accessToken, data as CreateHorarioRequest);
+    final created = await _horarioService.createHorario(
+        accessToken, data as CreateHorarioRequest);
     return created;
   }
 
@@ -33,8 +41,10 @@ class HorarioPaginatedProvider extends ChangeNotifier with PaginatedDataMixin<Ho
   }
 
   @override
-  Future<Horario?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _horarioService.updateHorario(accessToken, id, data as UpdateHorarioRequest);
+  Future<Horario?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
+    final updated = await _horarioService.updateHorario(
+        accessToken, id, data as UpdateHorarioRequest);
     return updated;
   }
 }

@@ -158,7 +158,8 @@ class FormValidationService {
       }
       if (!(userRole == 'admin_institucion' || userRole == 'super_admin')) {
         if (identificacion.isEmpty || identificacion.length < 5) {
-          _focusAndScroll(focusNodes['identificacion']!, fieldKeys['identificacion']!);
+          _focusAndScroll(
+              focusNodes['identificacion']!, fieldKeys['identificacion']!);
           return;
         }
       }
@@ -172,25 +173,29 @@ class FormValidationService {
           return;
         }
         if (especialidad.isEmpty || especialidad.length < 3) {
-          _focusAndScroll(focusNodes['especialidad']!, fieldKeys['especialidad']!);
+          _focusAndScroll(
+              focusNodes['especialidad']!, fieldKeys['especialidad']!);
           return;
         }
       } else if (userRole == 'estudiante') {
         final telefonoResp = controllers['telefonoResponsable']!.text.trim();
         if (telefonoResp.isNotEmpty && !_phoneRegex.hasMatch(telefonoResp)) {
-          _focusAndScroll(focusNodes['telefonoResponsable']!, fieldKeys['telefonoResponsable']!);
+          _focusAndScroll(focusNodes['telefonoResponsable']!,
+              fieldKeys['telefonoResponsable']!);
           return;
         }
       }
     }
   }
 
-  static void _focusAndScroll(FocusNode focusNode, GlobalKey<FormFieldState<String>> fieldKey) {
+  static void _focusAndScroll(
+      FocusNode focusNode, GlobalKey<FormFieldState<String>> fieldKey) {
     focusNode.requestFocus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = fieldKey.currentContext;
       if (ctx != null) {
-        Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
+        Scrollable.ensureVisible(ctx,
+            duration: const Duration(milliseconds: 300));
       }
     });
   }

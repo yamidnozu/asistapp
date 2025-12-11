@@ -6,7 +6,7 @@ import '../../theme/theme_extensions.dart';
 import 'clarity_components.dart';
 
 /// Widget reutilizable para pantallas de gestión/listado
-/// 
+///
 /// Proporciona una estructura consistente con:
 /// - AppBar con título y estadísticas
 /// - Filtros (búsqueda, chips, etc.)
@@ -17,52 +17,52 @@ import 'clarity_components.dart';
 class ClarityManagementPage extends StatelessWidget {
   /// Título de la página mostrado en el AppBar
   final String title;
-  
+
   /// Indica si los datos están cargando
   final bool isLoading;
-  
+
   /// Indica si hay un error
   final bool hasError;
-  
+
   /// Mensaje de error a mostrar
   final String? errorMessage;
-  
+
   /// Número total de items en la lista
   final int itemCount;
-  
+
   /// Constructor para cada item de la lista
   final Widget Function(BuildContext, int) itemBuilder;
-  
+
   /// Widgets de filtro (buscador, chips, etc.)
   final List<Widget>? filterWidgets;
-  
+
   /// Widgets de estadísticas para el AppBar
   final List<Widget>? statisticWidgets;
-  
+
   /// Callback para refresh
   final Future<void> Function()? onRefresh;
-  
+
   /// Floating action button opcional
   final Widget? floatingActionButton;
-  
+
   /// Controller del scroll para paginación infinita
   final ScrollController? scrollController;
-  
+
   /// Indica si hay más datos para cargar
   final bool hasMoreData;
-  
+
   /// Indica si se están cargando más datos
   final bool isLoadingMore;
-  
+
   /// Widget para estado vacío
   final Widget? emptyStateWidget;
-  
+
   /// Widget para estado de error
   final Widget? errorStateWidget;
-  
+
   /// Espaciado entre items de la lista
   final double? itemSpacing;
-  
+
   /// Color de fondo de la página
   final Color? backgroundColor;
 
@@ -71,7 +71,7 @@ class ClarityManagementPage extends StatelessWidget {
 
   /// Widget leading personalizado para el AppBar
   final Widget? leading;
-  
+
   /// Si mostrar automáticamente el botón leading de Flutter (false si usamos backRoute)
   final bool automaticallyImplyLeading;
 
@@ -101,25 +101,25 @@ class ClarityManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
-  final textStyles = context.textStyles;
+    final colors = context.colors;
+    final spacing = context.spacing;
+    final textStyles = context.textStyles;
 
-  // Determinar el widget leading
-  Widget? effectiveLeading = leading;
-  if (effectiveLeading == null && backRoute != null) {
-    effectiveLeading = IconButton(
-      icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-      tooltip: 'Volver',
-      onPressed: () {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go(backRoute!);
-        }
-      },
-    );
-  }
+    // Determinar el widget leading
+    Widget? effectiveLeading = leading;
+    if (effectiveLeading == null && backRoute != null) {
+      effectiveLeading = IconButton(
+        icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+        tooltip: 'Volver',
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(backRoute!);
+          }
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.background,
@@ -127,7 +127,8 @@ class ClarityManagementPage extends StatelessWidget {
         backgroundColor: colors.surface,
         elevation: 0,
         leading: effectiveLeading,
-        automaticallyImplyLeading: effectiveLeading == null && automaticallyImplyLeading,
+        automaticallyImplyLeading:
+            effectiveLeading == null && automaticallyImplyLeading,
         title: Text(title, style: textStyles.headlineMedium),
         centerTitle: false,
         // ▼▼▼ ELIMINAMOS LOS ACTIONS DE AQUÍ ▼▼▼
@@ -145,7 +146,8 @@ class ClarityManagementPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (statisticWidgets != null && statisticWidgets!.isNotEmpty) ...[
+                    if (statisticWidgets != null &&
+                        statisticWidgets!.isNotEmpty) ...[
                       // Usamos Wrap para que sea responsivo
                       Wrap(
                         spacing: spacing.lg,

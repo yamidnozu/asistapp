@@ -4,7 +4,7 @@ import '../providers/auth_provider.dart';
 import '../utils/role_enum.dart';
 
 /// Muestra o esconde widgets según el rol del usuario
-/// 
+///
 /// Ejemplo:
 /// ```dart
 /// RoleGuard(
@@ -15,8 +15,8 @@ import '../utils/role_enum.dart';
 /// ```
 class RoleGuard extends StatelessWidget {
   final List<UserRole> allowedRoles; // Qué roles pueden ver esto
-  final Widget child;                // Qué mostrar si tiene permiso
-  final Widget? fallback;            // Qué mostrar si NO tiene permiso (opcional)
+  final Widget child; // Qué mostrar si tiene permiso
+  final Widget? fallback; // Qué mostrar si NO tiene permiso (opcional)
 
   const RoleGuard({
     super.key,

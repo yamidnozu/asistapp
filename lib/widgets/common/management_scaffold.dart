@@ -55,7 +55,8 @@ class ManagementScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(title, style: textStyles.headlineMedium.copyWith(color: colors.surface)),
+        title: Text(title,
+            style: textStyles.headlineMedium.copyWith(color: colors.surface)),
         backgroundColor: colors.primary,
         elevation: 2,
       ),
@@ -65,13 +66,15 @@ class ManagementScaffold extends StatelessWidget {
             // Filtros
             if (filterWidgets != null && filterWidgets!.isNotEmpty)
               Card(
-                margin: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+                margin: EdgeInsets.symmetric(
+                    horizontal: spacing.lg, vertical: spacing.md),
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(spacing.borderRadius),
                 ),
                 child: ExpansionTile(
-                  title: Text('Filtros y Búsqueda', style: textStyles.titleMedium),
+                  title:
+                      Text('Filtros y Búsqueda', style: textStyles.titleMedium),
                   children: [
                     Material(
                       color: colors.surface,
@@ -91,7 +94,8 @@ class ManagementScaffold extends StatelessWidget {
             if (statisticWidgets != null && statisticWidgets!.isNotEmpty)
               Container(
                 margin: EdgeInsets.symmetric(horizontal: spacing.lg),
-                padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                padding: EdgeInsets.symmetric(
+                    horizontal: spacing.md, vertical: spacing.sm),
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(spacing.borderRadius),

@@ -135,11 +135,13 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.calendar_today_outlined, size: 64, color: colors.textMuted),
+            Icon(Icons.calendar_today_outlined,
+                size: 64, color: colors.textMuted),
             SizedBox(height: spacing.lg),
             Text(
               'No tienes clases programadas',
-              style: textStyles.headlineSmall.copyWith(color: colors.textSecondary),
+              style: textStyles.headlineSmall
+                  .copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: spacing.sm),
             Text(
@@ -187,7 +189,8 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          padding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
           decoration: BoxDecoration(
             color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -269,12 +272,14 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
                   if (profesor != null)
                     Text(
                       'Prof. ${profesor['nombres'] ?? ''} ${profesor['apellidos'] ?? ''}',
-                      style: textStyles.bodyMedium.copyWith(color: colors.textSecondary),
+                      style: textStyles.bodyMedium
+                          .copyWith(color: colors.textSecondary),
                     ),
                   SizedBox(height: spacing.xs),
                   Text(
                     grupo?['nombre'] ?? 'Sin grupo',
-                    style: textStyles.bodySmall.copyWith(color: colors.textMuted),
+                    style:
+                        textStyles.bodySmall.copyWith(color: colors.textMuted),
                   ),
                 ],
               ),
@@ -287,14 +292,22 @@ class _StudentScheduleScreenState extends State<StudentScheduleScreen> {
 
   String _getNombreDia(int diaSemana) {
     switch (diaSemana) {
-      case 1: return 'Lunes';
-      case 2: return 'Martes';
-      case 3: return 'Miércoles';
-      case 4: return 'Jueves';
-      case 5: return 'Viernes';
-      case 6: return 'Sábado';
-      case 7: return 'Domingo';
-      default: return 'Día $diaSemana';
+      case 1:
+        return 'Lunes';
+      case 2:
+        return 'Martes';
+      case 3:
+        return 'Miércoles';
+      case 4:
+        return 'Jueves';
+      case 5:
+        return 'Viernes';
+      case 6:
+        return 'Sábado';
+      case 7:
+        return 'Domingo';
+      default:
+        return 'Día $diaSemana';
     }
   }
 }

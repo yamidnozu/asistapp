@@ -28,7 +28,8 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
     super.initState();
     // Cargar períodos académicos si no están cargados
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+      final periodoProvider =
+          Provider.of<PeriodoAcademicoProvider>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
       if (periodoProvider.periodosAcademicos.isEmpty) {
@@ -78,7 +79,8 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                       labelText: 'Nombre del Grupo',
                       hintText: 'Ej: Grupo A, 1er Grado A',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                     ),
                     validator: (value) {
@@ -97,7 +99,8 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                       labelText: 'Grado',
                       hintText: 'Ej: 1er Grado, 2do Grado, Preescolar',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                     ),
                     validator: (value) {
@@ -116,7 +119,8 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                       labelText: 'Sección (Opcional)',
                       hintText: 'Ej: A, B, C',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                     ),
                   ),
@@ -128,13 +132,15 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
                     decoration: InputDecoration(
                       labelText: 'Periodo Académico',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                     ),
                     items: periodosActivos.map((periodo) {
                       return DropdownMenuItem<String>(
                         value: periodo.id,
-                        child: Text('${periodo.nombre} ${periodo.activo ? '(Activo)' : ''}'),
+                        child: Text(
+                            '${periodo.nombre} ${periodo.activo ? '(Activo)' : ''}'),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -158,7 +164,8 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
               onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
               child: Text(
                 'Cancelar',
-                style: textStyles.labelLarge.copyWith(color: colors.textSecondary),
+                style:
+                    textStyles.labelLarge.copyWith(color: colors.textSecondary),
               ),
             ),
             ElevatedButton(
@@ -204,7 +211,9 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
       final request = CreateGrupoRequest(
         nombre: _nombreController.text.trim(),
         grado: _gradoController.text.trim(),
-        seccion: _seccionController.text.trim().isEmpty ? null : _seccionController.text.trim(),
+        seccion: _seccionController.text.trim().isEmpty
+            ? null
+            : _seccionController.text.trim(),
         periodoId: _selectedPeriodoId!,
       );
 
@@ -214,16 +223,17 @@ class _CreateGrupoDialogState extends State<CreateGrupoDialog> {
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Grupo creado correctamente'),
-                backgroundColor: context.colors.primary,
-              ),
-            );
+            SnackBar(
+              content: const Text('Grupo creado correctamente'),
+              backgroundColor: context.colors.primary,
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(grupoProvider.errorMessage ?? 'Error al crear grupo'),
-                backgroundColor: context.colors.error,
+              content:
+                  Text(grupoProvider.errorMessage ?? 'Error al crear grupo'),
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -426,25 +436,29 @@ class _EditGrupoDialogState extends State<EditGrupoDialog> {
       final request = UpdateGrupoRequest(
         nombre: _nombreController.text.trim(),
         grado: _gradoController.text.trim(),
-        seccion: _seccionController.text.trim().isEmpty ? null : _seccionController.text.trim(),
+        seccion: _seccionController.text.trim().isEmpty
+            ? null
+            : _seccionController.text.trim(),
       );
 
-      final success = await grupoProvider.updateGrupo(token, widget.grupo.id, request);
+      final success =
+          await grupoProvider.updateGrupo(token, widget.grupo.id, request);
 
       if (mounted) {
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Grupo actualizado correctamente'),
-                backgroundColor: context.colors.primary,
-              ),
-            );
+            SnackBar(
+              content: const Text('Grupo actualizado correctamente'),
+              backgroundColor: context.colors.primary,
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(grupoProvider.errorMessage ?? 'Error al actualizar grupo'),
-                backgroundColor: context.colors.error,
+              content: Text(
+                  grupoProvider.errorMessage ?? 'Error al actualizar grupo'),
+              backgroundColor: context.colors.error,
             ),
           );
         }

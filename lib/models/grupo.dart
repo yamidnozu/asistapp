@@ -57,7 +57,8 @@ class GrupoCount {
     this.asistencias = 0,
   });
 
-  factory GrupoCount.fromJson(Map<String, dynamic> json) => _$GrupoCountFromJson(json);
+  factory GrupoCount.fromJson(Map<String, dynamic> json) =>
+      _$GrupoCountFromJson(json);
   Map<String, dynamic> toJson() => _$GrupoCountToJson(this);
 }
 
@@ -79,6 +80,7 @@ class PeriodoAcademico {
     required this.activo,
   });
 
-  factory PeriodoAcademico.fromJson(Map<String, dynamic> json) => _$PeriodoAcademicoFromJson(json);
+  factory PeriodoAcademico.fromJson(Map<String, dynamic> json) =>
+      _$PeriodoAcademicoFromJson(json);
   Map<String, dynamic> toJson() => _$PeriodoAcademicoToJson(this);
 }

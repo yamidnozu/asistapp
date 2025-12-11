@@ -14,7 +14,8 @@ class FakeUserProvider extends UserProvider {
   bool createCalled = false;
 
   @override
-  Future<bool> createUser(String accessToken, CreateUserRequest userData) async {
+  Future<bool> createUser(
+      String accessToken, CreateUserRequest userData) async {
     createCalled = true;
     return true;
   }
@@ -34,21 +35,27 @@ class FakeInstitutionProvider extends InstitutionProvider {
 }
 
 void main() {
-  testWidgets('CreateInstitutionAdminScreen delegates to UserFormScreen with initialInstitutionId', (WidgetTester tester) async {
-    final institution = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
+  testWidgets(
+      'CreateInstitutionAdminScreen delegates to UserFormScreen with initialInstitutionId',
+      (WidgetTester tester) async {
+    final institution =
+        Institution(id: 'i1', nombre: 'Test Inst', activa: true);
 
     final router = GoRouter(routes: [
-      GoRoute(path: '/', builder: (context, state) => MediaQuery(
-            data: const MediaQueryData(size: Size(400, 800)),
-            child: CreateInstitutionAdminScreen(institution: institution),
-          )),
+      GoRoute(
+          path: '/',
+          builder: (context, state) => MediaQuery(
+                data: const MediaQueryData(size: Size(400, 800)),
+                child: CreateInstitutionAdminScreen(institution: institution),
+              )),
     ]);
 
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-          ChangeNotifierProvider<InstitutionProvider>(create: (_) => InstitutionProvider()),
+          ChangeNotifierProvider<InstitutionProvider>(
+              create: (_) => InstitutionProvider()),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),
@@ -64,31 +71,37 @@ void main() {
     expect(widget.userRole, 'admin_institucion');
   });
 
-  testWidgets('CreateInstitutionAdminScreen form submits and calls createUser', (WidgetTester tester) async {
-    final institution = Institution(id: 'i1', nombre: 'Test Inst', activa: true);
+  testWidgets('CreateInstitutionAdminScreen form submits and calls createUser',
+      (WidgetTester tester) async {
+    final institution =
+        Institution(id: 'i1', nombre: 'Test Inst', activa: true);
     final fakeUserProvider = FakeUserProvider();
 
     final router = GoRouter(routes: [
-      GoRoute(path: '/', builder: (context, state) => MediaQuery(
-            data: const MediaQueryData(size: Size(400, 800)),
-            child: CreateInstitutionAdminScreen(institution: institution),
-          )),
+      GoRoute(
+          path: '/',
+          builder: (context, state) => MediaQuery(
+                data: const MediaQueryData(size: Size(400, 800)),
+                child: CreateInstitutionAdminScreen(institution: institution),
+              )),
     ]);
 
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider<AuthProvider>(create: (_) => FakeAuthProvider()),
+          ChangeNotifierProvider<AuthProvider>(
+              create: (_) => FakeAuthProvider()),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
-          ChangeNotifierProvider<InstitutionProvider>(create: (_) => FakeInstitutionProvider([institution])),
+          ChangeNotifierProvider<InstitutionProvider>(
+              create: (_) => FakeInstitutionProvider([institution])),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
 
-  // NOTE: Integration test for submitting the UserFormScreen is covered by widget tests
-  // that exercise the UserFormScreen directly. Creating a full end-to-end test from
-  // InstitutionAdminsScreen would require the app to be wired with a GoRouter above
-  // material navigation; keep this test scoped to showing the CreateInstitutionAdminScreen.
+    // NOTE: Integration test for submitting the UserFormScreen is covered by widget tests
+    // that exercise the UserFormScreen directly. Creating a full end-to-end test from
+    // InstitutionAdminsScreen would require the app to be wired with a GoRouter above
+    // material navigation; keep this test scoped to showing the CreateInstitutionAdminScreen.
   });
 }

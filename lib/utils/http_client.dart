@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 /// ✅ Cliente HTTP centralizado con interceptor automático para 401
-/// 
+///
 /// Beneficios:
 /// - Manejo automático de tokens expirados (401)
 /// - Cierre de sesión y redirección automática al login
@@ -18,7 +18,8 @@ class AppHttpClient {
   AppHttpClient({this.context});
 
   /// Headers por defecto para todas las peticiones
-  Map<String, String> _getDefaultHeaders({Map<String, String>? additionalHeaders}) {
+  Map<String, String> _getDefaultHeaders(
+      {Map<String, String>? additionalHeaders}) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -37,7 +38,8 @@ class AppHttpClient {
 
     if (response.statusCode == 401) {
       debugPrint('🔒 Token expirado o inválido - cerrando sesión');
-      _forceLogout('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+      _forceLogout(
+          'Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
       throw UnauthorizedException('Token expirado o inválido');
     }
 
@@ -45,10 +47,11 @@ class AppHttpClient {
     if (response.statusCode == 403) {
       final body = jsonDecode(response.body);
       final errorMsg = body['error'] ?? '';
-      
+
       if (errorMsg.toString().contains('inactiva')) {
         debugPrint('🔒 Institución inactiva - cerrando sesión');
-        _forceLogout('La institución ha sido desactivada. Contacta al administrador.');
+        _forceLogout(
+            'La institución ha sido desactivada. Contacta al administrador.');
         throw UnauthorizedException('Institución inactiva');
       }
     }
@@ -78,7 +81,7 @@ class AppHttpClient {
   }) async {
     try {
       debugPrint('📤 GET ${url.path}');
-      
+
       final response = await _client.get(
         url,
         headers: _getDefaultHeaders(additionalHeaders: headers),
@@ -101,7 +104,7 @@ class AppHttpClient {
   }) async {
     try {
       debugPrint('📤 POST ${url.path}');
-      
+
       final response = await _client.post(
         url,
         headers: _getDefaultHeaders(additionalHeaders: headers),
@@ -126,7 +129,7 @@ class AppHttpClient {
   }) async {
     try {
       debugPrint('📤 PUT ${url.path}');
-      
+
       final response = await _client.put(
         url,
         headers: _getDefaultHeaders(additionalHeaders: headers),
@@ -151,7 +154,7 @@ class AppHttpClient {
   }) async {
     try {
       debugPrint('📤 DELETE ${url.path}');
-      
+
       final response = await _client.delete(
         url,
         headers: _getDefaultHeaders(additionalHeaders: headers),
@@ -176,7 +179,7 @@ class AppHttpClient {
   }) async {
     try {
       debugPrint('📤 PATCH ${url.path}');
-      
+
       final response = await _client.patch(
         url,
         headers: _getDefaultHeaders(additionalHeaders: headers),
@@ -209,17 +212,17 @@ class UnauthorizedException implements Exception {
 }
 
 /// ✅ EJEMPLO DE USO:
-/// 
+///
 /// ```dart
 /// // En un servicio o widget:
 /// final httpClient = AppHttpClient(context: context);
-/// 
+///
 /// try {
 ///   final response = await httpClient.get(
 ///     Uri.parse('${AppConfig.apiBaseUrl}/api/horarios'),
 ///     headers: {'Authorization': 'Bearer $token'},
 ///   );
-///   
+///
 ///   if (response.statusCode == 200) {
 ///     final data = jsonDecode(response.body);
 ///     // Procesar datos...

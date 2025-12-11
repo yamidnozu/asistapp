@@ -9,9 +9,9 @@ class GestionAcademicaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -135,9 +135,9 @@ class GestionAcademicaScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return ListTile(
       leading: CircleAvatar(

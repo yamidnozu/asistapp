@@ -31,9 +31,10 @@ class DashboardFeatureCard extends StatelessWidget {
     final textStyles = context.textStyles;
 
     return ClarityCard(
-      onTap: onTap ?? () {
-        // PENDIENTE: Implementar navegación a la funcionalidad específica
-      },
+      onTap: onTap ??
+          () {
+            // PENDIENTE: Implementar navegación a la funcionalidad específica
+          },
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -99,13 +100,15 @@ class UserGreetingWidget extends StatelessWidget {
         ),
         textAlign: TextAlign.center,
       ),
-      subtitle: subtitle != null ? Text(
-        subtitle!,
-        style: textStyles.bodyLarge.copyWith(
-          color: colors.textSecondary,
-        ),
-        textAlign: TextAlign.center,
-      ) : null,
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: textStyles.bodyLarge.copyWith(
+                color: colors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            )
+          : null,
       padding: EdgeInsets.all(spacing.xl),
     );
   }
@@ -139,10 +142,12 @@ class DashboardOptionsGrid extends StatelessWidget {
                 child: ListTile(
                   onTap: card.onTap,
                   tileColor: Theme.of(context).cardColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   leading: Icon(card.icon, color: card.color, size: 28),
                   title: Text(card.title, style: context.textStyles.bodyLarge),
-                  subtitle: Text(card.description, style: context.textStyles.bodySmall),
+                  subtitle: Text(card.description,
+                      style: context.textStyles.bodySmall),
                 ),
               );
             }).toList(),
@@ -156,7 +161,8 @@ class DashboardOptionsGrid extends StatelessWidget {
         const SizedBox(height: 32),
         LayoutBuilder(
           builder: (context, constraints) {
-            final gridDelegate = ResponsiveUtils.getResponsiveGridDelegate(screenType);
+            final gridDelegate =
+                ResponsiveUtils.getResponsiveGridDelegate(screenType);
 
             return GridView(
               gridDelegate: gridDelegate,
@@ -213,14 +219,15 @@ class DashboardAppBarActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           margin: const EdgeInsets.only(right: 8),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          constraints: const BoxConstraints(maxWidth: 120), // Limitar ancho máximo
+          constraints:
+              const BoxConstraints(maxWidth: 120), // Limitar ancho máximo
           decoration: BoxDecoration(
             color: colors.roleBadgeBackground,
             borderRadius: BorderRadius.circular(16),
@@ -247,9 +254,10 @@ class DashboardAppBarActions extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.logout),
-          onPressed: onLogout ?? () async {
-            // PENDIENTE: Implementar cierre de sesión
-          },
+          onPressed: onLogout ??
+              () async {
+                // PENDIENTE: Implementar cierre de sesión
+              },
         ),
       ],
     );

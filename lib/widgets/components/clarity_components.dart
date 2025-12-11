@@ -26,8 +26,8 @@ class ClarityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final spacing = context.spacing;
 
     return Card(
       color: backgroundColor ?? colors.surface,
@@ -43,7 +43,8 @@ class ClarityCard extends StatelessWidget {
         child: Padding(
           padding: padding ?? EdgeInsets.all(spacing.cardPadding),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // Alinear verticalmente al centro
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Alinear verticalmente al centro
             children: [
               if (leading != null) ...[
                 leading!,
@@ -55,7 +56,8 @@ class ClarityCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (title != null) title!,
-                    if (subtitle != null && title != null) SizedBox(height: spacing.xs),
+                    if (subtitle != null && title != null)
+                      SizedBox(height: spacing.xs),
                     if (subtitle != null) subtitle!,
                   ],
                 ),
@@ -93,9 +95,9 @@ class ClarityKPICard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Card(
       color: backgroundColor ?? colors.surface,
@@ -165,9 +167,9 @@ class ClarityStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     // Nuevo estilo: fondo neutro, pequeño indicador de icono a la izquierda y texto en estilo sutil.
     final indicatorColor = textColor ?? backgroundColor ?? colors.primary;
@@ -228,8 +230,8 @@ class ClarityActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final spacing = context.spacing;
 
     return IconButton(
       icon: Icon(
@@ -265,8 +267,8 @@ class ClaritySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Padding(
       padding: padding ?? EdgeInsets.all(spacing.screenPadding),
@@ -304,9 +306,9 @@ class ClarityEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Center(
       child: Padding(
@@ -365,7 +367,7 @@ class ClarityCompactStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final textStyles = context.textStyles;
+    final textStyles = context.textStyles;
 
     return IntrinsicWidth(
       child: Row(
@@ -422,9 +424,9 @@ class ClarityManagementHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -448,9 +450,9 @@ class ClarityManagementHeader extends StatelessWidget {
               ),
           ],
         ),
-        
+
         SizedBox(height: spacing.md),
-        
+
         // Fila 2: Búsqueda
         if (showSearch) ...[
           TextField(
@@ -480,7 +482,7 @@ class ClarityManagementHeader extends StatelessWidget {
           ),
           SizedBox(height: spacing.md),
         ],
-        
+
         // Fila 3: Filtros
         if (filterWidgets != null && filterWidgets!.isNotEmpty)
           Wrap(
@@ -511,8 +513,8 @@ class ClarityContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final spacing = context.spacing;
 
     return PopupMenuButton<int>(
       icon: Icon(
@@ -526,10 +528,7 @@ class ClarityContextMenu extends StatelessWidget {
           actions[index].onPressed?.call();
         }
       },
-      itemBuilder: (context) => actions
-          .asMap()
-          .entries
-          .map((entry) {
+      itemBuilder: (context) => actions.asMap().entries.map((entry) {
         final action = entry.value;
         return PopupMenuItem(
           value: entry.key,
@@ -579,7 +578,7 @@ class ClarityResponsiveContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final spacing = context.spacing;
+    final spacing = context.spacing;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -593,9 +592,7 @@ class ClarityResponsiveContainer extends StatelessWidget {
 
         final responsivePadding = padding ??
             EdgeInsets.symmetric(
-              horizontal: constraints.maxWidth > 768
-                  ? spacing.lg
-                  : spacing.md,
+              horizontal: constraints.maxWidth > 768 ? spacing.lg : spacing.md,
               vertical: spacing.md,
             );
 
@@ -643,8 +640,8 @@ class ClarityListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final colors = context.colors;
-  final spacing = context.spacing;
+    final colors = context.colors;
+    final spacing = context.spacing;
 
     return ClarityCard(
       backgroundColor: backgroundColor,
@@ -663,8 +660,9 @@ class ClarityListItem extends StatelessWidget {
             SizedBox(height: spacing.xs),
             DefaultTextStyle(
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.textMuted,
-                  ) ?? const TextStyle(),
+                        color: colors.textMuted,
+                      ) ??
+                  const TextStyle(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               child: subtitleWidget!,
@@ -715,19 +713,21 @@ class ClarityAccessibilityIndicator extends StatelessWidget {
   bool get isCompliantAA => contrastRatio >= 4.5;
   bool get isCompliantAAA => contrastRatio >= 7.0;
 
-  Color get complianceColor =>
-      isCompliantAAA
-          ? Colors.green
-          : isCompliantAA
-              ? Colors.orange
-              : Colors.red;
+  Color get complianceColor => isCompliantAAA
+      ? Colors.green
+      : isCompliantAA
+          ? Colors.orange
+          : Colors.red;
 
-  String get complianceText =>
-      isCompliantAAA ? 'AAA' : isCompliantAA ? 'AA' : 'No Cumple';
+  String get complianceText => isCompliantAAA
+      ? 'AAA'
+      : isCompliantAA
+          ? 'AA'
+          : 'No Cumple';
 
   @override
   Widget build(BuildContext context) {
-  final spacing = context.spacing;
+    final spacing = context.spacing;
 
     return Container(
       padding: EdgeInsets.symmetric(

@@ -16,7 +16,6 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   // Error message delegated to PaginatedDataProvider
   Materia? _selectedMateria;
 
-
   // Getters
   // Use PaginatedDataProvider's errorMessage
   List<Materia> get materias => items;
@@ -31,18 +30,25 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   // Legacy state helper removed; rely on base provider for loading/errors
 
   @override
-  Future<PaginatedResponse<Materia>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<Materia>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     // Leer filtros del provider (this.filters) en lugar de solo los parámetros
     final searchFromFilters = this.filters['search']?.toString() ?? search;
     debugPrint('MateriaProvider.fetchPage - search: $searchFromFilters');
-    final response = await _materiaService.getMaterias(accessToken, page: page, limit: limit, search: searchFromFilters);
+    final response = await _materiaService.getMaterias(accessToken,
+        page: page, limit: limit, search: searchFromFilters);
     if (response == null) return null;
-    return PaginatedResponse(items: response.materias, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.materias, pagination: response.pagination);
   }
 
   @override
   Future<Materia?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _materiaService.createMateria(accessToken, data as CreateMateriaRequest);
+    final created = await _materiaService.createMateria(
+        accessToken, data as CreateMateriaRequest);
     return created;
   }
 
@@ -52,17 +58,20 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   }
 
   @override
-  Future<Materia?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _materiaService.updateMateria(accessToken, id, data as UpdateMateriaRequest);
+  Future<Materia?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
+    final updated = await _materiaService.updateMateria(
+        accessToken, id, data as UpdateMateriaRequest);
     return updated;
   }
 
   /// Carga todas las materias con paginación.
   /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
-  Future<void> loadMaterias(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<void> loadMaterias(String accessToken,
+      {int? page, int? limit, String? search}) async {
     if (isLoading) return;
     resetPagination();
-    
+
     // Solo actualizar el filtro de búsqueda si se proporciona explícitamente
     if (search != null) {
       if (search.isNotEmpty) {
@@ -74,9 +83,11 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
     // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
 
     try {
-      debugPrint('MateriaProvider: Iniciando carga de materias con filtros: $filters');
+      debugPrint(
+          'MateriaProvider: Iniciando carga de materias con filtros: $filters');
       final effectiveSearch = filters['search']?.toString();
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: effectiveSearch);
+      await loadItems(accessToken,
+          page: page ?? 1, limit: limit, search: effectiveSearch);
       notifyListeners();
     } catch (e) {
       setError(e.toString());
@@ -84,51 +95,55 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   }
 
   Future<void> loadMateriaById(String accessToken, String materiaId) async {
-  if (isLoading) return;
+    if (isLoading) return;
     try {
-      final materia = await _materiaService.getMateriaById(accessToken, materiaId);
+      final materia =
+          await _materiaService.getMateriaById(accessToken, materiaId);
       if (materia != null) {
         _selectedMateria = materia;
-  notifyListeners();
+        notifyListeners();
       } else {
-  setError('Materia no encontrada');
+        setError('Materia no encontrada');
       }
     } catch (e) {
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
-  Future<bool> createMateria(String accessToken, CreateMateriaRequest materiaData) async {
-  if (isLoading) return false;
+  Future<bool> createMateria(
+      String accessToken, CreateMateriaRequest materiaData) async {
+    if (isLoading) return false;
     try {
       final success = await createItem(accessToken, materiaData);
       if (success) {
-  notifyListeners();
+        notifyListeners();
         return true;
       }
-  setError(errorMessage ?? '');
+      setError(errorMessage ?? '');
       return false;
     } catch (e) {
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
 
-  Future<bool> updateMateria(String accessToken, String materiaId, UpdateMateriaRequest materiaData) async {
-  if (isLoading) return false;
+  Future<bool> updateMateria(String accessToken, String materiaId,
+      UpdateMateriaRequest materiaData) async {
+    if (isLoading) return false;
     try {
       final success = await updateItem(accessToken, materiaId, materiaData);
       if (success) {
         // update selected if needed
-        final updated = items.firstWhere((m) => m.id == materiaId, orElse: () => _selectedMateria!);
+        final updated = items.firstWhere((m) => m.id == materiaId,
+            orElse: () => _selectedMateria!);
         if (_selectedMateria?.id == materiaId) _selectedMateria = updated;
-  notifyListeners();
+        notifyListeners();
         return true;
       }
-  setError(errorMessage ?? '');
+      setError(errorMessage ?? '');
       return false;
     } catch (e) {
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
@@ -159,7 +174,7 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   void clearData() {
     clearItems();
     _selectedMateria = null;
-  clearError();
+    clearError();
   }
 
   Future<void> refreshData(String accessToken) async {
@@ -170,7 +185,8 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
     if (query.isEmpty) return items;
     final lowercaseQuery = query.toLowerCase();
     return items.where((materia) {
-      return materia.nombre.toLowerCase().contains(lowercaseQuery) || (materia.codigo?.toLowerCase().contains(lowercaseQuery) ?? false);
+      return materia.nombre.toLowerCase().contains(lowercaseQuery) ||
+          (materia.codigo?.toLowerCase().contains(lowercaseQuery) ?? false);
     }).toList();
   }
 
@@ -180,14 +196,16 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
   }
 
   Future<void> loadPreviousPage(String accessToken) async {
-  if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
+    if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
     final prevPage = paginationInfo!.page - 1;
-    await loadMaterias(accessToken, page: prevPage, limit: paginationInfo!.limit);
+    await loadMaterias(accessToken,
+        page: prevPage, limit: paginationInfo!.limit);
   }
 
   Future<void> loadPage(String accessToken, int page) async {
-  if (isLoading) return;
-    await loadMaterias(accessToken, page: page, limit: paginationInfo?.limit ?? 10);
+    if (isLoading) return;
+    await loadMaterias(accessToken,
+        page: page, limit: paginationInfo?.limit ?? 10);
   }
 
   Map<String, int> getMateriasStatistics() {
@@ -200,18 +218,20 @@ class MateriaProvider extends ChangeNotifier with PaginatedDataMixin<Materia> {
 
   Future<void> loadMoreMaterias(String accessToken, {String? search}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
-    
+
     // Solo actualizar el filtro si se proporciona explícitamente
     if (search != null) {
       filters['search'] = search;
     }
-    
+
     await super.loadNextPage(accessToken);
   }
 
-  Future<List<Materia>?> searchMateriasRemote(String accessToken, {String? search, int limit = 10}) async {
+  Future<List<Materia>?> searchMateriasRemote(String accessToken,
+      {String? search, int limit = 10}) async {
     try {
-      final response = await _materiaService.getMaterias(accessToken, page: 1, limit: limit, search: search);
+      final response = await _materiaService.getMaterias(accessToken,
+          page: 1, limit: limit, search: search);
       return response?.materias;
     } catch (e) {
       debugPrint('Error searchMateriasRemote: $e');

@@ -19,7 +19,8 @@ class MateriaService {
   // ===== MATERIAS =====
 
   /// Obtiene todas las materias con paginación y filtros
-  Future<PaginatedMateriasResponse?> getMaterias(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<PaginatedMateriasResponse?> getMaterias(String accessToken,
+      {int? page, int? limit, String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
@@ -27,7 +28,8 @@ class MateriaService {
       if (limit != null) queryParams['limit'] = limit.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri = Uri.parse('$baseUrlValue/materias').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrlValue/materias')
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -50,11 +52,14 @@ class MateriaService {
           final materias = (responseData['data'] as List)
               .map((materiaJson) => Materia.fromJson(materiaJson))
               .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
-          return PaginatedMateriasResponse(materias: materias, pagination: pagination);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedMateriasResponse(
+              materias: materias, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting materias: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting materias: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -90,7 +95,8 @@ class MateriaService {
           return Materia.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error getting materia: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting materia: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -102,17 +108,20 @@ class MateriaService {
   }
 
   /// Crea una nueva materia
-  Future<Materia?> createMateria(String accessToken, CreateMateriaRequest materiaData) async {
+  Future<Materia?> createMateria(
+      String accessToken, CreateMateriaRequest materiaData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/materias'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(materiaData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -127,7 +136,8 @@ class MateriaService {
           return Materia.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error creating materia: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating materia: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -139,17 +149,20 @@ class MateriaService {
   }
 
   /// Actualiza una materia
-  Future<Materia?> updateMateria(String accessToken, String materiaId, UpdateMateriaRequest materiaData) async {
+  Future<Materia?> updateMateria(String accessToken, String materiaId,
+      UpdateMateriaRequest materiaData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.put(
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/materias/$materiaId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(materiaData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -164,7 +177,8 @@ class MateriaService {
           return Materia.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error updating materia: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating materia: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -191,13 +205,15 @@ class MateriaService {
         },
       );
 
-      debugPrint('DELETE /materias/$materiaId - Status: ${response.statusCode}');
+      debugPrint(
+          'DELETE /materias/$materiaId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting materia: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting materia: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {

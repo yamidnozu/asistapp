@@ -77,7 +77,9 @@ class AuthProvider with ChangeNotifier {
       return null;
     }
   }
-  AuthProvider({AuthService? authService}) : _authService = authService ?? AuthService() {
+
+  AuthProvider({AuthService? authService})
+      : _authService = authService ?? AuthService() {
     _loadTokensFromStorage();
   }
 
@@ -151,14 +153,15 @@ class AuthProvider with ChangeNotifier {
       await loadUserInstitutions();
 
       if (_selectedInstitutionId != null && _institutions != null) {
-        final institutionExists = _institutions!.any((i) => i.id == _selectedInstitutionId);
+        final institutionExists =
+            _institutions!.any((i) => i.id == _selectedInstitutionId);
         if (!institutionExists) {
           debugPrint('Institución guardada ya no existe, limpiando');
           _selectedInstitutionId = null;
           await _saveTokensToStorage();
         }
       }
-      
+
       notifyListeners();
     }
   }
@@ -167,8 +170,10 @@ class AuthProvider with ChangeNotifier {
     if (_accessToken == null) return;
 
     try {
-      final institutionMaps = await _authService.getUserInstitutions(_accessToken!);
-      _institutions = institutionMaps?.map((map) => Institution.fromJson(map)).toList();
+      final institutionMaps =
+          await _authService.getUserInstitutions(_accessToken!);
+      _institutions =
+          institutionMaps?.map((map) => Institution.fromJson(map)).toList();
       if (notify) notifyListeners();
     } catch (e) {
       debugPrint('Error loading user institutions: $e');
@@ -194,13 +199,16 @@ class AuthProvider with ChangeNotifier {
         // Super Admin no necesita institución seleccionada (acceso global)
         if (_user?['rol'] == 'super_admin') {
           _selectedInstitutionId = null;
-          debugPrint('Super Admin: No requiere selección de institución (acceso global)');
+          debugPrint(
+              'Super Admin: No requiere selección de institución (acceso global)');
         } else if (_institutions != null && _institutions!.length == 1) {
           _selectedInstitutionId = _institutions!.first.id;
-          debugPrint('Institución seleccionada automáticamente: $_selectedInstitutionId');
+          debugPrint(
+              'Institución seleccionada automáticamente: $_selectedInstitutionId');
         } else if (_institutions != null && _institutions!.length > 1) {
           _selectedInstitutionId = null;
-          debugPrint('Múltiples instituciones encontradas, esperando selección manual');
+          debugPrint(
+              'Múltiples instituciones encontradas, esperando selección manual');
         }
 
         await _saveTokensToStorage();
@@ -253,7 +261,8 @@ class AuthProvider with ChangeNotifier {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.clearData();
 
-        final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+        final institutionProvider =
+            Provider.of<InstitutionProvider>(context, listen: false);
         institutionProvider.clearData();
       } catch (e) {
         debugPrint('Error clearing provider data: $e');

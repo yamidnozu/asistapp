@@ -1,4 +1,4 @@
-/// Constantes para estados y tipos de asistencia en AsistApp  
+/// Constantes para estados y tipos de asistencia en AsistApp
 /// Central para evitar strings mágicos en toda la aplicación
 
 class AttendanceStatus {

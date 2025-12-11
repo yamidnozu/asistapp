@@ -92,9 +92,11 @@ class ResponsiveUtils {
       'buttonWidth': buttonWidth,
       'minHeight': minHeight,
       'isSmallScreen': screenType == ScreenType.mobileSmall,
-      'isMobile': screenType == ScreenType.mobileSmall || screenType == ScreenType.mobileLarge,
+      'isMobile': screenType == ScreenType.mobileSmall ||
+          screenType == ScreenType.mobileLarge,
       'isTablet': screenType == ScreenType.tablet,
-      'isDesktop': screenType == ScreenType.desktop || screenType == ScreenType.largeDesktop,
+      'isDesktop': screenType == ScreenType.desktop ||
+          screenType == ScreenType.largeDesktop,
       'isLargeDesktop': screenType == ScreenType.largeDesktop,
     };
   }
@@ -111,10 +113,11 @@ class ResponsiveUtils {
       builder: (context, constraints) {
         final responsive = getResponsiveValues(constraints);
         final containerMaxWidth = maxWidth ?? responsive['maxWidth'];
-        final containerPadding = padding ?? EdgeInsets.symmetric(
-          horizontal: responsive['horizontalPadding'],
-          vertical: responsive['verticalPadding'],
-        );
+        final containerPadding = padding ??
+            EdgeInsets.symmetric(
+              horizontal: responsive['horizontalPadding'],
+              vertical: responsive['verticalPadding'],
+            );
 
         final content = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: containerMaxWidth),
@@ -145,7 +148,8 @@ class ResponsiveUtils {
       ScreenType.largeDesktop => 1.2,
     };
 
-    final scaledFontSize = fontSize ?? (baseStyle.fontSize ?? 14.0) * scaleFactor;
+    final scaledFontSize =
+        fontSize ?? (baseStyle.fontSize ?? 14.0) * scaleFactor;
 
     return baseStyle.copyWith(fontSize: scaledFontSize);
   }
@@ -177,7 +181,8 @@ class ResponsiveUtils {
           mainAxisSpacing: 24,
           childAspectRatio: 0.9,
         ),
-      ScreenType.largeDesktop => const SliverGridDelegateWithFixedCrossAxisCount(
+      ScreenType.largeDesktop =>
+        const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 5,
           crossAxisSpacing: 28,
           mainAxisSpacing: 28,

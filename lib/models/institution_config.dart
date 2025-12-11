@@ -22,7 +22,8 @@ class InstitutionConfig {
     this.notificarAusenciaTotalDiaria = false,
   });
 
-  factory InstitutionConfig.fromJson(Map<String, dynamic> json) => _$InstitutionConfigFromJson(json);
+  factory InstitutionConfig.fromJson(Map<String, dynamic> json) =>
+      _$InstitutionConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$InstitutionConfigToJson(this);
 }

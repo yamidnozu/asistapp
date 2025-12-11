@@ -21,14 +21,17 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   static const List<_TestStep> _stepDefinitions = [
     _TestStep('1. Login Super Admin', TestFlowManager.step1LoginSuperAdmin),
     _TestStep('2. Crear Institución', TestFlowManager.step2CrearInstitucion),
-    _TestStep('3. Crear Admin Institución', TestFlowManager.step3CrearAdminInstitucion),
+    _TestStep('3. Crear Admin Institución',
+        TestFlowManager.step3CrearAdminInstitucion),
     _TestStep('4. Crear Profesores', TestFlowManager.step4CrearProfesores),
     _TestStep('5. Crear Estudiantes', TestFlowManager.step5CrearEstudiantes),
     _TestStep('6. Crear Materias', TestFlowManager.step6CrearMaterias),
     _TestStep('7. Crear Grupos', TestFlowManager.step7CrearGrupos),
     _TestStep('8. Crear Horarios', TestFlowManager.step8CrearHorarios),
-    _TestStep('9. Verificar Asistencias', TestFlowManager.step9VerificarAsistencias),
-    _TestStep('10. Verificar Dashboards', TestFlowManager.step10VerificarDashboards),
+    _TestStep(
+        '9. Verificar Asistencias', TestFlowManager.step9VerificarAsistencias),
+    _TestStep(
+        '10. Verificar Dashboards', TestFlowManager.step10VerificarDashboards),
   ];
 
   void _addLog(String message) {
@@ -45,7 +48,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     });
   }
 
-  Future<void> _executeFlow(Future<void> Function(BuildContext) flow, String label) async {
+  Future<void> _executeFlow(
+      Future<void> Function(BuildContext) flow, String label) async {
     if (_isRunning) return;
 
     setState(() {
@@ -53,7 +57,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       _currentStep = label;
     });
 
-  _addLog('Iniciando: $label');
+    _addLog('Iniciando: $label');
 
     try {
       await flow(context);
@@ -71,11 +75,14 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     }
   }
 
-  Future<void> _runFullFlow() => _executeFlow(TestFlowManager.ejecutarFlujoCompleto, 'Flujo completo');
+  Future<void> _runFullFlow() =>
+      _executeFlow(TestFlowManager.ejecutarFlujoCompleto, 'Flujo completo');
 
-  Future<void> _runUITests() => _executeFlow(TestFlowManager.ejecutarPruebasUI, 'Pruebas de UI');
+  Future<void> _runUITests() =>
+      _executeFlow(TestFlowManager.ejecutarPruebasUI, 'Pruebas de UI');
 
-  Future<void> _runStep(_TestStep step) => _executeFlow(step.handler, step.title);
+  Future<void> _runStep(_TestStep step) =>
+      _executeFlow(step.handler, step.title);
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +119,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                 decoration: BoxDecoration(
                   color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(spacing.borderRadius),
-                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+                  border:
+                      Border.all(color: colors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -121,14 +129,16 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(colors.primary),
                       ),
                     ),
                     SizedBox(width: spacing.md),
                     Expanded(
                       child: Text(
                         _currentStep,
-                        style: textStyles.bodyMedium.copyWith(color: colors.primary),
+                        style: textStyles.bodyMedium
+                            .copyWith(color: colors.primary),
                       ),
                     ),
                   ],
@@ -145,7 +155,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isRunning ? null : _runFullFlow,
                 icon: Icon(_isRunning ? Icons.hourglass_top : Icons.play_arrow),
-                label: Text(_isRunning ? 'Ejecutando...' : 'Ejecutar flujo completo'),
+                label: Text(
+                    _isRunning ? 'Ejecutando...' : 'Ejecutar flujo completo'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                   foregroundColor: colors.white,
@@ -239,7 +250,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     );
   }
 
-  Widget _buildStepButton(_TestStep step, AppColors colors, AppSpacing spacing, AppTextStyles textStyles) {
+  Widget _buildStepButton(_TestStep step, AppColors colors, AppSpacing spacing,
+      AppTextStyles textStyles) {
     return Padding(
       padding: EdgeInsets.only(bottom: spacing.sm),
       child: SizedBox(
@@ -247,7 +259,8 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
         child: TextButton(
           onPressed: _isRunning ? null : () => _runStep(step),
           style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: spacing.md, horizontal: spacing.lg),
+            padding: EdgeInsets.symmetric(
+                vertical: spacing.md, horizontal: spacing.lg),
             alignment: Alignment.centerLeft,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(spacing.borderRadius),

@@ -33,12 +33,15 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   // delegated to base
 
   // Computed properties
-  List<User> get activeUsers => items.where((user) => user.activo == true).toList();
-  List<User> get inactiveUsers => items.where((user) => user.activo != true).toList();
+  List<User> get activeUsers =>
+      items.where((user) => user.activo == true).toList();
+  List<User> get inactiveUsers =>
+      items.where((user) => user.activo != true).toList();
 
   List<User> get professors => items.where((user) => user.esProfesor).toList();
   List<User> get students => items.where((user) => user.esEstudiante).toList();
-  List<User> get adminInstitutions => items.where((user) => user.esAdminInstitucion).toList();
+  List<User> get adminInstitutions =>
+      items.where((user) => user.esAdminInstitucion).toList();
 
   // Número de usuarios actualmente cargados en memoria (página actual)
   int get loadedUsersCount => items.length;
@@ -48,7 +51,7 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   int get professorsCount => professors.length;
   int get studentsCount => students.length;
   int get adminInstitutionsCount => adminInstitutions.length;
-  
+
   /// Número total de usuarios reportado por la paginación del backend
   int get totalUsersFromPagination => paginationInfo?.total ?? 0;
 
@@ -65,9 +68,15 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     _selectedInstitutionId = null;
 
     try {
-      debugPrint('UserProvider: Iniciando carga de usuarios con filtros: $filters');
+      debugPrint(
+          'UserProvider: Iniciando carga de usuarios con filtros: $filters');
       // Use base pagination via `loadItems` / `fetchPage`
-      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      await loadItems(accessToken,
+          page: page ?? 1,
+          limit: limit,
+          filters: filters.isNotEmpty
+              ? filters.map((k, v) => MapEntry(k, v.toString()))
+              : null);
       // base handles pagination info and hasMoreData
       notifyListeners();
     } catch (e) {
@@ -78,7 +87,8 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
 
   /// Carga usuarios por institución con paginación usando los filtros actuales del provider.
   /// Los filtros se deben establecer previamente con setFilter() antes de llamar a este método.
-  Future<void> loadUsersByInstitution(String accessToken, String institutionId, {int? page, int limit = 5}) async {
+  Future<void> loadUsersByInstitution(String accessToken, String institutionId,
+      {int? page, int limit = 5}) async {
     if (isLoading) return;
     // Clear items immediately to avoid mixed data
     clearItems();
@@ -89,8 +99,14 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     setFilter('institutionId', institutionId);
 
     try {
-      debugPrint('UserProvider: Iniciando carga de usuarios por institución $institutionId con filtros: $filters');
-      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      debugPrint(
+          'UserProvider: Iniciando carga de usuarios por institución $institutionId con filtros: $filters');
+      await loadItems(accessToken,
+          page: page ?? 1,
+          limit: limit,
+          filters: filters.isNotEmpty
+              ? filters.map((k, v) => MapEntry(k, v.toString()))
+              : null);
       // base handles pagination info and hasMoreData
       notifyListeners();
     } catch (e) {
@@ -100,33 +116,38 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   /// Carga administradores de una institución específica (sin paginación)
-  Future<void> loadAdminsByInstitution(String accessToken, String institutionId) async {
-  if (isLoading) return;
+  Future<void> loadAdminsByInstitution(
+      String accessToken, String institutionId) async {
+    if (isLoading) return;
 
-  // base handles loading state
+    // base handles loading state
     _selectedInstitutionId = institutionId;
 
     try {
-      debugPrint('UserProvider: Cargando admins de la institución $institutionId...');
-      final admins = await _userService.getAdminsByInstitution(accessToken, institutionId);
+      debugPrint(
+          'UserProvider: Cargando admins de la institución $institutionId...');
+      final admins =
+          await _userService.getAdminsByInstitution(accessToken, institutionId);
       if (admins != null) {
         clearItems();
-  items.addAll(admins);
-  setHasMoreData(false);
-  notifyListeners();
+        items.addAll(admins);
+        setHasMoreData(false);
+        notifyListeners();
       } else {
-  setError('Error al cargar administradores de la institución');
+        setError('Error al cargar administradores de la institución');
       }
     } catch (e) {
       debugPrint('UserProvider: Error loading admins by institution: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Asigna un usuario existente como admin de institución
-  Future<bool> assignAdminToInstitution(String accessToken, String institutionId, String userId) async {
+  Future<bool> assignAdminToInstitution(
+      String accessToken, String institutionId, String userId) async {
     try {
-      final updated = await _userService.assignAdminToInstitution(accessToken, institutionId, userId);
+      final updated = await _userService.assignAdminToInstitution(
+          accessToken, institutionId, userId);
       if (updated != null) {
         // Refrescar lista local
         await loadAdminsByInstitution(accessToken, institutionId);
@@ -140,9 +161,11 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   /// Remueve el rol de admin de institución para un usuario
-  Future<bool> removeAdminFromInstitution(String accessToken, String institutionId, String userId) async {
+  Future<bool> removeAdminFromInstitution(
+      String accessToken, String institutionId, String userId) async {
     try {
-      final result = await _userService.removeAdminFromInstitution(accessToken, institutionId, userId);
+      final result = await _userService.removeAdminFromInstitution(
+          accessToken, institutionId, userId);
       if (result != null) {
         await loadAdminsByInstitution(accessToken, institutionId);
         return true;
@@ -155,75 +178,81 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   /// Carga usuarios por rol con paginación
-  Future<void> loadUsersByRole(String accessToken, String role, {int? page, int? limit}) async {
-  if (isLoading) return;
+  Future<void> loadUsersByRole(String accessToken, String role,
+      {int? page, int? limit}) async {
+    if (isLoading) return;
 
-  // base handles loading state
+    // base handles loading state
     resetPagination(); // Resetear para scroll infinito
 
     try {
       debugPrint('UserProvider: Iniciando carga de usuarios por rol $role...');
-      final response = await _userService.getUsersByRole(accessToken, role, page: page ?? 1, limit: limit);
+      final response = await _userService.getUsersByRole(accessToken, role,
+          page: page ?? 1, limit: limit);
       if (response != null) {
-        debugPrint('UserProvider: Recibidos ${response.users.length} usuarios con rol $role');
-  // loadItems populates items
-  setPaginationInfo(response.pagination);
-  notifyListeners();
+        debugPrint(
+            'UserProvider: Recibidos ${response.users.length} usuarios con rol $role');
+        // loadItems populates items
+        setPaginationInfo(response.pagination);
+        notifyListeners();
       } else {
-  setError('Error al cargar usuarios por rol');
+        setError('Error al cargar usuarios por rol');
       }
     } catch (e) {
       debugPrint('UserProvider: Error loading users by role: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Carga un usuario específico por ID
   Future<void> loadUserById(String accessToken, String userId) async {
-  // base handles loading state
+    // base handles loading state
 
     try {
       final user = await _userService.getUserById(accessToken, userId);
       if (user != null) {
         _selectedUser = user;
-  notifyListeners();
+        notifyListeners();
       } else {
-  setError('Usuario no encontrado');
+        setError('Usuario no encontrado');
       }
     } catch (e) {
       debugPrint('Error loading user: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Crea un nuevo usuario
-  Future<bool> createUser(String accessToken, CreateUserRequest userData) async {
-  // base handles loading state
+  Future<bool> createUser(
+      String accessToken, CreateUserRequest userData) async {
+    // base handles loading state
 
     try {
       final newUser = await _userService.createUser(accessToken, userData);
       if (newUser != null) {
         // Agregar el nuevo usuario a la lista
-  items.insert(0, newUser);
-  notifyListeners();
+        items.insert(0, newUser);
+        notifyListeners();
         return true;
       } else {
-  setError('Error al crear usuario');
+        setError('Error al crear usuario');
         return false;
       }
     } catch (e) {
       debugPrint('Error creating user: $e');
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
 
   /// Actualiza un usuario existente
-  Future<bool> updateUser(String accessToken, String userId, UpdateUserRequest userData) async {
-  // base handles loading state
+  Future<bool> updateUser(
+      String accessToken, String userId, UpdateUserRequest userData) async {
+    // base handles loading state
 
     try {
-      final updatedUser = await _userService.updateUser(accessToken, userId, userData);
+      final updatedUser =
+          await _userService.updateUser(accessToken, userId, userData);
       if (updatedUser != null) {
         // Actualizar el usuario en la lista
         final index = items.indexWhere((user) => user.id == userId);
@@ -236,15 +265,15 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
           _selectedUser = updatedUser;
         }
 
-  notifyListeners();
+        notifyListeners();
         return true;
       } else {
-  setError('Error al actualizar usuario');
+        setError('Error al actualizar usuario');
         return false;
       }
     } catch (e) {
       debugPrint('Error updating user: $e');
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
@@ -270,9 +299,11 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   /// Cambia la contraseña de un usuario (llama al servicio)
-  Future<bool> changeUserPassword(String accessToken, String userId, String newPassword) async {
+  Future<bool> changeUserPassword(
+      String accessToken, String userId, String newPassword) async {
     try {
-      final result = await _userService.changePassword(accessToken, userId, newPassword);
+      final result =
+          await _userService.changePassword(accessToken, userId, newPassword);
       return result == true;
     } catch (e) {
       debugPrint('Error changeUserPassword: $e');
@@ -284,7 +315,7 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   /// Selecciona un usuario para edición
   void selectUser(User user) {
     _selectedUser = user;
-  setIsLoadingMore(true);
+    setIsLoadingMore(true);
   }
 
   /// Limpia el usuario seleccionado
@@ -301,13 +332,17 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
     _selectedInstitutionId = null;
     setPaginationInfo(null);
     clearError();
-  }  /// Recarga los datos (útil después de operaciones)
+  }
+
+  /// Recarga los datos (útil después de operaciones)
   /// Los filtros deben estar configurados previamente - este método solo recarga usando los filtros actuales it has
   Future<void> refreshData(String accessToken) async {
     debugPrint('UserProvider.refreshData - Filtros actuales: $filters');
     if (filters['institutionId'] != null) {
-      debugPrint('UserProvider.refreshData - Cargando por institución: ${filters['institutionId']}');
-      await loadUsersByInstitution(accessToken, filters['institutionId'] as String);
+      debugPrint(
+          'UserProvider.refreshData - Cargando por institución: ${filters['institutionId']}');
+      await loadUsersByInstitution(
+          accessToken, filters['institutionId'] as String);
     } else {
       debugPrint('UserProvider.refreshData - Cargando usuarios globales');
       await loadUsers(accessToken);
@@ -316,28 +351,28 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
 
   /// Busca usuarios por nombre, email o apellidos
   List<User> searchUsers(String query) {
-  if (query.isEmpty) return items;
+    if (query.isEmpty) return items;
 
     final lowercaseQuery = query.toLowerCase();
-  return items.where((user) {
+    return items.where((user) {
       return user.nombreCompleto.toLowerCase().contains(lowercaseQuery) ||
-             (user.email?.toLowerCase().contains(lowercaseQuery) ?? false) ||
-             (user.telefono?.contains(lowercaseQuery) ?? false);
+          (user.email?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+          (user.telefono?.contains(lowercaseQuery) ?? false);
     }).toList();
   }
 
   /// Filtra usuarios por rol
   List<User> filterUsersByRole(String role) {
-  if (role.isEmpty) return items;
-  return items.where((user) => user.rol == role).toList();
+    if (role.isEmpty) return items;
+    return items.where((user) => user.rol == role).toList();
   }
 
   // NOTA: filterUsersLocally fue eliminado. Todo el filtrado por rol debe hacerse mediante consultas al backend.
 
   /// Filtra usuarios por estado activo/inactivo
   List<User> filterUsersByStatus({bool? active}) {
-  if (active == null) return items;
-  return items.where((user) => user.activo == active).toList();
+    if (active == null) return items;
+    return items.where((user) => user.activo == active).toList();
   }
 
   /// Carga la siguiente página de usuarios
@@ -348,24 +383,28 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
 
   /// Carga la página anterior de usuarios
   Future<void> loadPreviousPage(String accessToken) async {
-  if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
+    if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
 
     final prevPage = paginationInfo!.page - 1;
     if (_selectedInstitutionId != null) {
-      await loadUsersByInstitution(accessToken, _selectedInstitutionId!, page: prevPage, limit: paginationInfo!.limit);
+      await loadUsersByInstitution(accessToken, _selectedInstitutionId!,
+          page: prevPage, limit: paginationInfo!.limit);
     } else {
-  await loadUsers(accessToken, page: prevPage, limit: paginationInfo!.limit);
+      await loadUsers(accessToken,
+          page: prevPage, limit: paginationInfo!.limit);
     }
   }
 
   /// Carga una página específica
   Future<void> loadPage(String accessToken, int page) async {
-  if (isLoading) return;
+    if (isLoading) return;
 
     if (_selectedInstitutionId != null) {
-      await loadUsersByInstitution(accessToken, _selectedInstitutionId!, page: page, limit: paginationInfo?.limit ?? 5);
+      await loadUsersByInstitution(accessToken, _selectedInstitutionId!,
+          page: page, limit: paginationInfo?.limit ?? 5);
     } else {
-  await loadUsers(accessToken, page: page, limit: paginationInfo?.limit ?? 5);
+      await loadUsers(accessToken,
+          page: page, limit: paginationInfo?.limit ?? 5);
     }
   }
 
@@ -373,7 +412,7 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   Map<String, int> getUserStatistics() {
     return {
       // 'total' debe reflejar el total informado por la paginación del backend.
-  'total': paginationInfo?.total ?? 0,
+      'total': paginationInfo?.total ?? 0,
       'activos': activeUsersCount,
       'inactivos': inactiveUsersCount,
       'profesores': professorsCount,
@@ -388,16 +427,22 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   @override
-  Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<User>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     final institutionId = this.filters['institutionId']?.toString();
     final role = this.filters['role']?.toString();
     final activoStr = this.filters['activo']?.toString();
     final activo = activoStr == 'true';
     final searchQuery = this.filters['search']?.toString();
     final rolesStr = this.filters['roles']?.toString();
-    final roles = rolesStr != null && rolesStr.isNotEmpty ? rolesStr.split(',') : null;
+    final roles =
+        rolesStr != null && rolesStr.isNotEmpty ? rolesStr.split(',') : null;
 
-    debugPrint('UserProvider.fetchPage - institutionId: $institutionId, role: $role, activo: $activoStr, search: $searchQuery, roles: $roles');
+    debugPrint(
+        'UserProvider.fetchPage - institutionId: $institutionId, role: $role, activo: $activoStr, search: $searchQuery, roles: $roles');
 
     if (institutionId != null && institutionId.isNotEmpty) {
       final response = await _userService.getUsersByInstitution(
@@ -410,17 +455,25 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
         search: searchQuery,
       );
       if (response == null) return null;
-      return PaginatedResponse(items: response.users, pagination: response.pagination);
+      return PaginatedResponse(
+          items: response.users, pagination: response.pagination);
     }
 
-    final response = await _userService.getAllUsers(accessToken, page: page, limit: limit, search: searchQuery, activo: activoStr != null ? activo : null, roles: roles);
+    final response = await _userService.getAllUsers(accessToken,
+        page: page,
+        limit: limit,
+        search: searchQuery,
+        activo: activoStr != null ? activo : null,
+        roles: roles);
     if (response == null) return null;
-    return PaginatedResponse(items: response.users, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.users, pagination: response.pagination);
   }
 
   @override
   Future<User?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _userService.createUser(accessToken, data as CreateUserRequest);
+    final created =
+        await _userService.createUser(accessToken, data as CreateUserRequest);
     return created;
   }
 
@@ -430,13 +483,16 @@ class UserProvider extends ChangeNotifier with PaginatedDataMixin<User> {
   }
 
   @override
-  Future<User?> updateItemApi(String accessToken, String id, dynamic data) async {
-    final updated = await _userService.updateUser(accessToken, id, data as UpdateUserRequest);
+  Future<User?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
+    final updated = await _userService.updateUser(
+        accessToken, id, data as UpdateUserRequest);
     return updated;
   }
 
   /// Busca usuarios en el backend (búsqueda remota) — usado por diálogos que requieren búsqueda puntual
-  Future<List<User>?> searchUsersRemote(String accessToken, {String? search, int limit = 10}) async {
+  Future<List<User>?> searchUsersRemote(String accessToken,
+      {String? search, int limit = 10}) async {
     try {
       final response = await _userService.getAllUsers(
         accessToken,

@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 
 /// Sistema de colores moderno y profesional - "Clarity UI"
 class AppColors {
-
   /// Default singleton (light mode default)
   static final AppColors instance = AppColors._light();
 
   /// Factory to create colors based on the current brightness
   factory AppColors.fromBrightness(Brightness brightness) {
-    return brightness == Brightness.dark ? AppColors._dark() : AppColors._light();
+    return brightness == Brightness.dark
+        ? AppColors._dark()
+        : AppColors._light();
   }
 
   /// Private constructors for light/dark variants
-  AppColors._light() { _setLight(); }
-  AppColors._dark() { _setDark(); }
+  AppColors._light() {
+    _setLight();
+  }
+  AppColors._dark() {
+    _setDark();
+  }
 
   void _setLight() {
     primary = _primaryBase;
@@ -203,10 +208,13 @@ class AppColors {
 
   // Base colors - Paleta moderna inspirada en Atlassian/Linear
   // Cambiado a azul claro para una apariencia más agradable
-  static const Color _primaryBase = Color(0xFF4FC3F7); // Azul cielo claro - 70% más claro
-  static const Color _secondaryBase = Color(0xFF4F46E5); // Índigo moderno - complementario
+  static const Color _primaryBase =
+      Color(0xFF4FC3F7); // Azul cielo claro - 70% más claro
+  static const Color _secondaryBase =
+      Color(0xFF4F46E5); // Índigo moderno - complementario
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
-  static const Color _backgroundBase = Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
+  static const Color _backgroundBase =
+      Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
 
   // Primary palette - Azul moderno y profesional
   late final Color primary;

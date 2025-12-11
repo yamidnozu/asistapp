@@ -22,7 +22,8 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+        final institutionProvider =
+            Provider.of<InstitutionProvider>(context, listen: false);
 
         final token = authProvider.accessToken;
         if (token != null) {
@@ -40,35 +41,35 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
     final authProvider = Provider.of<AuthProvider>(context);
     final institutionProvider = Provider.of<InstitutionProvider>(context);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-  // Usar context.colors / context.textStyles localmente en widgets según sea necesario
+    // Usar context.colors / context.textStyles localmente en widgets según sea necesario
 
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
 
     return LayoutBuilder(
       builder: (context, constraints) {
-          // FASE 3: Detección de dispositivo
-          final isDesktop = constraints.maxWidth > 1024;
-          final isTablet = constraints.maxWidth > 600;
-          final columnCount = isDesktop ? 4 : (isTablet ? 3 : 2);
+        // FASE 3: Detección de dispositivo
+        final isDesktop = constraints.maxWidth > 1024;
+        final isTablet = constraints.maxWidth > 600;
+        final columnCount = isDesktop ? 4 : (isTablet ? 3 : 2);
 
-          // FASE 7: Layout adaptativo 70/30 para desktop
-          return isDesktop
-              ? _buildDesktopLayout(
-                  context,
-                  userName,
-                  institutionProvider,
-                  userProvider,
-                  columnCount,
-                )
-              : _buildMobileLayout(
-                  context,
-                  userName,
-                  institutionProvider,
-                  userProvider,
-                  columnCount,
-                );
-        },
+        // FASE 7: Layout adaptativo 70/30 para desktop
+        return isDesktop
+            ? _buildDesktopLayout(
+                context,
+                userName,
+                institutionProvider,
+                userProvider,
+                columnCount,
+              )
+            : _buildMobileLayout(
+                context,
+                userName,
+                institutionProvider,
+                userProvider,
+                columnCount,
+              );
+      },
     );
   }
 

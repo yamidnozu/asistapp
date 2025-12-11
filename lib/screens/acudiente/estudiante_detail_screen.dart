@@ -189,9 +189,12 @@ class _EstudianteDetailScreenState extends State<EstudianteDetailScreen>
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatColumn('Total', resumen.totalClases, Colors.white),
-              _buildStatColumn('Presente', resumen.presentes, Colors.green.shade300),
-              _buildStatColumn('Ausente', resumen.ausentes, Colors.red.shade300),
-              _buildStatColumn('Tardanza', resumen.tardanzas, Colors.orange.shade300),
+              _buildStatColumn(
+                  'Presente', resumen.presentes, Colors.green.shade300),
+              _buildStatColumn(
+                  'Ausente', resumen.ausentes, Colors.red.shade300),
+              _buildStatColumn(
+                  'Tardanza', resumen.tardanzas, Colors.orange.shade300),
             ],
           ),
         ],
@@ -416,8 +419,18 @@ class _EstudianteDetailScreenState extends State<EstudianteDetailScreen>
   String _formatDate(DateTime date) {
     final days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     final months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
     ];
     return '${days[date.weekday - 1]} ${date.day} ${months[date.month - 1]} ${date.year}';
   }

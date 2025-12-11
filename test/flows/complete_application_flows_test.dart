@@ -106,12 +106,14 @@ class FakeInstitutionProvider extends InstitutionProvider {
   List<Institution> get institutions => _testInstitutions;
 
   @override
-  Future<void> loadInstitutions(String accessToken, {int? page, int? limit, bool? activa, String? search}) async {
+  Future<void> loadInstitutions(String accessToken,
+      {int? page, int? limit, bool? activa, String? search}) async {
     notifyListeners();
   }
 
   /// Método de test para crear institución (no override)
-  Future<Institution?> testCreateInstitution(String accessToken, Map<String, dynamic> data) async {
+  Future<Institution?> testCreateInstitution(
+      String accessToken, Map<String, dynamic> data) async {
     final newInst = Institution(
       id: 'inst-${_testInstitutions.length + 1}',
       nombre: data['nombre'] ?? 'Nueva Institución',
@@ -128,10 +130,12 @@ class FakeInstitutionProvider extends InstitutionProvider {
 class FakePeriodoProvider extends PeriodoAcademicoProvider {
   final List<PeriodoAcademico> _periodos;
 
-  FakePeriodoProvider([List<PeriodoAcademico>? periodos]) : _periodos = periodos ?? [];
+  FakePeriodoProvider([List<PeriodoAcademico>? periodos])
+      : _periodos = periodos ?? [];
 
   @override
-  List<PeriodoAcademico> get periodosActivos => _periodos.where((p) => p.activo).toList();
+  List<PeriodoAcademico> get periodosActivos =>
+      _periodos.where((p) => p.activo).toList();
 
   @override
   List<PeriodoAcademico> get items => _periodos;
@@ -142,7 +146,8 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
   }
 
   /// Método de test para crear periodo (no override)
-  Future<PeriodoAcademico?> testCreatePeriodo(String accessToken, Map<String, dynamic> data) async {
+  Future<PeriodoAcademico?> testCreatePeriodo(
+      String accessToken, Map<String, dynamic> data) async {
     final newPeriodo = PeriodoAcademico(
       id: 'periodo-${_periodos.length + 1}',
       nombre: data['nombre'] ?? 'Nuevo Periodo',
@@ -166,12 +171,14 @@ class FakeMateriaProvider extends MateriaProvider {
   List<Materia> get materias => _materias;
 
   @override
-  Future<void> loadMaterias(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<void> loadMaterias(String accessToken,
+      {int? page, int? limit, String? search}) async {
     notifyListeners();
   }
 
   /// Método de test para crear materia (no override)
-  Future<Materia?> testCreateMateria(String accessToken, Map<String, dynamic> data) async {
+  Future<Materia?> testCreateMateria(
+      String accessToken, Map<String, dynamic> data) async {
     final newMateria = Materia(
       id: 'materia-${_materias.length + 1}',
       nombre: data['nombre'] ?? 'Nueva Materia',
@@ -199,12 +206,17 @@ class FakeGrupoProvider extends GrupoProvider {
   Grupo? get selectedGrupo => _grupos.isNotEmpty ? _grupos.first : null;
 
   @override
-  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<void> loadItems(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     notifyListeners();
   }
 
   /// Método de test para crear grupo (no override)
-  Future<Grupo?> testCreateGrupo(String accessToken, Map<String, dynamic> data) async {
+  Future<Grupo?> testCreateGrupo(
+      String accessToken, Map<String, dynamic> data) async {
     final periodo = PeriodoAcademico(
       id: data['periodoId'] ?? 'periodo-1',
       nombre: 'Periodo Test',
@@ -229,14 +241,16 @@ class FakeGrupoProvider extends GrupoProvider {
   }
 
   @override
-  Future<bool> asignarEstudianteAGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> asignarEstudianteAGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     _estudiantesAsignados.add('$grupoId:$estudianteId');
     notifyListeners();
     return true;
   }
 
   @override
-  Future<bool> desasignarEstudianteDeGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> desasignarEstudianteDeGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     _estudiantesAsignados.remove('$grupoId:$estudianteId');
     notifyListeners();
     return true;
@@ -263,17 +277,28 @@ class FakeUserProvider extends UserProvider {
   List<User> get professors => _professors;
 
   @override
-  Future<void> loadUsers(String accessToken, {int? page, int? limit, bool? activo, String? search, List<String>? roles}) async {
+  Future<void> loadUsers(String accessToken,
+      {int? page,
+      int? limit,
+      bool? activo,
+      String? search,
+      List<String>? roles}) async {
     notifyListeners();
   }
 
   @override
-  Future<void> loadUsersByInstitution(String accessToken, String institutionId, {bool? activo, int limit = 10, int? page, String? role, String? search}) async {
+  Future<void> loadUsersByInstitution(String accessToken, String institutionId,
+      {bool? activo,
+      int limit = 10,
+      int? page,
+      String? role,
+      String? search}) async {
     notifyListeners();
   }
 
   /// Método de test para crear usuario (no override)
-  Future<User?> testCreateUser(String accessToken, Map<String, dynamic> data) async {
+  Future<User?> testCreateUser(
+      String accessToken, Map<String, dynamic> data) async {
     final newUser = User(
       id: 'user-${_users.length + 1}',
       email: data['email'] ?? 'user@test.com',
@@ -327,7 +352,11 @@ class FakeHorarioProvider extends HorarioProvider {
   ConflictError? get conflictError => _conflictErrorInternal;
 
   @override
-  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<void> loadItems(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     notifyListeners();
   }
 
@@ -337,12 +366,14 @@ class FakeHorarioProvider extends HorarioProvider {
   }
 
   @override
-  Future<void> loadHorariosForGrupoWithConflictDetection(String accessToken, String grupoId, String periodoId) async {
+  Future<void> loadHorariosForGrupoWithConflictDetection(
+      String accessToken, String grupoId, String periodoId) async {
     notifyListeners();
   }
 
   @override
-  Future<bool> createHorario(String accessToken, CreateHorarioRequest horarioData) async {
+  Future<bool> createHorario(
+      String accessToken, CreateHorarioRequest horarioData) async {
     createCalled = true;
 
     if (_shouldConflict) {
@@ -351,7 +382,9 @@ class FakeHorarioProvider extends HorarioProvider {
             code: '409',
             reason: 'grupo_conflict',
             message: 'El grupo ya tiene una clase programada en este horario',
-            meta: {'conflictingHorarioIds': _horarios.map((h) => h.id).toList()},
+            meta: {
+              'conflictingHorarioIds': _horarios.map((h) => h.id).toList()
+            },
           );
       return false;
     }
@@ -371,7 +404,9 @@ class FakeHorarioProvider extends HorarioProvider {
             code: '409',
             reason: 'grupo_conflict',
             message: 'El grupo ya tiene una clase programada en este horario',
-            meta: {'conflictingHorarioIds': [existing.id]},
+            meta: {
+              'conflictingHorarioIds': [existing.id]
+            },
           );
           return false;
         }
@@ -383,7 +418,8 @@ class FakeHorarioProvider extends HorarioProvider {
   }
 
   @override
-  Future<bool> updateHorario(String accessToken, String horarioId, UpdateHorarioRequest horarioData) async {
+  Future<bool> updateHorario(String accessToken, String horarioId,
+      UpdateHorarioRequest horarioData) async {
     updateCalled = true;
     notifyListeners();
     return true;
@@ -420,7 +456,9 @@ class FakeAsistenciaProvider extends AsistenciaProvider {
   String? get errorMessage => _testErrorMessage;
 
   /// Método de test para registrar asistencia manual
-  Future<AsistenciaEstudiante?> testRegistrarAsistenciaManual(String accessToken, String horarioId, String estudianteId, {String? estado, String? observaciones}) async {
+  Future<AsistenciaEstudiante?> testRegistrarAsistenciaManual(
+      String accessToken, String horarioId, String estudianteId,
+      {String? estado, String? observaciones}) async {
     if (_duplicateError) {
       _testErrorMessage = 'Asistencia ya registrada para hoy';
       return null;
@@ -446,7 +484,8 @@ class FakeAsistenciaProvider extends AsistenciaProvider {
   }
 
   /// Método de test para registrar asistencia QR
-  Future<AsistenciaEstudiante?> testRegistrarAsistenciaQr(String accessToken, String horarioId, String codigoQr) async {
+  Future<AsistenciaEstudiante?> testRegistrarAsistenciaQr(
+      String accessToken, String horarioId, String codigoQr) async {
     if (_duplicateError) {
       _testErrorMessage = 'Asistencia ya registrada para hoy';
       return null;
@@ -472,7 +511,8 @@ class FakeAsistenciaProvider extends AsistenciaProvider {
   }
 
   /// Método de test para actualizar asistencia
-  Future<bool> testActualizarAsistencia(String accessToken, String asistenciaId, Map<String, dynamic> data) async {
+  Future<bool> testActualizarAsistencia(String accessToken, String asistenciaId,
+      Map<String, dynamic> data) async {
     final index = _testAsistencias.indexWhere((a) => a.id == asistenciaId);
     if (index != -1) {
       notifyListeners();
@@ -500,14 +540,22 @@ Widget createTestWidget({
 }) {
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider<AuthProvider>.value(value: authProvider ?? FakeAuthProvider()),
-      ChangeNotifierProvider<InstitutionProvider>.value(value: institutionProvider ?? FakeInstitutionProvider()),
-      ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: periodoProvider ?? FakePeriodoProvider()),
-      ChangeNotifierProvider<MateriaProvider>.value(value: materiaProvider ?? FakeMateriaProvider()),
-      ChangeNotifierProvider<GrupoProvider>.value(value: grupoProvider ?? FakeGrupoProvider()),
-      ChangeNotifierProvider<UserProvider>.value(value: userProvider ?? FakeUserProvider()),
-      ChangeNotifierProvider<HorarioProvider>.value(value: horarioProvider ?? FakeHorarioProvider()),
-      ChangeNotifierProvider<AsistenciaProvider>.value(value: asistenciaProvider ?? FakeAsistenciaProvider()),
+      ChangeNotifierProvider<AuthProvider>.value(
+          value: authProvider ?? FakeAuthProvider()),
+      ChangeNotifierProvider<InstitutionProvider>.value(
+          value: institutionProvider ?? FakeInstitutionProvider()),
+      ChangeNotifierProvider<PeriodoAcademicoProvider>.value(
+          value: periodoProvider ?? FakePeriodoProvider()),
+      ChangeNotifierProvider<MateriaProvider>.value(
+          value: materiaProvider ?? FakeMateriaProvider()),
+      ChangeNotifierProvider<GrupoProvider>.value(
+          value: grupoProvider ?? FakeGrupoProvider()),
+      ChangeNotifierProvider<UserProvider>.value(
+          value: userProvider ?? FakeUserProvider()),
+      ChangeNotifierProvider<HorarioProvider>.value(
+          value: horarioProvider ?? FakeHorarioProvider()),
+      ChangeNotifierProvider<AsistenciaProvider>.value(
+          value: asistenciaProvider ?? FakeAsistenciaProvider()),
     ],
     child: MaterialApp(home: child),
   );
@@ -515,7 +563,8 @@ Widget createTestWidget({
 
 /// Crea datos de prueba completos para el "Golden Path"
 class TestDataFactory {
-  static Institution createInstitution({String? id, String? nombre, bool activa = true}) {
+  static Institution createInstitution(
+      {String? id, String? nombre, bool activa = true}) {
     return Institution(
       id: id ?? 'inst-test',
       nombre: nombre ?? 'Colegio Futuro',
@@ -524,7 +573,8 @@ class TestDataFactory {
     );
   }
 
-  static PeriodoAcademico createPeriodo({String? id, String? nombre, bool activo = true}) {
+  static PeriodoAcademico createPeriodo(
+      {String? id, String? nombre, bool activo = true}) {
     return PeriodoAcademico(
       id: id ?? 'periodo-test',
       nombre: nombre ?? '2024-I',
@@ -534,7 +584,8 @@ class TestDataFactory {
     );
   }
 
-  static Materia createMateria({String? id, String? nombre, String? institucionId}) {
+  static Materia createMateria(
+      {String? id, String? nombre, String? institucionId}) {
     return Materia(
       id: id ?? 'materia-test',
       nombre: nombre ?? 'Física Cuántica',
@@ -564,7 +615,8 @@ class TestDataFactory {
     );
   }
 
-  static User createProfesor({String? id, String? email, String? nombres, String? apellidos}) {
+  static User createProfesor(
+      {String? id, String? email, String? nombres, String? apellidos}) {
     return User(
       id: id ?? 'prof-test',
       email: email ?? 'dr.brown@futuro.edu',
@@ -573,12 +625,17 @@ class TestDataFactory {
       rol: 'profesor',
       activo: true,
       instituciones: [
-        UserInstitution(id: 'inst-test', nombre: 'Colegio Futuro', rolEnInstitucion: 'profesor', activo: true),
+        UserInstitution(
+            id: 'inst-test',
+            nombre: 'Colegio Futuro',
+            rolEnInstitucion: 'profesor',
+            activo: true),
       ],
     );
   }
 
-  static User createEstudiante({String? id, String? email, String? nombres, String? apellidos}) {
+  static User createEstudiante(
+      {String? id, String? email, String? nombres, String? apellidos}) {
     return User(
       id: id ?? 'est-test',
       email: email ?? 'marty.mcfly@futuro.edu',
@@ -587,7 +644,11 @@ class TestDataFactory {
       rol: 'estudiante',
       activo: true,
       instituciones: [
-        UserInstitution(id: 'inst-test', nombre: 'Colegio Futuro', rolEnInstitucion: 'estudiante', activo: true),
+        UserInstitution(
+            id: 'inst-test',
+            nombre: 'Colegio Futuro',
+            rolEnInstitucion: 'estudiante',
+            activo: true),
       ],
     );
   }
@@ -601,7 +662,11 @@ class TestDataFactory {
       rol: 'admin_institucion',
       activo: true,
       instituciones: [
-        UserInstitution(id: 'inst-test', nombre: 'Colegio Futuro', rolEnInstitucion: 'admin_institucion', activo: true),
+        UserInstitution(
+            id: 'inst-test',
+            nombre: 'Colegio Futuro',
+            rolEnInstitucion: 'admin_institucion',
+            activo: true),
       ],
     );
   }
@@ -690,8 +755,11 @@ void main() {
         expect(adminUser.email, equals('admin@futuro.edu'));
       });
 
-      test('FASE 3: Admin Institución puede crear estructura académica completa', () async {
-        final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-1');
+      test(
+          'FASE 3: Admin Institución puede crear estructura académica completa',
+          () async {
+        final authProvider = FakeAuthProvider(
+            role: 'admin_institucion', institutionId: 'inst-1');
         final periodoProvider = FakePeriodoProvider();
         final materiaProvider = FakeMateriaProvider();
         final grupoProvider = FakeGrupoProvider();
@@ -703,7 +771,8 @@ void main() {
           {
             'nombre': '2024-I',
             'fechaInicio': DateTime.now().toIso8601String(),
-            'fechaFin': DateTime.now().add(const Duration(days: 180)).toIso8601String(),
+            'fechaFin':
+                DateTime.now().add(const Duration(days: 180)).toIso8601String(),
             'activo': true,
           },
         );
@@ -721,7 +790,12 @@ void main() {
         // Crear Profesor
         final profesor = await userProvider.testCreateUser(
           authProvider.accessToken!,
-          {'email': 'dr.brown@futuro.edu', 'nombres': 'Dr. Emmett', 'apellidos': 'Brown', 'rol': 'profesor'},
+          {
+            'email': 'dr.brown@futuro.edu',
+            'nombres': 'Dr. Emmett',
+            'apellidos': 'Brown',
+            'rol': 'profesor'
+          },
         );
         expect(profesor, isNotNull);
         expect(profesor!.rol, equals('profesor'));
@@ -729,7 +803,12 @@ void main() {
         // Crear Grupo
         final grupo = await grupoProvider.testCreateGrupo(
           authProvider.accessToken!,
-          {'nombre': 'Grado 11-A', 'grado': '11', 'seccion': 'A', 'periodoId': periodo.id},
+          {
+            'nombre': 'Grado 11-A',
+            'grado': '11',
+            'seccion': 'A',
+            'periodoId': periodo.id
+          },
         );
         expect(grupo, isNotNull);
         expect(grupo!.nombre, equals('Grado 11-A'));
@@ -737,14 +816,20 @@ void main() {
         // Crear Estudiante
         final estudiante = await userProvider.testCreateUser(
           authProvider.accessToken!,
-          {'email': 'marty.mcfly@futuro.edu', 'nombres': 'Marty', 'apellidos': 'McFly', 'rol': 'estudiante'},
+          {
+            'email': 'marty.mcfly@futuro.edu',
+            'nombres': 'Marty',
+            'apellidos': 'McFly',
+            'rol': 'estudiante'
+          },
         );
         expect(estudiante, isNotNull);
         expect(estudiante!.rol, equals('estudiante'));
       });
 
       test('FASE 4: Admin puede asignar estudiante a grupo', () async {
-        final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-1');
+        final authProvider = FakeAuthProvider(
+            role: 'admin_institucion', institutionId: 'inst-1');
         final grupoProvider = FakeGrupoProvider();
 
         final success = await grupoProvider.asignarEstudianteAGrupo(
@@ -754,19 +839,29 @@ void main() {
         );
 
         expect(success, isTrue);
-        expect(grupoProvider.isEstudianteAsignado('grupo-1', 'estudiante-1'), isTrue);
+        expect(grupoProvider.isEstudianteAsignado('grupo-1', 'estudiante-1'),
+            isTrue);
       });
     });
 
     group('Escenario 2: Configuración Multi-Sede (Aislamiento de Datos)', () {
-      test('Admin de Institución A NO puede ver materias de Institución B', () async {
+      test('Admin de Institución A NO puede ver materias de Institución B',
+          () async {
         // Simular que las materias están filtradas por institución
         final materiaProviderA = FakeMateriaProvider([
-          Materia(id: 'm1', nombre: 'Matemáticas A', institucionId: 'inst-A', createdAt: DateTime.now()),
+          Materia(
+              id: 'm1',
+              nombre: 'Matemáticas A',
+              institucionId: 'inst-A',
+              createdAt: DateTime.now()),
         ]);
 
         final materiaProviderB = FakeMateriaProvider([
-          Materia(id: 'm2', nombre: 'Matemáticas B', institucionId: 'inst-B', createdAt: DateTime.now()),
+          Materia(
+              id: 'm2',
+              nombre: 'Matemáticas B',
+              institucionId: 'inst-B',
+              createdAt: DateTime.now()),
         ]);
 
         // Admin A solo ve sus materias
@@ -794,7 +889,9 @@ void main() {
 
   group('🟡 GRUPO B: Gestión de Conflictos y Restricciones', () {
     group('Escenario 3: El Profesor Ubicuo (Conflicto de Horario)', () {
-      test('Sistema detecta conflicto cuando profesor tiene clase en mismo horario', () async {
+      test(
+          'Sistema detecta conflicto cuando profesor tiene clase en mismo horario',
+          () async {
         final periodo = TestDataFactory.createPeriodo();
         final grupo = TestDataFactory.createGrupo(periodoAcademico: periodo);
         final materia = TestDataFactory.createMateria();
@@ -813,7 +910,8 @@ void main() {
         );
 
         final horarioProvider = FakeHorarioProvider([horarioExistente]);
-        final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-test');
+        final authProvider = FakeAuthProvider(
+            role: 'admin_institucion', institutionId: 'inst-test');
         authProvider.selectInstitution('inst-test');
 
         // Intentar crear horario conflictivo: Lunes 08:30-09:30
@@ -838,10 +936,13 @@ void main() {
     });
 
     group('Escenario 4: El Grupo Ocupado', () {
-      test('Sistema detecta conflicto cuando grupo ya tiene clase en horario', () async {
+      test('Sistema detecta conflicto cuando grupo ya tiene clase en horario',
+          () async {
         final periodo = TestDataFactory.createPeriodo();
-        final grupoA = TestDataFactory.createGrupo(id: 'grupo-10A', nombre: '10-A', periodoAcademico: periodo);
-        final matematicas = TestDataFactory.createMateria(id: 'mat', nombre: 'Matemáticas');
+        final grupoA = TestDataFactory.createGrupo(
+            id: 'grupo-10A', nombre: '10-A', periodoAcademico: periodo);
+        final matematicas =
+            TestDataFactory.createMateria(id: 'mat', nombre: 'Matemáticas');
 
         // Martes 10:00-12:00 ya ocupado
         final horarioExistente = TestDataFactory.createHorario(
@@ -855,7 +956,8 @@ void main() {
         );
 
         final horarioProvider = FakeHorarioProvider([horarioExistente]);
-        final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-test');
+        final authProvider = FakeAuthProvider(
+            role: 'admin_institucion', institutionId: 'inst-test');
 
         // Intentar: Martes 11:00-13:00 (overlap)
         final success = await horarioProvider.createHorario(
@@ -879,7 +981,8 @@ void main() {
     });
 
     group('Escenario 5: Eliminación con Dependencias', () {
-      test('Sistema debe manejar eliminación de entidades con dependencias', () async {
+      test('Sistema debe manejar eliminación de entidades con dependencias',
+          () async {
         // Este test verifica que el provider maneja correctamente la eliminación
         // En la práctica, el backend rechazaría la eliminación si hay dependencias
 
@@ -909,9 +1012,11 @@ void main() {
     group('Escenario 6: Asistencia Manual (Fallo de Tecnología)', () {
       test('Profesor puede registrar asistencia manual', () async {
         final asistenciaProvider = FakeAsistenciaProvider();
-        final authProvider = FakeAuthProvider(role: 'profesor', institutionId: 'inst-test');
+        final authProvider =
+            FakeAuthProvider(role: 'profesor', institutionId: 'inst-test');
 
-        final asistencia = await asistenciaProvider.testRegistrarAsistenciaManual(
+        final asistencia =
+            await asistenciaProvider.testRegistrarAsistenciaManual(
           authProvider.accessToken!,
           'horario-1',
           'estudiante-1',
@@ -926,7 +1031,8 @@ void main() {
         final asistenciaProvider = FakeAsistenciaProvider();
         final authProvider = FakeAuthProvider(role: 'profesor');
 
-        final asistencia = await asistenciaProvider.testRegistrarAsistenciaManual(
+        final asistencia =
+            await asistenciaProvider.testRegistrarAsistenciaManual(
           authProvider.accessToken!,
           'horario-1',
           'estudiante-1',
@@ -939,7 +1045,8 @@ void main() {
     });
 
     group('Escenario 7: El Estudiante Intruso (Seguridad QR)', () {
-      test('Sistema rechaza QR de estudiante que no pertenece al grupo', () async {
+      test('Sistema rechaza QR de estudiante que no pertenece al grupo',
+          () async {
         final asistenciaProvider = FakeAsistenciaProvider();
         asistenciaProvider.setStudentNotInGroupError(true);
 
@@ -962,7 +1069,8 @@ void main() {
         final authProvider = FakeAuthProvider(role: 'profesor');
 
         // Primer registro exitoso
-        final primerRegistro = await asistenciaProvider.testRegistrarAsistenciaManual(
+        final primerRegistro =
+            await asistenciaProvider.testRegistrarAsistenciaManual(
           authProvider.accessToken!,
           'horario-1',
           'estudiante-1',
@@ -973,7 +1081,8 @@ void main() {
         asistenciaProvider.setDuplicateError(true);
 
         // Segundo registro debe fallar
-        final segundoRegistro = await asistenciaProvider.testRegistrarAsistenciaQr(
+        final segundoRegistro =
+            await asistenciaProvider.testRegistrarAsistenciaQr(
           authProvider.accessToken!,
           'horario-1',
           'qr-estudiante-1',
@@ -985,7 +1094,8 @@ void main() {
     });
 
     group('Escenario 9: Asistencia Justificada (Post-Clase)', () {
-      test('Profesor puede cambiar asistencia de AUSENTE a JUSTIFICADO', () async {
+      test('Profesor puede cambiar asistencia de AUSENTE a JUSTIFICADO',
+          () async {
         final asistenciaProvider = FakeAsistenciaProvider();
         final authProvider = FakeAuthProvider(role: 'profesor');
 
@@ -1039,8 +1149,10 @@ void main() {
 
     group('Escenario 11: Institución Morosa (Desactivación Global)', () {
       test('Sistema puede verificar si institución está activa', () {
-        final institutionActiva = TestDataFactory.createInstitution(activa: true);
-        final institutionInactiva = TestDataFactory.createInstitution(id: 'inst-2', activa: false);
+        final institutionActiva =
+            TestDataFactory.createInstitution(activa: true);
+        final institutionInactiva =
+            TestDataFactory.createInstitution(id: 'inst-2', activa: false);
 
         expect(institutionActiva.activa, isTrue);
         expect(institutionInactiva.activa, isFalse);
@@ -1078,7 +1190,8 @@ void main() {
 
   group('🟣 GRUPO E: Notificaciones y Reportes', () {
     group('Escenario 13: Alerta de Ausencia', () {
-      test('Ausencia registrada debe poder encolarse para notificación', () async {
+      test('Ausencia registrada debe poder encolarse para notificación',
+          () async {
         final asistenciaProvider = FakeAsistenciaProvider();
         final authProvider = FakeAuthProvider(role: 'profesor');
 
@@ -1101,11 +1214,36 @@ void main() {
       test('Estudiante puede ver estadísticas de asistencia', () {
         // Simular datos de asistencia
         final asistencias = [
-          AsistenciaEstudiante(estudianteId: 'e1', nombres: 'A', apellidos: 'B', identificacion: '1', estado: 'PRESENTE'),
-          AsistenciaEstudiante(estudianteId: 'e1', nombres: 'A', apellidos: 'B', identificacion: '1', estado: 'PRESENTE'),
-          AsistenciaEstudiante(estudianteId: 'e1', nombres: 'A', apellidos: 'B', identificacion: '1', estado: 'TARDANZA'),
-          AsistenciaEstudiante(estudianteId: 'e1', nombres: 'A', apellidos: 'B', identificacion: '1', estado: 'AUSENTE'),
-          AsistenciaEstudiante(estudianteId: 'e1', nombres: 'A', apellidos: 'B', identificacion: '1', estado: 'JUSTIFICADO'),
+          AsistenciaEstudiante(
+              estudianteId: 'e1',
+              nombres: 'A',
+              apellidos: 'B',
+              identificacion: '1',
+              estado: 'PRESENTE'),
+          AsistenciaEstudiante(
+              estudianteId: 'e1',
+              nombres: 'A',
+              apellidos: 'B',
+              identificacion: '1',
+              estado: 'PRESENTE'),
+          AsistenciaEstudiante(
+              estudianteId: 'e1',
+              nombres: 'A',
+              apellidos: 'B',
+              identificacion: '1',
+              estado: 'TARDANZA'),
+          AsistenciaEstudiante(
+              estudianteId: 'e1',
+              nombres: 'A',
+              apellidos: 'B',
+              identificacion: '1',
+              estado: 'AUSENTE'),
+          AsistenciaEstudiante(
+              estudianteId: 'e1',
+              nombres: 'A',
+              apellidos: 'B',
+              identificacion: '1',
+              estado: 'JUSTIFICADO'),
         ];
 
         // Calcular estadísticas
@@ -1134,13 +1272,15 @@ void main() {
   // ==========================================================================
 
   group('🔧 Widget Tests: Dialogs de Horarios', () {
-    testWidgets('CreateClassDialog muestra campos correctamente', (WidgetTester tester) async {
+    testWidgets('CreateClassDialog muestra campos correctamente',
+        (WidgetTester tester) async {
       final periodo = TestDataFactory.createPeriodo();
       final grupo = TestDataFactory.createGrupo(periodoAcademico: periodo);
       final materia = TestDataFactory.createMateria();
       final profesor = TestDataFactory.createProfesor();
 
-      final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-test');
+      final authProvider = FakeAuthProvider(
+          role: 'admin_institucion', institutionId: 'inst-test');
       authProvider.selectInstitution('inst-test');
       final horarioProvider = FakeHorarioProvider();
       final materiaProvider = FakeMateriaProvider([materia]);
@@ -1152,10 +1292,13 @@ void main() {
         MultiProvider(
           providers: [
             ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
-            ChangeNotifierProvider<HorarioProvider>.value(value: horarioProvider),
-            ChangeNotifierProvider<MateriaProvider>.value(value: materiaProvider),
+            ChangeNotifierProvider<HorarioProvider>.value(
+                value: horarioProvider),
+            ChangeNotifierProvider<MateriaProvider>.value(
+                value: materiaProvider),
             ChangeNotifierProvider<UserProvider>.value(value: userProvider),
-            ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: periodoProvider),
+            ChangeNotifierProvider<PeriodoAcademicoProvider>.value(
+                value: periodoProvider),
             ChangeNotifierProvider<GrupoProvider>.value(value: grupoProvider),
           ],
           child: MaterialApp(
@@ -1166,7 +1309,8 @@ void main() {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (_) => CreateClassDialog(grupo: grupo, horaInicio: '08:00', diaSemana: 1),
+                        builder: (_) => CreateClassDialog(
+                            grupo: grupo, horaInicio: '08:00', diaSemana: 1),
                       );
                     },
                     child: const Text('Abrir Dialog'),
@@ -1192,7 +1336,8 @@ void main() {
       expect(find.textContaining('Grupo:'), findsOneWidget);
     });
 
-    testWidgets('EditClassDialog muestra horario existente', (WidgetTester tester) async {
+    testWidgets('EditClassDialog muestra horario existente',
+        (WidgetTester tester) async {
       final periodo = TestDataFactory.createPeriodo();
       final grupo = TestDataFactory.createGrupo(periodoAcademico: periodo);
       final materia = TestDataFactory.createMateria();
@@ -1207,7 +1352,8 @@ void main() {
         horaFin: '10:00',
       );
 
-      final authProvider = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-test');
+      final authProvider = FakeAuthProvider(
+          role: 'admin_institucion', institutionId: 'inst-test');
       final horarioProvider = FakeHorarioProvider([horario]);
       final userProvider = FakeUserProvider(professors: [profesor]);
 
@@ -1215,7 +1361,8 @@ void main() {
         MultiProvider(
           providers: [
             ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
-            ChangeNotifierProvider<HorarioProvider>.value(value: horarioProvider),
+            ChangeNotifierProvider<HorarioProvider>.value(
+                value: horarioProvider),
             ChangeNotifierProvider<UserProvider>.value(value: userProvider),
           ],
           child: MaterialApp(
@@ -1258,9 +1405,12 @@ void main() {
   group('📊 Checklist de Validación Final', () {
     test('✅ Auth: Todos los roles tienen tokens válidos', () {
       final superAdmin = FakeAuthProvider(role: 'super_admin');
-      final adminInst = FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-1');
-      final profesor = FakeAuthProvider(role: 'profesor', institutionId: 'inst-1');
-      final estudiante = FakeAuthProvider(role: 'estudiante', institutionId: 'inst-1');
+      final adminInst =
+          FakeAuthProvider(role: 'admin_institucion', institutionId: 'inst-1');
+      final profesor =
+          FakeAuthProvider(role: 'profesor', institutionId: 'inst-1');
+      final estudiante =
+          FakeAuthProvider(role: 'estudiante', institutionId: 'inst-1');
 
       expect(superAdmin.accessToken, isNotNull);
       expect(adminInst.accessToken, isNotNull);
@@ -1280,20 +1430,30 @@ void main() {
       final grupoProvider = FakeGrupoProvider();
       final userProvider = FakeUserProvider();
 
-      expect(await instProvider.testCreateInstitution('token', {'nombre': 'Test'}), isNotNull);
-      expect(await periodoProvider.testCreatePeriodo('token', {
-        'nombre': 'P1',
-        'fechaInicio': DateTime.now().toIso8601String(),
-        'fechaFin': DateTime.now().add(const Duration(days: 90)).toIso8601String(),
-      }), isNotNull);
-      expect(await materiaProvider.testCreateMateria('token', {'nombre': 'Mat'}), isNotNull);
-      expect(await grupoProvider.testCreateGrupo('token', {'nombre': 'G1'}), isNotNull);
-      expect(await userProvider.testCreateUser('token', {'email': 'u@t.com'}), isNotNull);
+      expect(
+          await instProvider.testCreateInstitution('token', {'nombre': 'Test'}),
+          isNotNull);
+      expect(
+          await periodoProvider.testCreatePeriodo('token', {
+            'nombre': 'P1',
+            'fechaInicio': DateTime.now().toIso8601String(),
+            'fechaFin':
+                DateTime.now().add(const Duration(days: 90)).toIso8601String(),
+          }),
+          isNotNull);
+      expect(
+          await materiaProvider.testCreateMateria('token', {'nombre': 'Mat'}),
+          isNotNull);
+      expect(await grupoProvider.testCreateGrupo('token', {'nombre': 'G1'}),
+          isNotNull);
+      expect(await userProvider.testCreateUser('token', {'email': 'u@t.com'}),
+          isNotNull);
     });
 
     test('✅ Logic: Conflictos de horario son detectados', () async {
       final horarioProvider = FakeHorarioProvider([
-        TestDataFactory.createHorario(diaSemana: 1, horaInicio: '08:00', horaFin: '10:00'),
+        TestDataFactory.createHorario(
+            diaSemana: 1, horaInicio: '08:00', horaFin: '10:00'),
       ]);
 
       final conflicto = await horarioProvider.createHorario(
@@ -1317,18 +1477,27 @@ void main() {
     test('✅ Flow: Asistencia puede registrarse por QR y Manual', () async {
       final asistProvider = FakeAsistenciaProvider();
 
-      final manual = await asistProvider.testRegistrarAsistenciaManual('token', 'h1', 'e1');
+      final manual = await asistProvider.testRegistrarAsistenciaManual(
+          'token', 'h1', 'e1');
       expect(manual, isNotNull);
       expect(manual!.estado, equals('PRESENTE'));
 
-      final qr = await asistProvider.testRegistrarAsistenciaQr('token', 'h2', 'qr-code');
+      final qr = await asistProvider.testRegistrarAsistenciaQr(
+          'token', 'h2', 'qr-code');
       expect(qr, isNotNull);
       expect(qr!.estado, equals('PRESENTE'));
     });
 
     test('✅ Clean: Entidades pueden ser eliminadas', () async {
       final userProvider = FakeUserProvider(users: [
-        User(id: 'u1', email: 'a@b.com', nombres: 'A', apellidos: 'B', rol: 'estudiante', activo: true, instituciones: []),
+        User(
+            id: 'u1',
+            email: 'a@b.com',
+            nombres: 'A',
+            apellidos: 'B',
+            rol: 'estudiante',
+            activo: true,
+            instituciones: []),
       ]);
 
       expect(userProvider.users.length, equals(1));

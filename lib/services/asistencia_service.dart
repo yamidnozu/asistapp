@@ -100,7 +100,8 @@ class AsistenciaService {
         'estudianteId': estudianteId,
       };
       if (estado != null) body['estado'] = estado;
-      if (observacion != null && observacion.isNotEmpty) body['observacion'] = observacion;
+      if (observacion != null && observacion.isNotEmpty)
+        body['observacion'] = observacion;
       if (justificada != null) body['justificada'] = justificada;
 
       final response = await http
@@ -172,7 +173,7 @@ class AsistenciaService {
   }) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      
+
       // CORREGIDO: Usar la ruta de horarios que trae la lista de estudiantes del grupo
       // independientemente de si ya tienen asistencia registrada o no.
       final url = '$baseUrlValue/horarios/$horarioId/asistencias';
@@ -189,37 +190,41 @@ class AsistenciaService {
         },
       );
 
-      debugPrint('GET /horarios/$horarioId/asistencias - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /horarios/$horarioId/asistencias - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           final List<dynamic> asistenciasJson = responseData['data'];
-          
+
           // DEBUG: Log raw response to verify id is being returned
           for (var json in asistenciasJson) {
-            debugPrint('📥 Raw data - id: ${json['id']}, estudiante: ${json['estudiante']?['id']}, estado: ${json['estado']}');
+            debugPrint(
+                '📥 Raw data - id: ${json['id']}, estudiante: ${json['estudiante']?['id']}, estado: ${json['estado']}');
           }
-          
+
           // Mapeo especial porque este endpoint devuelve una estructura diferente:
           // { id: null/string, estudiante: {...}, estado: null/string, observacion: null/string, fechaRegistro: ... }
           final asistencias = asistenciasJson.map<AsistenciaEstudiante>((json) {
             final estudiante = json['estudiante'];
             return AsistenciaEstudiante(
-              id: json['id'], // ID de la asistencia - null si no se ha tomado lista
+              id: json[
+                  'id'], // ID de la asistencia - null si no se ha tomado lista
               estudianteId: estudiante['id'],
               nombres: estudiante['nombres'] ?? '',
               apellidos: estudiante['apellidos'] ?? '',
               identificacion: estudiante['identificacion'] ?? '',
               estado: json['estado'], // Será null si no se ha tomado lista
               observaciones: json['observacion'], // Observación del registro
-              fechaRegistro: json['fechaRegistro'] != null 
-                  ? DateTime.parse(json['fechaRegistro'].toString()) 
+              fechaRegistro: json['fechaRegistro'] != null
+                  ? DateTime.parse(json['fechaRegistro'].toString())
                   : null,
             );
           }).toList();
 
-          debugPrint('✅ Obtenidos ${asistencias.length} estudiantes para la lista');
+          debugPrint(
+              '✅ Obtenidos ${asistencias.length} estudiantes para la lista');
           return asistencias;
         } else {
           throw Exception(
@@ -363,7 +368,8 @@ class AsistenciaService {
         },
       );
 
-      debugPrint('GET /asistencias/estudiante - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /asistencias/estudiante - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -374,7 +380,8 @@ class AsistenciaService {
         }
         return null;
       } else {
-        debugPrint('Error getting asistencias estudiante: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting asistencias estudiante: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e) {

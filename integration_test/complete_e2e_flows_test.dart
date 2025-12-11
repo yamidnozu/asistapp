@@ -2,7 +2,7 @@
 /// ============================================================================
 /// PRUEBAS E2E COMPLETAS - FLUJOS DETALLADOS CON VARIANTES Y CONTRAPRUEBAS
 /// ============================================================================
-/// 
+///
 /// Este archivo contiene pruebas exhaustivas de integración E2E que cubren:
 /// - Flujos principales (Happy Path)
 /// - Variantes de cada funcionalidad
@@ -40,15 +40,39 @@ void main() {
 
   /// Credenciales de prueba por rol
   const credentials = {
-    'super_admin': {'email': 'superadmin@asistapp.com', 'password': 'Admin123!'},
+    'super_admin': {
+      'email': 'superadmin@asistapp.com',
+      'password': 'Admin123!'
+    },
     'admin_sanjose': {'email': 'admin@sanjose.edu', 'password': 'SanJose123!'},
-    'admin_santander': {'email': 'admin@santander.edu', 'password': 'Santander123!'},
-    'multi_admin': {'email': 'multiadmin@asistapp.com', 'password': 'Multi123!'},
-    'profesor_juan': {'email': 'juan.perez@sanjose.edu', 'password': 'Prof123!'},
-    'profesor_laura': {'email': 'laura.gomez@sanjose.edu', 'password': 'Prof123!'},
-    'profesor_vacio': {'email': 'vacio.profe@sanjose.edu', 'password': 'Prof123!'},
-    'estudiante_santiago': {'email': 'santiago.mendoza@sanjose.edu', 'password': 'Est123!'},
-    'estudiante_mateo': {'email': 'mateo.castro@sanjose.edu', 'password': 'Est123!'},
+    'admin_santander': {
+      'email': 'admin@santander.edu',
+      'password': 'Santander123!'
+    },
+    'multi_admin': {
+      'email': 'multiadmin@asistapp.com',
+      'password': 'Multi123!'
+    },
+    'profesor_juan': {
+      'email': 'juan.perez@sanjose.edu',
+      'password': 'Prof123!'
+    },
+    'profesor_laura': {
+      'email': 'laura.gomez@sanjose.edu',
+      'password': 'Prof123!'
+    },
+    'profesor_vacio': {
+      'email': 'vacio.profe@sanjose.edu',
+      'password': 'Prof123!'
+    },
+    'estudiante_santiago': {
+      'email': 'santiago.mendoza@sanjose.edu',
+      'password': 'Est123!'
+    },
+    'estudiante_mateo': {
+      'email': 'mateo.castro@sanjose.edu',
+      'password': 'Est123!'
+    },
   };
 
   // Contadores globales
@@ -80,7 +104,8 @@ void main() {
     } catch (_) {}
   }
 
-  Future<bool> login(WidgetTester tester, String credKey, {int timeout = 10}) async {
+  Future<bool> login(WidgetTester tester, String credKey,
+      {int timeout = 10}) async {
     final creds = credentials[credKey];
     if (creds == null) return false;
 
@@ -136,7 +161,9 @@ void main() {
 
     // Buscar por texto parcial
     nav = find.byWidgetPredicate(
-      (w) => w is Text && w.data?.toLowerCase().contains(section.toLowerCase()) == true,
+      (w) =>
+          w is Text &&
+          w.data?.toLowerCase().contains(section.toLowerCase()) == true,
     );
     if (nav.evaluate().isNotEmpty) {
       await tester.tap(nav.first);
@@ -184,7 +211,7 @@ void main() {
 
   bool hasWidget(WidgetTester tester, String text) {
     return find.text(text).evaluate().isNotEmpty ||
-           find.textContaining(text).evaluate().isNotEmpty;
+        find.textContaining(text).evaluate().isNotEmpty;
   }
 
   bool hasIcon(WidgetTester tester, IconData icon) {
@@ -225,10 +252,11 @@ void main() {
   // TEST PRINCIPAL
   // ============================================================================
 
-  testWidgets('🎯 SUITE E2E COMPLETA - Todos los Flujos', (WidgetTester tester) async {
-    print('\n' + '═'*70);
+  testWidgets('🎯 SUITE E2E COMPLETA - Todos los Flujos',
+      (WidgetTester tester) async {
+    print('\n' + '═' * 70);
     print('🚀 INICIANDO SUITE E2E COMPLETA');
-    print('═'*70 + '\n');
+    print('═' * 70 + '\n');
 
     await clearAuth();
     app.main();
@@ -238,7 +266,7 @@ void main() {
     // 🟢 GRUPO A: AUTENTICACIÓN Y ROLES
     // ========================================================================
     print('\n🟢 GRUPO A: AUTENTICACIÓN Y ROLES');
-    print('─'*50);
+    print('─' * 50);
 
     // A1: Login Super Admin - Happy Path
     var success = await login(tester, 'super_admin');
@@ -268,16 +296,18 @@ void main() {
     final emailField = find.byKey(const Key('emailField'));
     final passwordField = find.byKey(const Key('passwordField'));
     final loginButton = find.byKey(const Key('loginButton'));
-    
+
     await tester.enterText(emailField, 'hacker@evil.com');
     await tester.pumpAndSettle();
     await tester.enterText(passwordField, 'wrongpassword');
     await tester.pumpAndSettle();
     await tester.tap(loginButton);
     await tester.pumpAndSettle(const Duration(seconds: 5));
-    
-    final stayedInLogin = find.byKey(const Key('appTitle')).evaluate().isNotEmpty;
-    logResult('A', 'A5: [CONTRA] Login rechaza credenciales inválidas', stayedInLogin);
+
+    final stayedInLogin =
+        find.byKey(const Key('appTitle')).evaluate().isNotEmpty;
+    logResult('A', 'A5: [CONTRA] Login rechaza credenciales inválidas',
+        stayedInLogin);
 
     // A6: CONTRAPRUEBA - Login con email vacío
     await tester.enterText(emailField, '');
@@ -286,23 +316,26 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(loginButton);
     await tester.pumpAndSettle(const Duration(seconds: 3));
-    
-    final stayedInLogin2 = find.byKey(const Key('appTitle')).evaluate().isNotEmpty;
+
+    final stayedInLogin2 =
+        find.byKey(const Key('appTitle')).evaluate().isNotEmpty;
     logResult('A', 'A6: [CONTRA] Login rechaza email vacío', stayedInLogin2);
 
     // ========================================================================
     // 🔵 GRUPO B: SUPER ADMIN - GESTIÓN DE INSTITUCIONES
     // ========================================================================
     print('\n🔵 GRUPO B: SUPER ADMIN - GESTIÓN DE INSTITUCIONES');
-    print('─'*50);
+    print('─' * 50);
 
     success = await login(tester, 'super_admin');
     if (success) {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // B1: Super Admin NO ve selección de institución
-      final noInstSelection = find.text('Seleccionar Institución').evaluate().isEmpty;
-      logResult('B', 'B1: Super Admin NO ve selección de institución', noInstSelection);
+      final noInstSelection =
+          find.text('Seleccionar Institución').evaluate().isEmpty;
+      logResult('B', 'B1: Super Admin NO ve selección de institución',
+          noInstSelection);
 
       // B2: Navegar a Instituciones
       final navInst = await navigateTo(tester, 'Instituciones');
@@ -315,7 +348,8 @@ void main() {
         final hasCards = find.byType(Card).evaluate().isNotEmpty;
         final hasSanJose = hasWidget(tester, 'San José');
         final hasSantander = hasWidget(tester, 'Santander');
-        logResult('B', 'B3: Lista muestra instituciones existentes', hasCards || hasSanJose || hasSantander);
+        logResult('B', 'B3: Lista muestra instituciones existentes',
+            hasCards || hasSanJose || hasSantander);
 
         // B4: Verificar que existe FAB para crear
         final hasFab = find.byType(FloatingActionButton).evaluate().isNotEmpty;
@@ -325,12 +359,13 @@ void main() {
         if (hasFab) {
           await tapFAB(tester);
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final hasForm = find.byType(TextFormField).evaluate().isNotEmpty ||
-                         hasWidget(tester, 'Crear') ||
-                         hasWidget(tester, 'Nueva');
-          logResult('B', 'B5: Formulario de crear institución se abre', hasForm);
-          
+              hasWidget(tester, 'Crear') ||
+              hasWidget(tester, 'Nueva');
+          logResult(
+              'B', 'B5: Formulario de crear institución se abre', hasForm);
+
           // Cerrar diálogo/formulario
           final cancelBtn = find.text('Cancelar');
           if (cancelBtn.evaluate().isNotEmpty) {
@@ -351,40 +386,42 @@ void main() {
         if (searchField.evaluate().isNotEmpty) {
           await tester.enterText(searchField.first, 'San José');
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final foundSanJose = hasWidget(tester, 'San José');
           logResult('B', 'B6: Búsqueda de institución funciona', foundSanJose);
-          
+
           // Limpiar búsqueda
           await tester.enterText(searchField.first, '');
           await tester.pumpAndSettle(const Duration(seconds: 1));
         } else {
-          logResult('B', 'B6: Búsqueda de institución funciona', true); // Skip si no hay search
+          logResult('B', 'B6: Búsqueda de institución funciona',
+              true); // Skip si no hay search
         }
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // B7-B12: CONFIGURACIÓN DE NOTIFICACIONES (NUEVO)
         // ═══════════════════════════════════════════════════════════════════
-        
+
         // B7: Abrir edición de institución existente para probar config notificaciones
         final instCards = find.byType(Card);
         if (instCards.evaluate().isNotEmpty) {
           // Tap en primera institución para editar
           await tester.tap(instCards.first);
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           // Buscar botón de editar
           final editBtn = find.byIcon(Icons.edit);
           if (editBtn.evaluate().isNotEmpty) {
             await tester.tap(editBtn.first);
             await tester.pumpAndSettle(const Duration(seconds: 2));
-            
+
             // B7: Formulario de edición tiene step de Configuración
             final hasConfigStep = hasWidget(tester, 'Configuración') ||
-                                 hasWidget(tester, 'Config') ||
-                                 hasWidget(tester, 'Notificaciones');
-            logResult('B', 'B7: Formulario tiene step de Configuración', hasConfigStep);
-            
+                hasWidget(tester, 'Config') ||
+                hasWidget(tester, 'Notificaciones');
+            logResult('B', 'B7: Formulario tiene step de Configuración',
+                hasConfigStep);
+
             // Navegar al step de configuración (Step 3)
             final stepperSteps = find.byType(Step);
             if (stepperSteps.evaluate().length >= 3) {
@@ -397,35 +434,42 @@ void main() {
                 }
               }
             }
-            
+
             // B8: Verificar Switch de Notificaciones Activas
             final notifSwitch = find.byType(Switch);
-            final hasNotifSwitch = notifSwitch.evaluate().length >= 2; // Al menos 2 switches (activa + notificaciones)
-            logResult('B', 'B8: Switch de Notificaciones visible', hasNotifSwitch);
-            
+            final hasNotifSwitch = notifSwitch.evaluate().length >=
+                2; // Al menos 2 switches (activa + notificaciones)
+            logResult(
+                'B', 'B8: Switch de Notificaciones visible', hasNotifSwitch);
+
             // B9: Activar notificaciones si no están activas
             if (hasNotifSwitch && notifSwitch.evaluate().length >= 2) {
               // El segundo switch es generalmente el de notificaciones
               await tester.tap(notifSwitch.at(1));
               await tester.pumpAndSettle(const Duration(seconds: 1));
-              
+
               // B9: Verificar que aparecen opciones de canal
               final hasChannelDropdown = hasWidget(tester, 'Canal') ||
-                                        hasWidget(tester, 'WhatsApp') ||
-                                        hasWidget(tester, 'SMS') ||
-                                        find.byType(DropdownButtonFormField).evaluate().isNotEmpty;
-              logResult('B', 'B9: Opciones de canal visibles al activar notificaciones', hasChannelDropdown);
-              
+                  hasWidget(tester, 'WhatsApp') ||
+                  hasWidget(tester, 'SMS') ||
+                  find.byType(DropdownButtonFormField).evaluate().isNotEmpty;
+              logResult(
+                  'B',
+                  'B9: Opciones de canal visibles al activar notificaciones',
+                  hasChannelDropdown);
+
               // B10: Probar dropdown de Canal de Notificación
-              final channelDropdowns = find.byType(DropdownButtonFormField<String>);
+              final channelDropdowns =
+                  find.byType(DropdownButtonFormField<String>);
               if (channelDropdowns.evaluate().isNotEmpty) {
                 await tester.tap(channelDropdowns.first);
                 await tester.pumpAndSettle(const Duration(seconds: 1));
-                
+
                 final hasWhatsApp = hasWidget(tester, 'WhatsApp');
                 final hasSMS = hasWidget(tester, 'SMS');
-                logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS', hasWhatsApp || hasSMS);
-                
+                logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS',
+                    hasWhatsApp || hasSMS);
+
                 // Seleccionar WhatsApp
                 final whatsappOption = find.text('WhatsApp');
                 if (whatsappOption.evaluate().isNotEmpty) {
@@ -433,45 +477,69 @@ void main() {
                   await tester.pumpAndSettle(const Duration(seconds: 1));
                 }
               } else {
-                logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS', true); // Skip
+                logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS',
+                    true); // Skip
               }
-              
+
               // B11: Probar dropdown de Modo de Notificación
-              final modeDropdowns = find.byType(DropdownButtonFormField<String>);
+              final modeDropdowns =
+                  find.byType(DropdownButtonFormField<String>);
               if (modeDropdowns.evaluate().length >= 2) {
                 await tester.tap(modeDropdowns.at(1));
                 await tester.pumpAndSettle(const Duration(seconds: 1));
-                
-                final hasInstant = hasWidget(tester, 'Instantáneo') || hasWidget(tester, 'INSTANT');
-                final hasEndOfDay = hasWidget(tester, 'Fin del Día') || hasWidget(tester, 'END_OF_DAY');
-                final hasManual = hasWidget(tester, 'Manual') || hasWidget(tester, 'MANUAL');
-                logResult('B', 'B11: Dropdown modo tiene opciones correctas', hasInstant || hasEndOfDay || hasManual);
-                
+
+                final hasInstant = hasWidget(tester, 'Instantáneo') ||
+                    hasWidget(tester, 'INSTANT');
+                final hasEndOfDay = hasWidget(tester, 'Fin del Día') ||
+                    hasWidget(tester, 'END_OF_DAY');
+                final hasManual =
+                    hasWidget(tester, 'Manual') || hasWidget(tester, 'MANUAL');
+                logResult('B', 'B11: Dropdown modo tiene opciones correctas',
+                    hasInstant || hasEndOfDay || hasManual);
+
                 // Seleccionar END_OF_DAY para probar hora
                 final endOfDayOption = find.textContaining('Fin');
                 if (endOfDayOption.evaluate().isNotEmpty) {
                   await tester.tap(endOfDayOption.last);
                   await tester.pumpAndSettle(const Duration(seconds: 1));
-                  
+
                   // B12: Verificar que aparece campo de Hora de Disparo
                   final hasTimeField = hasWidget(tester, 'Hora') ||
-                                      hasWidget(tester, 'Disparo') ||
-                                      find.byIcon(Icons.access_time).evaluate().isNotEmpty;
-                  logResult('B', 'B12: Campo Hora de Disparo visible en modo END_OF_DAY', hasTimeField);
+                      hasWidget(tester, 'Disparo') ||
+                      find.byIcon(Icons.access_time).evaluate().isNotEmpty;
+                  logResult(
+                      'B',
+                      'B12: Campo Hora de Disparo visible en modo END_OF_DAY',
+                      hasTimeField);
                 } else {
-                  logResult('B', 'B12: Campo Hora de Disparo visible en modo END_OF_DAY', true); // Skip
+                  logResult(
+                      'B',
+                      'B12: Campo Hora de Disparo visible en modo END_OF_DAY',
+                      true); // Skip
                 }
               } else {
-                logResult('B', 'B11: Dropdown modo tiene opciones correctas', true); // Skip
-                logResult('B', 'B12: Campo Hora de Disparo visible en modo END_OF_DAY', true); // Skip
+                logResult('B', 'B11: Dropdown modo tiene opciones correctas',
+                    true); // Skip
+                logResult(
+                    'B',
+                    'B12: Campo Hora de Disparo visible en modo END_OF_DAY',
+                    true); // Skip
               }
             } else {
-              logResult('B', 'B9: Opciones de canal visibles al activar notificaciones', true); // Skip
-              logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS', true); // Skip
-              logResult('B', 'B11: Dropdown modo tiene opciones correctas', true); // Skip
-              logResult('B', 'B12: Campo Hora de Disparo visible en modo END_OF_DAY', true); // Skip
+              logResult(
+                  'B',
+                  'B9: Opciones de canal visibles al activar notificaciones',
+                  true); // Skip
+              logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS',
+                  true); // Skip
+              logResult('B', 'B11: Dropdown modo tiene opciones correctas',
+                  true); // Skip
+              logResult(
+                  'B',
+                  'B12: Campo Hora de Disparo visible en modo END_OF_DAY',
+                  true); // Skip
             }
-            
+
             // Cerrar formulario sin guardar
             final cancelBtn = find.text('Cancelar');
             if (cancelBtn.evaluate().isNotEmpty) {
@@ -485,12 +553,22 @@ void main() {
               }
             }
           } else {
-            logResult('B', 'B7: Formulario tiene step de Configuración', true); // Skip
-            logResult('B', 'B8: Switch de Notificaciones visible', true); // Skip
-            logResult('B', 'B9: Opciones de canal visibles al activar notificaciones', true); // Skip
-            logResult('B', 'B10: Dropdown canal tiene WhatsApp y SMS', true); // Skip
-            logResult('B', 'B11: Dropdown modo tiene opciones correctas', true); // Skip
-            logResult('B', 'B12: Campo Hora de Disparo visible en modo END_OF_DAY', true); // Skip
+            logResult('B', 'B7: Formulario tiene step de Configuración',
+                true); // Skip
+            logResult(
+                'B', 'B8: Switch de Notificaciones visible', true); // Skip
+            logResult(
+                'B',
+                'B9: Opciones de canal visibles al activar notificaciones',
+                true); // Skip
+            logResult(
+                'B', 'B10: Dropdown canal tiene WhatsApp y SMS', true); // Skip
+            logResult('B', 'B11: Dropdown modo tiene opciones correctas',
+                true); // Skip
+            logResult(
+                'B',
+                'B12: Campo Hora de Disparo visible en modo END_OF_DAY',
+                true); // Skip
           }
         }
       }
@@ -503,10 +581,10 @@ void main() {
 
       if (navUsers) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
-        
+
         // B14: Ver usuarios de múltiples instituciones
         final hasUserCards = find.byType(Card).evaluate().isNotEmpty ||
-                            find.byType(ListTile).evaluate().isNotEmpty;
+            find.byType(ListTile).evaluate().isNotEmpty;
         logResult('B', 'B14: Lista de usuarios visible', hasUserCards);
       }
 
@@ -518,7 +596,7 @@ void main() {
     // 🟡 GRUPO C: ADMIN INSTITUCIÓN - GESTIÓN DE USUARIOS
     // ========================================================================
     print('\n🟡 GRUPO C: ADMIN INSTITUCIÓN - GESTIÓN DE USUARIOS');
-    print('─'*50);
+    print('─' * 50);
 
     success = await login(tester, 'admin_sanjose');
     if (success) {
@@ -526,8 +604,8 @@ void main() {
 
       // C1: Admin ve su dashboard
       final hasDashboard = hasWidget(tester, 'Dashboard') ||
-                          hasWidget(tester, 'Gestión') ||
-                          hasIcon(tester, Icons.dashboard);
+          hasWidget(tester, 'Gestión') ||
+          hasIcon(tester, Icons.dashboard);
       logResult('C', 'C1: Admin ve dashboard de institución', hasDashboard);
 
       // C2: Navegar a Usuarios
@@ -538,12 +616,15 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // C3: AISLAMIENTO - No ver usuarios de otra institución
-        final noSantander = find.textContaining('santander.edu').evaluate().isEmpty;
-        logResult('C', 'C3: [AISLAMIENTO] No ve usuarios de Santander', noSantander);
+        final noSantander =
+            find.textContaining('santander.edu').evaluate().isEmpty;
+        logResult(
+            'C', 'C3: [AISLAMIENTO] No ve usuarios de Santander', noSantander);
 
         // C4: Ver usuarios de su institución
-        final seesSanJose = find.textContaining('sanjose.edu').evaluate().isNotEmpty ||
-                          find.byType(Card).evaluate().isNotEmpty;
+        final seesSanJose =
+            find.textContaining('sanjose.edu').evaluate().isNotEmpty ||
+                find.byType(Card).evaluate().isNotEmpty;
         logResult('C', 'C4: Ve usuarios de San José', seesSanJose);
 
         // C5: FAB para crear usuario
@@ -557,12 +638,19 @@ void main() {
 
           // Puede ser formulario directo o diálogo de selección de tipo
           final hasForm = find.byType(TextFormField).evaluate().isNotEmpty;
-          final hasTypeSelection = find.byKey(const Key('createUser_professor')).evaluate().isNotEmpty ||
-                                   find.byKey(const Key('createUser_student')).evaluate().isNotEmpty ||
-                                   hasWidget(tester, 'Profesor') ||
-                                   hasWidget(tester, 'Estudiante') ||
-                                   hasWidget(tester, 'tipo');
-          logResult('C', 'C6: Formulario de crear usuario se abre', hasForm || hasTypeSelection);
+          final hasTypeSelection = find
+                  .byKey(const Key('createUser_professor'))
+                  .evaluate()
+                  .isNotEmpty ||
+              find
+                  .byKey(const Key('createUser_student'))
+                  .evaluate()
+                  .isNotEmpty ||
+              hasWidget(tester, 'Profesor') ||
+              hasWidget(tester, 'Estudiante') ||
+              hasWidget(tester, 'tipo');
+          logResult('C', 'C6: Formulario de crear usuario se abre',
+              hasForm || hasTypeSelection);
 
           // Cerrar
           final cancelBtn = find.text('Cancelar');
@@ -597,31 +685,33 @@ void main() {
     // 🟣 GRUPO D: GESTIÓN ACADÉMICA
     // ========================================================================
     print('\n🟣 GRUPO D: GESTIÓN ACADÉMICA');
-    print('─'*50);
+    print('─' * 50);
 
     success = await login(tester, 'admin_sanjose');
     if (success) {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // === MATERIAS ===
-      
+
       // D1: Navegar a Materias (puede estar integrado en otra sección o no existir)
       var realNavOk = await navigateTo(tester, 'Materias');
       // Si no hay sección Materias independiente, marcar como skip (la app puede no tener esta sección)
-      logResult('D', 'D1: Navegar a gestión de materias', realNavOk || true); // Skip si no existe
+      logResult('D', 'D1: Navegar a gestión de materias',
+          realNavOk || true); // Skip si no existe
 
       if (realNavOk) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // D2: Ver lista de materias
         final hasMaterias = find.byType(Card).evaluate().isNotEmpty ||
-                          hasWidget(tester, 'Cálculo') ||
-                          hasWidget(tester, 'Física') ||
-                          hasWidget(tester, 'Español');
+            hasWidget(tester, 'Cálculo') ||
+            hasWidget(tester, 'Física') ||
+            hasWidget(tester, 'Español');
         logResult('D', 'D2: Lista de materias visible', hasMaterias);
 
         // D3: FAB para crear materia
-        final hasFabMateria = find.byType(FloatingActionButton).evaluate().isNotEmpty;
+        final hasFabMateria =
+            find.byType(FloatingActionButton).evaluate().isNotEmpty;
         logResult('D', 'D3: FAB de crear materia visible', hasFabMateria);
 
         if (hasFabMateria) {
@@ -629,8 +719,9 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           // D4: Formulario de materia tiene campos correctos
-          final hasNombre = find.textContaining('Nombre').evaluate().isNotEmpty ||
-                           find.byType(TextFormField).evaluate().isNotEmpty;
+          final hasNombre =
+              find.textContaining('Nombre').evaluate().isNotEmpty ||
+                  find.byType(TextFormField).evaluate().isNotEmpty;
           logResult('D', 'D4: Formulario de materia tiene campos', hasNombre);
 
           // Cerrar
@@ -642,10 +733,10 @@ void main() {
         if (searchField.evaluate().isNotEmpty) {
           await tester.enterText(searchField.first, 'Física');
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final foundFisica = hasWidget(tester, 'Física');
           logResult('D', 'D5: Búsqueda de materia funciona', foundFisica);
-          
+
           await tester.enterText(searchField.first, '');
           await tester.pumpAndSettle(const Duration(seconds: 1));
         } else {
@@ -656,7 +747,7 @@ void main() {
       var navOk = realNavOk;
 
       // === GRUPOS ===
-      
+
       // D6: Navegar a Grupos
       await navigateTo(tester, 'Dashboard');
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -668,13 +759,14 @@ void main() {
 
         // D7: Ver lista de grupos
         final hasGrupos = find.byType(Card).evaluate().isNotEmpty ||
-                         hasWidget(tester, 'Grado') ||
-                         hasWidget(tester, '10-A') ||
-                         hasWidget(tester, '11-B');
+            hasWidget(tester, 'Grado') ||
+            hasWidget(tester, '10-A') ||
+            hasWidget(tester, '11-B');
         logResult('D', 'D7: Lista de grupos visible', hasGrupos);
 
         // D8: FAB para crear grupo
-        final hasFabGrupo = find.byType(FloatingActionButton).evaluate().isNotEmpty;
+        final hasFabGrupo =
+            find.byType(FloatingActionButton).evaluate().isNotEmpty;
         logResult('D', 'D8: FAB de crear grupo visible', hasFabGrupo);
 
         if (hasFabGrupo) {
@@ -683,19 +775,22 @@ void main() {
 
           // D9: Formulario de grupo tiene campos correctos
           final hasFields = find.byType(TextFormField).evaluate().length >= 2;
-          final hasDropdown = find.byType(DropdownButtonFormField).evaluate().isNotEmpty ||
-                             hasWidget(tester, 'Periodo') ||
-                             hasWidget(tester, 'Grado');
-          logResult('D', 'D9: Formulario de grupo tiene campos', hasFields || hasDropdown);
+          final hasDropdown =
+              find.byType(DropdownButtonFormField).evaluate().isNotEmpty ||
+                  hasWidget(tester, 'Periodo') ||
+                  hasWidget(tester, 'Grado');
+          logResult('D', 'D9: Formulario de grupo tiene campos',
+              hasFields || hasDropdown);
 
           // D10: CONTRAPRUEBA - Crear grupo sin datos obligatorios
           await tapButton(tester, 'Crear');
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final hasValidationError = hasWidget(tester, 'obligatorio') ||
-                                    hasWidget(tester, 'requerido') ||
-                                    hasWidget(tester, 'error');
-          logResult('D', 'D10: [CONTRA] Validación de campos obligatorios', hasValidationError);
+              hasWidget(tester, 'requerido') ||
+              hasWidget(tester, 'error');
+          logResult('D', 'D10: [CONTRA] Validación de campos obligatorios',
+              hasValidationError);
 
           // Cerrar
           await tapButton(tester, 'Cancelar');
@@ -706,13 +801,13 @@ void main() {
         if (grupoCards.evaluate().isNotEmpty) {
           await tester.tap(grupoCards.first);
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final inDetail = hasWidget(tester, 'estudiante') ||
-                          hasWidget(tester, 'Estudiante') ||
-                          hasWidget(tester, 'Detalle') ||
-                          hasIcon(tester, Icons.arrow_back);
+              hasWidget(tester, 'Estudiante') ||
+              hasWidget(tester, 'Detalle') ||
+              hasIcon(tester, Icons.arrow_back);
           logResult('D', 'D11: Ver detalle de grupo', inDetail);
-          
+
           // Volver
           final backBtn = find.byIcon(Icons.arrow_back);
           if (backBtn.evaluate().isNotEmpty) {
@@ -723,7 +818,7 @@ void main() {
       }
 
       // === HORARIOS ===
-      
+
       // D12: Navegar a Horarios
       await navigateTo(tester, 'Dashboard');
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -735,22 +830,25 @@ void main() {
 
         // D13: Ver horarios existentes
         final hasHorarios = find.byType(Card).evaluate().isNotEmpty ||
-                           hasWidget(tester, 'Lunes') ||
-                           hasWidget(tester, 'Martes') ||
-                           hasWidget(tester, '08:00');
+            hasWidget(tester, 'Lunes') ||
+            hasWidget(tester, 'Martes') ||
+            hasWidget(tester, '08:00');
         logResult('D', 'D13: Lista de horarios visible', hasHorarios);
 
         // D14: FAB para crear horario
-        final hasFabHorario = find.byType(FloatingActionButton).evaluate().isNotEmpty;
+        final hasFabHorario =
+            find.byType(FloatingActionButton).evaluate().isNotEmpty;
         logResult('D', 'D14: FAB de crear horario visible', hasFabHorario);
 
         // D15: Filtrar por grupo (si hay selector)
         final dropdown = find.byType(DropdownButton);
         final dropdownFormField = find.byType(DropdownButtonFormField);
-        if (dropdown.evaluate().isNotEmpty || dropdownFormField.evaluate().isNotEmpty) {
+        if (dropdown.evaluate().isNotEmpty ||
+            dropdownFormField.evaluate().isNotEmpty) {
           logResult('D', 'D15: Filtro de grupo/período disponible', true);
         } else {
-          logResult('D', 'D15: Filtro de grupo/período disponible', true); // Skip
+          logResult(
+              'D', 'D15: Filtro de grupo/período disponible', true); // Skip
         }
       }
 
@@ -762,7 +860,7 @@ void main() {
     // 🟠 GRUPO E: CONFLICTOS Y RESTRICCIONES
     // ========================================================================
     print('\n🟠 GRUPO E: CONFLICTOS Y RESTRICCIONES');
-    print('─'*50);
+    print('─' * 50);
 
     success = await login(tester, 'admin_sanjose');
     if (success) {
@@ -770,28 +868,29 @@ void main() {
 
       // E1: Navegar a Horarios para verificar conflictos
       final navOk = await navigateTo(tester, 'Horarios');
-      
+
       if (navOk) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // E1: Sistema tiene horarios para validar conflictos
         final hasExistingSchedules = find.byType(Card).evaluate().isNotEmpty ||
-                                    hasWidget(tester, 'Lunes') ||
-                                    hasWidget(tester, '08:00');
-        logResult('E', 'E1: Sistema tiene horarios existentes', hasExistingSchedules);
+            hasWidget(tester, 'Lunes') ||
+            hasWidget(tester, '08:00');
+        logResult(
+            'E', 'E1: Sistema tiene horarios existentes', hasExistingSchedules);
 
         // E2: Verificar que hay info de profesor en horarios
         final hasProfInfo = hasWidget(tester, 'Juan') ||
-                           hasWidget(tester, 'Laura') ||
-                           hasWidget(tester, 'Profesor') ||
-                           hasWidget(tester, 'profesor');
+            hasWidget(tester, 'Laura') ||
+            hasWidget(tester, 'Profesor') ||
+            hasWidget(tester, 'profesor');
         logResult('E', 'E2: Horarios muestran profesor asignado', hasProfInfo);
 
         // E3: Verificar info de grupo en horarios
         final hasGrupoInfo = hasWidget(tester, 'Grupo') ||
-                            hasWidget(tester, 'Grado') ||
-                            hasWidget(tester, '10') ||
-                            hasWidget(tester, '11');
+            hasWidget(tester, 'Grado') ||
+            hasWidget(tester, '10') ||
+            hasWidget(tester, '11');
         logResult('E', 'E3: Horarios muestran grupo asignado', hasGrupoInfo);
       }
 
@@ -808,9 +907,10 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         final hasStudentCount = hasWidget(tester, 'estudiante') ||
-                               hasWidget(tester, 'Estudiante') ||
-                               find.byIcon(Icons.person).evaluate().isNotEmpty;
-        logResult('E', 'E4: Grupo tiene estudiantes asignados', hasStudentCount);
+            hasWidget(tester, 'Estudiante') ||
+            find.byIcon(Icons.person).evaluate().isNotEmpty;
+        logResult(
+            'E', 'E4: Grupo tiene estudiantes asignados', hasStudentCount);
 
         // Volver
         final backBtn = find.byIcon(Icons.arrow_back);
@@ -828,7 +928,7 @@ void main() {
     // 🔴 GRUPO F: FLUJO DE ASISTENCIA
     // ========================================================================
     print('\n🔴 GRUPO F: FLUJO DE ASISTENCIA');
-    print('─'*50);
+    print('─' * 50);
 
     // F1-F4: Profesor ve sus clases y puede tomar asistencia
     success = await login(tester, 'profesor_juan');
@@ -837,16 +937,16 @@ void main() {
 
       // F1: Profesor ve dashboard con clases
       final hasClases = hasWidget(tester, 'Clase') ||
-                       hasWidget(tester, 'Hola') ||
-                       find.byType(Card).evaluate().isNotEmpty;
+          hasWidget(tester, 'Hola') ||
+          find.byType(Card).evaluate().isNotEmpty;
       logResult('F', 'F1: Profesor ve dashboard con clases', hasClases);
 
       // F2: Clases muestran información relevante
       final hasClassInfo = hasWidget(tester, 'Cálculo') ||
-                          hasWidget(tester, 'Español') ||
-                          hasWidget(tester, 'Física') ||
-                          hasWidget(tester, 'Grupo') ||
-                          hasWidget(tester, '08:00');
+          hasWidget(tester, 'Español') ||
+          hasWidget(tester, 'Física') ||
+          hasWidget(tester, 'Grupo') ||
+          hasWidget(tester, '08:00');
       logResult('F', 'F2: Clases muestran materia/horario', hasClassInfo);
 
       // F3: Tap en clase para tomar asistencia
@@ -857,24 +957,24 @@ void main() {
 
         // F4: Pantalla de asistencia cargada
         final inAttendance = hasWidget(tester, 'Asistencia') ||
-                            hasWidget(tester, 'Presente') ||
-                            hasWidget(tester, 'Ausente') ||
-                            hasIcon(tester, Icons.qr_code_scanner) ||
-                            find.byType(ListView).evaluate().isNotEmpty;
+            hasWidget(tester, 'Presente') ||
+            hasWidget(tester, 'Ausente') ||
+            hasIcon(tester, Icons.qr_code_scanner) ||
+            find.byType(ListView).evaluate().isNotEmpty;
         logResult('F', 'F3: Pantalla de tomar asistencia', inAttendance);
 
         // F4: Opciones de asistencia visibles
         final hasOptions = hasWidget(tester, 'Presente') ||
-                          hasWidget(tester, 'Ausente') ||
-                          hasWidget(tester, 'Tardanza') ||
-                          hasIcon(tester, Icons.check) ||
-                          hasIcon(tester, Icons.close);
+            hasWidget(tester, 'Ausente') ||
+            hasWidget(tester, 'Tardanza') ||
+            hasIcon(tester, Icons.check) ||
+            hasIcon(tester, Icons.close);
         logResult('F', 'F4: Opciones de estado visibles', hasOptions);
 
         // F5: Botón de escanear QR disponible
         final hasQrScanner = hasIcon(tester, Icons.qr_code_scanner) ||
-                            hasWidget(tester, 'QR') ||
-                            hasWidget(tester, 'Escanear');
+            hasWidget(tester, 'QR') ||
+            hasWidget(tester, 'Escanear');
         logResult('F', 'F5: Opción de escanear QR disponible', hasQrScanner);
 
         // Volver
@@ -896,9 +996,9 @@ void main() {
 
       // F6: Estudiante ve su dashboard
       final hasStudentDashboard = hasWidget(tester, 'Mi') ||
-                                  hasWidget(tester, 'QR') ||
-                                  hasIcon(tester, Icons.qr_code) ||
-                                  hasWidget(tester, 'Asistencia');
+          hasWidget(tester, 'QR') ||
+          hasIcon(tester, Icons.qr_code) ||
+          hasWidget(tester, 'Asistencia');
       logResult('F', 'F6: Estudiante ve su dashboard', hasStudentDashboard);
 
       // F7: Acceder a Mi QR
@@ -924,28 +1024,29 @@ void main() {
 
       // Verificar historial o al menos que la opción existe en el dashboard
       final hasHistory = hasWidget(tester, 'Presente') ||
-                        hasWidget(tester, 'Ausente') ||
-                        hasWidget(tester, 'Justificado') ||
-                        hasWidget(tester, '%') ||
-                        hasWidget(tester, 'Mi Asistencia') ||
-                        hasWidget(tester, 'Historial') ||
-                        hasWidget(tester, 'asistencia') ||
-                        find.byType(Card).evaluate().isNotEmpty ||
-                        find.byType(ListTile).evaluate().isNotEmpty ||
-                        asistNav; // Si navegó a asistencia, cuenta como éxito
+          hasWidget(tester, 'Ausente') ||
+          hasWidget(tester, 'Justificado') ||
+          hasWidget(tester, '%') ||
+          hasWidget(tester, 'Mi Asistencia') ||
+          hasWidget(tester, 'Historial') ||
+          hasWidget(tester, 'asistencia') ||
+          find.byType(Card).evaluate().isNotEmpty ||
+          find.byType(ListTile).evaluate().isNotEmpty ||
+          asistNav; // Si navegó a asistencia, cuenta como éxito
       logResult('F', 'F8: Estudiante ve historial de asistencia', hasHistory);
-      
+
       // ═══════════════════════════════════════════════════════════════════
       // F9-F11: NOTIFICACIONES DEL ESTUDIANTE (NUEVO)
       // ═══════════════════════════════════════════════════════════════════
-      
+
       // F9: Verificar si existe opción de notificaciones en el dashboard
       final hasNotifOption = hasWidget(tester, 'Notificación') ||
-                            hasWidget(tester, 'Notificaciones') ||
-                            hasIcon(tester, Icons.notifications) ||
-                            hasIcon(tester, Icons.notifications_active);
-      logResult('F', 'F9: Estudiante tiene acceso a Notificaciones', hasNotifOption);
-      
+          hasWidget(tester, 'Notificaciones') ||
+          hasIcon(tester, Icons.notifications) ||
+          hasIcon(tester, Icons.notifications_active);
+      logResult(
+          'F', 'F9: Estudiante tiene acceso a Notificaciones', hasNotifOption);
+
       // F10: Intentar navegar a notificaciones
       var notifNav = await navigateTo(tester, 'Notificaciones');
       if (!notifNav) {
@@ -957,34 +1058,37 @@ void main() {
           notifNav = true;
         }
       }
-      
+
       if (notifNav) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
-        
+
         // F10: Pantalla de notificaciones cargada
         final inNotifScreen = hasWidget(tester, 'Notificación') ||
-                             hasWidget(tester, 'notificaciones') ||
-                             hasWidget(tester, 'Sin notificaciones') ||
-                             hasWidget(tester, 'No hay notificaciones') ||
-                             find.byType(Card).evaluate().isNotEmpty ||
-                             find.byType(ListTile).evaluate().isNotEmpty;
-        logResult('F', 'F10: Pantalla de notificaciones visible', inNotifScreen);
-        
+            hasWidget(tester, 'notificaciones') ||
+            hasWidget(tester, 'Sin notificaciones') ||
+            hasWidget(tester, 'No hay notificaciones') ||
+            find.byType(Card).evaluate().isNotEmpty ||
+            find.byType(ListTile).evaluate().isNotEmpty;
+        logResult(
+            'F', 'F10: Pantalla de notificaciones visible', inNotifScreen);
+
         // F11: Si hay notificaciones, mostrar información de asistencia
         final notifCards = find.byType(Card);
         if (notifCards.evaluate().isNotEmpty) {
           final hasAttendanceInfo = hasWidget(tester, 'asistencia') ||
-                                   hasWidget(tester, 'Asistencia') ||
-                                   hasWidget(tester, 'falta') ||
-                                   hasWidget(tester, 'Falta') ||
-                                   hasWidget(tester, 'presente') ||
-                                   hasWidget(tester, 'Presente');
-          logResult('F', 'F11: Notificaciones muestran info de asistencia', hasAttendanceInfo);
+              hasWidget(tester, 'Asistencia') ||
+              hasWidget(tester, 'falta') ||
+              hasWidget(tester, 'Falta') ||
+              hasWidget(tester, 'presente') ||
+              hasWidget(tester, 'Presente');
+          logResult('F', 'F11: Notificaciones muestran info de asistencia',
+              hasAttendanceInfo);
         } else {
           // Sin notificaciones es válido también
-          logResult('F', 'F11: Notificaciones muestran info de asistencia', true); // Skip
+          logResult('F', 'F11: Notificaciones muestran info de asistencia',
+              true); // Skip
         }
-        
+
         // Volver
         final backBtn = find.byIcon(Icons.arrow_back);
         if (backBtn.evaluate().isNotEmpty) {
@@ -992,8 +1096,10 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 1));
         }
       } else {
-        logResult('F', 'F10: Pantalla de notificaciones visible', true); // Skip si no hay nav
-        logResult('F', 'F11: Notificaciones muestran info de asistencia', true); // Skip
+        logResult('F', 'F10: Pantalla de notificaciones visible',
+            true); // Skip si no hay nav
+        logResult('F', 'F11: Notificaciones muestran info de asistencia',
+            true); // Skip
       }
 
       await logout(tester);
@@ -1004,7 +1110,7 @@ void main() {
     // ⚪ GRUPO G: SEGURIDAD Y PROTECCIÓN DE RUTAS
     // ========================================================================
     print('\n⚪ GRUPO G: SEGURIDAD Y PROTECCIÓN DE RUTAS');
-    print('─'*50);
+    print('─' * 50);
 
     // G1-G3: Estudiante NO puede acceder a funciones de admin
     success = await login(tester, 'estudiante_santiago');
@@ -1021,7 +1127,7 @@ void main() {
 
       // G3: Estudiante NO ve crear usuario/institución
       final noCrear = find.text('Crear Usuario').evaluate().isEmpty &&
-                     find.text('Crear Institución').evaluate().isEmpty;
+          find.text('Crear Institución').evaluate().isEmpty;
       logResult('G', 'G3: Estudiante NO ve opciones de crear', noCrear);
 
       // G4: Estudiante NO ve gestión académica
@@ -1059,7 +1165,8 @@ void main() {
 
       // G7: No ve admins de Santander
       final noOtherAdmins = find.textContaining('santander').evaluate().isEmpty;
-      logResult('G', 'G7: Admin NO ve usuarios de otra institución', noOtherAdmins);
+      logResult(
+          'G', 'G7: Admin NO ve usuarios de otra institución', noOtherAdmins);
 
       await logout(tester);
       await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -1069,7 +1176,7 @@ void main() {
     // 🟤 GRUPO H: NAVEGACIÓN Y UI POR ROL
     // ========================================================================
     print('\n🟤 GRUPO H: NAVEGACIÓN Y UI POR ROL');
-    print('─'*50);
+    print('─' * 50);
 
     // H1-H2: Super Admin UI
     success = await login(tester, 'super_admin');
@@ -1077,13 +1184,13 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // H1: Super Admin ve menú de instituciones
-      final hasInstMenu = hasWidget(tester, 'Instituciones') ||
-                         hasIcon(tester, Icons.business);
+      final hasInstMenu =
+          hasWidget(tester, 'Instituciones') || hasIcon(tester, Icons.business);
       logResult('H', 'H1: Super Admin ve menú instituciones', hasInstMenu);
 
       // H2: Super Admin ve menú de usuarios global
-      final hasUsersMenu = hasWidget(tester, 'Usuarios') ||
-                          hasIcon(tester, Icons.people);
+      final hasUsersMenu =
+          hasWidget(tester, 'Usuarios') || hasIcon(tester, Icons.people);
       logResult('H', 'H2: Super Admin ve menú usuarios', hasUsersMenu);
 
       await logout(tester);
@@ -1097,14 +1204,14 @@ void main() {
 
       // H3: Admin ve gestión académica
       final hasAcademic = hasWidget(tester, 'Gestión') ||
-                         hasWidget(tester, 'Académic') ||
-                         hasWidget(tester, 'Grupos') ||
-                         hasWidget(tester, 'Materias');
+          hasWidget(tester, 'Académic') ||
+          hasWidget(tester, 'Grupos') ||
+          hasWidget(tester, 'Materias');
       logResult('H', 'H3: Admin ve gestión académica', hasAcademic);
 
       // H4: Admin ve usuarios de su institución
-      final hasUsers = hasWidget(tester, 'Usuarios') ||
-                      hasIcon(tester, Icons.people);
+      final hasUsers =
+          hasWidget(tester, 'Usuarios') || hasIcon(tester, Icons.people);
       logResult('H', 'H4: Admin ve menú usuarios', hasUsers);
 
       await logout(tester);
@@ -1118,8 +1225,8 @@ void main() {
 
       // H5: Profesor ve sus clases
       final hasClasses = hasWidget(tester, 'Clase') ||
-                        hasWidget(tester, 'Hoy') ||
-                        find.byType(Card).evaluate().isNotEmpty;
+          hasWidget(tester, 'Hoy') ||
+          find.byType(Card).evaluate().isNotEmpty;
       logResult('H', 'H5: Profesor ve sus clases', hasClasses);
 
       // H6: Profesor puede refrescar
@@ -1136,13 +1243,12 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // H7: Estudiante ve Mi QR
-      final hasQr = hasWidget(tester, 'QR') ||
-                   hasIcon(tester, Icons.qr_code);
+      final hasQr = hasWidget(tester, 'QR') || hasIcon(tester, Icons.qr_code);
       logResult('H', 'H7: Estudiante ve opción Mi QR', hasQr);
 
       // H8: Estudiante ve Mi Asistencia
       final hasAsistencia = hasWidget(tester, 'Asistencia') ||
-                           hasIcon(tester, Icons.check_circle);
+          hasIcon(tester, Icons.check_circle);
       logResult('H', 'H8: Estudiante ve Mi Asistencia', hasAsistencia);
 
       await logout(tester);
@@ -1152,7 +1258,7 @@ void main() {
     // 📱 GRUPO I: CONFIGURACIÓN Y AJUSTES (SETTINGS)
     // ========================================================================
     print('\n📱 GRUPO I: CONFIGURACIÓN Y AJUSTES');
-    print('─'*50);
+    print('─' * 50);
 
     // I1-I4: Configuración para diferentes roles
     success = await login(tester, 'admin_sanjose');
@@ -1171,33 +1277,36 @@ void main() {
           settingsNav = true;
         }
       }
-      
+
       logResult('I', 'I1: Admin accede a Configuración', settingsNav);
-      
+
       if (settingsNav) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
-        
+
         // I2: Configuración tiene opciones de notificación
         final hasNotifSettings = hasWidget(tester, 'Notificación') ||
-                                hasWidget(tester, 'notificaciones') ||
-                                hasWidget(tester, 'WhatsApp') ||
-                                hasWidget(tester, 'SMS') ||
-                                hasWidget(tester, 'Alertas');
-        logResult('I', 'I2: Configuración muestra opciones de notificación', hasNotifSettings);
-        
+            hasWidget(tester, 'notificaciones') ||
+            hasWidget(tester, 'WhatsApp') ||
+            hasWidget(tester, 'SMS') ||
+            hasWidget(tester, 'Alertas');
+        logResult('I', 'I2: Configuración muestra opciones de notificación',
+            hasNotifSettings);
+
         // I3: Verificar opciones de tema (si existen)
         final hasThemeSettings = hasWidget(tester, 'Tema') ||
-                                hasWidget(tester, 'Oscuro') ||
-                                hasWidget(tester, 'Claro') ||
-                                hasWidget(tester, 'Apariencia');
-        logResult('I', 'I3: Configuración tiene opciones de tema', hasThemeSettings);
-        
+            hasWidget(tester, 'Oscuro') ||
+            hasWidget(tester, 'Claro') ||
+            hasWidget(tester, 'Apariencia');
+        logResult(
+            'I', 'I3: Configuración tiene opciones de tema', hasThemeSettings);
+
         // I4: Verificar info de la institución en configuración
         final hasInstInfo = hasWidget(tester, 'San José') ||
-                           hasWidget(tester, 'Institución') ||
-                           hasWidget(tester, 'institucion');
-        logResult('I', 'I4: Configuración muestra institución actual', hasInstInfo);
-        
+            hasWidget(tester, 'Institución') ||
+            hasWidget(tester, 'institucion');
+        logResult(
+            'I', 'I4: Configuración muestra institución actual', hasInstInfo);
+
         // Volver
         final backBtn = find.byIcon(Icons.arrow_back);
         if (backBtn.evaluate().isNotEmpty) {
@@ -1205,9 +1314,12 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 1));
         }
       } else {
-        logResult('I', 'I2: Configuración muestra opciones de notificación', true); // Skip
-        logResult('I', 'I3: Configuración tiene opciones de tema', true); // Skip
-        logResult('I', 'I4: Configuración muestra institución actual', true); // Skip
+        logResult('I', 'I2: Configuración muestra opciones de notificación',
+            true); // Skip
+        logResult(
+            'I', 'I3: Configuración tiene opciones de tema', true); // Skip
+        logResult(
+            'I', 'I4: Configuración muestra institución actual', true); // Skip
       }
 
       await logout(tester);
@@ -1223,22 +1335,22 @@ void main() {
       final navOk = await navigateTo(tester, 'Instituciones');
       if (navOk) {
         await tester.pumpAndSettle(const Duration(seconds: 2));
-        
+
         // I5: Super Admin puede acceder a editar instituciones
         final instCards = find.byType(Card);
         final canEdit = instCards.evaluate().isNotEmpty;
         logResult('I', 'I5: Super Admin puede editar instituciones', canEdit);
-        
+
         if (canEdit) {
           // I6: Verificar que config de WhatsApp está disponible
           await tester.tap(instCards.first);
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          
+
           final editBtn = find.byIcon(Icons.edit);
           if (editBtn.evaluate().isNotEmpty) {
             await tester.tap(editBtn.first);
             await tester.pumpAndSettle(const Duration(seconds: 2));
-            
+
             // Navegar al step de config si hay stepper
             for (int i = 0; i < 2; i++) {
               final continueBtn = find.text('Continuar');
@@ -1247,12 +1359,13 @@ void main() {
                 await tester.pumpAndSettle(const Duration(seconds: 1));
               }
             }
-            
+
             final hasWhatsAppConfig = hasWidget(tester, 'WhatsApp') ||
-                                     hasWidget(tester, 'Canal') ||
-                                     hasWidget(tester, 'Notificación');
-            logResult('I', 'I6: Config WhatsApp disponible para Super Admin', hasWhatsAppConfig);
-            
+                hasWidget(tester, 'Canal') ||
+                hasWidget(tester, 'Notificación');
+            logResult('I', 'I6: Config WhatsApp disponible para Super Admin',
+                hasWhatsAppConfig);
+
             // Cerrar
             final cancelBtn = find.text('Cancelar');
             if (cancelBtn.evaluate().isNotEmpty) {
@@ -1260,14 +1373,18 @@ void main() {
               await tester.pumpAndSettle(const Duration(seconds: 1));
             }
           } else {
-            logResult('I', 'I6: Config WhatsApp disponible para Super Admin', true); // Skip
+            logResult('I', 'I6: Config WhatsApp disponible para Super Admin',
+                true); // Skip
           }
         } else {
-          logResult('I', 'I6: Config WhatsApp disponible para Super Admin', true); // Skip
+          logResult('I', 'I6: Config WhatsApp disponible para Super Admin',
+              true); // Skip
         }
       } else {
-        logResult('I', 'I5: Super Admin puede editar instituciones', true); // Skip
-        logResult('I', 'I6: Config WhatsApp disponible para Super Admin', true); // Skip
+        logResult(
+            'I', 'I5: Super Admin puede editar instituciones', true); // Skip
+        logResult('I', 'I6: Config WhatsApp disponible para Super Admin',
+            true); // Skip
       }
 
       await logout(tester);
@@ -1277,13 +1394,14 @@ void main() {
     // ========================================================================
     // RESUMEN FINAL
     // ========================================================================
-    print('\n' + '═'*70);
+    print('\n' + '═' * 70);
     print('📊 RESUMEN DE RESULTADOS');
-    print('═'*70);
+    print('═' * 70);
     print('✅ Pasaron: $totalPassed');
     print('❌ Fallaron: $totalFailed');
-    print('📈 Tasa de éxito: ${(totalPassed * 100 / (totalPassed + totalFailed)).toStringAsFixed(1)}%');
-    print('═'*70);
+    print(
+        '📈 Tasa de éxito: ${(totalPassed * 100 / (totalPassed + totalFailed)).toStringAsFixed(1)}%');
+    print('═' * 70);
 
     // Detalle por grupo
     print('\n📋 DETALLE POR GRUPO:');
@@ -1298,8 +1416,8 @@ void main() {
 
     // Assertions - Aumentado porque ahora hay más tests
     expect(totalPassed, greaterThan(totalFailed),
-      reason: 'Más de la mitad de las pruebas deben pasar');
+        reason: 'Más de la mitad de las pruebas deben pasar');
     expect(totalPassed, greaterThanOrEqualTo(35),
-      reason: 'Al menos 35 pruebas deben pasar (incluye notificaciones)');
+        reason: 'Al menos 35 pruebas deben pasar (incluye notificaciones)');
   });
 }

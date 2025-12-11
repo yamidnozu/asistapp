@@ -29,18 +29,27 @@ class GrupoService {
   // ===== GRUPOS =====
 
   /// Obtiene todos los grupos con paginación y filtros
-  Future<PaginatedGruposResponse?> getGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search, String? grado, String? seccion}) async {
+  Future<PaginatedGruposResponse?> getGrupos(String accessToken,
+      {int? page,
+      int? limit,
+      String? periodoId,
+      String? search,
+      String? grado,
+      String? seccion}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
-      if (periodoId != null && periodoId.isNotEmpty) queryParams['periodoId'] = periodoId;
+      if (periodoId != null && periodoId.isNotEmpty)
+        queryParams['periodoId'] = periodoId;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
       if (grado != null && grado.isNotEmpty) queryParams['grado'] = grado;
-      if (seccion != null && seccion.isNotEmpty) queryParams['seccion'] = seccion;
+      if (seccion != null && seccion.isNotEmpty)
+        queryParams['seccion'] = seccion;
 
-      final uri = Uri.parse('$baseUrlValue/grupos').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrlValue/grupos')
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -64,11 +73,14 @@ class GrupoService {
           final grupos = (responseData['data'] as List)
               .map((grupoJson) => Grupo.fromJson(grupoJson))
               .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
-          return PaginatedGruposResponse(grupos: grupos, pagination: pagination);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedGruposResponse(
+              grupos: grupos, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting grupos: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting grupos: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -104,7 +116,8 @@ class GrupoService {
           return Grupo.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error getting grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting grupo: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -116,17 +129,20 @@ class GrupoService {
   }
 
   /// Crea un nuevo grupo
-  Future<Grupo?> createGrupo(String accessToken, CreateGrupoRequest grupoData) async {
+  Future<Grupo?> createGrupo(
+      String accessToken, CreateGrupoRequest grupoData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/grupos'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(grupoData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -141,7 +157,8 @@ class GrupoService {
           return Grupo.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error creating grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating grupo: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -153,17 +170,20 @@ class GrupoService {
   }
 
   /// Actualiza un grupo
-  Future<Grupo?> updateGrupo(String accessToken, String grupoId, UpdateGrupoRequest grupoData) async {
+  Future<Grupo?> updateGrupo(
+      String accessToken, String grupoId, UpdateGrupoRequest grupoData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.put(
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/grupos/$grupoId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(grupoData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -178,7 +198,8 @@ class GrupoService {
           return Grupo.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error updating grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating grupo: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -211,7 +232,8 @@ class GrupoService {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting grupo: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
@@ -224,14 +246,17 @@ class GrupoService {
   // ===== STUDENTS =====
 
   /// Obtiene estudiantes asignados a un grupo
-  Future<PaginatedUsersResponse?> getEstudiantesByGrupo(String accessToken, String grupoId, {int? page, int? limit}) async {
+  Future<PaginatedUsersResponse?> getEstudiantesByGrupo(
+      String accessToken, String grupoId,
+      {int? page, int? limit}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
 
-      final uri = Uri.parse('$baseUrlValue/grupos/$grupoId/estudiantes').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrlValue/grupos/$grupoId/estudiantes')
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -246,7 +271,8 @@ class GrupoService {
         },
       );
 
-      debugPrint('GET /grupos/$grupoId/estudiantes - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /grupos/$grupoId/estudiantes - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -264,11 +290,13 @@ class GrupoService {
             }
             return User.fromJson(userJson);
           }).toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUsersResponse(users: users, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting estudiantes by grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting estudiantes by grupo: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -280,7 +308,8 @@ class GrupoService {
   }
 
   /// Obtiene estudiantes sin asignar a ningún grupo
-  Future<PaginatedUsersResponse?> getEstudiantesSinAsignar(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<PaginatedUsersResponse?> getEstudiantesSinAsignar(String accessToken,
+      {int? page, int? limit, String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
@@ -288,7 +317,8 @@ class GrupoService {
       if (limit != null) queryParams['limit'] = limit.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri = Uri.parse('$baseUrlValue/grupos/estudiantes-sin-asignar').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrlValue/grupos/estudiantes-sin-asignar')
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -303,7 +333,8 @@ class GrupoService {
         },
       );
 
-      debugPrint('GET /grupos/estudiantes-sin-asignar - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /grupos/estudiantes-sin-asignar - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -317,11 +348,13 @@ class GrupoService {
             }
             return User.fromJson(userJson);
           }).toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
           return PaginatedUsersResponse(users: users, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting estudiantes sin asignar: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting estudiantes sin asignar: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -333,30 +366,35 @@ class GrupoService {
   }
 
   /// Asigna un estudiante a un grupo
-  Future<bool> asignarEstudianteAGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> asignarEstudianteAGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/grupos/$grupoId/asignar-estudiante'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({'estudianteId': estudianteId}),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('POST /grupos/$grupoId/asignar-estudiante - Status: ${response.statusCode}');
+      debugPrint(
+          'POST /grupos/$grupoId/asignar-estudiante - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error asignando estudiante a grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error asignando estudiante a grupo: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
@@ -367,30 +405,35 @@ class GrupoService {
   }
 
   /// Desasigna un estudiante de un grupo
-  Future<bool> desasignarEstudianteDeGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> desasignarEstudianteDeGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/grupos/$grupoId/desasignar-estudiante'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({'estudianteId': estudianteId}),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('POST /grupos/$grupoId/desasignar-estudiante - Status: ${response.statusCode}');
+      debugPrint(
+          'POST /grupos/$grupoId/desasignar-estudiante - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error desasignando estudiante de grupo: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error desasignando estudiante de grupo: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {

@@ -57,7 +57,6 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
         _qrCode = qrCode;
         _isLoading = false;
       });
-
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -73,10 +72,10 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
     final userName = user?['nombres'] ?? 'Usuario';
     final userLastName = user?['apellidos'] ?? '';
 
-  return LayoutBuilder(
+    return LayoutBuilder(
       builder: (context, constraints) {
-    final colors = context.colors;
-    final spacing = context.spacing;
+        final colors = context.colors;
+        final spacing = context.spacing;
         return Scaffold(
           appBar: AppBar(
             title: const Text('Mi Código QR'),
@@ -115,10 +114,11 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                       SizedBox(height: spacing.md),
                       Text(
                         '$userName $userLastName',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colors.textPrimary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textPrimary,
+                                ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -127,8 +127,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                       Text(
                         'Estudiante',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colors.textSecondary,
-                        ),
+                              color: colors.textSecondary,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -154,9 +154,9 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
                 // Instrucciones
                 Text(
                   'Muestra este código QR a tu profesor para registrar tu asistencia',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colors.textSecondary,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colors.textSecondary,
+                      ),
                   textAlign: TextAlign.center,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -203,8 +203,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             Text(
               _errorMessage!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+                    color: colors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -234,8 +234,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             Text(
               'Código QR no disponible',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: colors.textMuted,
-              ),
+                    color: colors.textMuted,
+                  ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -252,7 +252,9 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
         Container(
           padding: EdgeInsets.all(spacing.lg),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.light ? colors.white : colors.surfaceLight,
+            color: Theme.of(context).brightness == Brightness.light
+                ? colors.white
+                : colors.surfaceLight,
             borderRadius: BorderRadius.circular(spacing.borderRadiusLarge),
             border: Border.all(
               color: colors.primary.withValues(alpha: 0.2),
@@ -270,7 +272,9 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
             data: _qrCode!,
             version: QrVersions.auto,
             size: qrSize,
-            backgroundColor: Theme.of(context).brightness == Brightness.light ? colors.white : colors.surfaceLight,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? colors.white
+                : colors.surfaceLight,
             eyeStyle: QrEyeStyle(
               eyeShape: QrEyeShape.square,
               color: colors.primary,
@@ -286,7 +290,8 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
 
         // Badge con ID
         Container(
-          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          padding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
           decoration: BoxDecoration(
             color: colors.surfaceVariant,
             borderRadius: BorderRadius.circular(spacing.borderRadiusLarge),

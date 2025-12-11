@@ -16,7 +16,7 @@ void main() {
     // Iniciar app
     app.main();
     print('  📱 App.main() ejecutado');
-    
+
     // Esperar a que cargue
     await tester.pumpAndSettle(const Duration(seconds: 15));
     print('  ⏳ pumpAndSettle completado');
@@ -25,15 +25,20 @@ void main() {
     final emailField = find.byKey(const Key('emailField'));
     final passwordField = find.byKey(const Key('passwordField'));
     final loginButton = find.byKey(const Key('loginButton'));
-    
+
     print('  📍 Buscando campos de login...');
     print('     - emailField encontrado: ${emailField.evaluate().isNotEmpty}');
-    print('     - passwordField encontrado: ${passwordField.evaluate().isNotEmpty}');
-    print('     - loginButton encontrado: ${loginButton.evaluate().isNotEmpty}');
+    print(
+        '     - passwordField encontrado: ${passwordField.evaluate().isNotEmpty}');
+    print(
+        '     - loginButton encontrado: ${loginButton.evaluate().isNotEmpty}');
 
-    expect(emailField, findsOneWidget, reason: 'Debe encontrar el campo de email');
-    expect(passwordField, findsOneWidget, reason: 'Debe encontrar el campo de password');
-    expect(loginButton, findsOneWidget, reason: 'Debe encontrar el botón de login');
+    expect(emailField, findsOneWidget,
+        reason: 'Debe encontrar el campo de email');
+    expect(passwordField, findsOneWidget,
+        reason: 'Debe encontrar el campo de password');
+    expect(loginButton, findsOneWidget,
+        reason: 'Debe encontrar el botón de login');
 
     print('\n✅ Test simple completado exitosamente!');
     print('═══════════════════════════════════════════════════════════════\n');

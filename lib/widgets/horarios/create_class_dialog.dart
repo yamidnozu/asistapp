@@ -71,10 +71,13 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
             children: [
               Text(
                 'Horario: ${widget.horaInicio} - ${_selectedHoraFin ?? (horasDisponibles.isNotEmpty ? _getHoraFin(widget.horaInicio) : '—')}',
-                style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                style:
+                    textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
               ),
-              Text('Día: ${_getDiaNombre(widget.diaSemana)}', style: textStyles.bodyMedium),
-              Text('Grupo: ${widget.grupo.nombre}', style: textStyles.bodyMedium),
+              Text('Día: ${_getDiaNombre(widget.diaSemana)}',
+                  style: textStyles.bodyMedium),
+              Text('Grupo: ${widget.grupo.nombre}',
+                  style: textStyles.bodyMedium),
             ],
           ),
         ),
@@ -87,7 +90,10 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
             hintText: 'Selecciona la hora de fin',
           ),
           items: _getHorasFinDisponibles(widget.horaInicio)
-              .map((hora) => DropdownMenuItem<String>(value: hora, child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1)))
+              .map((hora) => DropdownMenuItem<String>(
+                  value: hora,
+                  child:
+                      Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1)))
               .toList(),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -110,7 +116,10 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
                 hintText: 'Selecciona una materia',
               ),
               items: materiaProvider.materias
-                  .map((materia) => DropdownMenuItem<Materia>(value: materia, child: Text(materia.nombre, overflow: TextOverflow.ellipsis, maxLines: 1)))
+                  .map((materia) => DropdownMenuItem<Materia>(
+                      value: materia,
+                      child: Text(materia.nombre,
+                          overflow: TextOverflow.ellipsis, maxLines: 1)))
                   .toList(),
               validator: (value) {
                 if (value == null) {
@@ -127,7 +136,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
         SizedBox(height: spacing.md),
         Consumer2<UserProvider, HorarioProvider>(
           builder: (context, userProvider, horarioProvider, child) {
-            final profesoresDisponibles = horarioProvider.getProfesoresDisponibles(
+            final profesoresDisponibles =
+                horarioProvider.getProfesoresDisponibles(
               userProvider.professors,
               widget.diaSemana,
               widget.horaInicio,
@@ -148,14 +158,16 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
               decoration: InputDecoration(
                 labelText: 'Profesor',
                 hintText: 'Selecciona un profesor',
-                helperText: profesoresDisponibles.length < userProvider.professors.length
+                helperText: profesoresDisponibles.length <
+                        userProvider.professors.length
                     ? '${profesoresDisponibles.length} disponibles'
                     : null,
               ),
               items: profesoresDisponibles.map((profesor) {
                 return DropdownMenuItem<User>(
                   value: profesor,
-                  child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
+                  child: Text('${profesor.nombres} ${profesor.apellidos}',
+                      overflow: TextOverflow.ellipsis, maxLines: 1),
                 );
               }).toList(),
               validator: (value) {
@@ -180,7 +192,8 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
     if (_selectedProfesor == null) return false;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    final horarioProvider =
+        Provider.of<HorarioProvider>(context, listen: false);
     final colors = context.colors;
 
     try {
@@ -204,15 +217,18 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
       );
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clase creada correctamente')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Clase creada correctamente')));
         return true;
       } else if (mounted) {
-        final errorMessage = horarioProvider.errorMessage ?? 'Error al crear clase';
+        final errorMessage =
+            horarioProvider.errorMessage ?? 'Error al crear clase';
         if (horarioProvider.conflictError != null) {
           _showConflictDialog(horarioProvider.conflictError!, 'crear');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: colors.error),
+            SnackBar(
+                content: Text(errorMessage), backgroundColor: colors.error),
           );
         }
       }
@@ -300,17 +316,23 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
             ),
             if (conflictError.conflictingHorarioIds.isNotEmpty) ...[
               SizedBox(height: spacing.md),
-              Text('Horarios en conflicto:', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text('Horarios en conflicto:',
+                  style: textStyles.bodyMedium
+                      .copyWith(fontWeight: FontWeight.w600)),
               SizedBox(height: spacing.sm),
-              ...conflictError.conflictingHorarioIds
-                  .map((id) => Text('- $id', style: textStyles.bodySmall.copyWith(color: colors.textSecondary))),
+              ...conflictError.conflictingHorarioIds.map((id) => Text('- $id',
+                  style: textStyles.bodySmall
+                      .copyWith(color: colors.textSecondary))),
             ],
             SizedBox(height: spacing.md),
-            Text('Sugerencias para resolver el conflicto:', style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            Text('Sugerencias para resolver el conflicto:',
+                style: textStyles.bodyMedium
+                    .copyWith(fontWeight: FontWeight.w600)),
             SizedBox(height: spacing.sm),
             ...conflictError.suggestions.map((suggestion) => Text(
                   '• $suggestion',
-                  style: textStyles.bodySmall.copyWith(color: colors.textSecondary),
+                  style: textStyles.bodySmall
+                      .copyWith(color: colors.textSecondary),
                 )),
           ],
         ),

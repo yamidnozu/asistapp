@@ -18,7 +18,8 @@ class Materia {
     this.createdAt,
   });
 
-  factory Materia.fromJson(Map<String, dynamic> json) => _$MateriaFromJson(json);
+  factory Materia.fromJson(Map<String, dynamic> json) =>
+      _$MateriaFromJson(json);
 
   Map<String, dynamic> toJson() => _$MateriaToJson(this);
 

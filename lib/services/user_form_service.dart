@@ -40,8 +40,10 @@ class UserFormService {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Solo cargar instituciones si el usuario actual es super_admin y está creando/editando admin_institucion
-    if (authProvider.user?['rol'] == 'super_admin' && userRole == 'admin_institucion') {
-      final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+    if (authProvider.user?['rol'] == 'super_admin' &&
+        userRole == 'admin_institucion') {
+      final institutionProvider =
+          Provider.of<InstitutionProvider>(context, listen: false);
 
       // Solo cargar si no hay instituciones ya cargadas
       if (institutionProvider.institutions.isEmpty) {
@@ -93,8 +95,10 @@ class UserFormService {
 
     if (user.estudiante != null) {
       identificacionController.text = user.estudiante!.identificacion;
-      nombreResponsableController.text = user.estudiante!.nombreResponsable ?? '';
-      telefonoResponsableController.text = user.estudiante!.telefonoResponsable ?? '';
+      nombreResponsableController.text =
+          user.estudiante!.nombreResponsable ?? '';
+      telefonoResponsableController.text =
+          user.estudiante!.telefonoResponsable ?? '';
     }
 
     // Para profesores
@@ -140,13 +144,25 @@ class UserFormService {
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       telefono: telefono.trim().isNotEmpty ? telefono.trim() : null,
-      identificacion: (userRole == 'estudiante' || userRole == 'profesor') ? identificacion.trim() : null,
+      identificacion: (userRole == 'estudiante' || userRole == 'profesor')
+          ? identificacion.trim()
+          : null,
       rol: userRole,
       titulo: userRole == 'profesor' ? titulo.trim() : null,
       especialidad: userRole == 'profesor' ? especialidad.trim() : null,
-      nombreResponsable: userRole == 'estudiante' ? nombreResponsable.trim().isNotEmpty ? nombreResponsable.trim() : null : null,
-      telefonoResponsable: userRole == 'estudiante' ? telefonoResponsable.trim().isNotEmpty ? telefonoResponsable.trim() : null : null,
-      institucionId: userRole == 'admin_institucion' ? selectedInstitutionId : authProvider.selectedInstitutionId,
+      nombreResponsable: userRole == 'estudiante'
+          ? nombreResponsable.trim().isNotEmpty
+              ? nombreResponsable.trim()
+              : null
+          : null,
+      telefonoResponsable: userRole == 'estudiante'
+          ? telefonoResponsable.trim().isNotEmpty
+              ? telefonoResponsable.trim()
+              : null
+          : null,
+      institucionId: userRole == 'admin_institucion'
+          ? selectedInstitutionId
+          : authProvider.selectedInstitutionId,
       rolEnInstitucion: userRole == 'admin_institucion' ? 'admin' : null,
     );
   }
@@ -174,13 +190,25 @@ class UserFormService {
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       telefono: telefono.trim().isNotEmpty ? telefono.trim() : null,
-      identificacion: (userRole == 'estudiante' || userRole == 'profesor') ? identificacion.trim() : null,
+      identificacion: (userRole == 'estudiante' || userRole == 'profesor')
+          ? identificacion.trim()
+          : null,
       rol: userRole,
       titulo: userRole == 'profesor' ? titulo.trim() : null,
       especialidad: userRole == 'profesor' ? especialidad.trim() : null,
-      nombreResponsable: userRole == 'estudiante' ? nombreResponsable.trim().isNotEmpty ? nombreResponsable.trim() : null : null,
-      telefonoResponsable: userRole == 'estudiante' ? telefonoResponsable.trim().isNotEmpty ? telefonoResponsable.trim() : null : null,
-      institucionId: userRole == 'admin_institucion' ? selectedInstitutionId : authProvider.selectedInstitutionId,
+      nombreResponsable: userRole == 'estudiante'
+          ? nombreResponsable.trim().isNotEmpty
+              ? nombreResponsable.trim()
+              : null
+          : null,
+      telefonoResponsable: userRole == 'estudiante'
+          ? telefonoResponsable.trim().isNotEmpty
+              ? telefonoResponsable.trim()
+              : null
+          : null,
+      institucionId: userRole == 'admin_institucion'
+          ? selectedInstitutionId
+          : authProvider.selectedInstitutionId,
       rolEnInstitucion: userRole == 'admin_institucion' ? 'admin' : null,
     );
   }
@@ -204,9 +232,19 @@ class UserFormService {
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       telefono: telefono.trim().isNotEmpty ? telefono.trim() : null,
-      identificacion: (userRole == 'estudiante' || userRole == 'profesor') ? identificacion.trim() : null,
-      nombreResponsable: userRole == 'estudiante' ? nombreResponsable.trim().isNotEmpty ? nombreResponsable.trim() : null : null,
-      telefonoResponsable: userRole == 'estudiante' ? telefonoResponsable.trim().isNotEmpty ? telefonoResponsable.trim() : null : null,
+      identificacion: (userRole == 'estudiante' || userRole == 'profesor')
+          ? identificacion.trim()
+          : null,
+      nombreResponsable: userRole == 'estudiante'
+          ? nombreResponsable.trim().isNotEmpty
+              ? nombreResponsable.trim()
+              : null
+          : null,
+      telefonoResponsable: userRole == 'estudiante'
+          ? telefonoResponsable.trim().isNotEmpty
+              ? telefonoResponsable.trim()
+              : null
+          : null,
       activo: activo,
       titulo: userRole == 'profesor' ? titulo.trim() : null,
       especialidad: userRole == 'profesor' ? especialidad.trim() : null,
@@ -226,7 +264,8 @@ class UserFormService {
 
     final token = authProvider.accessToken;
     if (token == null) {
-      throw Exception('Debes iniciar sesión para ${user != null ? 'editar' : 'crear'} usuarios');
+      throw Exception(
+          'Debes iniciar sesión para ${user != null ? 'editar' : 'crear'} usuarios');
     }
 
     if (user != null) {
@@ -240,9 +279,11 @@ class UserFormService {
 
   /// Genera una contraseña aleatoria segura
   String generateRandomPassword({int length = 12}) {
-    const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#%^&*()';
+    const String chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#%^&*()';
     final Random random = Random.secure();
-    return List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(length, (_) => chars[random.nextInt(chars.length)])
+        .join();
   }
 
   /// Obtiene el nombre para mostrar del rol

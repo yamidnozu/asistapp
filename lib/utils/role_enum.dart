@@ -1,9 +1,9 @@
 /// Los 4 tipos de usuario en la app
 enum UserRole {
-  superAdmin,       // Administrador global del sistema
+  superAdmin, // Administrador global del sistema
   adminInstitucion, // Administrador de una institución
-  profesor,         // Profesor de clases
-  estudiante,       // Estudiante
+  profesor, // Profesor de clases
+  estudiante, // Estudiante
 }
 
 /// Helpers para trabajar con roles

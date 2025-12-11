@@ -12,14 +12,14 @@ import '../../models/user.dart';
 // import '../../services/user_service.dart'; // no longer used directly
 // create_institution_admin_screen route is now opened via go_router, no direct import required
 
-
 class InstitutionAdminsScreen extends StatefulWidget {
   final String institutionId;
 
   const InstitutionAdminsScreen({super.key, required this.institutionId});
 
   @override
-  State<InstitutionAdminsScreen> createState() => _InstitutionAdminsScreenState();
+  State<InstitutionAdminsScreen> createState() =>
+      _InstitutionAdminsScreenState();
 }
 
 class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
@@ -36,21 +36,23 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
   void _showAssignExistingUserDialog() {
     showDialog(
       context: context,
-      builder: (context) => AssignExistingUserDialog(institutionId: widget.institutionId, onAssigned: () async {
-        await _loadAdmins();
-      }),
+      builder: (context) => AssignExistingUserDialog(
+          institutionId: widget.institutionId,
+          onAssigned: () async {
+            await _loadAdmins();
+          }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context);
+    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context);
     return ClarityManagementPage(
       title: 'Administradores de Institución',
-  isLoading: pag.isLoading,
-  hasError: pag.hasError,
-  errorMessage: pag.errorMessage,
-  itemCount: pag.items.length,
+      isLoading: pag.isLoading,
+      hasError: pag.hasError,
+      errorMessage: pag.errorMessage,
+      itemCount: pag.items.length,
       itemBuilder: (context, index) {
         if (index >= pag.items.length) {
           return pag.isLoadingMore
@@ -63,18 +65,19 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               : const SizedBox.shrink();
         }
 
-  final user = pag.items[index];
+        final user = pag.items[index];
         return _buildAdminCard(user, context);
       },
       onRefresh: _loadAdmins,
       scrollController: _scrollController,
-  hasMoreData: pag.hasMoreData,
+      hasMoreData: pag.hasMoreData,
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddAdminSheet,
         backgroundColor: context.colors.primary,
         child: Icon(
           Icons.add,
-          color: context.colors.getTextColorForBackground(context.colors.primary),
+          color:
+              context.colors.getTextColorForBackground(context.colors.primary),
         ),
       ),
       emptyStateWidget: const ClarityEmptyState(
@@ -87,7 +90,8 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   Future<void> _loadAdmins() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final pag =
+        Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token != null) {
       await pag.loadAdmins(token, widget.institutionId, page: 1, limit: 10);
@@ -96,17 +100,23 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
   Future<void> _removeAdmin(User user) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final pag =
+        Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remover Administrador'),
-        content: Text('¿Deseas remover el rol de administrador a ${user.nombreCompleto}?'),
+        content: Text(
+            '¿Deseas remover el rol de administrador a ${user.nombreCompleto}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Remover')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Remover')),
         ],
       ),
     );
@@ -115,9 +125,11 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
 
     final token = authProvider.accessToken;
     if (token != null) {
-      final success = await userProvider.removeAdminFromInstitution(token, widget.institutionId, user.id);
+      final success = await userProvider.removeAdminFromInstitution(
+          token, widget.institutionId, user.id);
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administrador removido correctamente')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Administrador removido correctamente')));
         await pag.loadAdmins(token, widget.institutionId, page: 1, limit: 10);
       }
     }
@@ -130,7 +142,8 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
       builder: (context) {
         final colors = context.colors;
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Wrap(
             children: [
               ListTile(
@@ -138,10 +151,13 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
                 title: const Text('Crear Nuevo Administrador'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  final institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
-                  final institution = institutionProvider.institutions.firstWhere((i) => i.id == widget.institutionId);
+                  final institutionProvider =
+                      Provider.of<InstitutionProvider>(context, listen: false);
+                  final institution = institutionProvider.institutions
+                      .firstWhere((i) => i.id == widget.institutionId);
                   // Use go_router named route so navigation is consistent across the app
-                  context.pushNamed('institution-create-admin', extra: institution);
+                  context.pushNamed('institution-create-admin',
+                      extra: institution);
                   // Reload admins after possible changes once the pushed route completes
                   // go_router's context.pushNamed doesn't return a Future using .then directly,
                   // but we can listen for route pops via a post-frame callback or refresh on resume of the screen.
@@ -203,8 +219,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
               ),
             ],
           ),
-          if (user.telefono != null)
-            SizedBox(height: spacing.xs),
+          if (user.telefono != null) SizedBox(height: spacing.xs),
           if (user.telefono != null)
             Row(
               children: [
@@ -219,7 +234,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
                 ),
               ],
             ),
-          ],
+        ],
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -246,13 +261,14 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _ChangePasswordDialog(user: user, onSaved: () async {
-        // Recargar lista después de cambio de contraseña
-        await _loadAdmins();
-      }),
+      builder: (context) => _ChangePasswordDialog(
+          user: user,
+          onSaved: () async {
+            // Recargar lista después de cambio de contraseña
+            await _loadAdmins();
+          }),
     );
   }
-
 }
 
 class _ChangePasswordDialog extends StatefulWidget {
@@ -268,7 +284,8 @@ class _ChangePasswordDialog extends StatefulWidget {
 class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -295,15 +312,21 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       );
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña de ${widget.user.nombreCompleto} cambiada correctamente')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'Contraseña de ${widget.user.nombreCompleto} cambiada correctamente')));
         widget.onSaved?.call();
         return true;
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     }
 
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al cambiar la contraseña')));
+    if (mounted)
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al cambiar la contraseña')));
     return false;
   }
 
@@ -323,8 +346,10 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
           obscureText: true,
           decoration: const InputDecoration(labelText: 'Nueva contraseña'),
           validator: (value) {
-            if (value == null || value.trim().isEmpty) return 'La contraseña es requerida';
-            if (value.trim().length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+            if (value == null || value.trim().isEmpty)
+              return 'La contraseña es requerida';
+            if (value.trim().length < 8)
+              return 'La contraseña debe tener al menos 8 caracteres';
             return null;
           },
         ),
@@ -334,8 +359,10 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
           obscureText: true,
           decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
           validator: (value) {
-            if (value == null || value.trim().isEmpty) return 'La confirmación es requerida';
-            if (value.trim() != _newPasswordController.text.trim()) return 'Las contraseñas no coinciden';
+            if (value == null || value.trim().isEmpty)
+              return 'La confirmación es requerida';
+            if (value.trim() != _newPasswordController.text.trim())
+              return 'Las contraseñas no coinciden';
             return null;
           },
         ),
@@ -344,15 +371,16 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   }
 }
 
-
 class AssignExistingUserDialog extends StatefulWidget {
   final String institutionId;
   final VoidCallback? onAssigned;
 
-  const AssignExistingUserDialog({super.key, required this.institutionId, this.onAssigned});
+  const AssignExistingUserDialog(
+      {super.key, required this.institutionId, this.onAssigned});
 
   @override
-  State<AssignExistingUserDialog> createState() => _AssignExistingUserDialogState();
+  State<AssignExistingUserDialog> createState() =>
+      _AssignExistingUserDialogState();
 }
 
 class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
@@ -377,8 +405,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
 
   @override
   void dispose() {
-  _searchController.removeListener(_onSearchChanged);
-  if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _searchController.removeListener(_onSearchChanged);
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
     _scrollController.removeListener(_onScroll);
     _searchController.dispose();
     _scrollController.dispose();
@@ -389,12 +417,21 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
     final query = _searchController.text.trim();
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () async {
-      final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
+      final token =
+          Provider.of<AuthProvider>(context, listen: false).accessToken;
       if (token == null) return;
-      final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+      final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context,
+          listen: false);
       pag.resetPagination();
       // Usar modo assignment para buscar todos los admin_institucion (pueden estar en otras instituciones)
-      await pag.loadItems(token, page: 1, limit: _pageSize, search: query.isEmpty ? null : query, filters: {'institutionId': widget.institutionId, 'assignment': 'true'});
+      await pag.loadItems(token,
+          page: 1,
+          limit: _pageSize,
+          search: query.isEmpty ? null : query,
+          filters: {
+            'institutionId': widget.institutionId,
+            'assignment': 'true'
+          });
     });
   }
 
@@ -403,10 +440,14 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
   Future<void> _loadInitialUsers() async {
     final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
     if (token == null) return;
-    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final pag =
+        Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     try {
       // Cargar en modo assignment para mostrar todos los admin_institucion
-      await pag.loadItems(token, page: 1, limit: _pageSize, filters: {'institutionId': widget.institutionId, 'assignment': 'true'});
+      await pag.loadItems(token, page: 1, limit: _pageSize, filters: {
+        'institutionId': widget.institutionId,
+        'assignment': 'true'
+      });
     } catch (e) {
       debugPrint('Error cargando usuarios iniciales: $e');
       if (mounted) {
@@ -418,13 +459,14 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
       // no local isLoading
     }
   }
-      // handled above in the debounce body
+  // handled above in the debounce body
 
   // loading and paging are handled by InstitutionAdminsPaginatedProvider;
   // no local implementation required here.
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMoreUsers();
     }
   }
@@ -432,7 +474,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
   Future<void> _loadMoreUsers() async {
     final token = Provider.of<AuthProvider>(context, listen: false).accessToken;
     if (token == null) return;
-    final pag = Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
+    final pag =
+        Provider.of<InstitutionAdminsPaginatedProvider>(context, listen: false);
     if (pag.isLoadingMore || !pag.hasMoreData) return;
     // Mantener assignment mode para cargar admins globales - acceso directo para evitar múltiples notifyListeners
     pag.filters['institutionId'] = widget.institutionId;
@@ -441,7 +484,7 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
   }
 
   Future<void> _assign(User user) async {
-  setState(() => _isAssigning = true);
+    setState(() => _isAssigning = true);
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -459,7 +502,9 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${user.nombreCompleto} asignado como administrador')),
+          SnackBar(
+              content:
+                  Text('${user.nombreCompleto} asignado como administrador')),
         );
         widget.onAssigned?.call();
         Navigator.of(context).pop();
@@ -470,7 +515,8 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
       debugPrint('Error asignando administrador: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al asignar administrador: ${e.toString()}')),
+          SnackBar(
+              content: Text('Error al asignar administrador: ${e.toString()}')),
         );
       }
     } finally {
@@ -496,29 +542,36 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                   hintText: 'Buscar administradores...',
                   prefixIcon: const Icon(Icons.search, size: 20),
                   suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: 20),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged();
-                        },
-                      )
-                    : null,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearchChanged();
+                          },
+                        )
+                      : null,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).dividerColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+                    borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.5)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                    borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor, width: 2),
                   ),
                   filled: true,
-                  fillColor: Theme.of(context).inputDecorationTheme.fillColor ?? Theme.of(context).cardColor,
+                  fillColor: Theme.of(context).inputDecorationTheme.fillColor ??
+                      Theme.of(context).cardColor,
                 ),
                 textInputAction: TextInputAction.search,
               ),
@@ -528,68 +581,80 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
             // Lista de administradores de institución (paginados)
             Expanded(
               child: Consumer<InstitutionAdminsPaginatedProvider>(
-                  builder: (context, pag, child) {
-                    if (pag.isLoading && pag.items.isEmpty) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!pag.isLoading && pag.items.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                              Icon(Icons.people_outline, size: 56, color: context.colors.textMuted),
-                            const SizedBox(height: 12),
-                              Text('No hay administradores disponibles', style: context.textStyles.bodyMedium.copyWith(color: context.colors.textMuted, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
-                          ],
-                        ),
-                      );
-                    }
-                    final items = pag.items;
-                    return ListView.builder(
-                  controller: _scrollController,
-                  // quitar padding horizontal global para que las filas se alineen exactamente
-                  padding: EdgeInsets.zero,
-                  itemCount: items.length + (pag.hasMoreData ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    // Item de carga al final
-                    if (index == items.length) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: const Center(
-                          child: SizedBox(
-                            width: 28,
-                            height: 28,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          ),
-                        ),
-                      );
-                    }
-
-                    final user = items[index];
-                    final alreadyAssigned = (user.instituciones ?? []).any((inst) => inst.id == widget.institutionId);
-
-                    return Card(
-                      // mantener sólo margen vertical; el padding lo controlamos en el contenido
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                builder: (context, pag, child) {
+                  if (pag.isLoading && pag.items.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!pag.isLoading && pag.items.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people_outline,
+                              size: 56, color: context.colors.textMuted),
+                          const SizedBox(height: 12),
+                          Text('No hay administradores disponibles',
+                              style: context.textStyles.bodyMedium.copyWith(
+                                  color: context.colors.textMuted,
+                                  fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center),
+                        ],
                       ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                              onTap: (pag.isLoading || alreadyAssigned || _isAssigning) ? null : () => _assign(user),
-                        child: Padding(
-                          // padding horizontal más reducido para evitar columna en blanco
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Avatar eliminado intencionalmente para ajustar layout
+                    );
+                  }
+                  final items = pag.items;
+                  return ListView.builder(
+                    controller: _scrollController,
+                    // quitar padding horizontal global para que las filas se alineen exactamente
+                    padding: EdgeInsets.zero,
+                    itemCount: items.length + (pag.hasMoreData ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      // Item de carga al final
+                      if (index == items.length) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 28,
+                              height: 28,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                          ),
+                        );
+                      }
 
-                              // Información del usuario
-                              Expanded(
-                                child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                      final user = items[index];
+                      final alreadyAssigned = (user.instituciones ?? [])
+                          .any((inst) => inst.id == widget.institutionId);
+
+                      return Card(
+                        // mantener sólo margen vertical; el padding lo controlamos en el contenido
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap:
+                              (pag.isLoading || alreadyAssigned || _isAssigning)
+                                  ? null
+                                  : () => _assign(user),
+                          child: Padding(
+                            // padding horizontal más reducido para evitar columna en blanco
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Avatar eliminado intencionalmente para ajustar layout
+
+                                // Información del usuario
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       // Nombre completo
@@ -607,19 +672,27 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                                       Text(
                                         user.email ?? '',
                                         style: TextStyle(
-                                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color
+                                              ?.withValues(alpha: 0.7),
                                           fontSize: 13,
                                           height: 1.2,
                                         ),
                                       ),
 
                                       // Instituciones asignadas
-                                      if ((user.instituciones ?? []).any((inst) => inst.activo)) ...[
+                                      if ((user.instituciones ?? [])
+                                          .any((inst) => inst.activo)) ...[
                                         const SizedBox(height: 3),
                                         Text(
                                           'En: ${(user.instituciones ?? []).where((inst) => inst.activo).map((inst) => inst.nombre).join(', ')}',
                                           style: TextStyle(
-                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary
+                                                .withValues(alpha: 0.8),
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                             height: 1.2,
@@ -628,40 +701,47 @@ class _AssignExistingUserDialogState extends State<AssignExistingUserDialog> {
                                       ],
                                     ],
                                   ),
-                              ),
+                                ),
 
-                              const SizedBox(width: 12),
+                                const SizedBox(width: 12),
 
-                              // Botón de asignar (deshabilitado si ya está asignado)
-                              SizedBox(
-                                height: 36,
-                                child: ElevatedButton(
-                                  onPressed: (pag.isLoading || alreadyAssigned || _isAssigning) ? null : () => _assign(user),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                // Botón de asignar (deshabilitado si ya está asignado)
+                                SizedBox(
+                                  height: 36,
+                                  child: ElevatedButton(
+                                    onPressed: (pag.isLoading ||
+                                            alreadyAssigned ||
+                                            _isAssigning)
+                                        ? null
+                                        : () => _assign(user),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
                                     ),
-                                  ),
-                                  child: Text(
-                                    alreadyAssigned ? 'Ya asignado' : 'Asignar',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                    child: Text(
+                                      alreadyAssigned
+                                          ? 'Ya asignado'
+                                          : 'Asignar',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
 
             // footer handled in consumer list view branches
           ],

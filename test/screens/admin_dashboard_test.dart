@@ -22,7 +22,11 @@ class FakeUserProvider extends UserProvider {
 
   @override
   Map<String, int> getUserStatistics() {
-    return {'total': _fakeUsers.length, 'profesores': professorsCount, 'estudiantes': 0};
+    return {
+      'total': _fakeUsers.length,
+      'profesores': professorsCount,
+      'estudiantes': 0
+    };
   }
 }
 
@@ -35,7 +39,8 @@ class FakeInstitutionProvider extends InstitutionProvider {
 }
 
 void main() {
-  testWidgets('AdminDashboard shows KPIs and recent activity', (WidgetTester tester) async {
+  testWidgets('AdminDashboard shows KPIs and recent activity',
+      (WidgetTester tester) async {
     final user1 = User(
       id: 'u1',
       email: 'docente@example.com',
@@ -48,21 +53,22 @@ void main() {
       instituciones: [],
     );
 
-  final fakeUserProvider = FakeUserProvider([user1]);
+    final fakeUserProvider = FakeUserProvider([user1]);
     final fakeInstitutionProvider = FakeInstitutionProvider(3);
-  // Simple auth provider stub
-  final fakeAuth = AuthProvider();
-  // Set a minimal user map for tests
-  // authProvider.user is private so we extend in the test if needed; for now we rely on a default user
+    // Simple auth provider stub
+    final fakeAuth = AuthProvider();
+    // Set a minimal user map for tests
+    // authProvider.user is private so we extend in the test if needed; for now we rely on a default user
 
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
-          ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstitutionProvider),
+          ChangeNotifierProvider<InstitutionProvider>.value(
+              value: fakeInstitutionProvider),
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
         ],
-  child: const MaterialApp(home: AdminDashboard()),
+        child: const MaterialApp(home: AdminDashboard()),
       ),
     );
 

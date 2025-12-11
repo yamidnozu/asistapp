@@ -39,16 +39,26 @@ class Horario {
     this.profesor,
   });
 
-  factory Horario.fromJson(Map<String, dynamic> json) => _$HorarioFromJson(json);
+  factory Horario.fromJson(Map<String, dynamic> json) =>
+      _$HorarioFromJson(json);
 
   Map<String, dynamic> toJson() => _$HorarioToJson(this);
 
   String get diaSemanaNombre {
-    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo'
+    ];
     return dias[diaSemana - 1];
   }
 
   String get horarioFormato => '$horaInicio - $horaFin';
 
-  String get descripcion => '${materia.nombre} - ${grupo.nombreCompleto}${profesor != null ? ' (${profesor!.nombreCompleto})' : ''}';
+  String get descripcion =>
+      '${materia.nombre} - ${grupo.nombreCompleto}${profesor != null ? ' (${profesor!.nombreCompleto})' : ''}';
 }

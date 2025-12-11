@@ -212,7 +212,8 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                     Text(
                       notificacion.tiempoRelativo,
                       style: context.textStyles.bodySmall.copyWith(
-                        color: context.colors.textSecondary.withValues(alpha: 0.7),
+                        color:
+                            context.colors.textSecondary.withValues(alpha: 0.7),
                         fontSize: 11,
                       ),
                     ),

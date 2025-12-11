@@ -25,13 +25,18 @@ class FakeGrupoProvider extends GrupoProvider {
   List<Grupo> get items => initialGrupos;
 
   @override
-  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<void> loadItems(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     // Avoid network call during tests - return provided initial list
     notifyListeners();
   }
 
   @override
-  Future<Grupo?> updateItemApi(String accessToken, String id, dynamic data) async {
+  Future<Grupo?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
     updateCalled = true;
     // Retorna un grupo mock actualizado para propósitos de prueba
     return Grupo(
@@ -42,13 +47,19 @@ class FakeGrupoProvider extends GrupoProvider {
       periodoId: 'p1',
       institucionId: 'i1',
       createdAt: DateTime.now(),
-      periodoAcademico: PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true),
+      periodoAcademico: PeriodoAcademico(
+          id: 'p1',
+          nombre: '2025',
+          fechaInicio: DateTime.now(),
+          fechaFin: DateTime.now().add(const Duration(days: 365)),
+          activo: true),
       count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0),
     );
   }
 
   @override
-  Future<bool> updateGrupo(String accessToken, String grupoId, dynamic grupoData) async {
+  Future<bool> updateGrupo(
+      String accessToken, String grupoId, dynamic grupoData) async {
     updateCalled = true;
     return true;
   }
@@ -74,7 +85,8 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
   List<PeriodoAcademico> get periodosAcademicos => _periodos;
 
   @override
-  List<PeriodoAcademico> get periodosActivos => _periodos.where((p) => p.activo).toList();
+  List<PeriodoAcademico> get periodosActivos =>
+      _periodos.where((p) => p.activo).toList();
 
   @override
   Future<void> loadPeriodosActivos(String accessToken) async {
@@ -84,21 +96,37 @@ class FakePeriodoProvider extends PeriodoAcademicoProvider {
 }
 
 void main() {
-  testWidgets('Edit grupo via context menu calls update', (WidgetTester tester) async {
+  testWidgets('Edit grupo via context menu calls update',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
-    final periodo = PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true);
-    final grupo = Grupo(id: 'g1', nombre: 'Grupo 1', grado: '1ro', seccion: 'A', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
+    final periodo = PeriodoAcademico(
+        id: 'p1',
+        nombre: '2025',
+        fechaInicio: DateTime.now(),
+        fechaFin: DateTime.now().add(const Duration(days: 365)),
+        activo: true);
+    final grupo = Grupo(
+        id: 'g1',
+        nombre: 'Grupo 1',
+        grado: '1ro',
+        seccion: 'A',
+        periodoId: 'p1',
+        institucionId: 'i1',
+        createdAt: DateTime.now(),
+        periodoAcademico: periodo,
+        count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
     final fakeProvider = FakeGrupoProvider(initialGrupos: [grupo]);
 
-  await AppConfig.initialize();
+    await AppConfig.initialize();
 
-  await tester.pumpWidget(
+    await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<GrupoProvider>.value(value: fakeProvider),
-          ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: FakePeriodoProvider([periodo])),
+          ChangeNotifierProvider<PeriodoAcademicoProvider>.value(
+              value: FakePeriodoProvider([periodo])),
         ],
         child: const MaterialApp(home: Scaffold(body: GruposScreen())),
       ),
@@ -128,11 +156,26 @@ void main() {
     expect(find.text('Grupo actualizado correctamente'), findsOneWidget);
   });
 
-  testWidgets('Delete grupo via context menu calls delete and shows snack', (WidgetTester tester) async {
+  testWidgets('Delete grupo via context menu calls delete and shows snack',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
-    final periodo = PeriodoAcademico(id: 'p1', nombre: '2025', fechaInicio: DateTime.now(), fechaFin: DateTime.now().add(const Duration(days: 365)), activo: true);
-    final grupo = Grupo(id: 'g1', nombre: 'Grupo X', grado: '2do', seccion: 'B', periodoId: 'p1', institucionId: 'i1', createdAt: DateTime.now(), periodoAcademico: periodo, count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
+    final periodo = PeriodoAcademico(
+        id: 'p1',
+        nombre: '2025',
+        fechaInicio: DateTime.now(),
+        fechaFin: DateTime.now().add(const Duration(days: 365)),
+        activo: true);
+    final grupo = Grupo(
+        id: 'g1',
+        nombre: 'Grupo X',
+        grado: '2do',
+        seccion: 'B',
+        periodoId: 'p1',
+        institucionId: 'i1',
+        createdAt: DateTime.now(),
+        periodoAcademico: periodo,
+        count: GrupoCount(estudiantesGrupos: 0, horarios: 0, asistencias: 0));
     final fakeProvider = FakeGrupoProvider(initialGrupos: [grupo]);
 
     await tester.pumpWidget(
@@ -140,7 +183,8 @@ void main() {
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<GrupoProvider>.value(value: fakeProvider),
-          ChangeNotifierProvider<PeriodoAcademicoProvider>.value(value: FakePeriodoProvider([periodo])),
+          ChangeNotifierProvider<PeriodoAcademicoProvider>.value(
+              value: FakePeriodoProvider([periodo])),
         ],
         child: const MaterialApp(home: Scaffold(body: GruposScreen())),
       ),

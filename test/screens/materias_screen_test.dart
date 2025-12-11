@@ -26,20 +26,23 @@ class FakeMateriaProvider extends MateriaProvider {
   List<Materia> get materias => initialMaterias;
 
   @override
-  Future<void> loadMaterias(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<void> loadMaterias(String accessToken,
+      {int? page, int? limit, String? search}) async {
     loadCalled = true;
     // Simulate no-op
     notifyListeners();
   }
 
   @override
-  Future<bool> createMateria(String accessToken, CreateMateriaRequest materiaData) async {
+  Future<bool> createMateria(
+      String accessToken, CreateMateriaRequest materiaData) async {
     createCalled = true;
     return true;
   }
 
   @override
-  Future<bool> updateMateria(String accessToken, String materiaId, UpdateMateriaRequest materiaData) async {
+  Future<bool> updateMateria(String accessToken, String materiaId,
+      UpdateMateriaRequest materiaData) async {
     updateCalled = true;
     return true;
   }
@@ -52,7 +55,8 @@ class FakeMateriaProvider extends MateriaProvider {
 }
 
 void main() {
-  testWidgets('Open create materia dialog and create succeeds', (WidgetTester tester) async {
+  testWidgets('Open create materia dialog and create succeeds',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
     final fakeMaterias = FakeMateriaProvider();
@@ -80,7 +84,8 @@ void main() {
     expect(find.text('Crear Materia'), findsOneWidget);
 
     // Fill form and tap save
-    await tester.enterText(find.byType(TextFormField).first, 'Matemáticas Test');
+    await tester.enterText(
+        find.byType(TextFormField).first, 'Matemáticas Test');
     await tester.pumpAndSettle();
 
     final saveButton = find.text('Crear');
@@ -95,10 +100,15 @@ void main() {
     expect(find.text('Materia creada correctamente'), findsOneWidget);
   });
 
-  testWidgets('Open edit materia dialog and update succeeds', (WidgetTester tester) async {
+  testWidgets('Open edit materia dialog and update succeeds',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
-    final materia = Materia(id: 'm1', nombre: 'Matemáticas', institucionId: 'i1', createdAt: DateTime.now());
+    final materia = Materia(
+        id: 'm1',
+        nombre: 'Matemáticas',
+        institucionId: 'i1',
+        createdAt: DateTime.now());
     final fakeMaterias = FakeMateriaProvider(initialMaterias: [materia]);
 
     await tester.pumpWidget(
@@ -129,7 +139,8 @@ void main() {
     expect(find.text('Editar Materia'), findsOneWidget);
 
     // Change the name
-    await tester.enterText(find.byType(TextFormField).first, 'Matemáticas Editada');
+    await tester.enterText(
+        find.byType(TextFormField).first, 'Matemáticas Editada');
     await tester.pumpAndSettle();
 
     // Save changes
@@ -142,10 +153,16 @@ void main() {
     expect(find.text('Materia actualizada correctamente'), findsOneWidget);
   });
 
-  testWidgets('Delete materia from context menu calls delete and shows SnackBar', (WidgetTester tester) async {
+  testWidgets(
+      'Delete materia from context menu calls delete and shows SnackBar',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
-    final materia = Materia(id: 'm2', nombre: 'Ciencias', institucionId: 'i1', createdAt: DateTime.now());
+    final materia = Materia(
+        id: 'm2',
+        nombre: 'Ciencias',
+        institucionId: 'i1',
+        createdAt: DateTime.now());
     final fakeMaterias = FakeMateriaProvider(initialMaterias: [materia]);
 
     await tester.pumpWidget(

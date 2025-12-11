@@ -7,7 +7,8 @@ part 'asistencia_estudiante.g.dart';
 /// Corresponde a la respuesta del endpoint GET /horarios/:horarioId/asistencias
 @JsonSerializable()
 class AsistenciaEstudiante {
-  final String? id; // ID de la asistencia específica (puede ser null si no registrada)
+  final String?
+      id; // ID de la asistencia específica (puede ser null si no registrada)
   final String estudianteId;
   final String nombres;
   final String apellidos;
@@ -28,7 +29,8 @@ class AsistenciaEstudiante {
   });
 
   /// Crea una instancia desde un JSON del backend
-  factory AsistenciaEstudiante.fromJson(Map<String, dynamic> json) => _$AsistenciaEstudianteFromJson(json);
+  factory AsistenciaEstudiante.fromJson(Map<String, dynamic> json) =>
+      _$AsistenciaEstudianteFromJson(json);
 
   /// Convierte la instancia a JSON
   Map<String, dynamic> toJson() => _$AsistenciaEstudianteToJson(this);
@@ -42,12 +44,12 @@ class AsistenciaEstudiante {
     if (nombres.isNotEmpty) {
       return nombres[0].toUpperCase();
     }
-    
+
     // Si nombres está vacío, usar la primera letra del nombre completo
     if (nombreCompleto.isNotEmpty && nombreCompleto != ' ') {
       return nombreCompleto[0].toUpperCase();
     }
-    
+
     // Último recurso
     return '?';
   }

@@ -25,12 +25,21 @@ class ClaseDelDia {
     required this.institucion,
   });
 
-  factory ClaseDelDia.fromJson(Map<String, dynamic> json) => _$ClaseDelDiaFromJson(json);
+  factory ClaseDelDia.fromJson(Map<String, dynamic> json) =>
+      _$ClaseDelDiaFromJson(json);
 
   Map<String, dynamic> toJson() => _$ClaseDelDiaToJson(this);
 
   String get diaSemanaNombre {
-    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo'
+    ];
     return dias[diaSemana - 1];
   }
 
@@ -54,7 +63,8 @@ class GrupoSimple {
     this.seccion,
   });
 
-  factory GrupoSimple.fromJson(Map<String, dynamic> json) => _$GrupoSimpleFromJson(json);
+  factory GrupoSimple.fromJson(Map<String, dynamic> json) =>
+      _$GrupoSimpleFromJson(json);
 
   Map<String, dynamic> toJson() => _$GrupoSimpleToJson(this);
 
@@ -73,7 +83,8 @@ class MateriaSimple {
     this.codigo,
   });
 
-  factory MateriaSimple.fromJson(Map<String, dynamic> json) => _$MateriaSimpleFromJson(json);
+  factory MateriaSimple.fromJson(Map<String, dynamic> json) =>
+      _$MateriaSimpleFromJson(json);
 
   Map<String, dynamic> toJson() => _$MateriaSimpleToJson(this);
 
@@ -92,7 +103,8 @@ class PeriodoAcademicoSimple {
     required this.activo,
   });
 
-  factory PeriodoAcademicoSimple.fromJson(Map<String, dynamic> json) => _$PeriodoAcademicoSimpleFromJson(json);
+  factory PeriodoAcademicoSimple.fromJson(Map<String, dynamic> json) =>
+      _$PeriodoAcademicoSimpleFromJson(json);
 
   Map<String, dynamic> toJson() => _$PeriodoAcademicoSimpleToJson(this);
 }
@@ -109,13 +121,16 @@ class Institucion {
     this.configuraciones,
   });
 
-  factory Institucion.fromJson(Map<String, dynamic> json) => _$InstitucionFromJson(json);
+  factory Institucion.fromJson(Map<String, dynamic> json) =>
+      _$InstitucionFromJson(json);
 
   Map<String, dynamic> toJson() => _$InstitucionToJson(this);
 
   /// Helper para saber si el modo de notificación es MANUAL_ONLY
-  bool get isModoManual => configuraciones?.modoNotificacionAsistencia == 'MANUAL_ONLY';
+  bool get isModoManual =>
+      configuraciones?.modoNotificacionAsistencia == 'MANUAL_ONLY';
 
   /// Helper para saber si las notificaciones están activas
-  bool get notificacionesActivas => configuraciones?.notificacionesActivas ?? false;
+  bool get notificacionesActivas =>
+      configuraciones?.notificacionesActivas ?? false;
 }

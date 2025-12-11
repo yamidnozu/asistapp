@@ -31,11 +31,13 @@ class AppCard extends StatelessWidget {
       shadowColor: colors.shadow,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.circular(spacing.borderRadius),
+        borderRadius:
+            borderRadius ?? BorderRadius.circular(spacing.borderRadius),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: borderRadius ?? BorderRadius.circular(spacing.borderRadius),
+        borderRadius:
+            borderRadius ?? BorderRadius.circular(spacing.borderRadius),
         child: Padding(
           padding: padding ?? EdgeInsets.all(spacing.cardPadding),
           child: child,
@@ -74,20 +76,26 @@ class AppScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: appBar ?? (title != null ? AppBar(
-        backgroundColor: colors.surface,
-        foregroundColor: colors.textPrimary,
-        elevation: 0,
-        shadowColor: colors.shadow,
-        surfaceTintColor: Colors.transparent,
-        titleTextStyle: textStyles.headlineMedium,
-        title: Text(title!),
-        leading: showBackButton ? IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: onBackPressed ?? () => Navigator.maybePop(context),
-        ) : null,
-        actions: actions,
-      ) : null),
+      appBar: appBar ??
+          (title != null
+              ? AppBar(
+                  backgroundColor: colors.surface,
+                  foregroundColor: colors.textPrimary,
+                  elevation: 0,
+                  shadowColor: colors.shadow,
+                  surfaceTintColor: Colors.transparent,
+                  titleTextStyle: textStyles.headlineMedium,
+                  title: Text(title!),
+                  leading: showBackButton
+                      ? IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: onBackPressed ??
+                              () => Navigator.maybePop(context),
+                        )
+                      : null,
+                  actions: actions,
+                )
+              : null),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(spacing.screenPadding),
@@ -162,7 +170,6 @@ class AppText extends StatelessWidget {
     if (style != null) {
       resolvedStyle = style!;
     } else {
-
       final constructorName = runtimeType.toString();
       if (constructorName.contains('headlineLarge')) {
         resolvedStyle = textStyles.headlineLarge;
@@ -193,28 +200,39 @@ class AppSpacer extends StatelessWidget {
 
   const AppSpacer({this.width, this.height, super.key});
 
-  const AppSpacer.xs({super.key}) : width = null, height = null;
-  const AppSpacer.sm({super.key}) : width = null, height = null;
-  const AppSpacer.md({super.key}) : width = null, height = null;
-  const AppSpacer.lg({super.key}) : width = null, height = null;
-  const AppSpacer.xl({super.key}) : width = null, height = null;
+  const AppSpacer.xs({super.key})
+      : width = null,
+        height = null;
+  const AppSpacer.sm({super.key})
+      : width = null,
+        height = null;
+  const AppSpacer.md({super.key})
+      : width = null,
+        height = null;
+  const AppSpacer.lg({super.key})
+      : width = null,
+        height = null;
+  const AppSpacer.xl({super.key})
+      : width = null,
+        height = null;
 
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
 
     final double resolvedWidth = width ?? 0;
-    final double resolvedHeight = height ?? (() {
-      if (width != null) return width!;
-      if (height != null) return height!;
-      final constructorName = runtimeType.toString();
-  if (constructorName.contains('xs')) return spacing.xs.toDouble();
-  if (constructorName.contains('sm')) return spacing.sm.toDouble();
-  if (constructorName.contains('md')) return spacing.md.toDouble();
-  if (constructorName.contains('lg')) return spacing.lg.toDouble();
-  if (constructorName.contains('xl')) return spacing.xl.toDouble();
-  return 0.0;
-    })();
+    final double resolvedHeight = height ??
+        (() {
+          if (width != null) return width!;
+          if (height != null) return height!;
+          final constructorName = runtimeType.toString();
+          if (constructorName.contains('xs')) return spacing.xs.toDouble();
+          if (constructorName.contains('sm')) return spacing.sm.toDouble();
+          if (constructorName.contains('md')) return spacing.md.toDouble();
+          if (constructorName.contains('lg')) return spacing.lg.toDouble();
+          if (constructorName.contains('xl')) return spacing.xl.toDouble();
+          return 0.0;
+        })();
 
     return SizedBox(
       width: resolvedWidth,

@@ -17,11 +17,10 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
-
     final data = json['data'] ?? json;
 
     final usuario = data['usuario'] ?? data['user'];
-    
+
     return LoginResponse(
       accessToken: data['accessToken'] as String,
       refreshToken: data['refreshToken'] as String,
@@ -69,10 +68,12 @@ class AuthService {
       debugPrint('AuthService.login - URL: $url');
       debugPrint('AuthService.login - Config Base URL: $baseUrlValue');
 
-      final response = await _httpClient.post(
+      final response = await _httpClient
+          .post(
         Uri.parse(url),
         body: requestBody,
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -94,16 +95,18 @@ class AuthService {
           debugPrint('   usuario: ${data['usuario']}');
           return null;
         }
-        
+
         return LoginResponse.fromJson(responseData);
       } else {
         debugPrint('   Response: ${response.body}');
         try {
           final Map<String, dynamic> errorData = jsonDecode(response.body);
-          final serverMessage = errorData['message'] ?? 
-                                errorData['error'] ?? 
-                                (errorData['data'] is Map ? errorData['data']['message'] : null) ?? 
-                                response.body;
+          final serverMessage = errorData['message'] ??
+              errorData['error'] ??
+              (errorData['data'] is Map
+                  ? errorData['data']['message']
+                  : null) ??
+              response.body;
           throw Exception(serverMessage);
         } catch (parseError) {
           throw Exception(response.body);
@@ -162,7 +165,8 @@ class AuthService {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> getUserInstitutions(String accessToken) async {
+  Future<List<Map<String, dynamic>>?> getUserInstitutions(
+      String accessToken) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await _httpClient.get(
@@ -177,7 +181,8 @@ class AuthService {
           return institutions.map((e) => e as Map<String, dynamic>).toList();
         }
       } else {
-        debugPrint('Get user institutions failed: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Get user institutions failed: ${response.statusCode} - ${response.body}');
         return null;
       }
     } on UnauthorizedException {

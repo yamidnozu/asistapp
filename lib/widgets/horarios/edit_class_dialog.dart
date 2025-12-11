@@ -63,11 +63,15 @@ class _EditClassDialogState extends State<EditClassDialog> {
                 children: [
                   Text(
                     'Horario: ${widget.horario.horaInicio} - ${_selectedHoraFin ?? (horasDisponibles.contains(widget.horario.horaFin) ? widget.horario.horaFin : (horasDisponibles.isNotEmpty ? horasDisponibles.first : '—'))}',
-                    style: textStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                    style: textStyles.bodyMedium
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
-                  Text('Día: ${widget.horario.diaSemanaNombre}', style: textStyles.bodyMedium),
-                  Text('Grupo: ${widget.horario.grupo.nombre}', style: textStyles.bodyMedium),
-                  Text('Materia: ${widget.horario.materia.nombre}', style: textStyles.bodyMedium),
+                  Text('Día: ${widget.horario.diaSemanaNombre}',
+                      style: textStyles.bodyMedium),
+                  Text('Grupo: ${widget.horario.grupo.nombre}',
+                      style: textStyles.bodyMedium),
+                  Text('Materia: ${widget.horario.materia.nombre}',
+                      style: textStyles.bodyMedium),
                 ],
               ),
             ),
@@ -75,11 +79,18 @@ class _EditClassDialogState extends State<EditClassDialog> {
             DropdownButtonFormField<String>(
               isExpanded: true,
               value: _selectedHoraFin,
-              decoration: const InputDecoration(labelText: 'Hora de Fin', hintText: 'Selecciona la hora de fin'),
+              decoration: const InputDecoration(
+                  labelText: 'Hora de Fin',
+                  hintText: 'Selecciona la hora de fin'),
               items: _getHorasFinDisponibles(widget.horario.horaInicio)
-                  .map((hora) => DropdownMenuItem<String>(value: hora, child: Text(hora, overflow: TextOverflow.ellipsis, maxLines: 1)))
+                  .map((hora) => DropdownMenuItem<String>(
+                      value: hora,
+                      child: Text(hora,
+                          overflow: TextOverflow.ellipsis, maxLines: 1)))
                   .toList(),
-              validator: (value) => (value == null || value.isEmpty) ? 'La hora de fin es requerida' : null,
+              validator: (value) => (value == null || value.isEmpty)
+                  ? 'La hora de fin es requerida'
+                  : null,
               onChanged: (hora) => setState(() => _selectedHoraFin = hora),
             ),
             SizedBox(height: spacing.md),
@@ -88,7 +99,9 @@ class _EditClassDialogState extends State<EditClassDialog> {
                 // Buscar el profesor en la lista actual de profesores
                 User? selectedProfesorFromList;
                 if (_selectedProfesor != null) {
-                  final found = userProvider.professors.where((p) => p.id == _selectedProfesor!.id).toList();
+                  final found = userProvider.professors
+                      .where((p) => p.id == _selectedProfesor!.id)
+                      .toList();
                   if (found.isNotEmpty) {
                     selectedProfesorFromList = found.first;
                   }
@@ -98,23 +111,28 @@ class _EditClassDialogState extends State<EditClassDialog> {
 
                 return DropdownButtonFormField<User?>(
                   isExpanded: true,
-                  value: selectedProfesorFromList, // Será null si no se encuentra en la lista
+                  value:
+                      selectedProfesorFromList, // Será null si no se encuentra en la lista
                   decoration: InputDecoration(
                     labelText: 'Profesor',
-                    hintText: _selectedProfesor != null && selectedProfesorFromList == null
+                    hintText: _selectedProfesor != null &&
+                            selectedProfesorFromList == null
                         ? 'Profesor actual: ${_selectedProfesor!.nombres} (no disponible)'
                         : 'Selecciona un profesor',
                   ),
                   items: [
-                    const DropdownMenuItem<User?>(value: null, child: Text('Sin profesor')),
+                    const DropdownMenuItem<User?>(
+                        value: null, child: Text('Sin profesor')),
                     ...userProvider.professors.map((profesor) {
                       return DropdownMenuItem<User?>(
                         value: profesor,
-                        child: Text('${profesor.nombres} ${profesor.apellidos}', overflow: TextOverflow.ellipsis, maxLines: 1),
+                        child: Text('${profesor.nombres} ${profesor.apellidos}',
+                            overflow: TextOverflow.ellipsis, maxLines: 1),
                       );
                     }),
                   ],
-                  onChanged: (profesor) => setState(() => _selectedProfesor = profesor),
+                  onChanged: (profesor) =>
+                      setState(() => _selectedProfesor = profesor),
                 );
               },
             ),
@@ -139,7 +157,8 @@ class _EditClassDialogState extends State<EditClassDialog> {
 
     final success = await _deleteClass();
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clase eliminada correctamente')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Clase eliminada correctamente')));
       Navigator.of(context).pop(true);
     }
   }
@@ -162,7 +181,8 @@ class _EditClassDialogState extends State<EditClassDialog> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+      final horarioProvider =
+          Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
       if (token == null) return false;
 
@@ -178,11 +198,13 @@ class _EditClassDialogState extends State<EditClassDialog> {
       );
 
       if (success) {
-        messenger.showSnackBar(const SnackBar(content: Text('Clase actualizada correctamente')));
+        messenger.showSnackBar(
+            const SnackBar(content: Text('Clase actualizada correctamente')));
         return true;
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
+      messenger.showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     }
     return false;
   }
@@ -192,9 +214,12 @@ class _EditClassDialogState extends State<EditClassDialog> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar eliminación'),
-        content: const Text('¿Estás seguro de que quieres eliminar esta clase?'),
+        content:
+            const Text('¿Estás seguro de que quieres eliminar esta clase?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancelar')),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -211,20 +236,27 @@ class _EditClassDialogState extends State<EditClassDialog> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+      final horarioProvider =
+          Provider.of<HorarioProvider>(context, listen: false);
       final token = authProvider.accessToken;
       if (token == null) return false;
 
-      final success = await horarioProvider.deleteHorario(token, widget.horario.id);
+      final success =
+          await horarioProvider.deleteHorario(token, widget.horario.id);
       if (!mounted) return false;
       if (success) {
-        messenger.showSnackBar(const SnackBar(content: Text('Clase eliminada correctamente')));
+        messenger.showSnackBar(
+            const SnackBar(content: Text('Clase eliminada correctamente')));
         return true;
       } else {
-        messenger.showSnackBar(SnackBar(content: Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'), backgroundColor: colors.error));
+        messenger.showSnackBar(SnackBar(
+            content:
+                Text(horarioProvider.errorMessage ?? 'Error al eliminar clase'),
+            backgroundColor: colors.error));
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
+      messenger.showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
     }
     return false;
   }

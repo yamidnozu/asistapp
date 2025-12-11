@@ -37,8 +37,10 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   // Use PaginatedDataProvider's isLoadingMore and hasMoreData
 
   // Computed properties
-  List<Grupo> get gruposActivos => items.where((grupo) => grupo.periodoAcademico.activo).toList();
-  List<Grupo> get gruposInactivos => items.where((grupo) => !grupo.periodoAcademico.activo).toList();
+  List<Grupo> get gruposActivos =>
+      items.where((grupo) => grupo.periodoAcademico.activo).toList();
+  List<Grupo> get gruposInactivos =>
+      items.where((grupo) => !grupo.periodoAcademico.activo).toList();
 
   // Número de grupos actualmente cargados en memoria (página actual)
   int get loadedGruposCount => items.length;
@@ -54,7 +56,13 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   /// Carga todos los grupos con paginación y filtros.
   /// Los filtros se deben establecer previamente con filters[] antes de llamar a este método.
   /// Los parámetros son opcionales y solo sobrescriben los filtros existentes si se proporcionan.
-  Future<void> loadGrupos(String accessToken, {int? page, int? limit, String? periodoId, String? search, String? grado, String? seccion}) async {
+  Future<void> loadGrupos(String accessToken,
+      {int? page,
+      int? limit,
+      String? periodoId,
+      String? search,
+      String? grado,
+      String? seccion}) async {
     if (isLoading) return;
     resetPagination(); // Resetear para scroll infinito
 
@@ -76,55 +84,70 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
     // NOTA: No removemos filtros si los parámetros son null - los filtros existentes se mantienen
 
     try {
-      debugPrint('GrupoProvider: Iniciando carga de grupos con filtros: $filters');
-      await loadItems(accessToken, page: page ?? 1, limit: limit, filters: filters.isNotEmpty ? filters.map((k, v) => MapEntry(k, v.toString())) : null);
+      debugPrint(
+          'GrupoProvider: Iniciando carga de grupos con filtros: $filters');
+      await loadItems(accessToken,
+          page: page ?? 1,
+          limit: limit,
+          filters: filters.isNotEmpty
+              ? filters.map((k, v) => MapEntry(k, v.toString()))
+              : null);
       notifyListeners();
       debugPrint('GrupoProvider: Estado cambiado a loaded');
     } catch (e) {
       debugPrint('GrupoProvider: Error loading grupos: $e');
       setError(e.toString());
     }
-  }  /// Carga grupos por periodo académico
-  Future<void> loadGruposByPeriodo(String accessToken, String periodoId, {int? page, int limit = 10, String? search}) async {
-  if (isLoading) return;
+  }
+
+  /// Carga grupos por periodo académico
+  Future<void> loadGruposByPeriodo(String accessToken, String periodoId,
+      {int? page, int limit = 10, String? search}) async {
+    if (isLoading) return;
     _selectedPeriodoId = periodoId;
     resetPagination(); // Resetear para scroll infinito
 
     try {
-      debugPrint('GrupoProvider: Iniciando carga de grupos por periodo $periodoId...');
-  _selectedPeriodoId = periodoId; // store for filters
-      await loadItems(accessToken, page: page ?? 1, limit: limit, search: search, filters: {
-        'periodoId': periodoId,
-      });
-  // paginationInfo handled by base provider
-  notifyListeners();
+      debugPrint(
+          'GrupoProvider: Iniciando carga de grupos por periodo $periodoId...');
+      _selectedPeriodoId = periodoId; // store for filters
+      await loadItems(accessToken,
+          page: page ?? 1,
+          limit: limit,
+          search: search,
+          filters: {
+            'periodoId': periodoId,
+          });
+      // paginationInfo handled by base provider
+      notifyListeners();
       debugPrint('GrupoProvider: Estado cambiado a loaded');
     } catch (e) {
       debugPrint('GrupoProvider: Error loading grupos by periodo: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Carga un grupo específico por ID
   Future<void> loadGrupoById(String accessToken, String grupoId) async {
-  if (isLoading) return;
+    if (isLoading) return;
 
     try {
       final grupo = await _grupoService.getGrupoById(accessToken, grupoId);
       if (grupo != null) {
         _selectedGrupo = grupo;
-  notifyListeners();
+        notifyListeners();
       } else {
-  setError('Grupo no encontrado');
+        setError('Grupo no encontrado');
       }
     } catch (e) {
       debugPrint('Error loading grupo: $e');
-  setError(e.toString());
+      setError(e.toString());
     }
   }
 
   /// Crea un nuevo grupo
-  Future<bool> createGrupo(String accessToken, CreateGrupoRequest grupoData) async {
+  Future<bool> createGrupo(
+      String accessToken, CreateGrupoRequest grupoData) async {
     if (isLoading) return false;
 
     try {
@@ -132,28 +155,30 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
       if (newGrupo != null) {
         // Agregar el nuevo grupo a la lista
         items.insert(0, newGrupo);
-  notifyListeners();
+        notifyListeners();
         return true;
       } else {
-  setError('Error al crear grupo');
+        setError('Error al crear grupo');
         return false;
       }
     } catch (e) {
       debugPrint('Error creating grupo: $e');
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
 
   /// Actualiza un grupo existente
-  Future<bool> updateGrupo(String accessToken, String grupoId, UpdateGrupoRequest grupoData) async {
+  Future<bool> updateGrupo(
+      String accessToken, String grupoId, UpdateGrupoRequest grupoData) async {
     if (isLoading) return false;
 
     try {
-      final updatedGrupo = await _grupoService.updateGrupo(accessToken, grupoId, grupoData);
+      final updatedGrupo =
+          await _grupoService.updateGrupo(accessToken, grupoId, grupoData);
       if (updatedGrupo != null) {
         // Actualizar el grupo en la lista
-  final index = items.indexWhere((grupo) => grupo.id == grupoId);
+        final index = items.indexWhere((grupo) => grupo.id == grupoId);
         if (index != -1) {
           items[index] = updatedGrupo;
         }
@@ -163,15 +188,15 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
           _selectedGrupo = updatedGrupo;
         }
 
-  notifyListeners();
+        notifyListeners();
         return true;
       } else {
-  setError('Error al actualizar grupo');
+        setError('Error al actualizar grupo');
         return false;
       }
     } catch (e) {
       debugPrint('Error updating grupo: $e');
-  setError(e.toString());
+      setError(e.toString());
       return false;
     }
   }
@@ -209,11 +234,11 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
 
   /// Limpia todos los datos
   void clearData() {
-  clearItems();
+    clearItems();
     _selectedGrupo = null;
     _selectedPeriodoId = null;
-  // pagination info is cleared by clearItems()
-  clearError();
+    // pagination info is cleared by clearItems()
+    clearError();
   }
 
   /// Recarga los datos (útil después de operaciones)
@@ -227,13 +252,13 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
 
   /// Busca grupos por nombre, grado o sección
   List<Grupo> searchGrupos(String query) {
-  if (query.isEmpty) return items;
+    if (query.isEmpty) return items;
 
     final lowercaseQuery = query.toLowerCase();
-  return items.where((grupo) {
+    return items.where((grupo) {
       return grupo.nombre.toLowerCase().contains(lowercaseQuery) ||
-             grupo.grado.toLowerCase().contains(lowercaseQuery) ||
-             (grupo.seccion?.toLowerCase().contains(lowercaseQuery) ?? false);
+          grupo.grado.toLowerCase().contains(lowercaseQuery) ||
+          (grupo.seccion?.toLowerCase().contains(lowercaseQuery) ?? false);
     }).toList();
   }
 
@@ -246,56 +271,69 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   /// Filtra grupos por estado del periodo (activo/inactivo)
   List<Grupo> filterGruposByPeriodoStatus({bool? activo}) {
     if (activo == null) return items;
-    return items.where((grupo) => grupo.periodoAcademico.activo == activo).toList();
+    return items
+        .where((grupo) => grupo.periodoAcademico.activo == activo)
+        .toList();
   }
 
   /// Carga la siguiente página de grupos
   @override
-  Future<void> loadNextPage(String accessToken, {Map<String, String>? filters}) async {
-  if (paginationInfo == null || !paginationInfo!.hasNext || isLoading) return;
+  Future<void> loadNextPage(String accessToken,
+      {Map<String, String>? filters}) async {
+    if (paginationInfo == null || !paginationInfo!.hasNext || isLoading) return;
 
-  final nextPage = paginationInfo!.page + 1;
+    final nextPage = paginationInfo!.page + 1;
     if (_selectedPeriodoId != null) {
-  await loadGruposByPeriodo(accessToken, _selectedPeriodoId!, page: nextPage, limit: paginationInfo!.limit);
+      await loadGruposByPeriodo(accessToken, _selectedPeriodoId!,
+          page: nextPage, limit: paginationInfo!.limit);
     } else {
-  await loadGrupos(accessToken, page: nextPage, limit: paginationInfo!.limit);
+      await loadGrupos(accessToken,
+          page: nextPage, limit: paginationInfo!.limit);
     }
   }
 
   /// Carga la página anterior de grupos
   Future<void> loadPreviousPage(String accessToken) async {
-  if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
+    if (paginationInfo == null || !paginationInfo!.hasPrev || isLoading) return;
 
-  final prevPage = paginationInfo!.page - 1;
+    final prevPage = paginationInfo!.page - 1;
     if (_selectedPeriodoId != null) {
-  await loadGruposByPeriodo(accessToken, _selectedPeriodoId!, page: prevPage, limit: paginationInfo!.limit);
+      await loadGruposByPeriodo(accessToken, _selectedPeriodoId!,
+          page: prevPage, limit: paginationInfo!.limit);
     } else {
-  await loadGrupos(accessToken, page: prevPage, limit: paginationInfo!.limit);
+      await loadGrupos(accessToken,
+          page: prevPage, limit: paginationInfo!.limit);
     }
   }
 
   /// Carga una página específica
   Future<void> loadPage(String accessToken, int page) async {
-  if (isLoading) return;
+    if (isLoading) return;
 
     if (_selectedPeriodoId != null) {
-  await loadGruposByPeriodo(accessToken, _selectedPeriodoId!, page: page, limit: paginationInfo?.limit ?? 10);
+      await loadGruposByPeriodo(accessToken, _selectedPeriodoId!,
+          page: page, limit: paginationInfo?.limit ?? 10);
     } else {
-  await loadGrupos(accessToken, page: page, limit: paginationInfo?.limit ?? 10);
+      await loadGrupos(accessToken,
+          page: page, limit: paginationInfo?.limit ?? 10);
     }
   }
 
   /// Obtiene estadísticas de grupos
   Map<String, int> getGruposStatistics() {
     return {
-  'total': paginationInfo?.total ?? 0,
+      'total': paginationInfo?.total ?? 0,
       'activos': gruposActivosCount,
       'inactivos': gruposInactivosCount,
     };
   }
 
   /// Carga más grupos para scroll infinito (append)
-  Future<void> loadMoreGrupos(String accessToken, {String? periodoId, String? search, String? grado, String? seccion}) async {
+  Future<void> loadMoreGrupos(String accessToken,
+      {String? periodoId,
+      String? search,
+      String? grado,
+      String? seccion}) async {
     if (isLoadingMore || !hasMoreData || paginationInfo == null) return;
 
     // Solo actualizar filtros si se proporcionan explícitamente
@@ -304,15 +342,15 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
     } else if (_selectedPeriodoId != null) {
       filters['periodoId'] = _selectedPeriodoId;
     }
-    
+
     if (search != null) {
       filters['search'] = search;
     }
-    
+
     if (grado != null) {
       filters['grado'] = grado;
     }
-    
+
     if (seccion != null) {
       filters['seccion'] = seccion;
     }
@@ -322,7 +360,8 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   /// Busca grupos en el backend (búsqueda remota)
-  Future<List<Grupo>?> searchGruposRemote(String accessToken, {String? search, int limit = 10}) async {
+  Future<List<Grupo>?> searchGruposRemote(String accessToken,
+      {String? search, int limit = 10}) async {
     try {
       final response = await _grupoService.getGrupos(
         accessToken,
@@ -344,15 +383,21 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   @override
-  Future<PaginatedResponse<Grupo>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<Grupo>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     // Leer filtros del provider (this.filters) en lugar de solo los parámetros
-    final periodoId = this.filters['periodoId']?.toString() ?? _selectedPeriodoId;
+    final periodoId =
+        this.filters['periodoId']?.toString() ?? _selectedPeriodoId;
     final searchFromFilters = this.filters['search']?.toString() ?? search;
     final grado = this.filters['grado']?.toString();
     final seccion = this.filters['seccion']?.toString();
-    
-    debugPrint('GrupoProvider.fetchPage - periodoId: $periodoId, grado: $grado, seccion: $seccion, search: $searchFromFilters');
-    
+
+    debugPrint(
+        'GrupoProvider.fetchPage - periodoId: $periodoId, grado: $grado, seccion: $seccion, search: $searchFromFilters');
+
     final response = await _grupoService.getGrupos(
       accessToken,
       page: page,
@@ -363,12 +408,14 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
       seccion: seccion,
     );
     if (response == null) return null;
-    return PaginatedResponse(items: response.grupos, pagination: response.pagination);
+    return PaginatedResponse(
+        items: response.grupos, pagination: response.pagination);
   }
 
   @override
   Future<Grupo?> createItemApi(String accessToken, dynamic data) async {
-    final created = await _grupoService.createGrupo(accessToken, data as CreateGrupoRequest);
+    final created = await _grupoService.createGrupo(
+        accessToken, data as CreateGrupoRequest);
     return created;
   }
 
@@ -378,8 +425,10 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   @override
-  Future<Grupo?> updateItemApi(String accessToken, String id, dynamic data) async {
-  final updated = await _grupoService.updateGrupo(accessToken, id, data as UpdateGrupoRequest);
+  Future<Grupo?> updateItemApi(
+      String accessToken, String id, dynamic data) async {
+    final updated = await _grupoService.updateGrupo(
+        accessToken, id, data as UpdateGrupoRequest);
     return updated;
   }
 
@@ -387,10 +436,13 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   /// Keep methods for backward compatibility for a short period.
   /// Prefer using EstudiantesByGrupoPaginatedProvider and EstudiantesSinAsignarPaginatedProvider.
   @Deprecated('Use EstudiantesByGrupoPaginatedProvider instead')
-  Future<void> loadEstudiantesByGrupo(String accessToken, String grupoId, {int? page, int? limit}) async {
-    debugPrint('loadEstudiantesByGrupo is deprecated; use EstudiantesByGrupoPaginatedProvider instead.');
+  Future<void> loadEstudiantesByGrupo(String accessToken, String grupoId,
+      {int? page, int? limit}) async {
+    debugPrint(
+        'loadEstudiantesByGrupo is deprecated; use EstudiantesByGrupoPaginatedProvider instead.');
     try {
-      await _grupoService.getEstudiantesByGrupo(accessToken, grupoId, page: page ?? 1, limit: limit ?? 10);
+      await _grupoService.getEstudiantesByGrupo(accessToken, grupoId,
+          page: page ?? 1, limit: limit ?? 10);
     } catch (e) {
       debugPrint('Error in deprecated loadEstudiantesByGrupo: $e');
       setError(e.toString());
@@ -398,10 +450,13 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   @Deprecated('Use EstudiantesSinAsignarPaginatedProvider instead')
-  Future<void> loadEstudiantesSinAsignar(String accessToken, {int? page, int? limit}) async {
-    debugPrint('loadEstudiantesSinAsignar is deprecated; use EstudiantesSinAsignarPaginatedProvider instead.');
+  Future<void> loadEstudiantesSinAsignar(String accessToken,
+      {int? page, int? limit}) async {
+    debugPrint(
+        'loadEstudiantesSinAsignar is deprecated; use EstudiantesSinAsignarPaginatedProvider instead.');
     try {
-      await _grupoService.getEstudiantesSinAsignar(accessToken, page: page ?? 1, limit: limit ?? 10);
+      await _grupoService.getEstudiantesSinAsignar(accessToken,
+          page: page ?? 1, limit: limit ?? 10);
     } catch (e) {
       debugPrint('Error in deprecated loadEstudiantesSinAsignar: $e');
       setError(e.toString());
@@ -409,9 +464,11 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   /// Asigna un estudiante a un grupo
-  Future<bool> asignarEstudianteAGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> asignarEstudianteAGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     try {
-      final success = await _grupoService.asignarEstudianteAGrupo(accessToken, grupoId, estudianteId);
+      final success = await _grupoService.asignarEstudianteAGrupo(
+          accessToken, grupoId, estudianteId);
       if (success) {
         // The UI should refresh the paginated providers after this call.
         notifyListeners();
@@ -426,9 +483,11 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
   }
 
   /// Desasigna un estudiante de un grupo
-  Future<bool> desasignarEstudianteDeGrupo(String accessToken, String grupoId, String estudianteId) async {
+  Future<bool> desasignarEstudianteDeGrupo(
+      String accessToken, String grupoId, String estudianteId) async {
     try {
-      final success = await _grupoService.desasignarEstudianteDeGrupo(accessToken, grupoId, estudianteId);
+      final success = await _grupoService.desasignarEstudianteDeGrupo(
+          accessToken, grupoId, estudianteId);
       if (success) {
         // UI should refresh the paginated providers after this call.
         notifyListeners();
@@ -444,7 +503,7 @@ class GrupoProvider extends ChangeNotifier with PaginatedDataMixin<Grupo> {
 
   /// Limpia los datos de estudiantes
   void clearEstudiantesData() {
-  // Nothing to clear here: paginated providers handle students cache.
+    // Nothing to clear here: paginated providers handle students cache.
     notifyListeners();
   }
 }

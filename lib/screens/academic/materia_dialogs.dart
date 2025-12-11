@@ -32,14 +32,16 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
   Future<bool> _createMateria() async {
     if (!_formKey.currentState!.validate()) return false;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
     final messenger = ScaffoldMessenger.of(context);
     final colors = Theme.of(context).colorScheme;
 
     try {
       final token = authProvider.accessToken;
       if (token == null) {
-        messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear una materia')));
+        messenger.showSnackBar(const SnackBar(
+            content: Text('Debes iniciar sesión para crear una materia')));
         return false;
       }
 
@@ -47,18 +49,26 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
         token,
         CreateMateriaRequest(
           nombre: _nombreController.text.trim(),
-          codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
+          codigo: _codigoController.text.trim().isEmpty
+              ? null
+              : _codigoController.text.trim(),
         ),
       );
 
       if (success && mounted) {
-        messenger.showSnackBar(const SnackBar(content: Text('Materia creada correctamente')));
+        messenger.showSnackBar(
+            const SnackBar(content: Text('Materia creada correctamente')));
         return true;
       } else if (mounted) {
-        messenger.showSnackBar(SnackBar(content: Text(materiaProvider.errorMessage ?? 'Error al crear materia'), backgroundColor: colors.error));
+        messenger.showSnackBar(SnackBar(
+            content:
+                Text(materiaProvider.errorMessage ?? 'Error al crear materia'),
+            backgroundColor: colors.error));
       }
     } catch (e) {
-      if (mounted) messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: colors.error));
+      if (mounted)
+        messenger.showSnackBar(SnackBar(
+            content: Text('Error: $e'), backgroundColor: colors.error));
     }
     return false;
   }
@@ -79,27 +89,27 @@ class _CreateMateriaDialogState extends State<CreateMateriaDialog> {
       saveLabel: 'Crear',
       cancelLabel: 'Cancelar',
       children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre de la Materia',
-                hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _codigoController,
-              decoration: const InputDecoration(
-                labelText: 'Código (opcional)',
-                hintText: 'Ej: MAT101, LEN201',
-              ),
-            ),
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre de la Materia',
+            hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El nombre es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _codigoController,
+          decoration: const InputDecoration(
+            labelText: 'Código (opcional)',
+            hintText: 'Ej: MAT101, LEN201',
+          ),
+        ),
       ],
     );
   }
@@ -126,7 +136,8 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
   void initState() {
     super.initState();
     _nombreController = TextEditingController(text: widget.materia.nombre);
-    _codigoController = TextEditingController(text: widget.materia.codigo ?? '');
+    _codigoController =
+        TextEditingController(text: widget.materia.codigo ?? '');
   }
 
   @override
@@ -147,28 +158,28 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
       onSave: _updateMateria,
       saveLabel: 'Actualizar',
       cancelLabel: 'Cancelar',
-  children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre de la Materia',
-                hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es requerido';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: spacing.md),
-            TextFormField(
-              controller: _codigoController,
-              decoration: const InputDecoration(
-                labelText: 'Código (opcional)',
-                hintText: 'Ej: MAT101, LEN201',
-              ),
-            ),
+      children: [
+        TextFormField(
+          controller: _nombreController,
+          decoration: const InputDecoration(
+            labelText: 'Nombre de la Materia',
+            hintText: 'Ej: Matemáticas, Lenguaje, Ciencias',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'El nombre es requerido';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.md),
+        TextFormField(
+          controller: _codigoController,
+          decoration: const InputDecoration(
+            labelText: 'Código (opcional)',
+            hintText: 'Ej: MAT101, LEN201',
+          ),
+        ),
       ],
     );
   }
@@ -180,14 +191,15 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final colors = Theme.of(context).colorScheme;
 
-
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+      final materiaProvider =
+          Provider.of<MateriaProvider>(context, listen: false);
 
       final token = authProvider.accessToken;
       if (token == null) {
-        messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para editar una materia')));
+        messenger.showSnackBar(const SnackBar(
+            content: Text('Debes iniciar sesión para editar una materia')));
         return false;
       }
 
@@ -196,7 +208,9 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
         widget.materia.id,
         UpdateMateriaRequest(
           nombre: _nombreController.text.trim(),
-          codigo: _codigoController.text.trim().isEmpty ? null : _codigoController.text.trim(),
+          codigo: _codigoController.text.trim().isEmpty
+              ? null
+              : _codigoController.text.trim(),
         ),
       );
 
@@ -208,7 +222,8 @@ class _EditMateriaDialogState extends State<EditMateriaDialog> {
       } else if (mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text(materiaProvider.errorMessage ?? 'Error al actualizar materia'),
+            content: Text(
+                materiaProvider.errorMessage ?? 'Error al actualizar materia'),
             backgroundColor: colors.error,
           ),
         );

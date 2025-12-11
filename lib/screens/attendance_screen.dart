@@ -29,33 +29,34 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   // Use context.colors and context.spacing inside build and other methods
-  
+
   // Estado para tracking del estudiante seleccionado (primer toque)
   String? _estudianteSeleccionadoId;
   DateTime _selectedDate = DateTime.now();
-  
+
   // Estado para modo de selección múltiple
   bool _multiSelectMode = false;
   final Set<String> _selectedStudentIds = {};
 
   // Función helper para mostrar SnackBars en la parte superior
-  void _showTopSnackBar(BuildContext context, {
+  void _showTopSnackBar(
+    BuildContext context, {
     required String message,
     Color? backgroundColor,
     Widget? leading,
     Duration duration = const Duration(seconds: 2),
   }) {
-  if (!mounted) return;
-  final spacing = context.spacing;
-    
-  ScaffoldMessenger.of(context).showSnackBar(
+    if (!mounted) return;
+    final spacing = context.spacing;
+
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             if (leading != null) ...[
-                leading,
-                SizedBox(width: spacing.sm),
-              ],
+              leading,
+              SizedBox(width: spacing.sm),
+            ],
             Expanded(child: Text(message)),
           ],
         ),
@@ -83,11 +84,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Future<void> _loadAsistencias() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
 
-  final token = authProvider.accessToken;
+    final token = authProvider.accessToken;
     if (token != null) {
-      await asistenciaProvider.fetchAsistencias(token, widget.clase.id, date: _selectedDate);
+      await asistenciaProvider.fetchAsistencias(token, widget.clase.id,
+          date: _selectedDate);
     }
   }
 
@@ -98,12 +101,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       builder: (context, child) {
-            final colors = context.colors;
-            return Theme(
+        final colors = context.colors;
+        return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: colors.primary,
-                  onPrimary: colors.white,
+              onPrimary: colors.white,
               onSurface: colors.textPrimary,
             ),
           ),
@@ -120,20 +123,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _onScanQR() async {
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Navegar al escáner QR y esperar resultado
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (context) => QRScannerScreen(horarioId: widget.clase.id)),
+      MaterialPageRoute(
+          builder: (context) => QRScannerScreen(horarioId: widget.clase.id)),
     );
 
     // Si se registró una asistencia con éxito, recargar la lista
     if (result == true) {
       final token = authProvider.accessToken;
       if (token != null) {
-        await asistenciaProvider.fetchAsistencias(token, widget.clase.id, date: _selectedDate);
+        await asistenciaProvider.fetchAsistencias(token, widget.clase.id,
+            date: _selectedDate);
       }
     }
   }
@@ -141,30 +147,35 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _buildClassInfo(BuildContext context, BoxConstraints constraints) {
     final colors = context.colors;
     final spacing = context.spacing;
-    
+
     // Extraer configuración de notificaciones para mostrar al profesor
     final config = widget.clase.institucion.configuraciones;
     final bool notifActivas = config?.notificacionesActivas ?? false;
     final String modo = config?.modoNotificacionAsistencia ?? 'MANUAL_ONLY';
-    final String hora = config?.horaDisparoNotificacion?.substring(0, 5) ?? '18:00';
+    final String hora =
+        config?.horaDisparoNotificacion?.substring(0, 5) ?? '18:00';
 
     String mensajeNotificacion = '';
     IconData iconoNotificacion = Icons.info_outline;
     Color colorNotificacion = colors.textSecondary;
 
     if (!notifActivas) {
-      mensajeNotificacion = 'El envío de notificaciones está desactivado para esta institución.';
+      mensajeNotificacion =
+          'El envío de notificaciones está desactivado para esta institución.';
     } else {
       if (modo == 'INSTANT') {
-        mensajeNotificacion = 'Las ausencias se notifican inmediatamente por WhatsApp/SMS.';
+        mensajeNotificacion =
+            'Las ausencias se notifican inmediatamente por WhatsApp/SMS.';
         iconoNotificacion = Icons.send;
         colorNotificacion = colors.warning;
       } else if (modo == 'END_OF_DAY') {
-        mensajeNotificacion = 'El reporte de asistencia se enviará automáticamente a las $hora.';
+        mensajeNotificacion =
+            'El reporte de asistencia se enviará automáticamente a las $hora.';
         iconoNotificacion = Icons.schedule_send;
         colorNotificacion = colors.info;
       } else {
-        mensajeNotificacion = 'El envío es manual. Usa el botón "Megáfono" para notificar.';
+        mensajeNotificacion =
+            'El envío es manual. Usa el botón "Megáfono" para notificar.';
         iconoNotificacion = Icons.touch_app;
         colorNotificacion = colors.primary;
       }
@@ -188,16 +199,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               Expanded(
                 child: Text(
                   widget.clase.materia.nombre,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colors.textPrimary,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colors.textPrimary,
+                      ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               // Botón de notificación manual - solo visible cuando modo es MANUAL_ONLY
-              if (widget.clase.institucion.isModoManual && 
+              if (widget.clase.institucion.isModoManual &&
                   widget.clase.institucion.notificacionesActivas)
                 IconButton(
                   tooltip: 'Enviar notificaciones de ausencias',
@@ -210,8 +221,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           Text(
             '${widget.clase.grupo.nombreCompleto} - ${widget.clase.diaSemanaNombre}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
+                  color: colors.textSecondary,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -229,8 +240,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: Text(
                   widget.clase.horarioFormato,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colors.textMuted,
-                  ),
+                        color: colors.textMuted,
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -244,7 +255,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             decoration: BoxDecoration(
               color: colorNotificacion.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(spacing.borderRadius),
-              border: Border.all(color: colorNotificacion.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: colorNotificacion.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -254,9 +266,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Text(
                     mensajeNotificacion,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: colors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
               ],
@@ -268,11 +280,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   void _showManualTriggerOptions(BuildContext context) async {
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token == null) {
-      _showTopSnackBar(context, message: 'Error: No estás autenticado', backgroundColor: context.colors.error, leading: Icon(Icons.error, color: context.colors.white));
+      _showTopSnackBar(context,
+          message: 'Error: No estás autenticado',
+          backgroundColor: context.colors.error,
+          leading: Icon(Icons.error, color: context.colors.white));
       return;
     }
 
@@ -310,7 +326,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (scope == null) return;
 
     try {
-      _showTopSnackBar(context, message: 'Disparando notificaciones...', leading: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(context.colors.white))));
+      _showTopSnackBar(context,
+          message: 'Disparando notificaciones...',
+          leading: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(context.colors.white))));
       await asistenciaProvider.triggerManualNotifications(
         accessToken: token,
         institutionId: widget.clase.institucion.id,
@@ -318,14 +342,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         scope: scope,
       );
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showTopSnackBar(context, message: 'Notificaciones disparadas correctamente', backgroundColor: context.colors.success);
+      _showTopSnackBar(context,
+          message: 'Notificaciones disparadas correctamente',
+          backgroundColor: context.colors.success);
     } catch (e) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showTopSnackBar(context, message: 'Error al disparar notificaciones: $e', backgroundColor: context.colors.error);
+      _showTopSnackBar(context,
+          message: 'Error al disparar notificaciones: $e',
+          backgroundColor: context.colors.error);
     }
   }
 
-  Widget _buildAttendanceStats(BuildContext context, AsistenciaProvider provider, BoxConstraints constraints) {
+  Widget _buildAttendanceStats(BuildContext context,
+      AsistenciaProvider provider, BoxConstraints constraints) {
     final colors = context.colors;
     final spacing = context.spacing;
     final stats = provider.getEstadisticas();
@@ -335,7 +364,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final isSmallScreen = constraints.maxWidth < 400;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+      padding:
+          EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
       decoration: BoxDecoration(
         color: colors.surfaceLight,
         border: Border(
@@ -348,29 +378,35 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 // Estadísticas en columna
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-            _buildStatItem(context, 'Presentes', stats['presentes']!, colors.success),
-            _buildStatItem(context, 'Ausentes', stats['ausentes']!, colors.error),
+                  children: [
+                    _buildStatItem(context, 'Presentes', stats['presentes']!,
+                        colors.success),
+                    _buildStatItem(
+                        context, 'Ausentes', stats['ausentes']!, colors.error),
                   ],
                 ),
                 SizedBox(height: spacing.sm),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                    _buildStatItem(context, 'Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                  children: [
+                    _buildStatItem(context, 'Sin registrar',
+                        stats['sinRegistrar']!, colors.textMuted),
                     // Porcentaje
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: spacing.md, vertical: spacing.sm),
                       decoration: BoxDecoration(
                         color: colors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(spacing.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.borderRadius),
                       ),
                       child: Text(
                         '$porcentaje%',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
@@ -383,16 +419,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                      _buildStatItem(context, 'Presentes', stats['presentes']!, colors.success),
-                      _buildStatItem(context, 'Ausentes', stats['ausentes']!, colors.error),
-                      _buildStatItem(context, 'Sin registrar', stats['sinRegistrar']!, colors.textMuted),
+                    children: [
+                      _buildStatItem(context, 'Presentes', stats['presentes']!,
+                          colors.success),
+                      _buildStatItem(context, 'Ausentes', stats['ausentes']!,
+                          colors.error),
+                      _buildStatItem(context, 'Sin registrar',
+                          stats['sinRegistrar']!, colors.textMuted),
                     ],
                   ),
                 ),
                 // Porcentaje
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: spacing.md, vertical: spacing.sm),
                   decoration: BoxDecoration(
                     color: colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -400,9 +440,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Text(
                     '$porcentaje%',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               ],
@@ -410,7 +450,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, int value, Color color) {
+  Widget _buildStatItem(
+      BuildContext context, String label, int value, Color color) {
     final colors = context.colors;
     final textStyles = context.textStyles;
     return Column(
@@ -424,15 +465,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
         Text(
           label,
-      style: textStyles.bodySmall.copyWith(
-        color: colors.textMuted,
+          style: textStyles.bodySmall.copyWith(
+            color: colors.textMuted,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStudentsList(BuildContext context, List<AsistenciaEstudiante> asistencias) {
+  Widget _buildStudentsList(
+      BuildContext context, List<AsistenciaEstudiante> asistencias) {
     final colors = context.colors;
     final spacing = context.spacing;
     if (asistencias.isEmpty) {
@@ -449,8 +491,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Text(
               'No hay estudiantes en este grupo',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: colors.textMuted,
-              ),
+                    color: colors.textMuted,
+                  ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -464,7 +506,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       children: [
         // Barra de acciones múltiples (visible cuando hay selección)
         if (_multiSelectMode) _buildMultiSelectActionBar(context),
-        
+
         // Lista de estudiantes
         Expanded(
           child: ListView.builder(
@@ -487,9 +529,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     dynamic colors,
     dynamic spacing,
   ) {
-    final puedeMarcarManualmente = estudiante.sinRegistrar || estudiante.estaAusente;
-    final estaSeleccionado = _estudianteSeleccionadoId == estudiante.estudianteId;
-    final estaEnMultiSelect = _selectedStudentIds.contains(estudiante.estudianteId);
+    final puedeMarcarManualmente =
+        estudiante.sinRegistrar || estudiante.estaAusente;
+    final estaSeleccionado =
+        _estudianteSeleccionadoId == estudiante.estudianteId;
+    final estaEnMultiSelect =
+        _selectedStudentIds.contains(estudiante.estudianteId);
 
     // Envolver en Dismissible para swipe gestures
     return Dismissible(
@@ -558,104 +603,107 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ? colors.primary.withValues(alpha: 0.15)
             : estaSeleccionado
                 ? colors.warning.withValues(alpha: 0.15)
-              : null,
-          elevation: estaSeleccionado ? 4 : 1,
-          child: ListTile(
-            onTap: puedeMarcarManualmente 
-                ? () => _onEstudianteTap(estudiante)
                 : null,
-            leading: CircleAvatar(
-              backgroundColor: estaSeleccionado
-                  ? colors.warning.withValues(alpha: 0.3)
-                  : colors.primary.withValues(alpha: 0.1),
-              child: Text(
-                estudiante.inicial,
-                style: TextStyle(
-                  color: estaSeleccionado ? colors.warning : colors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+        elevation: estaSeleccionado ? 4 : 1,
+        child: ListTile(
+          onTap: puedeMarcarManualmente
+              ? () => _onEstudianteTap(estudiante)
+              : null,
+          leading: CircleAvatar(
+            backgroundColor: estaSeleccionado
+                ? colors.warning.withValues(alpha: 0.3)
+                : colors.primary.withValues(alpha: 0.1),
+            child: Text(
+              estudiante.inicial,
+              style: TextStyle(
+                color: estaSeleccionado ? colors.warning : colors.primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            title: Text(
-              estudiante.nombreCompleto,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Row(
-              children: [
-                Text(
-                  'ID: ${estudiante.identificacion}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.textMuted,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (estaSeleccionado) ...[
-                  SizedBox(width: spacing.sm),
-                  Expanded(
-                    child: Text(
-                      'Toca de nuevo para confirmar',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.warning,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildStatusChip(estudiante),
-                if (puedeMarcarManualmente && !estaSeleccionado) ...[
-                  SizedBox(width: spacing.xs),
-                  Icon(
-                    Icons.touch_app,
-                    color: colors.primary.withValues(alpha: 0.5),
-                    size: 20,
-                  ),
-                ],
-                if (estaSeleccionado) ...[
-                  SizedBox(width: spacing.xs),
-                  Icon(
-                    Icons.check_circle_outline,
-                    color: colors.warning,
-                    size: 24,
-                  ),
-                ],
-                // Botón de edición
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  color: colors.primary,
-                  onPressed: () => _showEditDialog(estudiante),
-                  tooltip: 'Editar asistencia',
-                ),
-              ],
-            ),
-            // Agregar long press para activar modo multi-selección
-            onLongPress: () => _toggleMultiSelectMode(estudiante),
           ),
+          title: Text(
+            estudiante.nombreCompleto,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Row(
+            children: [
+              Text(
+                'ID: ${estudiante.identificacion}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.textMuted,
+                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (estaSeleccionado) ...[
+                SizedBox(width: spacing.sm),
+                Expanded(
+                  child: Text(
+                    'Toca de nuevo para confirmar',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colors.warning,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildStatusChip(estudiante),
+              if (puedeMarcarManualmente && !estaSeleccionado) ...[
+                SizedBox(width: spacing.xs),
+                Icon(
+                  Icons.touch_app,
+                  color: colors.primary.withValues(alpha: 0.5),
+                  size: 20,
+                ),
+              ],
+              if (estaSeleccionado) ...[
+                SizedBox(width: spacing.xs),
+                Icon(
+                  Icons.check_circle_outline,
+                  color: colors.warning,
+                  size: 24,
+                ),
+              ],
+              // Botón de edición
+              IconButton(
+                icon: const Icon(Icons.edit),
+                color: colors.primary,
+                onPressed: () => _showEditDialog(estudiante),
+                tooltip: 'Editar asistencia',
+              ),
+            ],
+          ),
+          // Agregar long press para activar modo multi-selección
+          onLongPress: () => _toggleMultiSelectMode(estudiante),
         ),
+      ),
     );
   }
 
   /// Acción rápida de marcado de asistencia con deslizamiento
   /// Maneja automáticamente si es crear o actualizar
-  Future<void> _quickMarkAttendance(AsistenciaEstudiante estudiante, String estado) async {
+  Future<void> _quickMarkAttendance(
+      AsistenciaEstudiante estudiante, String estado) async {
     final colors = context.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token == null) {
-      _showTopSnackBar(context,
+      _showTopSnackBar(
+        context,
         message: 'Error: No estás autenticado',
         backgroundColor: colors.error,
         leading: Icon(Icons.error, color: colors.white),
@@ -666,19 +714,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       // FIX: Primero, recargar la lista para asegurar que tenemos el estado más reciente del estudiante (y su asistencia.id si existe)
       await _loadAsistencias();
-      
+
       // Encontrar la versión más actualizada del estudiante en la lista recién cargada
       final estudianteActualizado = asistenciaProvider.asistencias.firstWhere(
         (a) => a.estudianteId == estudiante.estudianteId,
-        orElse: () => estudiante, // Si no se encuentra, usar el original (poco probable)
+        orElse: () =>
+            estudiante, // Si no se encuentra, usar el original (poco probable)
       );
 
       bool success = false;
-      
+
       // Lógica simple y robusta: si tiene ID, actualiza; si no, crea.
-      if (estudianteActualizado.id != null && estudianteActualizado.id!.isNotEmpty) {
+      if (estudianteActualizado.id != null &&
+          estudianteActualizado.id!.isNotEmpty) {
         // Tiene ID de asistencia -> Actualizar registro existente
-        debugPrint('🔄 QUICK-MARK: Actualizando asistencia existente: ${estudianteActualizado.id} a estado $estado');
+        debugPrint(
+            '🔄 QUICK-MARK: Actualizando asistencia existente: ${estudianteActualizado.id} a estado $estado');
         success = await asistenciaProvider.updateAsistencia(
           token,
           estudianteActualizado.id!,
@@ -686,7 +737,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       } else {
         // No tiene ID -> Crear nuevo registro
-        debugPrint('➕ QUICK-MARK: Creando nueva asistencia para: ${estudianteActualizado.estudianteId} con estado $estado');
+        debugPrint(
+            '➕ QUICK-MARK: Creando nueva asistencia para: ${estudianteActualizado.estudianteId} con estado $estado');
         success = await asistenciaProvider.registrarAsistenciaManual(
           token,
           widget.clase.id,
@@ -698,23 +750,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       if (mounted && success) {
         // Recargar la lista para reflejar el cambio visualmente
         await _loadAsistencias();
-        
-        final emoji = estado == 'PRESENTE' ? '✓' : (estado == 'AUSENTE' ? '✗' : '⏰');
+
+        final emoji =
+            estado == 'PRESENTE' ? '✓' : (estado == 'AUSENTE' ? '✗' : '⏰');
         final estadoTexto = estado.toLowerCase();
-        _showTopSnackBar(context,
-          message: '$emoji ${estudiante.nombreCompleto} marcado como $estadoTexto',
-          backgroundColor: estado == 'PRESENTE' ? colors.success : 
-                          (estado == 'AUSENTE' ? colors.error : colors.warning),
+        _showTopSnackBar(
+          context,
+          message:
+              '$emoji ${estudiante.nombreCompleto} marcado como $estadoTexto',
+          backgroundColor: estado == 'PRESENTE'
+              ? colors.success
+              : (estado == 'AUSENTE' ? colors.error : colors.warning),
           leading: Icon(
-            estado == 'PRESENTE' ? Icons.check_circle : 
-            (estado == 'AUSENTE' ? Icons.cancel : Icons.schedule),
+            estado == 'PRESENTE'
+                ? Icons.check_circle
+                : (estado == 'AUSENTE' ? Icons.cancel : Icons.schedule),
             color: colors.white,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        _showTopSnackBar(context,
+        _showTopSnackBar(
+          context,
           message: 'Error: ${e.toString()}',
           backgroundColor: colors.error,
           leading: Icon(Icons.error, color: colors.white),
@@ -750,9 +808,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _buildMultiSelectActionBar(BuildContext context) {
     final colors = context.colors;
     final spacing = context.spacing;
-    
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+      padding:
+          EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
       decoration: BoxDecoration(
         color: colors.primary,
         boxShadow: [
@@ -838,14 +897,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Future<void> _applyBatchAction(String estado) async {
     final colors = context.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
     final token = authProvider.accessToken;
 
     if (token == null || _selectedStudentIds.isEmpty) return;
 
     // Mostrar loading
-    _showTopSnackBar(context,
-      message: 'Aplicando cambios a ${_selectedStudentIds.length} estudiantes...',
+    _showTopSnackBar(
+      context,
+      message:
+          'Aplicando cambios a ${_selectedStudentIds.length} estudiantes...',
       leading: SizedBox(
         width: 20,
         height: 20,
@@ -874,7 +936,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         bool success = false;
         if (estudiante.id != null && estudiante.id!.isNotEmpty) {
           // Tiene ID -> actualizar
-          success = await asistenciaProvider.updateAsistencia(token, estudiante.id!, estado);
+          success = await asistenciaProvider.updateAsistencia(
+              token, estudiante.id!, estado);
         } else {
           // No tiene ID -> crear
           try {
@@ -888,13 +951,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             // Si falla por duplicado, intentar actualizar
             if (e.toString().contains('ya tiene registrada')) {
               await _loadAsistencias();
-              final estudianteActualizado = asistenciaProvider.asistencias.firstWhere(
+              final estudianteActualizado =
+                  asistenciaProvider.asistencias.firstWhere(
                 (a) => a.estudianteId == studentId,
                 orElse: () => estudiante,
               );
               if (estudianteActualizado.id != null) {
                 success = await asistenciaProvider.updateAsistencia(
-                  token, estudianteActualizado.id!, estado);
+                    token, estudianteActualizado.id!, estado);
               }
             } else {
               rethrow;
@@ -902,7 +966,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           }
         }
 
-        if (success) successCount++; else failCount++;
+        if (success)
+          successCount++;
+        else
+          failCount++;
       } catch (e) {
         debugPrint('Error procesando estudiante $studentId: $e');
         failCount++;
@@ -917,11 +984,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showTopSnackBar(context,
-        message: '✓ $successCount marcados como $estado${failCount > 0 ? ' ($failCount errores)' : ''}',
+      _showTopSnackBar(
+        context,
+        message:
+            '✓ $successCount marcados como $estado${failCount > 0 ? ' ($failCount errores)' : ''}',
         backgroundColor: failCount == 0 ? colors.success : colors.warning,
       );
-      
+
       // Recargar lista
       _loadAsistencias();
     }
@@ -933,7 +1002,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       _toggleMultiSelectMode(estudiante);
       return;
     }
-    
+
     if (_estudianteSeleccionadoId == estudiante.estudianteId) {
       // Segundo toque - confirmar registro
       _registrarAsistenciaManual(estudiante);
@@ -945,14 +1014,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-  Future<void> _registrarAsistenciaManual(AsistenciaEstudiante estudiante) async {
+  Future<void> _registrarAsistenciaManual(
+      AsistenciaEstudiante estudiante) async {
     final colors = context.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
 
     final token = authProvider.accessToken;
     if (token == null) {
-      _showTopSnackBar(context,
+      _showTopSnackBar(
+        context,
         message: 'Error: No estás autenticado',
         backgroundColor: colors.error,
         leading: Icon(Icons.error, color: colors.white),
@@ -966,7 +1038,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
 
     // Mostrar indicador de carga
-    _showTopSnackBar(context,
+    _showTopSnackBar(
+      context,
       message: 'Registrando asistencia...',
       duration: const Duration(seconds: 2),
       leading: SizedBox(
@@ -988,15 +1061,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        
+
         if (success) {
-          _showTopSnackBar(context,
+          _showTopSnackBar(
+            context,
             message: '✓ ${estudiante.nombreCompleto} marcado como presente',
             backgroundColor: colors.success,
             leading: Icon(Icons.check_circle, color: colors.white),
           );
         } else {
-          _showTopSnackBar(context,
+          _showTopSnackBar(
+            context,
             message: 'Error al registrar asistencia',
             backgroundColor: colors.error,
             leading: Icon(Icons.error, color: colors.white),
@@ -1006,18 +1081,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     } catch (e) {
       // Recuperación automática: si el registro ya existe, actualizar
       if (e.toString().contains('ya tiene registrada')) {
-        debugPrint('_registrarAsistenciaManual: Conflicto detectado, recuperando...');
-        
+        debugPrint(
+            '_registrarAsistenciaManual: Conflicto detectado, recuperando...');
+
         // Recargar lista para obtener IDs actualizados
         await _loadAsistencias();
-        
+
         // Buscar el estudiante en la lista actualizada
-        final provider = Provider.of<AsistenciaProvider>(context, listen: false);
+        final provider =
+            Provider.of<AsistenciaProvider>(context, listen: false);
         final updatedStudent = provider.asistencias.firstWhere(
           (a) => a.estudianteId == estudiante.estudianteId,
           orElse: () => estudiante,
         );
-        
+
         if (updatedStudent.id != null) {
           // Ahora actualizar en lugar de crear
           final updateSuccess = await provider.updateAsistencia(
@@ -1025,11 +1102,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             updatedStudent.id!,
             'PRESENTE',
           );
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             if (updateSuccess) {
-              _showTopSnackBar(context,
+              _showTopSnackBar(
+                context,
                 message: '✓ ${estudiante.nombreCompleto} marcado como presente',
                 backgroundColor: colors.success,
                 leading: Icon(Icons.check_circle, color: colors.white),
@@ -1039,11 +1117,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           return;
         }
       }
-      
+
       // Error real
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        _showTopSnackBar(context,
+        _showTopSnackBar(
+          context,
           message: 'Error: ${e.toString()}',
           backgroundColor: colors.error,
           leading: Icon(Icons.error, color: colors.white),
@@ -1057,7 +1136,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final appCtx = context; // to avoid shadowing inside builder
     final colors = appCtx.colors;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final asistenciaProvider = Provider.of<AsistenciaProvider>(context, listen: false);
+    final asistenciaProvider =
+        Provider.of<AsistenciaProvider>(context, listen: false);
     final token = authProvider.accessToken;
 
     if (token == null) return;
@@ -1065,10 +1145,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     String estado = estudiante.estado ?? 'PRESENTE';
     // Si el estado es vacío, por defecto PRESENTE
     if (estado.isEmpty) estado = 'PRESENTE';
-    
+
     final String observacion = estudiante.observaciones ?? '';
     bool justificada = estudiante.estaJustificado;
-    
+
     // Controlador para el campo de texto
     final observacionController = TextEditingController(text: observacion);
 
@@ -1087,7 +1167,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       value: estado,
                       decoration: const InputDecoration(labelText: 'Estado'),
                       items: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -1105,7 +1186,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     const SizedBox(height: 16),
                     TextField(
                       controller: observacionController,
-                      decoration: const InputDecoration(labelText: 'Observación'),
+                      decoration:
+                          const InputDecoration(labelText: 'Observación'),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
@@ -1133,9 +1215,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     Navigator.pop(context); // Cerrar diálogo
-                    
+
                     // Mostrar loading
-                    _showTopSnackBar(context,
+                    _showTopSnackBar(
+                      context,
                       message: 'Guardando asistencia...',
                       leading: CircularProgressIndicator(color: colors.white),
                     );
@@ -1156,31 +1239,36 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         );
                       } else {
                         // --- CREAR NUEVO REGISTRO directamente con el estado seleccionado ---
-                        success = await asistenciaProvider.registrarAsistenciaManual(
+                        success =
+                            await asistenciaProvider.registrarAsistenciaManual(
                           token,
                           widget.clase.id, // ID del Horario
                           estudiante.estudianteId, // ID del Estudiante
-                          estado: estado, // El estado seleccionado (AUSENTE, TARDANZA, etc.)
+                          estado:
+                              estado, // El estado seleccionado (AUSENTE, TARDANZA, etc.)
                           observacion: observacionController.text,
                           justificada: justificada,
                         );
                       }
 
                       if (success) {
-                        _showTopSnackBar(context,
+                        _showTopSnackBar(
+                          context,
                           message: 'Asistencia guardada correctamente',
                           backgroundColor: colors.success,
                         );
                         // Recargar la lista
                         _loadAsistencias();
                       } else {
-                        _showTopSnackBar(context,
+                        _showTopSnackBar(
+                          context,
                           message: 'Error al guardar',
                           backgroundColor: colors.error,
                         );
                       }
                     } catch (e) {
-                        _showTopSnackBar(context,
+                      _showTopSnackBar(
+                        context,
                         message: 'Error: $e',
                         backgroundColor: colors.error,
                       );
@@ -1230,17 +1318,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     // Chip interactivo con PopupMenu
     return PopupMenuButton<String>(
       tooltip: 'Cambiar estado',
-      onSelected: (nuevoEstado) => _quickMarkAttendance(estudiante, nuevoEstado),
+      onSelected: (nuevoEstado) =>
+          _quickMarkAttendance(estudiante, nuevoEstado),
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (context) => [
-        _buildStatusMenuItem('PRESENTE', 'Presente', Icons.check_circle, colors.success, estudiante.estado),
-        _buildStatusMenuItem('AUSENTE', 'Ausente', Icons.cancel, colors.error, estudiante.estado),
-        _buildStatusMenuItem('TARDANZA', 'Tardanza', Icons.schedule, colors.warning, estudiante.estado),
-        _buildStatusMenuItem('JUSTIFICADO', 'Justificado', Icons.assignment_turned_in, colors.info, estudiante.estado),
+        _buildStatusMenuItem('PRESENTE', 'Presente', Icons.check_circle,
+            colors.success, estudiante.estado),
+        _buildStatusMenuItem('AUSENTE', 'Ausente', Icons.cancel, colors.error,
+            estudiante.estado),
+        _buildStatusMenuItem('TARDANZA', 'Tardanza', Icons.schedule,
+            colors.warning, estudiante.estado),
+        _buildStatusMenuItem('JUSTIFICADO', 'Justificado',
+            Icons.assignment_turned_in, colors.info, estudiante.estado),
       ],
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+        padding:
+            EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
         decoration: BoxDecoration(
           color: chipColor,
           borderRadius: BorderRadius.circular(20),
@@ -1316,9 +1410,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               return Column(
                 children: [
                   _buildClassInfo(context, constraints),
-                  _buildAttendanceStats(context, asistenciaProvider, constraints),
+                  _buildAttendanceStats(
+                      context, asistenciaProvider, constraints),
                   Expanded(
-                    child: _buildStudentsList(context, asistenciaProvider.asistencias),
+                    child: _buildStudentsList(
+                        context, asistenciaProvider.asistencias),
                   ),
                 ],
               );

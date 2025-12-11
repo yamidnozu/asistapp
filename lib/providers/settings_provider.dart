@@ -27,7 +27,7 @@ class SettingsProvider with ChangeNotifier {
   int get refreshIntervalMinutes => _refreshIntervalMinutes;
 
   bool get showTestUsers => _showTestUsers;
-  
+
   /// Indica si el tema es oscuro
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 
@@ -39,18 +39,18 @@ class SettingsProvider with ChangeNotifier {
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       final themeModeIndex = prefs.getInt(_keyThemeMode);
       if (themeModeIndex != null && themeModeIndex < ThemeMode.values.length) {
         _themeMode = ThemeMode.values[themeModeIndex];
       }
-      
+
       _itemsPerPage = prefs.getInt(_keyItemsPerPage) ?? 10;
       _autoRefresh = prefs.getBool(_keyAutoRefresh) ?? false;
       _refreshIntervalMinutes = prefs.getInt(_keyRefreshInterval) ?? 5;
 
       _showTestUsers = prefs.getBool(_keyShowTestUsers) ?? false;
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading settings: $e');
@@ -61,7 +61,7 @@ class SettingsProvider with ChangeNotifier {
   Future<void> _savePreference(String key, dynamic value) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       if (value is int) {
         await prefs.setInt(key, value);
       } else if (value is bool) {
@@ -89,7 +89,8 @@ class SettingsProvider with ChangeNotifier {
 
   /// Alterna entre tema oscuro y claro
   Future<void> toggleDarkMode() async {
-    await setThemeMode(_themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
+    await setThemeMode(
+        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
   }
 
   /// Cambia el número de elementos por página en las listas
@@ -117,8 +118,6 @@ class SettingsProvider with ChangeNotifier {
     }
   }
 
-
-
   /// Activa/desactiva la visualización de usuarios de prueba
   Future<void> setShowTestUsers(bool value) async {
     _showTestUsers = value;
@@ -134,9 +133,9 @@ class SettingsProvider with ChangeNotifier {
     _refreshIntervalMinutes = 5;
 
     _showTestUsers = false;
-    
+
     notifyListeners();
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyThemeMode);
     await prefs.remove(_keyItemsPerPage);

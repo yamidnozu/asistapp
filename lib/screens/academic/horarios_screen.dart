@@ -80,9 +80,11 @@ class _HorariosScreenState extends State<HorariosScreen> {
     final token = authProvider.accessToken;
     if (token == null) return;
 
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+    final periodoProvider =
+        Provider.of<PeriodoAcademicoProvider>(context, listen: false);
     final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
@@ -110,14 +112,17 @@ class _HorariosScreenState extends State<HorariosScreen> {
       // Configurar filtro de rol antes de cargar
       userProvider.filters['role'] = 'profesor';
       if (institutionId != null) {
-        debugPrint('HorariosScreen: Cargando profesores para institución $institutionId');
+        debugPrint(
+            'HorariosScreen: Cargando profesores para institución $institutionId');
         await userProvider.loadUsersByInstitution(token, institutionId);
       } else {
         debugPrint('HorariosScreen: Cargando profesores globalmente');
         await userProvider.loadUsers(token);
       }
-      debugPrint('HorariosScreen: Profesores cargados: ${userProvider.professors.length}');
-      debugPrint('HorariosScreen: Usuarios totales: ${userProvider.items.length}');
+      debugPrint(
+          'HorariosScreen: Profesores cargados: ${userProvider.professors.length}');
+      debugPrint(
+          'HorariosScreen: Usuarios totales: ${userProvider.items.length}');
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,8 +138,10 @@ class _HorariosScreenState extends State<HorariosScreen> {
   Widget build(BuildContext context) {
     return FocusDetector(
       onFocusGained: _onFocusGained,
-      child: Consumer4<PeriodoAcademicoProvider, GrupoProvider, HorarioProvider, MateriaProvider>(
-        builder: (context, periodoProvider, grupoProvider, horarioProvider, materiaProvider, child) {
+      child: Consumer4<PeriodoAcademicoProvider, GrupoProvider, HorarioProvider,
+          MateriaProvider>(
+        builder: (context, periodoProvider, grupoProvider, horarioProvider,
+            materiaProvider, child) {
           return ClarityManagementPage(
             title: 'Horarios',
             backRoute: '/academic',
@@ -150,20 +157,23 @@ class _HorariosScreenState extends State<HorariosScreen> {
               onEmptyCellTap: _handleEmptyCellTap,
               onHorarioTap: _handleHorarioTap,
             ),
-            filterWidgets: _buildFilterWidgets(context, periodoProvider, grupoProvider, materiaProvider),
+            filterWidgets: _buildFilterWidgets(
+                context, periodoProvider, grupoProvider, materiaProvider),
             onRefresh: () async {
               if (_selectedGrupo != null) {
                 await _loadHorariosForGrupo(_selectedGrupo!.id);
               }
               // También recargar materias por si acaso
               await materiaProvider.loadMaterias(
-                Provider.of<AuthProvider>(context, listen: false).accessToken!
-              );
+                  Provider.of<AuthProvider>(context, listen: false)
+                      .accessToken!);
             },
             scrollController: null,
             emptyStateWidget: ClarityEmptyState(
               icon: Icons.calendar_month,
-              title: _selectedGrupo == null ? 'Selecciona un grupo' : 'No hay clases en el grupo',
+              title: _selectedGrupo == null
+                  ? 'Selecciona un grupo'
+                  : 'No hay clases en el grupo',
               subtitle: _selectedGrupo == null
                   ? 'Selecciona un grupo para ver el calendario semanal'
                   : 'Crea la primera clase para este grupo',
@@ -172,7 +182,9 @@ class _HorariosScreenState extends State<HorariosScreen> {
               onPressed: () {
                 if (_selectedGrupo == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Selecciona un grupo para crear una clase')),
+                    const SnackBar(
+                        content:
+                            Text('Selecciona un grupo para crear una clase')),
                   );
                   return;
                 }
@@ -193,11 +205,12 @@ class _HorariosScreenState extends State<HorariosScreen> {
     final token = authProvider.accessToken;
     if (token == null) return;
 
-    final materiaProvider = Provider.of<MateriaProvider>(context, listen: false);
+    final materiaProvider =
+        Provider.of<MateriaProvider>(context, listen: false);
 
     // Recargar materias silenciosamente
     await materiaProvider.loadMaterias(token);
-    
+
     // Opcional: Recargar grupos si es necesario
     // await grupoProvider.loadGrupos(token, periodoId: _selectedPeriodo?.id);
   }
@@ -248,7 +261,9 @@ class _HorariosScreenState extends State<HorariosScreen> {
           // Sincronizar selectedGrupo con la instancia actual de grupoProvider (si aplica)
           final grupos = _selectedPeriodo == null
               ? grupoProvider.items
-              : grupoProvider.items.where((g) => g.periodoId == _selectedPeriodo!.id).toList();
+              : grupoProvider.items
+                  .where((g) => g.periodoId == _selectedPeriodo!.id)
+                  .toList();
           Grupo? grupoValue;
           if (_selectedGrupo != null && grupos.isNotEmpty) {
             Grupo? matchingGrupo;
@@ -268,7 +283,8 @@ class _HorariosScreenState extends State<HorariosScreen> {
             } else if (matchingGrupo == null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
-                setState(() => _selectedGrupo = grupos.isNotEmpty ? grupos.first : null);
+                setState(() =>
+                    _selectedGrupo = grupos.isNotEmpty ? grupos.first : null);
               });
             }
           } else {
@@ -288,18 +304,22 @@ class _HorariosScreenState extends State<HorariosScreen> {
                   decoration: InputDecoration(
                     labelText: 'Período Académico',
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: spacing.md, vertical: spacing.sm),
                   ),
-                  style: context.textStyles.bodyLarge.copyWith(color: context.colors.textPrimary),
+                  style: context.textStyles.bodyLarge
+                      .copyWith(color: context.colors.textPrimary),
                   items: periodoProvider.periodosActivos
                       .map(
                         (periodo) => DropdownMenuItem<PeriodoAcademico>(
                           value: periodo,
-                          child: Text(periodo.nombre, overflow: TextOverflow.ellipsis, maxLines: 1),
+                          child: Text(periodo.nombre,
+                              overflow: TextOverflow.ellipsis, maxLines: 1),
                         ),
                       )
                       .toList(),
-                  onChanged: (periodo) => _onPeriodoChanged(periodo, grupoProvider),
+                  onChanged: (periodo) =>
+                      _onPeriodoChanged(periodo, grupoProvider),
                 ),
               ),
               SizedBox(
@@ -322,19 +342,23 @@ class _HorariosScreenState extends State<HorariosScreen> {
   List<DropdownMenuItem<Grupo>> _buildGrupoItems(GrupoProvider grupoProvider) {
     final grupos = _selectedPeriodo == null
         ? grupoProvider.items
-        : grupoProvider.items.where((grupo) => grupo.periodoId == _selectedPeriodo!.id).toList();
+        : grupoProvider.items
+            .where((grupo) => grupo.periodoId == _selectedPeriodo!.id)
+            .toList();
 
     return grupos
         .map(
           (grupo) => DropdownMenuItem<Grupo>(
             value: grupo,
-            child: Text('${grupo.nombre} - ${grupo.grado}', overflow: TextOverflow.ellipsis, maxLines: 1),
+            child: Text('${grupo.nombre} - ${grupo.grado}',
+                overflow: TextOverflow.ellipsis, maxLines: 1),
           ),
         )
         .toList();
   }
 
-  Future<void> _onPeriodoChanged(PeriodoAcademico? periodo, GrupoProvider grupoProvider) async {
+  Future<void> _onPeriodoChanged(
+      PeriodoAcademico? periodo, GrupoProvider grupoProvider) async {
     if (!mounted) return;
 
     setState(() {
@@ -375,13 +399,15 @@ class _HorariosScreenState extends State<HorariosScreen> {
 
   Future<void> _loadHorariosForGrupo(String grupoId) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final horarioProvider = Provider.of<HorarioProvider>(context, listen: false);
+    final horarioProvider =
+        Provider.of<HorarioProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token == null) return;
 
     try {
       if (_selectedPeriodo != null) {
-        await horarioProvider.loadHorariosForGrupoWithConflictDetection(token, grupoId, _selectedPeriodo!.id);
+        await horarioProvider.loadHorariosForGrupoWithConflictDetection(
+            token, grupoId, _selectedPeriodo!.id);
       } else {
         await horarioProvider.loadHorariosByGrupo(token, grupoId);
       }

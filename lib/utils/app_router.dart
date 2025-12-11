@@ -38,8 +38,10 @@ import '../screens/acudiente/notificaciones_screen.dart';
 import '../screens/users/vincular_acudiente_screen.dart';
 
 // Global keys for navigation branches
-final _dashboardNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
-final _institutionsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Institutions');
+final _dashboardNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'Dashboard');
+final _institutionsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'Institutions');
 final _usersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Users');
 
 /// Router principal de la aplicación
@@ -82,13 +84,13 @@ class AppRouter {
     final userRole = authProvider.user?['rol'] as String?;
     final institutions = authProvider.institutions;
     final selectedInstitutionId = authProvider.selectedInstitutionId;
-    
+
     // Super Admin no necesita selección de institución (acceso global)
     final isSuperAdmin = userRole == 'super_admin';
     final needsSelection = !isSuperAdmin &&
-                          institutions != null &&
-                          institutions.length > 1 &&
-                          selectedInstitutionId == null;
+        institutions != null &&
+        institutions.length > 1 &&
+        selectedInstitutionId == null;
 
     // 2. Si el usuario está en la pantalla de login pero ya está logueado, se va para el dashboard.
     if (currentRoute == '/login') {
@@ -322,7 +324,8 @@ class AppRouter {
                   return MaterialPage(
                     fullscreenDialog: true,
                     name: 'Create Institution Admin',
-                    child: CreateInstitutionAdminScreen(institution: institution),
+                    child:
+                        CreateInstitutionAdminScreen(institution: institution),
                   );
                 },
               ),
@@ -413,9 +416,14 @@ class AppRouter {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.error_outline,
+                size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
-            Text('Error de Navegación', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Error de Navegación',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text('${state.error}'),
             const SizedBox(height: 16),

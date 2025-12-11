@@ -29,7 +29,7 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
-    
+
     // Agregar listener para capturar Ctrl+K globalmente
     _focusNode.addListener(_handleKeyboardShortcuts);
 
@@ -77,10 +77,10 @@ class _AppShellState extends State<AppShell> {
   void _showCommandPalette() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userRole = authProvider.user?['rol'] as String?;
-    
+
     // Crear items según el rol
     final items = _buildCommandPaletteItems(userRole);
-    
+
     showDialog(
       context: context,
       builder: (context) => CommandPalette(
@@ -183,33 +183,52 @@ class _AppShellState extends State<AppShell> {
     final userRole = authProvider.user?['rol'] as String?;
 
     final allBranches = [
-      (label: 'Dashboard', icon: Icons.dashboard_rounded, branchIndex: 0, roles: ['super_admin', 'admin_institucion', 'profesor', 'estudiante']),
-      (label: 'Instituciones', icon: Icons.business_rounded, branchIndex: 1, roles: ['super_admin']),
-      (label: 'Usuarios', icon: Icons.people_alt_rounded, branchIndex: 2, roles: ['super_admin', 'admin_institucion']),
+      (
+        label: 'Dashboard',
+        icon: Icons.dashboard_rounded,
+        branchIndex: 0,
+        roles: ['super_admin', 'admin_institucion', 'profesor', 'estudiante']
+      ),
+      (
+        label: 'Instituciones',
+        icon: Icons.business_rounded,
+        branchIndex: 1,
+        roles: ['super_admin']
+      ),
+      (
+        label: 'Usuarios',
+        icon: Icons.people_alt_rounded,
+        branchIndex: 2,
+        roles: ['super_admin', 'admin_institucion']
+      ),
     ];
 
-    final accessibleBranches = allBranches.where((branch) => branch.roles.contains(userRole)).toList();
+    final accessibleBranches =
+        allBranches.where((branch) => branch.roles.contains(userRole)).toList();
 
     // Lógica para encontrar el índice seleccionado
     int selectedIndex = 0; // Default a 0
     if (accessibleBranches.isNotEmpty) {
       final currentBranchIndex = widget.navigationShell.currentIndex;
-      final foundIndex = accessibleBranches.indexWhere((b) => b.branchIndex == currentBranchIndex);
+      final foundIndex = accessibleBranches
+          .indexWhere((b) => b.branchIndex == currentBranchIndex);
       if (foundIndex != -1) {
         selectedIndex = foundIndex;
       }
     }
 
-  // Nombre de la institución seleccionada (si aplica)
-  final institutionName = authProvider.selectedInstitution?.name;
+    // Nombre de la institución seleccionada (si aplica)
+    final institutionName = authProvider.selectedInstitution?.name;
 
-  // Usamos LayoutBuilder para decidir qué navegación mostrar
+    // Usamos LayoutBuilder para decidir qué navegación mostrar
     return Focus(
       focusNode: _focusNode,
       onKeyEvent: (node, event) {
         // Capturar Ctrl+K (Windows/Linux) o Cmd+K (Mac)
-        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.keyK) &&
-            (HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed)) {
+        if (HardwareKeyboard.instance
+                .isLogicalKeyPressed(LogicalKeyboardKey.keyK) &&
+            (HardwareKeyboard.instance.isControlPressed ||
+                HardwareKeyboard.instance.isMetaPressed)) {
           _showCommandPalette();
           return KeyEventResult.handled;
         }
@@ -227,10 +246,13 @@ class _AppShellState extends State<AppShell> {
                 backgroundColor: context.colors.surface,
                 elevation: 0,
                 foregroundColor: context.colors.textPrimary,
-                title: Text(institutionName != null ? 'Dashboard — $institutionName' : 'Dashboard'),
+                title: Text(institutionName != null
+                    ? 'Dashboard — $institutionName'
+                    : 'Dashboard'),
                 actions: [
                   IconButton(
-                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
+                    icon: Icon(Icons.settings,
+                        color: Theme.of(context).colorScheme.onSurface),
                     tooltip: 'Ajustes',
                     onPressed: () {
                       context.go('/settings');
@@ -258,12 +280,13 @@ class _AppShellState extends State<AppShell> {
                 backgroundColor: context.colors.surface,
                 elevation: 0,
                 foregroundColor: context.colors.textPrimary,
-        title: Text(institutionName != null
-          ? '${accessibleBranches[selectedIndex].label} — $institutionName'
-          : accessibleBranches[selectedIndex].label),
+                title: Text(institutionName != null
+                    ? '${accessibleBranches[selectedIndex].label} — $institutionName'
+                    : accessibleBranches[selectedIndex].label),
                 actions: [
                   IconButton(
-                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
+                    icon: Icon(Icons.settings,
+                        color: Theme.of(context).colorScheme.onSurface),
                     tooltip: 'Ajustes',
                     onPressed: () {
                       context.go('/settings');
@@ -285,8 +308,11 @@ class _AppShellState extends State<AppShell> {
                     NavigationRail(
                       selectedIndex: selectedIndex,
                       onDestinationSelected: (index) {
-                        final branchIndexToGo = accessibleBranches[index].branchIndex;
-                        widget.navigationShell.goBranch(branchIndexToGo, initialLocation: index == widget.navigationShell.currentIndex);
+                        final branchIndexToGo =
+                            accessibleBranches[index].branchIndex;
+                        widget.navigationShell.goBranch(branchIndexToGo,
+                            initialLocation:
+                                index == widget.navigationShell.currentIndex);
                       },
                       labelType: NavigationRailLabelType.all,
                       destinations: [
@@ -311,8 +337,8 @@ class _AppShellState extends State<AppShell> {
                 elevation: 0,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 title: Text(institutionName != null
-                  ? '${accessibleBranches[selectedIndex].label} — $institutionName'
-                  : accessibleBranches[selectedIndex].label),
+                    ? '${accessibleBranches[selectedIndex].label} — $institutionName'
+                    : accessibleBranches[selectedIndex].label),
                 leading: IconButton(
                   icon: const Icon(Icons.menu),
                   tooltip: 'Menú',
@@ -323,7 +349,8 @@ class _AppShellState extends State<AppShell> {
                 ),
                 actions: [
                   IconButton(
-                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onPrimary),
+                    icon: Icon(Icons.settings,
+                        color: Theme.of(context).colorScheme.onPrimary),
                     tooltip: 'Ajustes',
                     onPressed: () {
                       context.go('/settings');
@@ -377,11 +404,14 @@ class _AppShellState extends State<AppShell> {
                           Navigator.of(context).pop();
                           context.go('/settings');
                         },
-                        icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
-                        label: Text('Ajustes', style: context.textStyles.bodyMedium),
+                        icon: Icon(Icons.settings,
+                            color: Theme.of(context).colorScheme.onSurface),
+                        label: Text('Ajustes',
+                            style: context.textStyles.bodyMedium),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.surface,
-                          foregroundColor: Theme.of(context).colorScheme.onSurface,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSurface,
                           minimumSize: const Size(double.infinity, 48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -405,28 +435,34 @@ class _AppShellState extends State<AppShell> {
                 ),
               ),
               body: widget.navigationShell,
-              bottomNavigationBar: accessibleBranches.length > 1 ? BottomNavigationBar(
-                currentIndex: selectedIndex,
-                onTap: (index) {
-                  final branchIndexToGo = accessibleBranches[index].branchIndex;
-                  widget.navigationShell.goBranch(branchIndexToGo, initialLocation: index == widget.navigationShell.currentIndex);
-                },
-                // ▼▼▼ CORRECCIONES CLAVE ▼▼▼
-                type: BottomNavigationBarType.fixed, // Muestra siempre los labels
-                backgroundColor: context.colors.surface,
-                selectedItemColor: context.colors.primary,
-                unselectedItemColor: context.colors.textMuted,
-                selectedLabelStyle: context.textStyles.labelSmall.bold,
-                unselectedLabelStyle: context.textStyles.labelSmall,
-                // ▲▲▲ FIN DE CORRECCIONES ▲▲▲
-                items: [
-                  for (final branch in accessibleBranches)
-                    BottomNavigationBarItem(
-                      icon: Icon(branch.icon),
-                      label: branch.label,
-                    ),
-                  ],
-              ) : null, // No mostrar la barra si solo hay una opción
+              bottomNavigationBar: accessibleBranches.length > 1
+                  ? BottomNavigationBar(
+                      currentIndex: selectedIndex,
+                      onTap: (index) {
+                        final branchIndexToGo =
+                            accessibleBranches[index].branchIndex;
+                        widget.navigationShell.goBranch(branchIndexToGo,
+                            initialLocation:
+                                index == widget.navigationShell.currentIndex);
+                      },
+                      // ▼▼▼ CORRECCIONES CLAVE ▼▼▼
+                      type: BottomNavigationBarType
+                          .fixed, // Muestra siempre los labels
+                      backgroundColor: context.colors.surface,
+                      selectedItemColor: context.colors.primary,
+                      unselectedItemColor: context.colors.textMuted,
+                      selectedLabelStyle: context.textStyles.labelSmall.bold,
+                      unselectedLabelStyle: context.textStyles.labelSmall,
+                      // ▲▲▲ FIN DE CORRECCIONES ▲▲▲
+                      items: [
+                        for (final branch in accessibleBranches)
+                          BottomNavigationBarItem(
+                            icon: Icon(branch.icon),
+                            label: branch.label,
+                          ),
+                      ],
+                    )
+                  : null, // No mostrar la barra si solo hay una opción
             );
           }
         },

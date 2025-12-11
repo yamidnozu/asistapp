@@ -27,16 +27,28 @@ class _GruposScreenState extends State<GruposScreen> {
   List<String> _getGradosDisponibles(BuildContext context) {
     final grupoProvider = Provider.of<GrupoProvider>(context, listen: false);
     final loadedGrados = grupoProvider.grupos.map((g) => g.grado).toSet();
-    
+
     final orderedGrados = [
-      'Pre-Jardin', 'Jardin', 'Transicion', 
-      '1ro', '2do', '3ro', '4to', '5to', 
-      '6to', '7mo', '8vo', '9no', '10mo', '11mo'
+      'Pre-Jardin',
+      'Jardin',
+      'Transicion',
+      '1ro',
+      '2do',
+      '3ro',
+      '4to',
+      '5to',
+      '6to',
+      '7mo',
+      '8vo',
+      '9no',
+      '10mo',
+      '11mo'
     ];
-    
-    final extras = loadedGrados.where((g) => !orderedGrados.contains(g)).toList();
+
+    final extras =
+        loadedGrados.where((g) => !orderedGrados.contains(g)).toList();
     extras.sort();
-    
+
     return [...orderedGrados, ...extras];
   }
 
@@ -71,7 +83,8 @@ class _GruposScreenState extends State<GruposScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       _loadMoreGrupos();
     }
   }
@@ -129,11 +142,11 @@ class _GruposScreenState extends State<GruposScreen> {
           emptyStateWidget: ClarityEmptyState(
             icon: _isSearching ? Icons.search_off : Icons.group,
             title: _isSearching
-              ? 'No se encontraron resultados'
-              : 'Aún no has creado ningún grupo',
+                ? 'No se encontraron resultados'
+                : 'Aún no has creado ningún grupo',
             subtitle: _isSearching
-              ? 'Intenta con otros términos de búsqueda'
-              : 'Comienza creando tu primer grupo académico',
+                ? 'Intenta con otros términos de búsqueda'
+                : 'Comienza creando tu primer grupo académico',
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCreateGrupoDialog(context),
@@ -181,7 +194,8 @@ class _GruposScreenState extends State<GruposScreen> {
           ),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
         ),
         // onChanged removido: _searchController.addListener ya maneja los cambios
       ),
@@ -206,7 +220,9 @@ class _GruposScreenState extends State<GruposScreen> {
                   selectedColor: colors.primary.withValues(alpha: 0.2),
                   checkmarkColor: colors.primary,
                   labelStyle: TextStyle(
-                    color: _selectedGrado == grado ? colors.primary : colors.textSecondary,
+                    color: _selectedGrado == grado
+                        ? colors.primary
+                        : colors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -217,7 +233,8 @@ class _GruposScreenState extends State<GruposScreen> {
     ];
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, GrupoProvider provider) {
+  List<Widget> _buildStatisticWidgets(
+      BuildContext context, GrupoProvider provider) {
     final stats = provider.getGruposStatistics();
     final colors = context.colors;
 
@@ -243,7 +260,8 @@ class _GruposScreenState extends State<GruposScreen> {
     ];
   }
 
-  Widget _buildGrupoCard(Grupo grupo, GrupoProvider provider, BuildContext context) {
+  Widget _buildGrupoCard(
+      Grupo grupo, GrupoProvider provider, BuildContext context) {
     final colors = context.colors;
 
     final List<ClarityContextMenuAction> contextActions = [
@@ -270,7 +288,8 @@ class _GruposScreenState extends State<GruposScreen> {
         ),
       ),
       title: grupo.nombre,
-      subtitle: '${grupo.nombreCompleto} • ${grupo.estudiantesGruposCount} estudiantes • ${grupo.horariosCount} horarios',
+      subtitle:
+          '${grupo.nombreCompleto} • ${grupo.estudiantesGruposCount} estudiantes • ${grupo.horariosCount} horarios',
       contextActions: contextActions,
       onTap: () => _navigateToGrupoDetail(grupo),
     );
@@ -302,7 +321,8 @@ class _GruposScreenState extends State<GruposScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Grupo', style: Theme.of(context).textTheme.headlineSmall),
+        title: Text('Eliminar Grupo',
+            style: Theme.of(context).textTheme.headlineSmall),
         content: Text(
           '¿Estás seguro de que quieres eliminar "${grupo.nombre}"?\n\n'
           'Esta acción no se puede deshacer y afectará a ${grupo.estudiantesGruposCount} estudiantes.',
@@ -311,15 +331,21 @@ class _GruposScreenState extends State<GruposScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
+            child:
+                Text('Cancelar', style: Theme.of(context).textTheme.labelLarge),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteGrupo(grupo, provider);
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Eliminar', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.error)),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Eliminar',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -331,7 +357,8 @@ class _GruposScreenState extends State<GruposScreen> {
 
     final token = authProvider.accessToken;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar un grupo')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Debes iniciar sesión para eliminar un grupo')));
       return;
     }
 
@@ -347,7 +374,10 @@ class _GruposScreenState extends State<GruposScreen> {
         SnackBar(
           content: Text(
             'Grupo eliminado correctamente',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
@@ -358,7 +388,10 @@ class _GruposScreenState extends State<GruposScreen> {
         SnackBar(
           content: Text(
             provider.errorMessage ?? 'Error al eliminar grupo',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onError),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),

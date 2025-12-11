@@ -19,16 +19,19 @@ class ProfesorService {
   // Usar AppConfig.baseUrl para obtener la URL de la API centralizada
 
   /// Obtiene todos los profesores de la institución del admin con paginación
-  Future<PaginatedUserResponse?> getAllProfesores(String accessToken, {int? page, int? limit, String? search, bool? activo}) async {
+  Future<PaginatedUserResponse?> getAllProfesores(String accessToken,
+      {int? page, int? limit, String? search, bool? activo}) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
       if (activo != null) queryParams['activo'] = activo.toString();
 
-      final uri = Uri.parse('$baseUrlValue/institution-admin/profesores').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+      final uri = Uri.parse('$baseUrlValue/institution-admin/profesores')
+          .replace(
+              queryParameters: queryParams.isNotEmpty ? queryParams : null);
 
       final response = await http.get(
         uri,
@@ -43,7 +46,8 @@ class ProfesorService {
         },
       );
 
-      debugPrint('GET /institution-admin/profesores - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /institution-admin/profesores - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -64,10 +68,12 @@ class ProfesorService {
                   hasPrev: false,
                 );
 
-          return PaginatedUserResponse(users: profesores, pagination: pagination);
+          return PaginatedUserResponse(
+              users: profesores, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting profesores: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting profesores: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -81,7 +87,7 @@ class ProfesorService {
   /// Obtiene un profesor específico por ID
   Future<User?> getProfesorById(String accessToken, String profesorId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -95,7 +101,8 @@ class ProfesorService {
         },
       );
 
-      debugPrint('GET /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -103,7 +110,8 @@ class ProfesorService {
           return User.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error getting profesor: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting profesor: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -115,10 +123,12 @@ class ProfesorService {
   }
 
   /// Crea un nuevo profesor
-  Future<User?> createProfesor(String accessToken, CreateUserRequest profesorData) async {
+  Future<User?> createProfesor(
+      String accessToken, CreateUserRequest profesorData) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final baseUrlValue = AppConfig.baseUrl;
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/institution-admin/profesores'),
         headers: {
           'Content-Type': 'application/json',
@@ -130,16 +140,19 @@ class ProfesorService {
           'email': profesorData.email,
           'password': profesorData.password,
           'telefono': profesorData.telefono,
-          'grupoId': profesorData.rolEnInstitucion, // Puede ser usado como grupoId
+          'grupoId':
+              profesorData.rolEnInstitucion, // Puede ser usado como grupoId
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('POST /institution-admin/profesores - Status: ${response.statusCode}');
+      debugPrint(
+          'POST /institution-admin/profesores - Status: ${response.statusCode}');
 
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
@@ -147,7 +160,8 @@ class ProfesorService {
           return User.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error creating profesor: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating profesor: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -159,33 +173,41 @@ class ProfesorService {
   }
 
   /// Actualiza un profesor existente
-  Future<User?> updateProfesor(String accessToken, String profesorId, UpdateUserRequest profesorData) async {
+  Future<User?> updateProfesor(String accessToken, String profesorId,
+      UpdateUserRequest profesorData) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
-      
+      final baseUrlValue = AppConfig.baseUrl;
+
       // Solo incluir campos que no son null
       final Map<String, dynamic> updateData = {};
-      if (profesorData.nombres != null) updateData['nombres'] = profesorData.nombres;
-      if (profesorData.apellidos != null) updateData['apellidos'] = profesorData.apellidos;
+      if (profesorData.nombres != null)
+        updateData['nombres'] = profesorData.nombres;
+      if (profesorData.apellidos != null)
+        updateData['apellidos'] = profesorData.apellidos;
       if (profesorData.email != null) updateData['email'] = profesorData.email;
-      if (profesorData.telefono != null) updateData['telefono'] = profesorData.telefono;
-      if (profesorData.activo != null) updateData['activo'] = profesorData.activo;
-      
-      final response = await http.put(
+      if (profesorData.telefono != null)
+        updateData['telefono'] = profesorData.telefono;
+      if (profesorData.activo != null)
+        updateData['activo'] = profesorData.activo;
+
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(updateData),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('PUT /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
+      debugPrint(
+          'PUT /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
       debugPrint('Update data sent: $updateData');
 
       if (response.statusCode == 200) {
@@ -194,7 +216,8 @@ class ProfesorService {
           return User.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error updating profesor: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating profesor: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -208,7 +231,7 @@ class ProfesorService {
   /// Elimina un profesor (desactivación lógica)
   Future<bool> deleteProfesor(String accessToken, String profesorId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
         Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId'),
         headers: {
@@ -221,13 +244,15 @@ class ProfesorService {
         },
       );
 
-      debugPrint('DELETE /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
+      debugPrint(
+          'DELETE /institution-admin/profesores/$profesorId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting profesor: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting profesor: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
@@ -238,11 +263,13 @@ class ProfesorService {
   }
 
   /// Activa/desactiva un profesor
-  Future<User?> toggleProfesorStatus(String accessToken, String profesorId) async {
+  Future<User?> toggleProfesorStatus(
+      String accessToken, String profesorId) async {
     try {
-  final baseUrlValue = AppConfig.baseUrl;
+      final baseUrlValue = AppConfig.baseUrl;
       final response = await http.patch(
-        Uri.parse('$baseUrlValue/institution-admin/profesores/$profesorId/toggle-status'),
+        Uri.parse(
+            '$baseUrlValue/institution-admin/profesores/$profesorId/toggle-status'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           // No enviar Content-Type para requests sin body
@@ -254,7 +281,8 @@ class ProfesorService {
         },
       );
 
-      debugPrint('PATCH /institution-admin/profesores/$profesorId/toggle-status - Status: ${response.statusCode}');
+      debugPrint(
+          'PATCH /institution-admin/profesores/$profesorId/toggle-status - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -262,7 +290,8 @@ class ProfesorService {
           return User.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error toggling profesor status: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error toggling profesor status: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {

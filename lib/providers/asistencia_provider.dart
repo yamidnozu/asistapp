@@ -40,9 +40,11 @@ class AsistenciaProvider with ChangeNotifier {
   int get sinRegistrar => _asistencias.where((a) => a.sinRegistrar).length;
 
   /// Carga las asistencias para un horario específico
-  Future<void> fetchAsistencias(String accessToken, String horarioId, {DateTime? date}) async {
+  Future<void> fetchAsistencias(String accessToken, String horarioId,
+      {DateTime? date}) async {
     try {
-      debugPrint('AsistenciaProvider: Loading asistencias for horario: $horarioId');
+      debugPrint(
+          'AsistenciaProvider: Loading asistencias for horario: $horarioId');
       _setState(AsistenciaState.loading);
 
       final asistencias = await _asistenciaService.getAsistencias(
@@ -54,7 +56,8 @@ class AsistenciaProvider with ChangeNotifier {
       _asistencias = asistencias;
       _selectedHorarioId = horarioId;
       _setState(AsistenciaState.loaded);
-      debugPrint('AsistenciaProvider: Loaded ${asistencias.length} asistencias');
+      debugPrint(
+          'AsistenciaProvider: Loaded ${asistencias.length} asistencias');
     } catch (e) {
       debugPrint('AsistenciaProvider: Error loading asistencias: $e');
       _setState(AsistenciaState.error, e.toString());
@@ -62,7 +65,8 @@ class AsistenciaProvider with ChangeNotifier {
   }
 
   /// Registra la asistencia mediante código QR y refresca la lista
-  Future<bool> registrarAsistencia(String accessToken, String horarioId, String qrCode) async {
+  Future<bool> registrarAsistencia(
+      String accessToken, String horarioId, String qrCode) async {
     try {
       debugPrint('AsistenciaProvider: Registrando asistencia con QR: $qrCode');
       _setState(AsistenciaState.loading);
@@ -90,15 +94,16 @@ class AsistenciaProvider with ChangeNotifier {
   /// Registra asistencia manual para un estudiante específico
   /// Ahora acepta estado personalizado para registro inteligente
   Future<bool> registrarAsistenciaManual(
-    String accessToken, 
-    String horarioId, 
+    String accessToken,
+    String horarioId,
     String estudianteId, {
     String? estado,
     String? observacion,
     bool? justificada,
   }) async {
     try {
-      debugPrint('AsistenciaProvider: Registrando asistencia manual ($estado) para estudiante: $estudianteId');
+      debugPrint(
+          'AsistenciaProvider: Registrando asistencia manual ($estado) para estudiante: $estudianteId');
       _setState(AsistenciaState.loading);
 
       final success = await _asistenciaService.registrarAsistenciaManual(
@@ -125,9 +130,12 @@ class AsistenciaProvider with ChangeNotifier {
   }
 
   /// Actualiza el estado de una asistencia
-  Future<bool> updateAsistencia(String accessToken, String asistenciaId, String estado, {String? observacion, bool? justificada}) async {
+  Future<bool> updateAsistencia(
+      String accessToken, String asistenciaId, String estado,
+      {String? observacion, bool? justificada}) async {
     try {
-      debugPrint('AsistenciaProvider: Actualizando asistencia $asistenciaId a estado: $estado');
+      debugPrint(
+          'AsistenciaProvider: Actualizando asistencia $asistenciaId a estado: $estado');
       _setState(AsistenciaState.loading);
 
       final success = await _asistenciaService.updateAsistencia(
@@ -160,7 +168,7 @@ class AsistenciaProvider with ChangeNotifier {
     final lowercaseQuery = query.toLowerCase();
     return _asistencias.where((asistencia) {
       return asistencia.nombreCompleto.toLowerCase().contains(lowercaseQuery) ||
-             asistencia.identificacion.toLowerCase().contains(lowercaseQuery);
+          asistencia.identificacion.toLowerCase().contains(lowercaseQuery);
     }).toList();
   }
 

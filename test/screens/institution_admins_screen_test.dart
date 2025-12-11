@@ -29,14 +29,16 @@ class FakeUserProvider extends UserProvider {
   List<User> get users => fakeUsers;
 
   @override
-  Future<void> loadAdminsByInstitution(String accessToken, String institutionId) async {
+  Future<void> loadAdminsByInstitution(
+      String accessToken, String institutionId) async {
     loadAdminsCalled = true;
     // no-op: users getter returns fakeUsers
     notifyListeners();
   }
 
   @override
-  Future<bool> createUser(String accessToken, CreateUserRequest userData) async {
+  Future<bool> createUser(
+      String accessToken, CreateUserRequest userData) async {
     createCalled = true;
     return true;
   }
@@ -50,25 +52,41 @@ class FakeInstitutionProvider extends InstitutionProvider {
   List<Institution> get institutions => _insts;
 }
 
-class FakeInstitutionAdminsPaginatedProvider extends InstitutionAdminsPaginatedProvider {
+class FakeInstitutionAdminsPaginatedProvider
+    extends InstitutionAdminsPaginatedProvider {
   final List<User> fakeAdmins;
 
   FakeInstitutionAdminsPaginatedProvider({this.fakeAdmins = const []});
 
   @override
-  Future<PaginatedResponse<User>?> fetchPage(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<PaginatedResponse<User>?> fetchPage(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     // Retorna una respuesta paginada simple que envuelve los usuarios falsos
     return PaginatedResponse(
       items: fakeAdmins,
-      pagination: PaginationInfo(page: page, limit: limit ?? 10, total: fakeAdmins.length, totalPages: 1, hasNext: false, hasPrev: false),
+      pagination: PaginationInfo(
+          page: page,
+          limit: limit ?? 10,
+          total: fakeAdmins.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false),
     );
   }
 
   @override
-  Future<void> loadItems(String accessToken, {int page = 1, int? limit, String? search, Map<String, String>? filters}) async {
+  Future<void> loadItems(String accessToken,
+      {int page = 1,
+      int? limit,
+      String? search,
+      Map<String, String>? filters}) async {
     // Delay the actual load to avoid notifyListeners during the widget build phase
     await Future.delayed(Duration.zero);
-    await super.loadItems(accessToken, page: page, limit: limit, search: search, filters: filters);
+    await super.loadItems(accessToken,
+        page: page, limit: limit, search: search, filters: filters);
   }
 }
 
@@ -77,7 +95,9 @@ void main() {
     // AppConfig requiere inicialización en tests que usan servicios http
     await AppConfig.initialize();
   });
-  testWidgets('Open bottom sheet and navigate to create admin form which calls createUser', (WidgetTester tester) async {
+  testWidgets(
+      'Open bottom sheet and navigate to create admin form which calls createUser',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
     final fakeUserProvider = FakeUserProvider();
@@ -85,7 +105,10 @@ void main() {
     final fakeInstProvider = FakeInstitutionProvider([inst]);
 
     final router = GoRouter(routes: [
-      GoRoute(path: '/', builder: (context, state) => const Scaffold(body: InstitutionAdminsScreen(institutionId: 'i1')) ),
+      GoRoute(
+          path: '/',
+          builder: (context, state) => const Scaffold(
+              body: InstitutionAdminsScreen(institutionId: 'i1'))),
     ]);
 
     await tester.pumpWidget(
@@ -93,8 +116,10 @@ void main() {
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
-          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(value: FakeInstitutionAdminsPaginatedProvider()),
-          ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstProvider),
+          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(
+              value: FakeInstitutionAdminsPaginatedProvider()),
+          ChangeNotifierProvider<InstitutionProvider>.value(
+              value: fakeInstProvider),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),
@@ -114,7 +139,8 @@ void main() {
     expect(createTile, findsOneWidget);
   });
 
-  testWidgets('Open bottom sheet and choose assign existing opens dialog', (WidgetTester tester) async {
+  testWidgets('Open bottom sheet and choose assign existing opens dialog',
+      (WidgetTester tester) async {
     final fakeAuth = FakeAuthProvider();
     fakeAuth.selectInstitution('i1');
     final fakeUserProvider = FakeUserProvider();
@@ -126,8 +152,10 @@ void main() {
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: fakeAuth),
           ChangeNotifierProvider<UserProvider>.value(value: fakeUserProvider),
-          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(value: FakeInstitutionAdminsPaginatedProvider()),
-          ChangeNotifierProvider<InstitutionProvider>.value(value: fakeInstProvider),
+          ChangeNotifierProvider<InstitutionAdminsPaginatedProvider>.value(
+              value: FakeInstitutionAdminsPaginatedProvider()),
+          ChangeNotifierProvider<InstitutionProvider>.value(
+              value: fakeInstProvider),
         ],
         child: const MaterialApp(
           home: Scaffold(body: InstitutionAdminsScreen(institutionId: 'i1')),

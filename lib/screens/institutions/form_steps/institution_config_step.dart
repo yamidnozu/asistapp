@@ -6,16 +6,16 @@ import '../../../widgets/components/clarity_components.dart';
 class InstitutionConfigStep extends StatelessWidget {
   final bool activa;
   final ValueChanged<bool> onActivaChanged;
-  
+
   final bool notificacionesActivas;
   final ValueChanged<bool> onNotificacionesActivasChanged;
-  
+
   final String canalNotificacion;
   final ValueChanged<String?> onCanalNotificacionChanged;
-  
+
   final String modoNotificacionAsistencia;
   final ValueChanged<String?> onModoNotificacionAsistenciaChanged;
-  
+
   final String? horaDisparoNotificacion;
   final ValueChanged<String?> onHoraDisparoNotificacionChanged;
 
@@ -82,18 +82,21 @@ class InstitutionConfigStep extends StatelessWidget {
         ),
 
         SizedBox(height: spacing.lg),
-        
+
         // Notificaciones Section
         Text(
           'Notificaciones',
           style: textStyles.titleMedium,
         ),
         SizedBox(height: spacing.md),
-        
+
         ClarityCard(
           leading: Icon(
-            notificacionesActivas ? Icons.notifications_active : Icons.notifications_off,
-            color: notificacionesActivas ? colors.primary : colors.textSecondary,
+            notificacionesActivas
+                ? Icons.notifications_active
+                : Icons.notifications_off,
+            color:
+                notificacionesActivas ? colors.primary : colors.textSecondary,
             size: 32,
           ),
           title: Text(
@@ -101,7 +104,9 @@ class InstitutionConfigStep extends StatelessWidget {
             style: textStyles.bodyLarge.semiBold,
           ),
           subtitle: Text(
-            notificacionesActivas ? 'Las notificaciones se enviarán según la configuración' : 'No se enviarán notificaciones',
+            notificacionesActivas
+                ? 'Las notificaciones se enviarán según la configuración'
+                : 'No se enviarán notificaciones',
             style: textStyles.bodyMedium.withColor(colors.textSecondary),
           ),
           trailing: Switch(
@@ -110,7 +115,7 @@ class InstitutionConfigStep extends StatelessWidget {
             activeColor: colors.primary,
           ),
         ),
-        
+
         if (notificacionesActivas) ...[
           SizedBox(height: spacing.md),
           DropdownButtonFormField<String>(
@@ -134,28 +139,32 @@ class InstitutionConfigStep extends StatelessWidget {
               border: OutlineInputBorder(),
             ),
             items: const [
-              DropdownMenuItem(value: 'INSTANT', child: Text('Instantáneo (Al registrar)')),
-              DropdownMenuItem(value: 'END_OF_DAY', child: Text('Fin del Día (Resumen)')),
-              DropdownMenuItem(value: 'MANUAL_ONLY', child: Text('Solo Manual')),
+              DropdownMenuItem(
+                  value: 'INSTANT', child: Text('Instantáneo (Al registrar)')),
+              DropdownMenuItem(
+                  value: 'END_OF_DAY', child: Text('Fin del Día (Resumen)')),
+              DropdownMenuItem(
+                  value: 'MANUAL_ONLY', child: Text('Solo Manual')),
             ],
             onChanged: onModoNotificacionAsistenciaChanged,
           ),
-          
           if (modoNotificacionAsistencia == 'END_OF_DAY') ...[
             SizedBox(height: spacing.md),
             InkWell(
               onTap: () async {
                 final TimeOfDay? picked = await showTimePicker(
                   context: context,
-                  initialTime: horaDisparoNotificacion != null 
-                    ? TimeOfDay(
-                        hour: int.parse(horaDisparoNotificacion!.split(':')[0]), 
-                        minute: int.parse(horaDisparoNotificacion!.split(':')[1])
-                      )
-                    : const TimeOfDay(hour: 18, minute: 0),
+                  initialTime: horaDisparoNotificacion != null
+                      ? TimeOfDay(
+                          hour:
+                              int.parse(horaDisparoNotificacion!.split(':')[0]),
+                          minute:
+                              int.parse(horaDisparoNotificacion!.split(':')[1]))
+                      : const TimeOfDay(hour: 18, minute: 0),
                 );
                 if (picked != null) {
-                  final formatted = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+                  final formatted =
+                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
                   onHoraDisparoNotificacionChanged(formatted);
                 }
               },
@@ -188,12 +197,14 @@ class InstitutionConfigStep extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: colors.warning, size: 20),
+                  Icon(Icons.warning_amber_rounded,
+                      color: colors.warning, size: 20),
                   SizedBox(width: spacing.sm),
                   Expanded(
                     child: Text(
                       'Importante',
-                      style: textStyles.bodyMedium.semiBold.withColor(colors.warning),
+                      style: textStyles.bodyMedium.semiBold
+                          .withColor(colors.warning),
                     ),
                   ),
                 ],

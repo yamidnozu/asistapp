@@ -26,7 +26,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         final selectedInstitutionId = authProvider.selectedInstitutionId;
         final token = authProvider.accessToken;
         if (selectedInstitutionId != null && token != null) {
-          await userProvider.loadUsersByInstitution(token, selectedInstitutionId);
+          await userProvider.loadUsersByInstitution(
+              token, selectedInstitutionId);
         }
       } catch (e) {
         debugPrint('AdminDashboard init load error: $e');
@@ -172,14 +173,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           SizedBox(width: spacing.lg),
           ClarityCompactStat(
-            value: stats['profesores']?.toString() ?? userProvider.professorsCount.toString(),
+            value: stats['profesores']?.toString() ??
+                userProvider.professorsCount.toString(),
             title: 'Profesores',
             icon: Icons.school,
             color: context.colors.info,
           ),
           SizedBox(width: spacing.lg),
           ClarityCompactStat(
-            value: stats['estudiantes']?.toString() ?? userProvider.studentsCount.toString(),
+            value: stats['estudiantes']?.toString() ??
+                userProvider.studentsCount.toString(),
             title: 'Estudiantes',
             icon: Icons.person,
             color: context.colors.warning,

@@ -98,7 +98,8 @@ class CustomTextFormField extends StatelessWidget {
             borderSide: BorderSide(color: colors.error, width: 2),
           ),
           filled: true,
-          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          fillColor:
+              enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
           contentPadding: EdgeInsets.symmetric(
             horizontal: spacing.md,
             vertical: spacing.sm,
@@ -175,7 +176,8 @@ class CustomDropdownFormField<T> extends StatelessWidget {
             borderSide: BorderSide(color: colors.error, width: 2),
           ),
           filled: true,
-          fillColor: enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
+          fillColor:
+              enabled ? colors.surface : colors.surface.withValues(alpha: 0.5),
           contentPadding: EdgeInsets.symmetric(
             horizontal: spacing.md,
             vertical: spacing.sm,
@@ -221,10 +223,12 @@ class CustomCheckboxFormField extends StatelessWidget {
           children: [
             CheckboxListTile(
               value: state.value ?? false,
-              onChanged: enabled ? (bool? newValue) {
-                state.didChange(newValue);
-                onChanged?.call(newValue);
-              } : null,
+              onChanged: enabled
+                  ? (bool? newValue) {
+                      state.didChange(newValue);
+                      onChanged?.call(newValue);
+                    }
+                  : null,
               title: Text(
                 title,
                 style: textStyles.bodyLarge,
@@ -232,7 +236,8 @@ class CustomCheckboxFormField extends StatelessWidget {
               subtitle: subtitle != null
                   ? Text(
                       subtitle!,
-                      style: textStyles.bodySmall.withColor(colors.textSecondary),
+                      style:
+                          textStyles.bodySmall.withColor(colors.textSecondary),
                     )
                   : null,
               controlAffinity: ListTileControlAffinity.leading,
@@ -308,7 +313,8 @@ class CustomSwitchFormField extends StatelessWidget {
                     if (subtitle != null)
                       Text(
                         subtitle!,
-                        style: textStyles.bodySmall.withColor(colors.textSecondary),
+                        style: textStyles.bodySmall
+                            .withColor(colors.textSecondary),
                       ),
                   ],
                 ),

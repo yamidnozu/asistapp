@@ -21,7 +21,8 @@ class ShimmerListWidget extends StatelessWidget {
       baseColor: colors.surface,
       highlightColor: colors.borderLight,
       child: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.sm),
+        padding:
+            EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.sm),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           return cardBuilder(context);

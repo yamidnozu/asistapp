@@ -12,9 +12,10 @@ class PeriodosAcademicosScreen extends StatefulWidget {
   const PeriodosAcademicosScreen({super.key});
 
   @override
-  State<PeriodosAcademicosScreen> createState() => _PeriodosAcademicosScreenState();
+  State<PeriodosAcademicosScreen> createState() =>
+      _PeriodosAcademicosScreenState();
 }
-  
+
 class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -42,14 +43,16 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 180) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 180) {
       _loadMorePeriodos();
     }
   }
 
   Future<void> _loadPeriodos({String? search}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+    final periodoProvider =
+        Provider.of<PeriodoAcademicoProvider>(context, listen: false);
     final token = authProvider.accessToken;
     if (token != null) {
       await periodoProvider.loadPeriodosAcademicos(token);
@@ -58,7 +61,8 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
 
   Future<void> _loadMorePeriodos() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+    final periodoProvider =
+        Provider.of<PeriodoAcademicoProvider>(context, listen: false);
     final token2 = authProvider.accessToken;
     if (token2 != null && (periodoProvider.paginationInfo?.hasNext ?? false)) {
       await periodoProvider.loadNextPage(token2);
@@ -85,11 +89,16 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           onRefresh: _loadPeriodos,
           scrollController: _scrollController,
           hasMoreData: periodoProvider.paginationInfo?.hasNext ?? false,
-          isLoadingMore: periodoProvider.isLoading && (periodoProvider.paginationInfo?.hasNext ?? false),
+          isLoadingMore: periodoProvider.isLoading &&
+              (periodoProvider.paginationInfo?.hasNext ?? false),
           emptyStateWidget: ClarityEmptyState(
             icon: _isSearching ? Icons.search_off : Icons.calendar_today,
-            title: _isSearching ? 'No se encontraron resultados' : 'Aún no has creado ningún período académico',
-            subtitle: _isSearching ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer período académico',
+            title: _isSearching
+                ? 'No se encontraron resultados'
+                : 'Aún no has creado ningún período académico',
+            subtitle: _isSearching
+                ? 'Intenta con otros términos de búsqueda'
+                : 'Comienza creando tu primer período académico',
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCreatePeriodoDialog(context),
@@ -137,14 +146,16 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           ),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: spacing.md, vertical: spacing.sm),
         ),
         onChanged: (_) => _onSearchChanged(),
       ),
     ];
   }
 
-  List<Widget> _buildStatisticWidgets(BuildContext context, PeriodoAcademicoProvider provider) {
+  List<Widget> _buildStatisticWidgets(
+      BuildContext context, PeriodoAcademicoProvider provider) {
     final stats = provider.getPeriodosStatistics();
     final colors = context.colors;
 
@@ -170,7 +181,8 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     ];
   }
 
-  Widget _buildPeriodoCard(PeriodoAcademico periodo, PeriodoAcademicoProvider provider, BuildContext context) {
+  Widget _buildPeriodoCard(PeriodoAcademico periodo,
+      PeriodoAcademicoProvider provider, BuildContext context) {
     final colors = context.colors;
     final textStyles = context.textStyles;
     final spacing = context.spacing;
@@ -222,35 +234,41 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           onPressed: () => _showDeletePeriodoDialog(context, periodo, provider),
         ),
       ],
-      onTap: () => Navigator.of(context).pushNamed('/academic/periodos/${periodo.id}'),
+      onTap: () =>
+          Navigator.of(context).pushNamed('/academic/periodos/${periodo.id}'),
     );
   }
 
-  Future<void> _togglePeriodoStatus(BuildContext context, PeriodoAcademico periodo, PeriodoAcademicoProvider provider) async {
+  Future<void> _togglePeriodoStatus(BuildContext context,
+      PeriodoAcademico periodo, PeriodoAcademicoProvider provider) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  final colors = Theme.of(context).colorScheme;
-  final messenger = ScaffoldMessenger.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final messenger = ScaffoldMessenger.of(context);
 
-  final tokenLocal = authProvider.accessToken;
-  if (tokenLocal == null) {
-    messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para cambiar el estado de un período')));
-    return;
-  }
+    final tokenLocal = authProvider.accessToken;
+    if (tokenLocal == null) {
+      messenger.showSnackBar(const SnackBar(
+          content: Text(
+              'Debes iniciar sesión para cambiar el estado de un período')));
+      return;
+    }
 
-  final success = await provider.togglePeriodoStatus(tokenLocal, periodo.id);
+    final success = await provider.togglePeriodoStatus(tokenLocal, periodo.id);
 
     if (!mounted) return;
 
     if (success) {
-  messenger.showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text('Período ${periodo.activo ? 'desactivado' : 'activado'} correctamente'),
+          content: Text(
+              'Período ${periodo.activo ? 'desactivado' : 'activado'} correctamente'),
         ),
       );
     } else {
-  messenger.showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text(provider.errorMessage ?? 'Error al cambiar el status del período'),
+          content: Text(provider.errorMessage ??
+              'Error al cambiar el status del período'),
           backgroundColor: colors.error,
         ),
       );
@@ -275,7 +293,8 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
     });
   }
 
-  void _showDeletePeriodoDialog(BuildContext context, PeriodoAcademico periodo, PeriodoAcademicoProvider provider) {
+  void _showDeletePeriodoDialog(BuildContext context, PeriodoAcademico periodo,
+      PeriodoAcademicoProvider provider) {
     final colors = Theme.of(context).colorScheme;
 
     showDialog(
@@ -286,25 +305,36 @@ class _PeriodosAcademicosScreenState extends State<PeriodosAcademicosScreen> {
           '¿Estás seguro de que quieres eliminar el período "${periodo.nombre}"? Esta acción no se puede deshacer y eliminará todos los grupos asociados.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar')),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
               final messenger = ScaffoldMessenger.of(context);
               final tokenDelete = authProvider.accessToken;
               if (tokenDelete == null) {
-                messenger.showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para eliminar un período')));
+                messenger.showSnackBar(const SnackBar(
+                    content:
+                        Text('Debes iniciar sesión para eliminar un período')));
                 return;
               }
 
-              final success = await provider.deletePeriodoAcademico(tokenDelete, periodo.id);
+              final success = await provider.deletePeriodoAcademico(
+                  tokenDelete, periodo.id);
               if (!mounted) return;
               if (success) {
-                messenger.showSnackBar(const SnackBar(content: Text('Período académico eliminado correctamente')));
+                messenger.showSnackBar(const SnackBar(
+                    content:
+                        Text('Período académico eliminado correctamente')));
                 _loadPeriodos();
               } else {
-                messenger.showSnackBar(SnackBar(content: Text(provider.errorMessage ?? 'Error al eliminar período académico'), backgroundColor: colors.error));
+                messenger.showSnackBar(SnackBar(
+                    content: Text(provider.errorMessage ??
+                        'Error al eliminar período académico'),
+                    backgroundColor: colors.error));
               }
             },
             style: TextButton.styleFrom(foregroundColor: colors.error),
@@ -378,7 +408,9 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           },
           child: InputDecorator(
             decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
-            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+            child: Text(_fechaInicio != null
+                ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
+                : 'Seleccionar fecha'),
           ),
         ),
 
@@ -397,7 +429,9 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
           },
           child: InputDecorator(
             decoration: const InputDecoration(labelText: 'Fecha de Fin'),
-            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+            child: Text(_fechaFin != null
+                ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
+                : 'Seleccionar fecha'),
           ),
         ),
       ],
@@ -416,16 +450,19 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
       return false;
     }
 
-  // dialog handles progress UI
+    // dialog handles progress UI
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+      final periodoProvider =
+          Provider.of<PeriodoAcademicoProvider>(context, listen: false);
       final colors = Theme.of(context).colorScheme;
 
       final token = authProvider.accessToken;
       if (token == null) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para crear períodos')));
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Debes iniciar sesión para crear períodos')));
         return false;
       }
 
@@ -440,13 +477,15 @@ class _CreatePeriodoDialogState extends State<CreatePeriodoDialog> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Período académico creado correctamente')),
+          const SnackBar(
+              content: Text('Período académico creado correctamente')),
         );
         return true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(periodoProvider.errorMessage ?? 'Error al crear período académico'),
+            content: Text(periodoProvider.errorMessage ??
+                'Error al crear período académico'),
             backgroundColor: colors.error,
           ),
         );
@@ -537,7 +576,9 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           },
           child: InputDecorator(
             decoration: const InputDecoration(labelText: 'Fecha de Inicio'),
-            child: Text(_fechaInicio != null ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}' : 'Seleccionar fecha'),
+            child: Text(_fechaInicio != null
+                ? '${_fechaInicio!.day}/${_fechaInicio!.month}/${_fechaInicio!.year}'
+                : 'Seleccionar fecha'),
           ),
         ),
 
@@ -556,7 +597,9 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           },
           child: InputDecorator(
             decoration: const InputDecoration(labelText: 'Fecha de Fin'),
-            child: Text(_fechaFin != null ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}' : 'Seleccionar fecha'),
+            child: Text(_fechaFin != null
+                ? '${_fechaFin!.day}/${_fechaFin!.month}/${_fechaFin!.year}'
+                : 'Seleccionar fecha'),
           ),
         ),
       ],
@@ -572,19 +615,22 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
           backgroundColor: Colors.orange,
         ),
       );
-          return false;
+      return false;
     }
 
-  // progress is handled by ClarityFormDialog
+    // progress is handled by ClarityFormDialog
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final periodoProvider = Provider.of<PeriodoAcademicoProvider>(context, listen: false);
+      final periodoProvider =
+          Provider.of<PeriodoAcademicoProvider>(context, listen: false);
       final colors = Theme.of(context).colorScheme;
 
       final token = authProvider.accessToken;
       if (token == null) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Debes iniciar sesión para actualizar períodos')));
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Debes iniciar sesión para actualizar períodos')));
         return false;
       }
 
@@ -600,13 +646,15 @@ class _EditPeriodoDialogState extends State<EditPeriodoDialog> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Período académico actualizado correctamente')),
+          const SnackBar(
+              content: Text('Período académico actualizado correctamente')),
         );
         return true;
-          } else if (mounted) {
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(periodoProvider.errorMessage ?? 'Error al actualizar período académico'),
+            content: Text(periodoProvider.errorMessage ??
+                'Error al actualizar período académico'),
             backgroundColor: colors.error,
           ),
         );

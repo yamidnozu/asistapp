@@ -5,7 +5,6 @@ import 'app_text_styles.dart';
 
 /// Theme principal de la aplicación - escalable y mantenible
 class AppTheme {
-
   AppTheme._();
 
   static final AppTheme instance = AppTheme._();
@@ -20,7 +19,7 @@ class AppTheme {
   static ThemeData get defaultTheme => dark;
 
   static ThemeData _createTheme(Brightness brightness) {
-  final colors = AppColors.fromBrightness(brightness);
+    final colors = AppColors.fromBrightness(brightness);
     final textStyles = AppTextStyles.instance;
 
     return ThemeData(
@@ -30,7 +29,9 @@ class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: colors.primary,
-        onPrimary: brightness == Brightness.light ? colors.textPrimary : colors.white, // Negro en light, blanco en dark
+        onPrimary: brightness == Brightness.light
+            ? colors.textPrimary
+            : colors.white, // Negro en light, blanco en dark
         primaryContainer: colors.primaryContainer,
         onPrimaryContainer: colors.textPrimary,
         secondary: colors.secondary,
@@ -70,19 +71,28 @@ class AppTheme {
         labelSmall: textStyles.labelSmall,
       ),
 
-
       appBarTheme: AppBarTheme(
         backgroundColor: colors.primary,
-        foregroundColor: brightness == Brightness.light ? colors.textPrimary : colors.white, // Negro en light, blanco en dark
+        foregroundColor: brightness == Brightness.light
+            ? colors.textPrimary
+            : colors.white, // Negro en light, blanco en dark
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: textStyles.headlineMedium.copyWith(
-          color: brightness == Brightness.light ? colors.textPrimary : colors.white, // Negro en light, blanco en dark
+          color: brightness == Brightness.light
+              ? colors.textPrimary
+              : colors.white, // Negro en light, blanco en dark
           fontWeight: FontWeight.bold,
         ),
-        iconTheme: IconThemeData(color: brightness == Brightness.light ? colors.textPrimary : colors.white), // Negro en light, blanco en dark
-        actionsIconTheme: IconThemeData(color: brightness == Brightness.light ? colors.textPrimary : colors.white), // Negro en light, blanco en dark
+        iconTheme: IconThemeData(
+            color: brightness == Brightness.light
+                ? colors.textPrimary
+                : colors.white), // Negro en light, blanco en dark
+        actionsIconTheme: IconThemeData(
+            color: brightness == Brightness.light
+                ? colors.textPrimary
+                : colors.white), // Negro en light, blanco en dark
         toolbarHeight: AppSpacing.instance.appBarHeight,
         centerTitle: true,
       ),
@@ -101,14 +111,17 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
-          foregroundColor: brightness == Brightness.light ? colors.textPrimary : colors.white, // Negro en light, blanco en dark
+          foregroundColor: brightness == Brightness.light
+              ? colors.textPrimary
+              : colors.white, // Negro en light, blanco en dark
           elevation: 1, // Elevación sutil
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.instance.buttonPadding,
             vertical: AppSpacing.instance.md,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+            borderRadius:
+                BorderRadius.circular(AppSpacing.instance.borderRadius),
           ),
           textStyle: textStyles.button,
         ),
@@ -117,14 +130,16 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colors.primary,
-          side: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+          side: BorderSide(
+              color: colors.border, width: AppSpacing.instance.borderWidth),
           elevation: 0,
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.instance.buttonPadding,
             vertical: AppSpacing.instance.md,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+            borderRadius:
+                BorderRadius.circular(AppSpacing.instance.borderRadius),
           ),
           textStyle: textStyles.button, // Usar estilo sin color fijo
         ),
@@ -146,11 +161,13 @@ class AppTheme {
         fillColor: colors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
-          borderSide: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+          borderSide: BorderSide(
+              color: colors.border, width: AppSpacing.instance.borderWidth),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
-          borderSide: BorderSide(color: colors.border, width: AppSpacing.instance.borderWidth),
+          borderSide: BorderSide(
+              color: colors.border, width: AppSpacing.instance.borderWidth),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
@@ -158,7 +175,8 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
-          borderSide: BorderSide(color: colors.error, width: AppSpacing.instance.borderWidth),
+          borderSide: BorderSide(
+              color: colors.error, width: AppSpacing.instance.borderWidth),
         ),
         contentPadding: EdgeInsets.all(AppSpacing.instance.inputPadding),
         labelStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
@@ -180,7 +198,8 @@ class AppTheme {
         foregroundColor: colors.white,
         elevation: 2, // Elevación sutil
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
+          borderRadius:
+              BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
         ),
       ),
 
@@ -195,7 +214,8 @@ class AppTheme {
           vertical: AppSpacing.instance.xs,
         ),
         labelStyle: textStyles.bodyMedium.copyWith(color: colors.textPrimary),
-        secondaryLabelStyle: textStyles.bodyMedium.copyWith(color: colors.white),
+        secondaryLabelStyle:
+            textStyles.bodyMedium.copyWith(color: colors.white),
         brightness: brightness,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
@@ -208,10 +228,10 @@ class AppTheme {
       shadowColor: colors.shadow,
 
       typography: Typography.material2021(),
-      
+
       // FASE 2: Material 3 Refinements - Mejor soporte para adaptatividad
       // useMaterial3: true, // Ya está activado arriba en _createTheme
-      
+
       // Temas de navegación mejorados
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: colors.surface,
@@ -232,16 +252,18 @@ class AppTheme {
           return IconThemeData(color: colors.textMuted);
         }),
       ),
-      
+
       // Rail de navegación para tablet/desktop
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: colors.surface,
         selectedIconTheme: IconThemeData(color: colors.primary),
         unselectedIconTheme: IconThemeData(color: colors.textMuted),
-        selectedLabelTextStyle: textStyles.labelSmall.copyWith(color: colors.primary),
-        unselectedLabelTextStyle: textStyles.labelSmall.copyWith(color: colors.textMuted),
+        selectedLabelTextStyle:
+            textStyles.labelSmall.copyWith(color: colors.primary),
+        unselectedLabelTextStyle:
+            textStyles.labelSmall.copyWith(color: colors.textMuted),
       ),
-      
+
       // Mejora de contraste para accesibilidad WCAG AA
       // Asegura que los colores tengan suficiente contraste
       bottomSheetTheme: BottomSheetThemeData(
@@ -258,7 +280,8 @@ class AppTheme {
       // Centralizar estilo de SnackBars para consistencia de la UI
       snackBarTheme: SnackBarThemeData(
         backgroundColor: colors.surfaceVariant,
-        contentTextStyle: textStyles.bodyMedium.copyWith(color: colors.textPrimary),
+        contentTextStyle:
+            textStyles.bodyMedium.copyWith(color: colors.textPrimary),
         actionTextColor: colors.primary,
         behavior: SnackBarBehavior.floating,
         elevation: 4,
@@ -271,11 +294,11 @@ class AppTheme {
 }
 
 // NOTAS DE IMPLEMENTACIÓN - ACCESIBILIDAD Y MATERIAL 3:
-// 
+//
 // WCAG AA Compliance (4.5:1 contrast ratio):
 // - TextPrimary (Slate 900) sobre White: 18.5:1 ✅ AAA
 // - TextPrimary sobre Primary Blue: 6.96:1 ✅ AA (cambiado de blanco para mejor accesibilidad)
-// - TextSecondary (Slate 700) sobre White: 8.2:1 ✅ AAA  
+// - TextSecondary (Slate 700) sobre White: 8.2:1 ✅ AAA
 // - TextMuted (Slate 600) sobre White: 5.8:1 ✅ AA
 // - Primary Blue sobre White: 8.8:1 ✅ AAA
 // - Success Green sobre White: 5.3:1 ✅ AA

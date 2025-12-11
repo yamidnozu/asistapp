@@ -19,7 +19,11 @@ class PeriodoService {
   // ===== PERIODOS ACADÉMICOS =====
 
   /// Obtiene todos los períodos académicos con paginación
-  Future<PaginatedPeriodosAcademicosResponse?> getPeriodosAcademicos(String accessToken, {int? page, int? limit, String? search}) async {
+  Future<PaginatedPeriodosAcademicosResponse?> getPeriodosAcademicos(
+      String accessToken,
+      {int? page,
+      int? limit,
+      String? search}) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final queryParams = <String, String>{};
@@ -27,7 +31,8 @@ class PeriodoService {
       if (limit != null) queryParams['limit'] = limit.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri = Uri.parse('$baseUrlValue/periodos-academicos').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrlValue/periodos-academicos')
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -50,11 +55,14 @@ class PeriodoService {
           final periodos = (responseData['data'] as List)
               .map((periodoJson) => PeriodoAcademico.fromJson(periodoJson))
               .toList();
-          final pagination = PaginationInfo.fromJson(responseData['pagination']);
-          return PaginatedPeriodosAcademicosResponse(periodosAcademicos: periodos, pagination: pagination);
+          final pagination =
+              PaginationInfo.fromJson(responseData['pagination']);
+          return PaginatedPeriodosAcademicosResponse(
+              periodosAcademicos: periodos, pagination: pagination);
         }
       } else {
-        debugPrint('Error getting periodos académicos: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting periodos académicos: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -82,7 +90,8 @@ class PeriodoService {
         },
       );
 
-      debugPrint('GET /periodos-academicos/activos - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /periodos-academicos/activos - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -92,7 +101,8 @@ class PeriodoService {
               .toList();
         }
       } else {
-        debugPrint('Error getting periodos activos: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting periodos activos: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -104,7 +114,8 @@ class PeriodoService {
   }
 
   /// Obtiene un período académico por ID
-  Future<PeriodoAcademico?> getPeriodoAcademicoById(String accessToken, String periodoId) async {
+  Future<PeriodoAcademico?> getPeriodoAcademicoById(
+      String accessToken, String periodoId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.get(
@@ -120,7 +131,8 @@ class PeriodoService {
         },
       );
 
-      debugPrint('GET /periodos-academicos/$periodoId - Status: ${response.statusCode}');
+      debugPrint(
+          'GET /periodos-academicos/$periodoId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -128,7 +140,8 @@ class PeriodoService {
           return PeriodoAcademico.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error getting período académico: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error getting período académico: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -140,17 +153,20 @@ class PeriodoService {
   }
 
   /// Crea un nuevo período académico
-  Future<PeriodoAcademico?> createPeriodoAcademico(String accessToken, CreatePeriodoAcademicoRequest periodoData) async {
+  Future<PeriodoAcademico?> createPeriodoAcademico(
+      String accessToken, CreatePeriodoAcademicoRequest periodoData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrlValue/periodos-academicos'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(periodoData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
@@ -165,7 +181,8 @@ class PeriodoService {
           return PeriodoAcademico.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error creating período académico: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error creating período académico: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -177,24 +194,28 @@ class PeriodoService {
   }
 
   /// Actualiza un período académico
-  Future<PeriodoAcademico?> updatePeriodoAcademico(String accessToken, String periodoId, UpdatePeriodoAcademicoRequest periodoData) async {
+  Future<PeriodoAcademico?> updatePeriodoAcademico(String accessToken,
+      String periodoId, UpdatePeriodoAcademicoRequest periodoData) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
-      final response = await http.put(
+      final response = await http
+          .put(
         Uri.parse('$baseUrlValue/periodos-academicos/$periodoId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(periodoData.toJson()),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      debugPrint('PUT /periodos-academicos/$periodoId - Status: ${response.statusCode}');
+      debugPrint(
+          'PUT /periodos-academicos/$periodoId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -202,7 +223,8 @@ class PeriodoService {
           return PeriodoAcademico.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error updating período académico: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error updating período académico: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {
@@ -214,7 +236,8 @@ class PeriodoService {
   }
 
   /// Elimina un período académico
-  Future<bool> deletePeriodoAcademico(String accessToken, String periodoId) async {
+  Future<bool> deletePeriodoAcademico(
+      String accessToken, String periodoId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.delete(
@@ -229,13 +252,15 @@ class PeriodoService {
         },
       );
 
-      debugPrint('DELETE /periodos-academicos/$periodoId - Status: ${response.statusCode}');
+      debugPrint(
+          'DELETE /periodos-academicos/$periodoId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['success'] == true;
       } else {
-        debugPrint('Error deleting período académico: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error deleting período académico: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e, stackTrace) {
@@ -246,7 +271,8 @@ class PeriodoService {
   }
 
   /// Activa/desactiva un período académico
-  Future<PeriodoAcademico?> togglePeriodoStatus(String accessToken, String periodoId) async {
+  Future<PeriodoAcademico?> togglePeriodoStatus(
+      String accessToken, String periodoId) async {
     try {
       final baseUrlValue = AppConfig.baseUrl;
       final response = await http.patch(
@@ -262,7 +288,8 @@ class PeriodoService {
         },
       );
 
-      debugPrint('PATCH /periodos-academicos/$periodoId/toggle-status - Status: ${response.statusCode}');
+      debugPrint(
+          'PATCH /periodos-academicos/$periodoId/toggle-status - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -270,7 +297,8 @@ class PeriodoService {
           return PeriodoAcademico.fromJson(responseData['data']);
         }
       } else {
-        debugPrint('Error toggling período status: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'Error toggling período status: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e, stackTrace) {

@@ -30,7 +30,8 @@ class EstudianteService {
         if (responseData['success'] == true) {
           return responseData['data'] as Map<String, dynamic>;
         } else {
-          throw Exception(responseData['message'] ?? 'Error al obtener información del estudiante');
+          throw Exception(responseData['message'] ??
+              'Error al obtener información del estudiante');
         }
       } else if (response.statusCode == 404) {
         throw Exception('Perfil de estudiante no encontrado');
