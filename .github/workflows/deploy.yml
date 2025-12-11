@@ -382,7 +382,7 @@ jobs:
               $SUDO ufw allow 443/tcp || echo "Warning: ufw allow 443 failed" >&2
             fi
             # Enable ufw if not already enabled
-          $SUDO ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
+            if $SUDO ufw status verbose 2>/dev/null | grep -q "Status: inactive"; then
               $SUDO ufw --force enable || echo "Warning: ufw enable failed" >&2
             else
               echo "✅ ufw already active"
