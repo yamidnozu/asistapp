@@ -177,7 +177,7 @@ class PushNotificationService {
 
         // Mostrar el diálogo de depuración
         if (_currentContext != null) {
-          UiUtils.showDebugDialog(_currentContext!, result.debugMessage);
+          UiUtils.showDebugDialog(_currentContext!, result.$2);
         }
       }
     } catch (e) {
@@ -201,7 +201,7 @@ class PushNotificationService {
           );
           debugPrint('🔄 Token FCM actualizado en el backend');
           if (_currentContext != null) {
-             UiUtils.showDebugDialog(_currentContext!, result.debugMessage);
+             UiUtils.showDebugDialog(_currentContext!, result.$2);
           }
         } catch (e) {
           debugPrint('⚠️ Error actualizando token FCM: $e');

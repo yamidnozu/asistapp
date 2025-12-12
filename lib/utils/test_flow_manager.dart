@@ -40,7 +40,7 @@ class TestFlowManager {
     }
 
     // Simular login
-    await authProvider.login(testSuperAdminEmail, testSuperAdminPassword);
+    await authProvider.login(testSuperAdminEmail, testSuperAdminPassword, context);
 
     if (authProvider.isAuthenticated &&
         authProvider.user?['rol'] == 'super_admin') {

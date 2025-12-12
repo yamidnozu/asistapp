@@ -259,26 +259,6 @@ class AcudienteProvider extends ChangeNotifier {
     }
   }
 
-  /// Registra un dispositivo para notificaciones push
-  Future<bool> registrarDispositivo(
-    String accessToken,
-    String token,
-    String plataforma, {
-    String? modelo,
-  }) async {
-    try {
-      return await _acudienteService.registrarDispositivo(
-        accessToken,
-        token,
-        plataforma,
-        modelo: modelo,
-      );
-    } catch (e) {
-      debugPrint('Error registrando dispositivo: $e');
-      return false;
-    }
-  }
-
   /// Limpia el error
   void clearError() {
     _errorMessage = null;
