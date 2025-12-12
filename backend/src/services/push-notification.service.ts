@@ -190,6 +190,21 @@ class PushNotificationService {
             throw new NotFoundError('Usuario no encontrado');
         }
 
+        // --- NUEVA LÓGICA: Asegurar que este token de dispositivo solo esté activo para el usuario actual ---
+        await prisma.dispositivoFCM.updateMany({
+            where: {
+                token: data.token, // El mismo token de dispositivo físico
+                NOT: {
+                    usuarioId: data.usuarioId // Pero para un usuario diferente
+                }
+            },
+            data: {
+                activo: false,
+                updatedAt: new Date()
+            }
+        });
+        // --- FIN NUEVA LÓGICA ---
+
         // Upsert del dispositivo (actualizar si ya existe, crear si no)
         await prisma.dispositivoFCM.upsert({
             where: {

@@ -638,6 +638,54 @@ class AcudienteService {
     }
   }
 
+  /// Elimina un dispositivo para notificaciones push (desasocia el token del usuario)
+  Future<(bool success, String debugMessage)> eliminarDispositivo(
+    String accessToken,
+    String token,
+  ) async {
+    final StringBuffer debugBuffer = StringBuffer();
+    debugBuffer.writeln('--- DEBUG ELIMINAR DISPOSITIVO ---');
+
+    try {
+      final baseUrlValue = AppConfig.baseUrl;
+      final uri = Uri.parse('$baseUrlValue/acudiente/dispositivo/$token');
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      };
+
+      debugBuffer.writeln('URL: $uri');
+      debugBuffer.writeln('Authorization: Bearer ${accessToken.length > 20 ? accessToken.substring(0,20) + '...' : accessToken}');
+      debugBuffer.writeln('Intentando petición DELETE...');
+
+      final response = await http
+          .delete(
+        uri,
+        headers: headers,
+      )
+          .timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: El servidor no responde');
+        },
+      );
+
+      debugBuffer.writeln('Respuesta recibida:');
+      debugBuffer.writeln('Status: ${response.statusCode}');
+      debugBuffer.writeln('Body: ${response.body}');
+
+      final bool success = response.statusCode == 200;
+      debugBuffer.writeln('--- FIN DEBUG ELIMINAR DISPOSITIVO ---');
+      return (success, debugBuffer.toString());
+    } catch (e, stackTrace) {
+      debugBuffer.writeln('--- ERROR DURANTE ELIMINACIÓN DE DISPOSITIVO ---');
+      debugBuffer.writeln('Excepción: $e');
+      debugBuffer.writeln('Stack Trace: $stackTrace');
+      debugBuffer.writeln('--- FIN ERROR ELIMINAR DISPOSITIVO ---');
+      return (false, debugBuffer.toString());
+    }
+  }
+
   // ============================================================
   // MÉTODOS ADMIN: Vincular/Desvincular estudiantes
   // ============================================================

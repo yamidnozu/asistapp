@@ -303,6 +303,15 @@ class PushNotificationService {
   Future<void> dispose() async {
     if (!_isMobilePlatform) return;
 
+    if (_fcmToken != null && _accessToken != null) {
+      debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Desactivando token FCM en backend... >>>>>');
+      final result = await _acudienteService.eliminarDispositivo(
+        _accessToken!,
+        _fcmToken!,
+      );
+      debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Resultado de eliminación: ${result.$1}, Mensaje: ${result.$2} >>>>>');
+    }
+
     await _foregroundSubscription?.cancel();
     _fcmToken = null;
     _accessToken = null;
