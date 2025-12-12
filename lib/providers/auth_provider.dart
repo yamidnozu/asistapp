@@ -194,6 +194,11 @@ class AuthProvider with ChangeNotifier {
         _refreshToken = result.refreshToken;
         _user = result.user;
 
+        // --- INICIO DE LA CORRECCIÓN CRÍTICA ---
+        // Configurar el servicio de notificaciones push con el nuevo token de acceso
+        PushNotificationService().configure(_accessToken!);
+        // --- FIN DE LA CORRECCIÓN CRÍTICA ---
+
         await loadUserInstitutions(notify: false);
 
         // Super Admin no necesita institución seleccionada (acceso global)

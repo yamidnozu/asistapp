@@ -590,10 +590,6 @@ class AcudienteService {
     try {
       final baseUrlValue = AppConfig.baseUrl;
 
-      // --- PASO DE DEPURACIÓN ---
-      // Imprime la URL a la que la app se está conectando.
-      debugPrint('<<<<< INTENTANDO REGISTRAR DISPOSITIVO EN: $baseUrlValue/acudiente/dispositivo >>>>>');
-
       final response = await http
           .post(
         Uri.parse('$baseUrlValue/acudiente/dispositivo'),
@@ -608,24 +604,15 @@ class AcudienteService {
         }),
       )
           .timeout(
-        const Duration(seconds: 15), // Aumentado para depuración
+        const Duration(seconds: 10),
         onTimeout: () {
           throw Exception('Timeout: El servidor no responde');
         },
       );
 
-      // --- PASO DE DEPURACIÓN ---
-      // Imprime el resultado de la petición.
-      debugPrint('<<<<< RESPUESTA DE REGISTRO: Código=${response.statusCode}, Cuerpo=${response.body} >>>>>');
-
       return response.statusCode == 201;
-    } catch (e, stackTrace) {
-      // --- PASO DE DEPURACIÓN CRÍTICO ---
-      // Imprime el error exacto que está ocurriendo.
-      debugPrint('<<<<< ¡ERROR CATASTRÓFICO AL REGISTRAR DISPOSITIVO! >>>>>');
-      debugPrint('Error: $e');
-      debugPrint('Stack Trace: $stackTrace');
-      
+    } catch (e) {
+      debugPrint('Error registering device: $e');
       return false;
     }
   }
