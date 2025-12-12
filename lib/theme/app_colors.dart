@@ -209,7 +209,7 @@ class AppColors {
   // Base colors - Paleta moderna inspirada en Atlassian/Linear
   // Cambiado a azul claro para una apariencia más agradable
   static const Color _primaryBase =
-      Color(0xFF8A0303); // Vinotinto - para verificar despliegue
+      Color(0xFFFFC107); // Amarillo Amber 500 - color de prueba
   static const Color _secondaryBase =
       Color(0xFF4F46E5); // Índigo moderno - complementario
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
