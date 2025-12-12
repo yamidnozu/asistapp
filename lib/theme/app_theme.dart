@@ -97,7 +97,7 @@ class AppTheme {
         centerTitle: true,
       ),
 
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colors.surface,
         shadowColor: colors.shadowLight,
         elevation: 1, // Elevación sutil
@@ -184,7 +184,7 @@ class AppTheme {
         errorStyle: textStyles.bodySmall.copyWith(color: colors.error),
       ),
 
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: colors.surface,
         elevation: 6, // Elevación media para diálogos
         shadowColor: colors.shadowLight,
