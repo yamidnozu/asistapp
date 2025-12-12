@@ -6,7 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'acudiente_service.dart';
-import '../utils/ui_utils.dart'; // Importar UiUtils
+import 'package:flutter/material.dart'; // Necesario para BuildContext
 
 /// Helper para verificar si estamos en plataforma móvil
 bool get _isMobilePlatform {
@@ -174,11 +174,7 @@ class PushNotificationService {
           plataforma,
         );
         debugPrint('✅ Token FCM registrado en el backend');
-
-        // Mostrar el diálogo de depuración
-        if (_currentContext != null) {
-          UiUtils.showDebugDialog(_currentContext!, result.$2);
-        }
+        debugPrint('<<<<< MENSAJE DE DEPURACIÓN DE REGISTRO: ${result.$2} >>>>>');
       }
     } catch (e) {
       debugPrint('⚠️ Error obteniendo/registrando token FCM: $e');
@@ -200,9 +196,7 @@ class PushNotificationService {
             plataforma,
           );
           debugPrint('🔄 Token FCM actualizado en el backend');
-          if (_currentContext != null) {
-             UiUtils.showDebugDialog(_currentContext!, result.$2);
-          }
+          debugPrint('<<<<< MENSAJE DE DEPURACIÓN DE ACTUALIZACIÓN DE TOKEN: ${result.$2} >>>>>');
         } catch (e) {
           debugPrint('⚠️ Error actualizando token FCM: $e');
         }
@@ -302,19 +296,13 @@ class PushNotificationService {
   /// Limpia los recursos al cerrar sesión
   Future<void> dispose() async {
     if (!_isMobilePlatform) return;
-
-    if (_fcmToken != null && _accessToken != null) {
-      debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Desactivando token FCM en backend... >>>>>');
-      final result = await _acudienteService.eliminarDispositivo(
-        _accessToken!,
-        _fcmToken!,
-      );
-      debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Resultado de eliminación: ${result.$1}, Mensaje: ${result.$2} >>>>>');
-    }
-
+    
+    debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Limpiando estado local del servicio. >>>>>');
+    
     await _foregroundSubscription?.cancel();
     _fcmToken = null;
     _accessToken = null;
-    debugPrint('🧹 PushNotificationService limpiado');
+    
+    debugPrint('🧹 PushNotificationService limpiado (solo estado local)');
   }
 }
