@@ -187,7 +187,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, BuildContext context) async {
     try {
       final result = await _authService.login(email, password);
       if (result != null) {
@@ -195,11 +195,8 @@ class AuthProvider with ChangeNotifier {
         _refreshToken = result.refreshToken;
         _user = result.user;
 
-        // --- INICIO DE LA CORRECCIÓN CRÍTICA ---
         // Configurar el servicio de notificaciones push con el nuevo token de acceso
-        PushNotificationService().configure(_accessToken!);
-        // --- FIN DE LA CORRECCIÓN CRÍTICA ---
-
+        PushNotificationService().configure(_accessToken!, context); // Pasar BuildContext
         await loadUserInstitutions(notify: false);
 
         // Super Admin no necesita institución seleccionada (acceso global)

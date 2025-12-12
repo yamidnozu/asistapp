@@ -581,27 +581,39 @@ class AcudienteService {
   }
 
   /// Registra un dispositivo para notificaciones push
-  Future<bool> registrarDispositivo(
+  Future<(bool success, String debugMessage)> registrarDispositivo(
     String accessToken,
     String token,
     String plataforma, {
     String? modelo,
   }) async {
+    final StringBuffer debugBuffer = StringBuffer();
+    debugBuffer.writeln('--- DEBUG REGISTRO DISPOSITIVO ---');
+
     try {
       final baseUrlValue = AppConfig.baseUrl;
+      final uri = Uri.parse('$baseUrlValue/acudiente/dispositivo');
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      };
+      final body = jsonEncode({
+        'token': token,
+        'plataforma': plataforma,
+        if (modelo != null) 'modelo': modelo,
+      });
+
+      debugBuffer.writeln('URL: $uri');
+      debugBuffer.writeln('Headers: ${headers['Content-Type']}');
+      debugBuffer.writeln('Authorization: Bearer ${accessToken.length > 20 ? accessToken.substring(0,20) + '...' : accessToken}');
+      debugBuffer.writeln('Body: $body');
+      debugBuffer.writeln('Intentando petición POST...');
 
       final response = await http
           .post(
-        Uri.parse('$baseUrlValue/acudiente/dispositivo'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode({
-          'token': token,
-          'plataforma': plataforma,
-          if (modelo != null) 'modelo': modelo,
-        }),
+        uri,
+        headers: headers,
+        body: body,
       )
           .timeout(
         const Duration(seconds: 10),
@@ -610,10 +622,19 @@ class AcudienteService {
         },
       );
 
-      return response.statusCode == 201;
-    } catch (e) {
-      debugPrint('Error registering device: $e');
-      return false;
+      debugBuffer.writeln('Respuesta recibida:');
+      debugBuffer.writeln('Status: ${response.statusCode}');
+      debugBuffer.writeln('Body: ${response.body}');
+
+      final bool success = response.statusCode == 201;
+      debugBuffer.writeln('--- FIN DEBUG REGISTRO DISPOSITIVO ---');
+      return (success, debugBuffer.toString());
+    } catch (e, stackTrace) {
+      debugBuffer.writeln('--- ERROR DURANTE REGISTRO DE DISPOSITIVO ---');
+      debugBuffer.writeln('Excepción: $e');
+      debugBuffer.writeln('Stack Trace: $stackTrace');
+      debugBuffer.writeln('--- FIN ERROR REGISTRO DISPOSITIVO ---');
+      return (false, debugBuffer.toString());
     }
   }
 

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart'; // Necesario para BuildContext
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'acudiente_service.dart';
+import '../utils/ui_utils.dart'; // Importar UiUtils
 
 /// Helper para verificar si estamos en plataforma móvil
 bool get _isMobilePlatform {
@@ -66,6 +68,9 @@ class PushNotificationService {
   // Callback para cuando el usuario toca una notificación
   Function(RemoteMessage)? onNotificationTapped;
 
+  // Almacenar el BuildContext para mostrar diálogos
+  BuildContext? _currentContext;
+
   /// Inicializa Firebase (debe llamarse en main.dart antes de runApp)
   static Future<void> initializeFirebase() async {
     if (!_isMobilePlatform) {
@@ -102,13 +107,14 @@ class PushNotificationService {
 
   /// Configura el servicio de notificaciones push
   /// Debe llamarse después del login exitoso
-  Future<void> configure(String accessToken) async {
+  Future<void> configure(String accessToken, BuildContext context) async { // Añadido BuildContext
     if (!_isMobilePlatform) {
       debugPrint('ℹ️ Push notifications no disponibles en esta plataforma');
       return;
     }
 
     _accessToken = accessToken;
+    _currentContext = context; // Guardar el contexto
 
     // Solicitar permisos
     await _requestPermission();
@@ -161,13 +167,18 @@ class PushNotificationService {
           if (Platform.isIOS) plataforma = 'ios';
         } catch (_) {}
 
-        // Registrar token en el backend
-        await _acudienteService.registrarDispositivo(
+        // Registrar token en el backend y capturar mensaje de depuración
+        final result = await _acudienteService.registrarDispositivo(
           _accessToken!,
           _fcmToken!,
           plataforma,
         );
         debugPrint('✅ Token FCM registrado en el backend');
+
+        // Mostrar el diálogo de depuración
+        if (_currentContext != null) {
+          UiUtils.showDebugDialog(_currentContext!, result.debugMessage);
+        }
       }
     } catch (e) {
       debugPrint('⚠️ Error obteniendo/registrando token FCM: $e');
@@ -183,12 +194,15 @@ class PushNotificationService {
             if (Platform.isIOS) plataforma = 'ios';
           } catch (_) {}
 
-          await _acudienteService.registrarDispositivo(
+          final result = await _acudienteService.registrarDispositivo(
             _accessToken!,
             newToken,
             plataforma,
           );
           debugPrint('🔄 Token FCM actualizado en el backend');
+          if (_currentContext != null) {
+             UiUtils.showDebugDialog(_currentContext!, result.debugMessage);
+          }
         } catch (e) {
           debugPrint('⚠️ Error actualizando token FCM: $e');
         }
