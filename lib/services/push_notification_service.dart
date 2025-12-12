@@ -73,7 +73,10 @@ class PushNotificationService {
       return;
     }
     try {
-      await Firebase.initializeApp();
+      if (Firebase.apps.isEmpty) { // Asegurarse de que Firebase ya ha sido inicializado
+        debugPrint('⚠️ Firebase Core no inicializado al llamar PushNotificationService.initializeFirebase. Esto es inesperado.');
+        return;
+      }
       // Configurar handler de mensajes en background
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -93,7 +96,7 @@ class PushNotificationService {
 
       debugPrint('✅ Firebase inicializado para push notifications');
     } catch (e) {
-      debugPrint('⚠️ Error inicializando Firebase: $e');
+      debugPrint('⚠️ Error configurando Push Notifications: $e');
     }
   }
 

@@ -50,6 +50,8 @@ void main() async {
     try {
       await Firebase.initializeApp();
       debugPrint('✅ Firebase Core inicializado correctamente');
+      // Inicializar PushNotificationService después de Firebase Core
+      await PushNotificationService.initializeFirebase();
     } catch (e) {
       debugPrint('⚠️ Error inicializando Firebase: $e');
     }
