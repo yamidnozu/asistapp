@@ -110,7 +110,7 @@ export class NotificationService {
                 return;
             }
 
-            // NUEVO: Llamar al servicio que SÍ envía notificaciones PUSH
+            // PUSH NOTIFICATION LOGIC (independent of external config)
             if (attendance.estado === 'AUSENTE' || attendance.estado === 'TARDANZA') {
                 logger.info(`[NotificationService] Handing off to PushNotificationService for state: ${attendance.estado}`);
                 PushNotificationService.notificarAcudientes(
@@ -128,10 +128,10 @@ export class NotificationService {
                 });
             }
 
-            // Obtener configuración de la institución
+            // Obtener configuración de la institución (para notificaciones externas)
             const config = await this.getInstitutionConfig(attendance.institucionId);
 
-            // Verificar si las notificaciones WhatsApp/SMS están activas
+            // Verificar si las notificaciones externas (WhatsApp/SMS) están activas
             if (!config.enabled || config.channel === NotificationChannel.NONE) {
                 logger.debug(`[NotificationService] External notifications disabled for institution ${attendance.institucionId}`);
                 return;
@@ -139,14 +139,14 @@ export class NotificationService {
 
             const student = attendance.estudiante;
 
-            // Verificar que el estudiante acepta notificaciones y tiene teléfono de responsable
+            // Verificar que el estudiante acepta notificaciones externas y tiene teléfono de responsable
             if (!student.aceptaNotificaciones) {
-                logger.debug(`[NotificationService] Student ${student.id} has notifications disabled`);
+                logger.debug(`[NotificationService] Student ${student.id} has external notifications disabled`);
                 return;
             }
 
             if (!student.telefonoResponsable) {
-                logger.warn(`[NotificationService] Student ${student.id} has no guardian phone number`);
+                logger.warn(`[NotificationService] Student ${student.id} has no guardian phone number for external notifications`);
                 return;
             }
 
