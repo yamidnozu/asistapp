@@ -75,6 +75,9 @@ class ClarityManagementPage extends StatelessWidget {
   /// Si mostrar automáticamente el botón leading de Flutter (false si usamos backRoute)
   final bool automaticallyImplyLeading;
 
+  /// Widget de carga personalizado (Skeleton)
+  final Widget? loadingWidget;
+
   const ClarityManagementPage({
     super.key,
     required this.title,
@@ -97,6 +100,7 @@ class ClarityManagementPage extends StatelessWidget {
     this.backRoute,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.loadingWidget,
   });
 
   @override
@@ -166,8 +170,9 @@ class ClarityManagementPage extends StatelessWidget {
 
             // Estados de carga, error o vacío
             if (isLoading && itemCount == 0)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+              SliverFillRemaining(
+                child: loadingWidget ??
+                    const Center(child: CircularProgressIndicator()),
               )
             else if (hasError)
               SliverFillRemaining(

@@ -10,6 +10,7 @@ import '../../providers/user_provider.dart';
 import '../../theme/theme_extensions.dart';
 // Using theme extensions via context: colors, textStyles, spacing
 import '../../widgets/components/index.dart';
+import '../../widgets/common/skeleton_list.dart';
 
 class UsersListScreen extends StatefulWidget {
   const UsersListScreen({super.key});
@@ -220,6 +221,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
         return ClarityManagementPage(
           title: title,
           isLoading: userProvider.isLoading,
+          loadingWidget:
+              const SkeletonList(height: 90), // Skeleton personalizado
           hasError: userProvider.hasError,
           errorMessage: userProvider.errorMessage,
           itemCount: userProvider.users.length,

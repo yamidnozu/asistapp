@@ -207,11 +207,11 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Base colors - Paleta moderna y energética
-  // Naranja vibrante para denotar energía y acción
+  // Fucsia vibrante para una identidad visual única y audaz
   static const Color _primaryBase =
-      Color(0xFFF97316); // Orange 500 - vibrante y cálido
+      Color(0xFFD946EF); // Fuchsia 500 - vibrante y moderno
   static const Color _secondaryBase =
-      Color(0xFF3B82F6); // Azul moderno - complementario ideal para naranja
+      Color(0xFF06B6D4); // Cyan moderno - contraste fresco
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
       Color(0xFFF8FAFC); // Gris muy claro - fondo limpio

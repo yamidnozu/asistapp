@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
 import '../../theme/theme_extensions.dart';
 import '../../widgets/components/index.dart';
+import '../../widgets/common/skeleton_list.dart';
 // Routes now usan go_router y se definen en app_router.dart; los screens se instancian desde allí vía 'extra'
 
 class InstitutionsListScreen extends StatefulWidget {
@@ -153,6 +154,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
         return ClarityManagementPage(
           title: 'Gestión de Instituciones',
           isLoading: institutionProvider.isLoading,
+          loadingWidget:
+              const SkeletonList(height: 100), // Skeleton personalizado
           hasError: institutionProvider.hasError,
           errorMessage: institutionProvider.errorMessage,
           itemCount: institutionProvider.institutions.length,
