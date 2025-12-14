@@ -207,11 +207,11 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Base colors - Paleta moderna inspirada en Atlassian/Linear
-  // Cambiado a teal moderno para una apariencia fresca y profesional
+  // Verde moderno y vibrante para una apariencia fresca y distintiva
   static const Color _primaryBase =
-      Color(0xFF14B8A6); // Teal 500 - color moderno y profesional
+      Color(0xFF10B981); // Emerald 500 - verde moderno y vibrante
   static const Color _secondaryBase =
-      Color(0xFF4F46E5); // Índigo moderno - complementario
+      Color(0xFF8B5CF6); // Violeta moderno - complementario
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
       Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
