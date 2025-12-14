@@ -75,6 +75,7 @@ export class InstitucionService {
       const total = await prisma.institucion.count({ where });
 
       // Get paginated institutions; include one admin user if exists to use as contact fallback
+      // IMPORTANTE: También incluir configuraciones de notificación
       const institutions = await prisma.institucion.findMany({
         orderBy: {
           createdAt: 'desc',
@@ -88,6 +89,7 @@ export class InstitucionService {
             include: { usuario: true },
             take: 1,
           },
+          configuraciones: true, // ✅ Incluir configuraciones de notificación
         },
       });
 
@@ -101,6 +103,14 @@ export class InstitucionService {
         telefono: inst.telefono ?? (inst.usuarioInstituciones?.[0]?.usuario?.telefono ?? null),
         email: inst.email ?? (inst.usuarioInstituciones?.[0]?.usuario?.email ?? null),
         activa: inst.activa,
+        // ✅ Incluir configuraciones en la respuesta (igual que en getInstitutionById)
+        configuraciones: inst.configuraciones ? {
+          notificacionesActivas: inst.configuraciones.notificacionesActivas,
+          canalNotificacion: inst.configuraciones.canalNotificacion,
+          modoNotificacionAsistencia: inst.configuraciones.modoNotificacionAsistencia,
+          horaDisparoNotificacion: inst.configuraciones.horaDisparoNotificacion,
+          notificarAusenciaTotalDiaria: inst.configuraciones.notificarAusenciaTotalDiaria,
+        } : null,
         createdAt: inst.createdAt.toISOString(),
         updatedAt: inst.updatedAt.toISOString(),
       }));
