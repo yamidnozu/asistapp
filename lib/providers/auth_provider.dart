@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart'; // Importación faltante
 import '../models/institution.dart';
@@ -10,6 +10,7 @@ import 'institution_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
+  final _storage = const FlutterSecureStorage();
 
   String? _accessToken;
   String? _refreshToken;
@@ -86,45 +87,49 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _loadTokensFromStorage() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      _accessToken = prefs.getString('accessToken');
-      _refreshToken = prefs.getString('refreshToken');
-      final userJson = prefs.getString('user');
+      _accessToken = await _storage.read(key: 'accessToken');
+      _refreshToken = await _storage.read(key: 'refreshToken');
+      final userJson = await _storage.read(key: 'user');
+
       if (userJson != null) {
         _user = Map<String, dynamic>.from(jsonDecode(userJson));
       }
-      _selectedInstitutionId = prefs.getString('selectedInstitutionId');
+      _selectedInstitutionId =
+          await _storage.read(key: 'selectedInstitutionId');
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading from storage: $e');
+      debugPrint('Error loading from secure storage: $e');
     }
   }
 
   Future<void> _saveTokensToStorage() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       if (_accessToken != null) {
-        await prefs.setString('accessToken', _accessToken!);
+        await _storage.write(key: 'accessToken', value: _accessToken!);
       } else {
-        await prefs.remove('accessToken');
+        await _storage.delete(key: 'accessToken');
       }
+
       if (_refreshToken != null) {
-        await prefs.setString('refreshToken', _refreshToken!);
+        await _storage.write(key: 'refreshToken', value: _refreshToken!);
       } else {
-        await prefs.remove('refreshToken');
+        await _storage.delete(key: 'refreshToken');
       }
+
       if (_user != null) {
-        await prefs.setString('user', jsonEncode(_user));
+        await _storage.write(key: 'user', value: jsonEncode(_user));
       } else {
-        await prefs.remove('user');
+        await _storage.delete(key: 'user');
       }
+
       if (_selectedInstitutionId != null) {
-        await prefs.setString('selectedInstitutionId', _selectedInstitutionId!);
+        await _storage.write(
+            key: 'selectedInstitutionId', value: _selectedInstitutionId!);
       } else {
-        await prefs.remove('selectedInstitutionId');
+        await _storage.delete(key: 'selectedInstitutionId');
       }
     } catch (e) {
-      debugPrint('Error saving to storage: $e');
+      debugPrint('Error saving to secure storage: $e');
     }
   }
 
@@ -133,7 +138,10 @@ class AuthProvider with ChangeNotifier {
     _refreshToken = null;
     _user = null;
     _selectedInstitutionId = null;
-    await _saveTokensToStorage();
+
+    // Limpiar todo el almacenamiento seguro
+    await _storage.deleteAll();
+
     notifyListeners();
   }
 

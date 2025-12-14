@@ -6,10 +6,17 @@
  */
 
 const axios = require('axios');
+require('dotenv').config();
 
-// Configuración de WhatsApp
-const WHATSAPP_API_TOKEN = 'EAATWH2LvOj8BQDBrZAZCLhGveuRyecvyi0VL9LTPwhkfZBVQeDqeIZA2bSDIJqCIqkbEsSk333ycSLlGo7ccgUCKH5CeD9Bhr97lCSp3CfCUgaECUN9kzXZC06WpYqQIaxpXnBEV0TGCdm6Rv9MUjCylR7oyeOUgV5WqTNiqBv3gQfLZCCTwjQpOj2BPDiGoR5yLOXDT2NLQCNeRhd5zEqG1HSH1ytbjgZCWeG03cwUIkcV1vZCcGutY1i9tD0Fz528IbjKs0O56K4wSpROhWmtoe0UkL5cUkoyZCggZDZD';
-const WHATSAPP_PHONE_NUMBER_ID = '947537288440449';
+// Configuración de WhatsApp desde variables de entorno
+const WHATSAPP_API_TOKEN = process.env.WHATSAPP_API_TOKEN;
+const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+if (!WHATSAPP_API_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
+  console.error('❌ Error: Faltan variables de entorno WHATSAPP_API_TOKEN o WHATSAPP_PHONE_NUMBER_ID');
+  console.error('   Asegúrate de configurar el archivo .env');
+  process.exit(1);
+}
 
 async function sendWhatsAppMessage(to, message) {
   try {
