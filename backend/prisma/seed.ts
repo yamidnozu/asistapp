@@ -99,37 +99,41 @@ async function main() {
       {
         institucionId: colegioSanJose.id,
         notificacionesActivas: true,
-        canalNotificacion: 'WHATSAPP',
+        canalNotificacion: 'WHATSAPP', // Solo WhatsApp
         modoNotificacionAsistencia: 'INSTANT', // Notificación inmediata al registrar ausencia
         horaDisparoNotificacion: '18:00:00',
+        notificarAusenciaTotalDiaria: true,
       },
       {
         institucionId: liceoSantander.id,
         notificacionesActivas: true,
-        canalNotificacion: 'WHATSAPP',
+        canalNotificacion: 'BOTH', // WhatsApp + Notificaciones Push en la app
         modoNotificacionAsistencia: 'MANUAL_ONLY', // Solo envío manual (botón)
         horaDisparoNotificacion: '17:00:00',
+        notificarAusenciaTotalDiaria: false,
       },
       {
         institucionId: colegioBolivar.id,
         notificacionesActivas: true,
-        canalNotificacion: 'WHATSAPP',
+        canalNotificacion: 'PUSH', // Solo notificaciones en la app
         modoNotificacionAsistencia: 'END_OF_DAY', // Resumen al final del día
         horaDisparoNotificacion: '16:00:00',
+        notificarAusenciaTotalDiaria: true,
       },
       {
         institucionId: institutoPasado.id,
         notificacionesActivas: false,
-        canalNotificacion: 'NONE',
+        canalNotificacion: 'PUSH', // Por defecto Push (aunque esté desactivado)
         modoNotificacionAsistencia: 'MANUAL_ONLY',
+        notificarAusenciaTotalDiaria: false,
       },
     ],
   });
 
   console.log('✅ Configuraciones de notificaciones creadas.');
-  console.log('   • San José: INSTANT (WhatsApp inmediato)');
-  console.log('   • Santander: MANUAL_ONLY (botón de envío)');
-  console.log('   • Bolívar: END_OF_DAY (resumen diario)');
+  console.log('   • San José: WHATSAPP + INSTANT (WhatsApp inmediato)');
+  console.log('   • Santander: BOTH + MANUAL_ONLY (WhatsApp + App, con botón)');
+  console.log('   • Bolívar: PUSH + END_OF_DAY (Solo app, resumen diario)');
 
   // ============================================================================
   // 4. CREAR USUARIOS - TODOS LOS DEL LOGIN
