@@ -206,12 +206,12 @@ class AppColors {
   // PALETA MODERNA - CLARITY UI
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Base colors - Paleta moderna inspirada en Atlassian/Linear
-  // Verde moderno y vibrante para una apariencia fresca y distintiva
+  // Base colors - Paleta moderna y energética
+  // Naranja vibrante para denotar energía y acción
   static const Color _primaryBase =
-      Color(0xFF10B981); // Emerald 500 - verde moderno y vibrante
+      Color(0xFFF97316); // Orange 500 - vibrante y cálido
   static const Color _secondaryBase =
-      Color(0xFF8B5CF6); // Violeta moderno - complementario
+      Color(0xFF3B82F6); // Azul moderno - complementario ideal para naranja
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
       Color(0xFFF8FAFC); // Gris muy claro - fondo limpio
