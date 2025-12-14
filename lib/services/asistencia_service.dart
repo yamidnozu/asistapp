@@ -176,7 +176,11 @@ class AsistenciaService {
 
       // CORREGIDO: Usar la ruta de horarios que trae la lista de estudiantes del grupo
       // independientemente de si ya tienen asistencia registrada o no.
-      final url = '$baseUrlValue/horarios/$horarioId/asistencias';
+      String url = '$baseUrlValue/horarios/$horarioId/asistencias';
+      if (date != null) {
+        final dateStr = date.toIso8601String().split('T')[0];
+        url += '?date=$dateStr';
+      }
 
       final response = await http.get(
         Uri.parse(url),

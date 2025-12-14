@@ -102,13 +102,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         final colors = context.colors;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: colors.primary,
-              onPrimary: colors.white,
-              onSurface: colors.textPrimary,
-            ),
+            colorScheme: isDark
+                ? ColorScheme.dark(
+                    primary: colors.primary,
+                    onPrimary: colors.white,
+                    surface: colors.surfaceContainer,
+                    onSurface: colors.textPrimary,
+                  )
+                : ColorScheme.light(
+                    primary: colors.primary,
+                    onPrimary: colors.white,
+                    surface: colors.surface,
+                    onSurface: colors.textPrimary,
+                  ),
+            dialogBackgroundColor:
+                isDark ? colors.surfaceContainer : colors.surface,
           ),
           child: child!,
         );

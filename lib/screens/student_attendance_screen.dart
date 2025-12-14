@@ -17,7 +17,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _asistencias = [];
   String? _errorMessage;
-  DateTime _selectedDate = DateTime.now();
+
   final AsistenciaService _asistenciaService = AsistenciaService();
 
   @override
@@ -67,52 +67,6 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: context.colors.primary,
-              onPrimary: context.colors.onPrimary,
-              surface: context.colors.surface,
-              onSurface: context.colors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-      _loadAsistencias();
-    }
-  }
-
-  void _previousMonth() {
-    setState(() {
-      _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1, 1);
-    });
-    _loadAsistencias();
-  }
-
-  void _nextMonth() {
-    final nextMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 1);
-    if (nextMonth.isBefore(DateTime.now()) ||
-        nextMonth.month == DateTime.now().month) {
-      setState(() {
-        _selectedDate = nextMonth;
-      });
-      _loadAsistencias();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -134,28 +88,6 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
             }
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: _previousMonth,
-            tooltip: 'Mes anterior',
-          ),
-          TextButton(
-            onPressed: () => _selectDate(context),
-            child: Text(
-              '${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-              style: textStyles.titleMedium.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: _nextMonth,
-            tooltip: 'Mes siguiente',
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -474,23 +406,5 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     } catch (e) {
       return dateStr;
     }
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre'
-    ];
-    return months[month - 1];
   }
 }
