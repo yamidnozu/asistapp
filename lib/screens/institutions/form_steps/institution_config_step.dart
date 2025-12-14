@@ -118,67 +118,156 @@ class InstitutionConfigStep extends StatelessWidget {
 
         if (notificacionesActivas) ...[
           SizedBox(height: spacing.md),
-          DropdownButtonFormField<String>(
-            value: canalNotificacion,
-            decoration: const InputDecoration(
-              labelText: 'Canal de Notificación',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'WHATSAPP', child: Text('WhatsApp')),
-              DropdownMenuItem(value: 'SMS', child: Text('SMS')),
-              DropdownMenuItem(value: 'NONE', child: Text('Ninguno')),
+
+          // Canal de Notificación
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Canal de Notificación',
+                    style: textStyles.labelLarge,
+                  ),
+                  SizedBox(width: spacing.xs),
+                  Tooltip(
+                    message: '¿Cómo se envían las notificaciones?\n'
+                        '• WhatsApp: Solo mensajes de WhatsApp\n'
+                        '• App: Solo notificaciones push en la app\n'
+                        '• Ambos: WhatsApp + Notificaciones push',
+                    child: Icon(Icons.help_outline,
+                        size: 18, color: colors.textSecondary),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.xs),
+              DropdownButtonFormField<String>(
+                value: canalNotificacion,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Seleccione el canal',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'WHATSAPP',
+                    child: Text('WhatsApp'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'PUSH',
+                    child: Text('Notificación a la app'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'BOTH',
+                    child: Text('WhatsApp y Notificación a la app'),
+                  ),
+                ],
+                onChanged: onCanalNotificacionChanged,
+              ),
             ],
-            onChanged: onCanalNotificacionChanged,
           ),
+
           SizedBox(height: spacing.md),
-          DropdownButtonFormField<String>(
-            value: modoNotificacionAsistencia,
-            decoration: const InputDecoration(
-              labelText: 'Modo de Notificación de Asistencia',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(
-                  value: 'INSTANT', child: Text('Instantáneo (Al registrar)')),
-              DropdownMenuItem(
-                  value: 'END_OF_DAY', child: Text('Fin del Día (Resumen)')),
-              DropdownMenuItem(
-                  value: 'MANUAL_ONLY', child: Text('Solo Manual')),
+
+          // Modo de Notificación
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Modo de Envío',
+                    style: textStyles.labelLarge,
+                  ),
+                  SizedBox(width: spacing.xs),
+                  Tooltip(
+                    message: '¿Cuándo se envían las notificaciones?\n'
+                        '• Manual: Solo cuando el profesor presiona "Notificar"\n'
+                        '• Inmediato: Automáticamente al registrar ausencia\n'
+                        '• Fin del día: Consolida y envía a una hora específica',
+                    child: Icon(Icons.help_outline,
+                        size: 18, color: colors.textSecondary),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.xs),
+              DropdownButtonFormField<String>(
+                value: modoNotificacionAsistencia,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Seleccione el modo',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'MANUAL_ONLY',
+                    child: Text('Manual (con botón)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'INSTANT',
+                    child: Text('Inmediato (automático)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'END_OF_DAY',
+                    child: Text('Fin del día (consolidado)'),
+                  ),
+                ],
+                onChanged: onModoNotificacionAsistenciaChanged,
+              ),
             ],
-            onChanged: onModoNotificacionAsistenciaChanged,
           ),
+
           if (modoNotificacionAsistencia == 'END_OF_DAY') ...[
             SizedBox(height: spacing.md),
-            InkWell(
-              onTap: () async {
-                final TimeOfDay? picked = await showTimePicker(
-                  context: context,
-                  initialTime: horaDisparoNotificacion != null
-                      ? TimeOfDay(
-                          hour:
-                              int.parse(horaDisparoNotificacion!.split(':')[0]),
-                          minute:
-                              int.parse(horaDisparoNotificacion!.split(':')[1]))
-                      : const TimeOfDay(hour: 18, minute: 0),
-                );
-                if (picked != null) {
-                  final formatted =
-                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
-                  onHoraDisparoNotificacionChanged(formatted);
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Hora de Disparo',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.access_time),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Hora de Envío',
+                      style: textStyles.labelLarge,
+                    ),
+                    SizedBox(width: spacing.xs),
+                    Tooltip(
+                      message:
+                          'Hora a la que se enviarán las notificaciones consolidadas del día',
+                      child: Icon(Icons.help_outline,
+                          size: 18, color: colors.textSecondary),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  horaDisparoNotificacion ?? 'Seleccionar hora',
-                  style: textStyles.bodyMedium,
+                SizedBox(height: spacing.xs),
+                InkWell(
+                  onTap: () async {
+                    final TimeOfDay? picked = await showTimePicker(
+                      context: context,
+                      initialTime: horaDisparoNotificacion != null
+                          ? TimeOfDay(
+                              hour: int.parse(
+                                  horaDisparoNotificacion!.split(':')[0]),
+                              minute: int.parse(
+                                  horaDisparoNotificacion!.split(':')[1]))
+                          : const TimeOfDay(hour: 18, minute: 0),
+                    );
+                    if (picked != null) {
+                      final formatted =
+                          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+                      onHoraDisparoNotificacionChanged(formatted);
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.access_time),
+                    ),
+                    child: Text(
+                      horaDisparoNotificacion != null
+                          ? horaDisparoNotificacion!.substring(0, 5)
+                          : 'Seleccionar hora (ej: 18:00)',
+                      style: textStyles.bodyMedium,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ],

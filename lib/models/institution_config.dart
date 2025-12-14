@@ -16,8 +16,9 @@ class InstitutionConfig {
     this.id,
     this.institucionId,
     this.notificacionesActivas = false,
-    this.canalNotificacion = 'NONE',
-    this.modoNotificacionAsistencia = 'MANUAL_ONLY',
+    this.canalNotificacion = 'PUSH', // PUSH (app) | WHATSAPP | BOTH
+    this.modoNotificacionAsistencia =
+        'MANUAL_ONLY', // MANUAL_ONLY | INSTANT | END_OF_DAY
     this.horaDisparoNotificacion,
     this.notificarAusenciaTotalDiaria = false,
   });

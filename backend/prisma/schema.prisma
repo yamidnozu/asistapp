@@ -242,12 +242,25 @@ model Configuracion {
   id            String @id @default(uuid()) @db.Uuid
   institucionId String @unique @map("institucion_id") @db.Uuid
 
-  // Notificaciones WhatsApp
+  // ═══════════════════════════════════════════════════════════
+  // CONFIGURACIÓN DE NOTIFICACIONES
+  // ═══════════════════════════════════════════════════════════
+  // Activar/desactivar sistema de notificaciones
   notificacionesActivas    Boolean @default(false) @map("notificaciones_activas")
-  canalNotificacion        String  @default("NONE") @map("canal_notificacion") // 'WHATSAPP', 'SMS', 'NONE'
-  modoNotificacionAsistencia String  @default("MANUAL_ONLY") @map("modo_notificacion_asistencia") // 'INSTANT', 'END_OF_DAY', 'MANUAL_ONLY'
-  horaDisparoNotificacion  String? @map("hora_disparo_notificacion") @db.VarChar(8) // "18:00:00"
-  notificarAusenciaTotalDiaria Boolean @default(false) @map("notificar_ausencia_total_diaria") // Notificar si falta a todas las clases del día
+  
+  // Canal de envío: WHATSAPP (solo WhatsApp) | PUSH (solo app) | BOTH (ambos)
+  canalNotificacion        String  @default("PUSH") @map("canal_notificacion")
+  // Modo de envío:
+  // - INSTANT: Envía inmediatamente al registrar ausencia
+  // - END_OF_DAY: Consolida y envía a una hora específica (ver horaDisparoNotificacion)
+  // - MANUAL_ONLY: Solo envía cuando el profesor presiona el botón "Notificar"
+  modoNotificacionAsistencia String  @default("MANUAL_ONLY") @map("modo_notificacion_asistencia")
+  
+  // Hora de envío para modo END_OF_DAY (ejemplo: "18:00:00")
+  horaDisparoNotificacion  String? @map("hora_disparo_notificacion") @db.VarChar(8)
+  
+  // Alerta especial: Envía notificación adicional si el estudiante falta a TODAS las clases del día
+  notificarAusenciaTotalDiaria Boolean @default(false) @map("notificar_ausencia_total_diaria")
 
   // Configuración de horarios (24 horas disponibles)
   horaInicioClases String @default("00:00:00") @map("hora_inicio_clases") @db.VarChar(8)

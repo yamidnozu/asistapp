@@ -57,21 +57,35 @@ class Institution {
       return 'Notificaciones desactivadas';
     }
 
-    final canal =
-        configuraciones!.canalNotificacion == 'WHATSAPP' ? 'WhatsApp' : 'SMS';
+    // Mapear canal de notificación
+    String canal;
+    switch (configuraciones!.canalNotificacion) {
+      case 'WHATSAPP':
+        canal = 'WhatsApp';
+        break;
+      case 'PUSH':
+        canal = 'App';
+        break;
+      case 'BOTH':
+        canal = 'WhatsApp + App';
+        break;
+      default:
+        canal = 'Sin configurar';
+    }
 
+    // Mapear modo de notificación
     switch (configuraciones!.modoNotificacionAsistencia) {
       case 'INSTANT':
-        return '$canal: Envío inmediato';
+        return '$canal: Inmediato';
       case 'MANUAL_ONLY':
-        return '$canal: Envío manual (botón)';
+        return '$canal: Manual';
       case 'END_OF_DAY':
         final hora =
             configuraciones!.horaDisparoNotificacion?.substring(0, 5) ??
                 '18:00';
-        return '$canal: Programado a las $hora';
+        return '$canal: $hora';
       default:
-        return '$canal: Configuración desconocida';
+        return '$canal: No configurado';
     }
   }
 
