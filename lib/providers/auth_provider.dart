@@ -187,7 +187,8 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String email, String password, BuildContext context) async {
+  Future<bool> login(
+      String email, String password, BuildContext context) async {
     try {
       final result = await _authService.login(email, password);
       if (result != null) {
@@ -196,7 +197,8 @@ class AuthProvider with ChangeNotifier {
         _user = result.user;
 
         // Configurar el servicio de notificaciones push con el nuevo token de acceso
-        PushNotificationService().configure(_accessToken!, context); // Pasar BuildContext
+        PushNotificationService()
+            .configure(_accessToken!, context); // Pasar BuildContext
         await loadUserInstitutions(notify: false);
 
         // Super Admin no necesita institución seleccionada (acceso global)
@@ -246,19 +248,41 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // 1. Limpiar notificaciones push del dispositivo y backend
+    try {
+      await PushNotificationService().dispose();
+    } catch (e) {
+      debugPrint('⚠️ Error limpiando push notifications en logout: $e');
+      // Continuar con el logout aunque falle la limpieza de notificaciones
+    }
+
+    // 2. Revocar refresh token en el backend
     if (_refreshToken != null) {
       await _authService.logout(_refreshToken!);
     }
+
+    // 3. Limpiar tokens locales
     await _clearTokens();
   }
 
   Future<void> logoutAndClearAllData(BuildContext context) async {
+    // 1. Limpiar notificaciones push del dispositivo y backend
+    try {
+      await PushNotificationService().dispose();
+    } catch (e) {
+      debugPrint('⚠️ Error limpiando push notifications en logout: $e');
+      // Continuar con el logout aunque falle la limpieza de notificaciones
+    }
+
+    // 2. Revocar refresh token en el backend
     if (_refreshToken != null) {
       await _authService.logout(_refreshToken!);
     }
+
+    // 3. Limpiar tokens locales
     await _clearTokens();
 
-    // Limpiar datos de otros providers
+    // 4. Limpiar datos de otros providers
     if (context.mounted) {
       try {
         final userProvider = Provider.of<UserProvider>(context, listen: false);

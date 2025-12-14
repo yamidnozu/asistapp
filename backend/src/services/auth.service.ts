@@ -67,6 +67,19 @@ export class AuthService {
 
       const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
+      // ESTRATEGIA LOGIN-CENTRIC: Desactivar todos los tokens FCM previos al hacer login
+      // Esto asegura que solo la sesión actual tenga notificaciones activas
+      try {
+        await prisma.dispositivoFCM.updateMany({
+          where: { usuarioId: usuario.id },
+          data: { activo: false }
+        });
+        logger.info(`🔄 Tokens FCM previos desactivados para usuario ${usuario.id} en nuevo login`);
+      } catch (fcmError) {
+        logger.error('Error desactivando tokens FCM en login:', fcmError);
+        // No bloquear el login si falla la desactivación de FCM
+      }
+
       await prisma.refreshToken.create({
         data: {
           usuarioId: usuario.id,
@@ -160,6 +173,7 @@ export class AuthService {
 
   /**
    * Revoca los refresh tokens de un usuario
+   * También desactiva todos los dispositivos FCM para evitar envío de notificaciones post-logout
    */
   public static async revokeRefreshTokens(usuarioId: string, refreshToken?: string): Promise<void> {
     if (refreshToken) {
@@ -168,6 +182,19 @@ export class AuthService {
         where: { usuarioId, token: hashed },
         data: { revoked: true }
       });
+    }
+
+    // SEGURIDAD: Desactivar todos los dispositivos FCM al cerrar sesión
+    // Esto evita que se envíen notificaciones push a un usuario que ya cerró sesión
+    try {
+      await prisma.dispositivoFCM.updateMany({
+        where: { usuarioId },
+        data: { activo: false }
+      });
+      logger.info(`🔒 Dispositivos FCM desactivados para usuario ${usuarioId} en logout`);
+    } catch (error) {
+      logger.error('Error desactivando dispositivos FCM en logout:', error);
+      // No lanzar error para no bloquear el logout
     }
   }
 

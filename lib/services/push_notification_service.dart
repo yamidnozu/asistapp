@@ -78,8 +78,10 @@ class PushNotificationService {
       return;
     }
     try {
-      if (Firebase.apps.isEmpty) { // Asegurarse de que Firebase ya ha sido inicializado
-        debugPrint('⚠️ Firebase Core no inicializado al llamar PushNotificationService.initializeFirebase. Esto es inesperado.');
+      if (Firebase.apps.isEmpty) {
+        // Asegurarse de que Firebase ya ha sido inicializado
+        debugPrint(
+            '⚠️ Firebase Core no inicializado al llamar PushNotificationService.initializeFirebase. Esto es inesperado.');
         return;
       }
       // Configurar handler de mensajes en background
@@ -107,7 +109,8 @@ class PushNotificationService {
 
   /// Configura el servicio de notificaciones push
   /// Debe llamarse después del login exitoso
-  Future<void> configure(String accessToken, BuildContext context) async { // Añadido BuildContext
+  Future<void> configure(String accessToken, BuildContext context) async {
+    // Añadido BuildContext
     if (!_isMobilePlatform) {
       debugPrint('ℹ️ Push notifications no disponibles en esta plataforma');
       return;
@@ -174,7 +177,8 @@ class PushNotificationService {
           plataforma,
         );
         debugPrint('✅ Token FCM registrado en el backend');
-        debugPrint('<<<<< MENSAJE DE DEPURACIÓN DE REGISTRO: ${result.$2} >>>>>');
+        debugPrint(
+            '<<<<< MENSAJE DE DEPURACIÓN DE REGISTRO: ${result.$2} >>>>>');
       }
     } catch (e) {
       debugPrint('⚠️ Error obteniendo/registrando token FCM: $e');
@@ -196,7 +200,8 @@ class PushNotificationService {
             plataforma,
           );
           debugPrint('🔄 Token FCM actualizado en el backend');
-          debugPrint('<<<<< MENSAJE DE DEPURACIÓN DE ACTUALIZACIÓN DE TOKEN: ${result.$2} >>>>>');
+          debugPrint(
+              '<<<<< MENSAJE DE DEPURACIÓN DE ACTUALIZACIÓN DE TOKEN: ${result.$2} >>>>>');
         } catch (e) {
           debugPrint('⚠️ Error actualizando token FCM: $e');
         }
@@ -294,15 +299,42 @@ class PushNotificationService {
   String? get currentToken => _fcmToken;
 
   /// Limpia los recursos al cerrar sesión
+  /// Desregistra el token FCM del backend y del dispositivo
   Future<void> dispose() async {
     if (!_isMobilePlatform) return;
-    
-    debugPrint('<<<<< LIMPIANDO PUSH NOTIFICATIONS: Limpiando estado local del servicio. >>>>>');
-    
+
+    debugPrint(
+        '<<<<<  LIMPIANDO PUSH NOTIFICATIONS: Iniciando limpieza completa. >>>>>');
+
+    // 1. Eliminar el token FCM del backend si existe
+    if (_fcmToken != null && _accessToken != null) {
+      try {
+        debugPrint('🗑️ Eliminando token FCM del backend...');
+        await _acudienteService.eliminarDispositivo(_accessToken!, _fcmToken!);
+        debugPrint('✅ Token FCM eliminado del backend');
+      } catch (e) {
+        debugPrint('⚠️ Error eliminando token FCM del backend: $e');
+        // Continuar con la limpieza local aunque falle el backend
+      }
+    }
+
+    // 2. Eliminar el token FCM del dispositivo
+    final msg = messaging;
+    if (msg != null) {
+      try {
+        debugPrint('🗑️ Eliminando token FCM del dispositivo...');
+        await msg.deleteToken();
+        debugPrint('✅ Token FCM eliminado del dispositivo');
+      } catch (e) {
+        debugPrint('⚠️ Error eliminando token FCM del dispositivo: $e');
+      }
+    }
+
+    // 3. Limpiar estado local
     await _foregroundSubscription?.cancel();
     _fcmToken = null;
     _accessToken = null;
-    
-    debugPrint('🧹 PushNotificationService limpiado (solo estado local)');
+
+    debugPrint('🧹 PushNotificationService limpiado completamente');
   }
 }
