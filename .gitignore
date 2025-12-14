@@ -68,3 +68,21 @@ android/app/build/
 # Archivos con secrets sensibles
 SECRET_VALUES.md
 add_secrets.sh
+
+# Keystores y credenciales (seguridad)
+*.b64
+service_account*.json
+firebase-service-account*.json
+
+# Archivos temporales y logs
+*.log
+*.stackdump
+test_output*.txt
+test-results-*.json
+test_results.log
+project_structure.txt
+manifest.txt
+manifest_check.txt
+
+# Archivos grandes de herramientas (descargables)
+bundletool.jar
