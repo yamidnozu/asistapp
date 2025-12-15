@@ -22,9 +22,9 @@ class AppColors {
 
   void _setLight() {
     primary = _primaryBase;
-    primaryDark = const Color(0xFF0288D1);
-    primaryLight = const Color(0xFF81D4FA);
-    primaryContainer = const Color(0xFFE1F5FE);
+    primaryDark = const Color(0xFF1D4ED8); // Blue 700
+    primaryLight = const Color(0xFF60A5FA); // Blue 400
+    primaryContainer = const Color(0xFFDBEAFE); // Blue 100
 
     secondary = _secondaryBase;
     secondaryLight = const Color(0xFF6366F1);
@@ -88,10 +88,10 @@ class AppColors {
     borderStrong = const Color(0xFFCBD5E1); // Slate 300
     divider = const Color(0xFFE2E8F0);
 
-    shadow = const Color(0x0A000000);
+    shadow = const Color(0x0A000000); // Sombras sutiles
     shadowLight = const Color(0x05000000);
     shadowMedium = const Color(0x0F000000);
-    scrim = const Color(0x0F000000);
+    scrim = const Color(0x1A000000);
 
     transparent = const Color(0x00000000);
     white = const Color(0xFFFFFFFF);
@@ -206,9 +206,9 @@ class AppColors {
   // PALETA MODERNA - CLARITY UI
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Base colors - Paleta Clarity UI (Azul Claro Moderno)
+  // Base colors - Paleta Mockups del Manual (Azul más vibrante)
   static const Color _primaryBase =
-      Color(0xFF0EA5E9); // Sky Blue 500 - Fresco y profesional
+      Color(0xFF2563EB); // Blue 600 - Azul vibrante para headers
   static const Color _secondaryBase =
       Color(0xFF0F172A); // Slate 900 - Contraste fuerte
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro

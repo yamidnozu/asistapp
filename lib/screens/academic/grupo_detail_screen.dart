@@ -182,13 +182,14 @@ class _GrupoDetailScreenState extends State<GrupoDetailScreen> {
     final textStyles = context.textStyles;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Detalles del Grupo'),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.getTextColorForBackground(colors.primary),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: colors.getTextColorForBackground(colors.primary)),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () {
             if (context.canPop()) {
               context.pop();

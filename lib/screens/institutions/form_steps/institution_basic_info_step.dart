@@ -48,7 +48,7 @@ class InstitutionBasicInfoStep extends StatelessWidget {
             return null;
           },
         ),
-        SizedBox(height: spacing.md),
+        SizedBox(height: spacing.inputSpacing),
         CustomTextFormField(
           key: const Key('emailInstitucionField'),
           controller: emailController,

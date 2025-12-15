@@ -551,8 +551,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
         backgroundColor: colors.background,
         appBar: AppBar(
           title: Text(title),
-          backgroundColor: colors.primary,
-          foregroundColor: colors.white,
+          backgroundColor: colors.surface,
+          foregroundColor: colors.textPrimary,
+          elevation: 0,
         ),
         body: Center(
           child: const Column(
@@ -574,8 +575,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
       backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
       ),
       body: Form(
         key: _formKey,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/institution.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/institution_provider.dart';
+import '../../theme/theme_extensions.dart';
 
 class InstitutionFormScreen extends StatefulWidget {
   final Institution? institution;
@@ -72,12 +73,18 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final spacing = context.spacing;
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(isEditing ? 'Editar Institución' : 'Nueva Institución'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(spacing.screenPadding),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -88,24 +95,29 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                 validator: (value) =>
                     value?.isEmpty ?? true ? 'Requerido' : null,
               ),
+              SizedBox(height: spacing.inputSpacing),
               TextFormField(
                 controller: _direccionController,
                 decoration: const InputDecoration(labelText: 'Dirección'),
               ),
+              SizedBox(height: spacing.inputSpacing),
               TextFormField(
                 controller: _telefonoController,
                 decoration: const InputDecoration(labelText: 'Teléfono'),
               ),
+              SizedBox(height: spacing.inputSpacing),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
+              SizedBox(height: spacing.inputSpacing),
               SwitchListTile(
                 title: const Text('Activa'),
                 value: _activa,
                 onChanged: (value) => setState(() => _activa = value),
               ),
-              const Divider(height: 32),
+              SizedBox(height: spacing.sectionSpacing),
+              const Divider(),
               const Text(
                 'Configuración de Notificaciones',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -136,10 +148,11 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'NONE', child: Text('Ninguno')),
+                    DropdownMenuItem(value: 'NONE', child: Text('Desactivado')),
                     DropdownMenuItem(
-                        value: 'WHATSAPP', child: Text('WhatsApp')),
-                    DropdownMenuItem(value: 'SMS', child: Text('SMS')),
+                        value: 'PUSH', child: Text('Solo App (Push)')),
+                    DropdownMenuItem(
+                        value: 'WHATSAPP', child: Text('WhatsApp + App')),
                   ],
                   onChanged: (value) =>
                       setState(() => _canalNotificacion = value ?? 'NONE'),

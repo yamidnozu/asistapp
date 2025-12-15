@@ -265,8 +265,10 @@ class _UsersListScreenState extends State<UsersListScreen> {
         activeIcon: Icons.close,
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         children: [
           SpeedDialChild(
+            key: const Key('createUser_admin_institution'),
             child: Icon(Icons.admin_panel_settings,
                 color: colors.getTextColorForBackground(colors.primary)),
             backgroundColor: colors.primary,
@@ -289,6 +291,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         activeIcon: Icons.close,
         backgroundColor: colors.primary,
         foregroundColor: colors.getTextColorForBackground(colors.primary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         children: [
           SpeedDialChild(
             key: const Key('createUser_professor'),

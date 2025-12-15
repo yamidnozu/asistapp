@@ -19,7 +19,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   @override
   void initState() {
     super.initState();
-    _loadNotificaciones();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadNotificaciones();
+    });
   }
 
   Future<void> _loadNotificaciones() async {
@@ -53,9 +55,14 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Notificaciones'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         actions: [
           Consumer<AcudienteProvider>(
             builder: (context, provider, _) {

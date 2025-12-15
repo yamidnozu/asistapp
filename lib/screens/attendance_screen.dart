@@ -176,7 +176,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     } else {
       if (modo == 'INSTANT') {
         mensajeNotificacion =
-            'Las ausencias se notifican inmediatamente por WhatsApp/SMS.';
+            'Las ausencias se notifican inmediatamente por WhatsApp/App.';
         iconoNotificacion = Icons.send;
         colorNotificacion = colors.warning;
       } else if (modo == 'END_OF_DAY') {
@@ -1400,9 +1400,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return Consumer<AsistenciaProvider>(
       builder: (context, asistenciaProvider, child) {
+        final colors = context.colors;
         return Scaffold(
+          backgroundColor: colors.background,
           appBar: AppBar(
             title: const Text('Asistencia'),
+            backgroundColor: colors.surface,
+            foregroundColor: colors.textPrimary,
+            elevation: 0,
             actions: [
               IconButton(
                 icon: const Icon(Icons.calendar_today),

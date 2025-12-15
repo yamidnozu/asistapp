@@ -262,7 +262,7 @@ class ClarityManagementPage extends StatelessWidget {
         leading: effectiveLeading,
         automaticallyImplyLeading:
             effectiveLeading == null && automaticallyImplyLeading,
-        title: Text(title, style: textStyles.headlineMedium),
+        title: Text(title, style: textStyles.titleLarge),
         centerTitle: false,
       ),
       body: mainContent,

@@ -22,7 +22,9 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {
@@ -42,9 +44,14 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Mis Hijos'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         actions: [
           Consumer<AcudienteProvider>(
             builder: (context, provider, _) {
@@ -61,7 +68,7 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: colors.error,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         constraints:

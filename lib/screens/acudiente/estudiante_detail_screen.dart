@@ -67,9 +67,14 @@ class _EstudianteDetailScreenState extends State<EstudianteDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(_hijo?.nombreCompleto ?? 'Detalle del Estudiante'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

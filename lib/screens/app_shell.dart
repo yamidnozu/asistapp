@@ -314,6 +314,26 @@ class _AppShellState extends State<AppShell> {
                             initialLocation:
                                 index == widget.navigationShell.currentIndex);
                       },
+                      backgroundColor: context.colors.surface,
+                      selectedIconTheme: IconThemeData(
+                        color: context.colors.primary,
+                        size: 24,
+                      ),
+                      unselectedIconTheme: IconThemeData(
+                        color: context.colors.textMuted,
+                        size: 24,
+                      ),
+                      selectedLabelTextStyle: TextStyle(
+                        color: context.colors.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                      unselectedLabelTextStyle: TextStyle(
+                        color: context.colors.textMuted,
+                        fontSize: 12,
+                      ),
+                      indicatorColor:
+                          context.colors.primary.withValues(alpha: 0.15),
                       labelType: NavigationRailLabelType.all,
                       destinations: [
                         for (final branch in accessibleBranches)
@@ -329,35 +349,10 @@ class _AppShellState extends State<AppShell> {
               ),
             );
           } else {
-            // Si es móvil, usamos BottomNavigationBar
+            // Si es móvil, NO usamos AppBar - los dashboards controlan su UI
             return Scaffold(
               key: _scaffoldKey,
-              appBar: AppBar(
-                backgroundColor: context.colors.primary,
-                elevation: 0,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                title: Text(institutionName != null
-                    ? '${accessibleBranches[selectedIndex].label} — $institutionName'
-                    : accessibleBranches[selectedIndex].label),
-                leading: IconButton(
-                  icon: const Icon(Icons.menu),
-                  tooltip: 'Menú',
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  onPressed: () {
-                    _scaffoldKey.currentState?.openDrawer();
-                  },
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(Icons.settings,
-                        color: Theme.of(context).colorScheme.onPrimary),
-                    tooltip: 'Ajustes',
-                    onPressed: () {
-                      context.go('/settings');
-                    },
-                  ),
-                ],
-              ),
+              // Sin AppBar - diseño limpio controlado por cada dashboard
               drawer: Drawer(
                 backgroundColor: context.colors.surface,
                 child: Column(
@@ -436,36 +431,139 @@ class _AppShellState extends State<AppShell> {
               ),
               body: widget.navigationShell,
               bottomNavigationBar: accessibleBranches.length > 1
-                  ? BottomNavigationBar(
-                      currentIndex: selectedIndex,
-                      onTap: (index) {
-                        final branchIndexToGo =
-                            accessibleBranches[index].branchIndex;
-                        widget.navigationShell.goBranch(branchIndexToGo,
-                            initialLocation:
-                                index == widget.navigationShell.currentIndex);
-                      },
-                      // ▼▼▼ CORRECCIONES CLAVE ▼▼▼
-                      type: BottomNavigationBarType
-                          .fixed, // Muestra siempre los labels
-                      backgroundColor: context.colors.surface,
-                      selectedItemColor: context.colors.primary,
-                      unselectedItemColor: context.colors.textMuted,
-                      selectedLabelStyle: context.textStyles.labelSmall.bold,
-                      unselectedLabelStyle: context.textStyles.labelSmall,
-                      // ▲▲▲ FIN DE CORRECCIONES ▲▲▲
-                      items: [
-                        for (final branch in accessibleBranches)
-                          BottomNavigationBarItem(
-                            icon: Icon(branch.icon),
-                            label: branch.label,
-                          ),
-                      ],
-                    )
+                  ? _buildFloatingNavBar(
+                      context, accessibleBranches, selectedIndex)
                   : null, // No mostrar la barra si solo hay una opción
             );
           }
         },
+      ),
+    );
+  }
+
+  /// Barra de navegación flotante estilo píldora continua (Premium)
+  /// Usa colores del tema para coherencia total.
+  Widget _buildFloatingNavBar(
+    BuildContext context,
+    List<dynamic> branches,
+    int selectedIndex,
+  ) {
+    // Usamos los colores del tema actual
+    final colors = context.colors;
+    // Fondo de la píldora: Usamos Surface (que se adapta a Light/Dark)
+    // pero con alta opacidad para que flote bien sobre el contenido.
+    final navBarColor = colors.surface;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+            color: navBarColor,
+            borderRadius: BorderRadius.circular(35), // Píldora completa
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15), // Sombra más sutil
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: branches.asMap().entries.map((entry) {
+              final i = entry.key;
+              final branch = entry.value;
+              return _buildPremiumNavItem(
+                context,
+                icon: branch.icon,
+                label: branch.label,
+                isSelected: i == selectedIndex,
+                onTap: () => _onTapNav(i, branches),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onTapNav(int index, List<dynamic> branches) {
+    widget.navigationShell.goBranch(
+      branches[index].branchIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  Widget _buildPremiumNavItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    // Colores dinámicos basados en el tema
+    final colors = context.colors;
+    final activeColor = colors.primary; // Azul/Violeta del tema
+    final inactiveColor = colors.textMuted; // Gris suave
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icono animado
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutBack,
+              transform: Matrix4.identity()
+                ..translate(0.0, isSelected ? -2.0 : 0.0),
+              child: Icon(
+                icon,
+                size: 26,
+                color: isSelected ? activeColor : inactiveColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Etiqueta de texto animada
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? activeColor : inactiveColor,
+                letterSpacing: 0.3,
+              ),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            // Pequeño punto indicador si está seleccionado
+            const SizedBox(height: 2),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isSelected ? 4 : 0,
+              height: 4,
+              decoration: BoxDecoration(
+                color: activeColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  if (isSelected)
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.4),
+                      blurRadius: 4,
+                    )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -102,8 +102,9 @@ class _StudentNotificationsScreenState
     final textStyles = context.textStyles;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('Notificaciones', style: textStyles.headlineMedium),
+        title: Text('Notificaciones', style: textStyles.titleLarge),
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,

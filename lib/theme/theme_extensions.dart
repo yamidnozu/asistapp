@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
+import 'app_styles.dart';
 
 /// Extensiones para acceder fácilmente al theme desde BuildContext
 extension ThemeExtensions on BuildContext {
@@ -17,6 +18,9 @@ extension ThemeExtensions on BuildContext {
 
   /// Acceso rápido a espaciado
   AppSpacing get spacing => AppSpacing.instance;
+
+  /// Acceso rápido a estilos centralizados (mockups del manual)
+  AppStyles get appStyles => AppStyles.instance;
 
   /// Theme data actual
   ThemeData get theme => Theme.of(this);

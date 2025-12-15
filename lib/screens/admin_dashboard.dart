@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/institution_provider.dart';
 import '../theme/theme_extensions.dart';
-import '../widgets/components/index.dart';
+import '../theme/app_styles.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -18,21 +18,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
+  }
 
-        final selectedInstitutionId = authProvider.selectedInstitutionId;
-        final token = authProvider.accessToken;
-        if (selectedInstitutionId != null && token != null) {
-          await userProvider.loadUsersByInstitution(
-              token, selectedInstitutionId);
-        }
-      } catch (e) {
-        debugPrint('AdminDashboard init load error: $e');
+  Future<void> _refresh() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      final selectedInstitutionId = authProvider.selectedInstitutionId;
+      final token = authProvider.accessToken;
+      if (selectedInstitutionId != null && token != null) {
+        await userProvider.loadUsersByInstitution(token, selectedInstitutionId);
       }
-    });
+    } catch (e) {
+      debugPrint('AdminDashboard refresh error: $e');
+    }
   }
 
   @override
@@ -40,284 +41,89 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final authProvider = Provider.of<AuthProvider>(context);
     final institutionProvider = Provider.of<InstitutionProvider>(context);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final colors = context.colors;
+    final textStyles = context.textStyles;
+    final spacing = context.spacing;
 
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
+    final institutionName =
+        institutionProvider.selectedInstitution?.nombre ?? 'Institución';
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 1024;
-        final isTablet = constraints.maxWidth > 600;
-        final columnCount = isDesktop ? 4 : (isTablet ? 3 : 2);
+    // Obtener estadísticas
+    final stats = userProvider.getUserStatistics();
 
-        return isDesktop
-            ? _buildDesktopLayout(
-                context,
-                userName,
-                institutionProvider,
-                userProvider,
-                columnCount,
-              )
-            : _buildMobileLayout(
-                context,
-                userName,
-                institutionProvider,
-                userProvider,
-                columnCount,
-              );
-      },
-    );
-  }
-
-  /// Layout Desktop (70% contenido, 30% sidebar)
-  Widget _buildDesktopLayout(
-    BuildContext context,
-    String userName,
-    InstitutionProvider institutionProvider,
-    UserProvider userProvider,
-    int columnCount,
-  ) {
-    final spacing = context.spacing;
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(spacing.screenPadding),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 70% - Contenido Principal
-            Expanded(
-              flex: 70,
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildGreeting(context, userName),
-                  SizedBox(height: spacing.xl),
-                  _buildKPIRow(context, userProvider),
-                  SizedBox(height: spacing.xl),
-                  _buildActionsGrid(context, columnCount),
+                  // Card de resumen centralizado
+                  DashboardResumenCard(
+                    icon: Icons.dashboard,
+                    greeting: '¡Hola, $userName!',
+                    subtitle: institutionName,
+                    onMenuPressed: () => Scaffold.of(context).openDrawer(),
+                    onRefreshPressed: _refresh,
+                    stats: [
+                      DashboardStatItem(
+                        icon: Icons.people,
+                        value: '${stats['total'] ?? 0}',
+                        label: 'Total',
+                      ),
+                      DashboardStatItem(
+                        icon: Icons.school,
+                        value: '${stats['profesores'] ?? 0}',
+                        label: 'Profesores',
+                      ),
+                      DashboardStatItem(
+                        icon: Icons.person,
+                        value: '${stats['estudiantes'] ?? 0}',
+                        label: 'Estudiantes',
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: spacing.lg),
+
+                  // Título de sección
+                  Text('Gestión Académica', style: textStyles.headlineSmall),
+                  SizedBox(height: spacing.md),
+
+                  // Lista de acciones usando MenuActionCard
+                  MenuActionCard(
+                    icon: Icons.people,
+                    title: 'Usuarios',
+                    subtitle: 'Profesores y estudiantes',
+                    onTap: () => context.go('/users'),
+                  ),
+                  MenuActionCard(
+                    icon: Icons.groups,
+                    title: 'Grupos',
+                    subtitle: 'Grupos académicos',
+                    onTap: () => context.go('/academic/grupos'),
+                  ),
+                  MenuActionCard(
+                    icon: Icons.calendar_month,
+                    title: 'Horarios',
+                    subtitle: 'Configuración de clases',
+                    onTap: () => context.go('/academic/horarios'),
+                  ),
+                  MenuActionCard(
+                    icon: Icons.settings,
+                    title: 'Configuración',
+                    subtitle: 'Ajustes de la institución',
+                    onTap: () => context.go('/settings'),
+                  ),
                 ],
               ),
             ),
-            SizedBox(width: spacing.lg),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Layout Móvil/Tablet (flujo vertical)
-  Widget _buildMobileLayout(
-    BuildContext context,
-    String userName,
-    InstitutionProvider institutionProvider,
-    UserProvider userProvider,
-    int columnCount,
-  ) {
-    final spacing = context.spacing;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(spacing.screenPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildGreeting(context, userName),
-          SizedBox(height: spacing.xl),
-          _buildKPIRow(context, userProvider),
-          SizedBox(height: spacing.xl),
-          _buildActionsGrid(context, columnCount),
-        ],
-      ),
-    );
-  }
-
-  /// Saludo Sutil
-  Widget _buildGreeting(BuildContext context, String userName) {
-    final textStyles = context.textStyles;
-    final colors = context.colors;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '¡Hola, $userName!',
-          style: textStyles.headlineMedium.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SizedBox(height: context.spacing.sm),
-        Text(
-          'Bienvenido al panel de administración.',
-          style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
-        ),
-      ],
-    );
-  }
-
-  /// Row de KPIs
-  Widget _buildKPIRow(BuildContext context, UserProvider userProvider) {
-    final spacing = context.spacing;
-
-    // Obtener estadísticas desde el provider
-    final stats = userProvider.getUserStatistics();
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ClarityCompactStat(
-            value: stats['total']?.toString() ?? '0',
-            title: 'Usuarios',
-            icon: Icons.people,
-            color: context.colors.primary,
-          ),
-          SizedBox(width: spacing.lg),
-          ClarityCompactStat(
-            value: stats['profesores']?.toString() ??
-                userProvider.professorsCount.toString(),
-            title: 'Profesores',
-            icon: Icons.school,
-            color: context.colors.info,
-          ),
-          SizedBox(width: spacing.lg),
-          ClarityCompactStat(
-            value: stats['estudiantes']?.toString() ??
-                userProvider.studentsCount.toString(),
-            title: 'Estudiantes',
-            icon: Icons.person,
-            color: context.colors.warning,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Grilla de Acciones Principal
-  Widget _buildActionsGrid(BuildContext context, int columnCount) {
-    final spacing = context.spacing;
-    final colors = context.colors;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Acciones Principales',
-          style: context.textStyles.headlineSmall,
-        ),
-        SizedBox(height: spacing.md),
-        Container(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(spacing.borderRadius),
-            border: Border.all(color: colors.borderLight),
-          ),
-          child: Column(
-            children: [
-              _buildMenuActionItem(
-                context,
-                icon: Icons.people_outline_rounded,
-                label: 'Usuarios',
-                value: 'Gestión de usuarios',
-                color: colors.primary,
-                onTap: () => context.go('/users'),
-                isFirst: true,
-              ),
-              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-              _buildMenuActionItem(
-                context,
-                icon: Icons.group_outlined,
-                label: 'Grupos',
-                value: 'Gestión de grupos académicos',
-                color: colors.success,
-                onTap: () => context.go('/academic/grupos'),
-              ),
-              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-              _buildMenuActionItem(
-                context,
-                icon: Icons.calendar_today_outlined,
-                label: 'Horarios',
-                value: 'Configuración de horarios',
-                color: colors.warning,
-                onTap: () => context.go('/academic/horarios'),
-              ),
-              Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-              _buildMenuActionItem(
-                context,
-                icon: Icons.settings_outlined,
-                label: 'Ajustes',
-                value: 'Configuración del sistema',
-                color: const Color(0xFF8B5CF6),
-                onTap: () => context.go('/settings'),
-                isLast: true,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenuActionItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-    required VoidCallback onTap,
-    bool isFirst = false,
-    bool isLast = false,
-  }) {
-    final textStyles = context.textStyles;
-    final spacing = context.spacing;
-    final colors = context.colors;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.lg,
-            vertical: spacing.sm,
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              SizedBox(width: spacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: textStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      value,
-                      style: textStyles.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: colors.textSecondary,
-              ),
-            ],
           ),
         ),
       ),

@@ -25,17 +25,17 @@ class UserDetailScreen extends StatelessWidget {
     final textStyles = context.textStyles;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
           user.nombreCompleto,
           style: textStyles.titleLarge,
         ),
-        backgroundColor: colors.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () {
             if (context.canPop()) {
               context.pop();

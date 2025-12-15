@@ -141,7 +141,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
           },
           errorText: widget.errorEmail,
         ),
-        SizedBox(height: spacing.md),
+        SizedBox(height: spacing.inputSpacing),
 
         // Dropdown de Institución (solo para admin_institucion creado por super_admin)
         if (widget.userRole == 'admin_institucion') ...[

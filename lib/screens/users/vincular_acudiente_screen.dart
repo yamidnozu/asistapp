@@ -200,13 +200,18 @@ class _VincularAcudienteScreenState extends State<VincularAcudienteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(_estudiante != null
             ? 'Acudientes de ${_estudiante!.nombres}'
             : 'Vincular Acudientes'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
       ),

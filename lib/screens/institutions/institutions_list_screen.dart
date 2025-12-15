@@ -206,12 +206,8 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
           floatingActionButton: canCreateInstitutions
               ? FloatingActionButton(
                   onPressed: () => _navigateToForm(context),
-                  backgroundColor: context.colors.primary,
-                  child: Icon(
-                    Icons.add,
-                    color: context.colors
-                        .getTextColorForBackground(context.colors.primary),
-                  ),
+                  // Estilos heredados del tema global para consistencia
+                  child: const Icon(Icons.add),
                 )
               : null,
         );

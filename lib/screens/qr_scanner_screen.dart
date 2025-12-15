@@ -315,10 +315,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         final frameSize = constraints.maxWidth < 400 ? 200.0 : 250.0;
 
         return Scaffold(
+          backgroundColor: context.colors.background,
           appBar: AppBar(
             title: const Text('Escanear Código QR'),
             backgroundColor: context.colors.surface,
             foregroundColor: context.colors.textPrimary,
+            elevation: 0,
             actions: [
               IconButton(
                 icon: const Icon(Icons.flashlight_on),

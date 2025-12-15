@@ -162,7 +162,7 @@ class UserPersonalInfoStep extends StatelessWidget {
                           return null;
                         },
                       ),
-                      SizedBox(height: spacing.md),
+                      SizedBox(height: spacing.inputSpacing),
                       CustomTextFormField(
                         key: const Key('apellidosUsuarioField'),
                         fieldKey: apellidosFieldKey,
@@ -184,7 +184,7 @@ class UserPersonalInfoStep extends StatelessWidget {
                   );
           },
         ),
-        SizedBox(height: spacing.md),
+        SizedBox(height: spacing.inputSpacing),
 
         // Teléfono e Identificación
         LayoutBuilder(

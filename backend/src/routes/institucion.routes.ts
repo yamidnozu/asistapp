@@ -8,7 +8,7 @@ export default async function institucionRoutes(fastify: FastifyInstance) {
   fastify.register(async function (institucionRoutes) {
 
     institucionRoutes.addHook('preHandler', authenticate);
-    institucionRoutes.addHook('preHandler', authorize([UserRole.SUPER_ADMIN]));
+    institucionRoutes.addHook('preHandler', authorize([UserRole.SUPER_ADMIN, UserRole.ADMIN_INSTITUCION]));
 
     institucionRoutes.get('/', {
       handler: InstitucionController.getAll,
@@ -29,6 +29,12 @@ export default async function institucionRoutes(fastify: FastifyInstance) {
 
     institucionRoutes.delete('/:id/admins/:userId', {
       handler: InstitucionController.removeAdminFromInstitution as any,
+    });
+
+    // Gestionar usuarios por institución (solo super_admin y admin_institucion)
+    institucionRoutes.post('/:id/usuarios', {
+      preHandler: authorize([UserRole.SUPER_ADMIN, UserRole.ADMIN_INSTITUCION]),
+      handler: InstitucionController.assignUserToInstitution as any,
     });
 
     institucionRoutes.post('/', {

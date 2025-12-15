@@ -5,79 +5,7 @@ import '../providers/auth_provider.dart';
 import '../services/asistencia_service.dart';
 import '../services/academic/horario_service.dart';
 import '../theme/theme_extensions.dart';
-import '../widgets/components/index.dart';
-
-// Helper para construir acciones con estilo consistente (copiado de admin_dashboard)
-Widget _buildMenuActionItem(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required String value,
-  required Color color,
-  required VoidCallback onTap,
-  bool isFirst = false,
-  bool isLast = false,
-}) {
-  final textStyles = context.textStyles;
-  final spacing = context.spacing;
-  final colors = context.colors;
-
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.lg,
-          vertical: spacing.sm,
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            SizedBox(width: spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: textStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    value,
-                    style: textStyles.bodySmall.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: colors.textSecondary,
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
+import '../theme/app_styles.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -188,149 +116,81 @@ class _StudentDashboardState extends State<StudentDashboard> {
     final user = authProvider.user;
     final userName = user?['nombres'] ?? 'Usuario';
 
-    return RefreshIndicator(
-      onRefresh: _loadStats,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.all(spacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Saludo Sutil
-            Text('¡Hola, $userName!',
-                style: textStyles.displayMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            SizedBox(height: spacing.sm),
-            Text(
-              'Bienvenido al panel estudiantil.',
-              style: textStyles.bodyLarge.copyWith(color: colors.textSecondary),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: spacing.xl),
-
-            // 2. Barra de Estadísticas con datos reales
-            _buildCompactStatsBar(context),
-
-            SizedBox(height: spacing.xl),
-
-            // 3. Acciones principales en lista compacta (estilo Admin)
-            Text('Acciones Principales', style: textStyles.headlineSmall),
-            SizedBox(height: spacing.md),
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(spacing.borderRadius),
-                border: Border.all(color: colors.borderLight),
-              ),
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: RefreshIndicator(
+        onRefresh: _loadStats,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(spacing.md),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.qr_code_2_rounded,
-                    label: 'Mi Código QR',
-                    value: 'Para registrar asistencia',
-                    color: colors.primary,
-                    onTap: () => context.go('/student/qr'),
-                    isFirst: true,
+                  // Card de resumen centralizado
+                  DashboardResumenCard(
+                    icon: Icons.person_outline,
+                    greeting: '¡Hola, $userName!',
+                    subtitle: 'Panel del Estudiante',
+                    onMenuPressed: () => Scaffold.of(context).openDrawer(),
+                    onRefreshPressed: _loadStats,
+                    stats: [
+                      DashboardStatItem(
+                        icon: Icons.check_circle_outline,
+                        value:
+                            _isLoadingStats ? '-' : '$_asistenciaPercentage%',
+                        label: 'Asistencia',
+                      ),
+                      DashboardStatItem(
+                        icon: Icons.class_outlined,
+                        value: _isLoadingStats ? '-' : '$_totalMaterias',
+                        label: 'Materias',
+                      ),
+                      DashboardStatItem(
+                        icon: Icons.calendar_today_outlined,
+                        value: _isLoadingStats ? '-' : '$_clasesHoy',
+                        label: 'Clases Hoy',
+                      ),
+                    ],
                   ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Mi Horario',
-                    value: 'Ver mis clases',
-                    color: const Color(0xFF06B6D4),
+                  SizedBox(height: spacing.lg),
+
+                  // Título de sección
+                  Text('Acciones Principales', style: textStyles.headlineSmall),
+                  SizedBox(height: spacing.md),
+
+                  // Lista de acciones usando MenuActionCard
+                  MenuActionCard(
+                    icon: Icons.qr_code_2,
+                    title: 'Mi Código QR',
+                    subtitle: 'Para registrar asistencia',
+                    onTap: () => context.go('/student/qr'),
+                  ),
+                  MenuActionCard(
+                    icon: Icons.calendar_today,
+                    title: 'Mi Horario',
+                    subtitle: 'Ver mis clases',
                     onTap: () => context.go('/student/schedule'),
                   ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
-                    icon: Icons.check_circle_outline_rounded,
-                    label: 'Mi Asistencia',
-                    value: 'Historial y estadísticas',
-                    color: colors.success,
+                  MenuActionCard(
+                    icon: Icons.check_circle_outline,
+                    title: 'Mi Asistencia',
+                    subtitle: 'Historial y estadísticas',
                     onTap: () => context.go('/student/attendance'),
                   ),
-                  Divider(height: 0, indent: spacing.lg, endIndent: spacing.lg),
-                  _buildMenuActionItem(
-                    context,
+                  MenuActionCard(
                     icon: Icons.notifications_outlined,
-                    label: 'Notificaciones',
-                    value: 'Ver mensajes',
-                    color: colors.warning,
+                    title: 'Notificaciones',
+                    subtitle: 'Ver mensajes',
                     onTap: () => context.go('/student/notifications'),
-                    isLast: true,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-
-  // Widget para la barra de estadísticas con datos reales
-  Widget _buildCompactStatsBar(BuildContext context) {
-    final colors = context.colors;
-    final spacing = context.spacing;
-
-    return Container(
-      padding:
-          EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.md),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(spacing.borderRadius),
-        border: Border.all(color: colors.borderLight),
-      ),
-      child: _isLoadingStats
-          ? Center(
-              child: Padding(
-                padding: EdgeInsets.all(spacing.md),
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: colors.primary,
-                  ),
-                ),
-              ),
-            )
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ClarityCompactStat(
-                    value: '$_asistenciaPercentage%',
-                    title: 'Asistencia',
-                    icon: Icons.check_circle,
-                    color: _asistenciaPercentage >= 80
-                        ? colors.success
-                        : _asistenciaPercentage >= 60
-                            ? colors.warning
-                            : colors.error,
-                  ),
-                  SizedBox(width: spacing.lg),
-                  ClarityCompactStat(
-                    value: '$_clasesHoy',
-                    title: 'Clases Hoy',
-                    icon: Icons.today,
-                    color: colors.primary,
-                  ),
-                  SizedBox(width: spacing.lg),
-                  ClarityCompactStat(
-                    value: '$_totalMaterias',
-                    title: 'Materias',
-                    icon: Icons.book,
-                    color: colors.info,
-                  ),
-                ],
-              ),
-            ),
     );
   }
 }

@@ -262,6 +262,47 @@ export class InstitucionService {
   }
 
   /**
+   * Asigna un usuario a una institución (para usuarios no admin)
+   */
+  public static async assignUserToInstitution(institutionId: string, userId: string) {
+    try {
+      if (!institutionId || !userId) throw new ValidationError('Parámetros inválidos');
+
+      // Verificar existencia de institución
+      const institucion = await prisma.institucion.findUnique({ where: { id: institutionId } });
+      if (!institucion) throw new ValidationError('Institución no encontrada');
+
+      // Verificar existencia de usuario
+      const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+      if (!usuario) throw new ValidationError('Usuario no encontrado');
+
+      // Crear o Reactivar la relación usuarioInstitucion con rol 'miembro'
+      const existingRel = await prisma.usuarioInstitucion.findUnique({
+        where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+      });
+
+      if (existingRel) {
+        // Reactivar y establecer rol como miembro
+        await prisma.usuarioInstitucion.update({
+          where: { usuarioId_institucionId: { usuarioId: userId, institucionId: institutionId } },
+          data: { rolEnInstitucion: 'miembro', activo: true },
+        });
+      } else {
+        await prisma.usuarioInstitucion.create({
+          data: { usuarioId: userId, institucionId: institutionId, rolEnInstitucion: 'miembro', activo: true },
+        });
+      }
+
+      // Devolver el usuario actualizado
+      const updatedUser = await prisma.usuario.findUnique({ where: { id: userId } });
+      return updatedUser;
+    } catch (error) {
+      logger.error(`Error al asignar usuario ${userId} a institución ${institutionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene una institución por ID
    */
   public static async getInstitutionById(id: string): Promise<any | null> {

@@ -31,7 +31,7 @@ class ClarityCard extends StatelessWidget {
 
     return Card(
       color: backgroundColor ?? colors.surface,
-      elevation: elevation ?? 1,
+      elevation: elevation ?? 1, // Elevación sutil
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.borderRadius),
@@ -101,7 +101,7 @@ class ClarityKPICard extends StatelessWidget {
 
     return Card(
       color: backgroundColor ?? colors.surface,
-      elevation: 1,
+      elevation: 1, // Elevación sutil
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.borderRadius),

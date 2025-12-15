@@ -16,16 +16,16 @@ class GestionAcademicaScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
         elevation: 0,
         leading: BackNavigationButton(
           fallbackRoute: '/dashboard',
-          iconColor: colors.white,
+          iconColor: colors.textPrimary,
         ),
         title: Text(
           'Gestión Académica',
-          style: textStyles.headlineMedium.copyWith(color: colors.white),
+          style: textStyles.titleLarge,
         ),
       ),
       body: SingleChildScrollView(

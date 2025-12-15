@@ -14,10 +14,12 @@ class AppSpacing {
   final double cardPadding = _baseUnit * 3; // 12 - Padding en tarjetas
   final double screenPadding = _baseUnit * 4; // 16 - Padding global
   final double inputPadding = _baseUnit * 3; // 12
+  final double inputSpacing = _baseUnit * 5; // 20 - Espacio entre inputs
+  final double sectionSpacing = _baseUnit * 8; // 32 - Espacio entre secciones
   final double iconSize = _baseUnit * 6; // 24
   final double borderRadius = _baseUnit * 2; // 8 - Border radius estándar
   final double borderRadiusLarge =
-      _baseUnit * 3; // 12 - Border radius en chips o botones
+      _baseUnit * 3; // 12 - Border radius para cards
   final double appBarHeight = _baseUnit * 14; // 56 - Altura de AppBar
   final double borderWidth = 1; // 1 - Ancho de borde estándar
   double multiply(double factor) => _baseUnit * factor;

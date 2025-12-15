@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/theme_extensions.dart';
 import '../utils/responsive_utils.dart';
+import '../widgets/form_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -138,26 +139,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildEmailField() {
-    return TextFormField(
+    return CustomTextFormField(
       key: const Key('emailField'),
       controller: _emailController,
-      decoration: const InputDecoration(
-        labelText: 'Correo electrónico',
-        // No especificar border, fillColor, etc. - usa el tema
-      ),
+      labelText: 'Correo Electrónico',
+      hintText: 'ejemplo@correo.com',
+      prefixIcon: const Icon(Icons.email_outlined),
       keyboardType: TextInputType.emailAddress,
     );
   }
 
   Widget _buildPasswordField() {
-    return TextFormField(
+    return CustomTextFormField(
       key: const Key('passwordField'),
       controller: _passwordController,
-      decoration: const InputDecoration(
-        labelText: 'Contraseña',
-        // No especificar border, fillColor, etc. - usa el tema
-      ),
+      labelText: 'Contraseña',
+      hintText: '••••••••',
+      prefixIcon: const Icon(Icons.lock_outline),
       obscureText: true,
+      maxLines: 1,
     );
   }
 

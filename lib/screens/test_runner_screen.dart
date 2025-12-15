@@ -110,11 +110,11 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
         title: Text(
           'Flujo de Pruebas',
-          style: textStyles.headlineMedium.copyWith(color: colors.white),
+          style: textStyles.titleLarge,
         ),
         elevation: 0,
       ),

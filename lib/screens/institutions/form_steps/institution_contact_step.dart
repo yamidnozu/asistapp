@@ -44,7 +44,7 @@ class InstitutionContactStep extends StatelessWidget {
             return null;
           },
         ),
-        SizedBox(height: spacing.md),
+        SizedBox(height: spacing.inputSpacing),
         CustomTextFormField(
           key: const Key('telefonoInstitucionField'),
           controller: telefonoController,
@@ -62,7 +62,7 @@ class InstitutionContactStep extends StatelessWidget {
             return null;
           },
         ),
-        SizedBox(height: spacing.md),
+        SizedBox(height: spacing.inputSpacing),
         Container(
           padding: EdgeInsets.all(spacing.md),
           decoration: BoxDecoration(

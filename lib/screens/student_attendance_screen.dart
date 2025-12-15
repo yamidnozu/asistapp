@@ -73,8 +73,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     final textStyles = context.textStyles;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('Mi Asistencia', style: textStyles.headlineMedium),
+        title: Text('Mi Asistencia', style: textStyles.titleLarge),
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,

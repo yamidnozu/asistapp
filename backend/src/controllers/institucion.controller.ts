@@ -199,6 +199,23 @@ export class InstitucionController {
       throw error;
     }
   }
+
+  public static async assignUserToInstitution(request: AuthenticatedRequest & FastifyRequest<{ Params: GetInstitucionParams; Body: { userId: string } }>, reply: FastifyReply) {
+    try {
+      const { id } = request.params;
+      const { userId } = request.body as { userId: string };
+
+      const result = await InstitucionService.assignUserToInstitution(id, userId);
+
+      return reply.code(201).send({
+        success: true,
+        data: result,
+        message: 'Usuario asignado a la institución exitosamente',
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default InstitucionController;

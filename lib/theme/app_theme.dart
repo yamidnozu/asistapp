@@ -111,9 +111,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
-          foregroundColor: brightness == Brightness.light
-              ? colors.textPrimary
-              : colors.white, // Negro en light, blanco en dark
+          foregroundColor: colors.white,
           elevation: 1, // Elevación sutil
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.instance.buttonPadding,
@@ -178,7 +176,10 @@ class AppTheme {
           borderSide: BorderSide(
               color: colors.error, width: AppSpacing.instance.borderWidth),
         ),
-        contentPadding: EdgeInsets.all(AppSpacing.instance.inputPadding),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.instance.md,
+          vertical: AppSpacing.instance.inputPadding,
+        ),
         labelStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         hintStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         errorStyle: textStyles.bodySmall.copyWith(color: colors.error),
@@ -186,7 +187,7 @@ class AppTheme {
 
       dialogTheme: DialogThemeData(
         backgroundColor: colors.surface,
-        elevation: 6, // Elevación media para diálogos
+        elevation: 6, // Elevación media
         shadowColor: colors.shadowLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
@@ -196,10 +197,15 @@ class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colors.primary,
         foregroundColor: colors.white,
-        elevation: 2, // Elevación sutil
+        elevation: 6,
+        focusElevation: 8,
+        hoverElevation: 8,
+        highlightElevation: 8,
+        enableFeedback: true,
+        splashColor: colors.white.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(
           borderRadius:
-              BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
+              BorderRadius.circular(16), // Diseño squircle moderno unificado
         ),
       ),
 

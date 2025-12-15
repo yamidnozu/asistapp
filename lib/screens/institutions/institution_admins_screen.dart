@@ -73,12 +73,7 @@ class _InstitutionAdminsScreenState extends State<InstitutionAdminsScreen> {
       hasMoreData: pag.hasMoreData,
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddAdminSheet,
-        backgroundColor: context.colors.primary,
-        child: Icon(
-          Icons.add,
-          color:
-              context.colors.getTextColorForBackground(context.colors.primary),
-        ),
+        child: const Icon(Icons.add),
       ),
       emptyStateWidget: const ClarityEmptyState(
         icon: Icons.group_off,

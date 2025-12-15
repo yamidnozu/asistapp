@@ -77,12 +77,13 @@ class _MyQRCodeScreenState extends State<MyQRCodeScreen> {
         final colors = context.colors;
         final spacing = context.spacing;
         return Scaffold(
+          backgroundColor: colors.background,
           appBar: AppBar(
             title: const Text('Mi Código QR'),
-            backgroundColor: colors.primary,
-            foregroundColor: colors.white,
+            backgroundColor: colors.surface,
+            foregroundColor: colors.textPrimary,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: colors.white),
+              icon: Icon(Icons.arrow_back, color: colors.textPrimary),
               onPressed: () {
                 if (context.canPop()) {
                   context.pop();
