@@ -35,7 +35,8 @@ async function main() {
   console.log('✅ Base de datos limpia.');
 
   const hashPassword = (password: string) => bcrypt.hashSync(password, 10);
-  const TELEFONO_TEST = '+573103816321';
+  const TELEFONO_1 = '+573103816321'; // Para pruebas WhatsApp
+  const TELEFONO_2 = '+573217645654'; // Alternativo
 
   // ============================================================================
   // 2. CREAR INSTITUCIONES (mantener las originales del login)
@@ -297,7 +298,7 @@ async function main() {
       identificacion: 'ACU-MM-001',
       rol: 'acudiente',
       activo: true,
-      telefono: TELEFONO_TEST,
+      telefono: TELEFONO_1,
     },
   });
 
@@ -310,7 +311,7 @@ async function main() {
       identificacion: 'ACU-PC-001',
       rol: 'acudiente',
       activo: true,
-      telefono: '+573001112233',
+      telefono: TELEFONO_1,
     },
   });
 
@@ -323,7 +324,7 @@ async function main() {
       identificacion: 'ACU-CL-001',
       rol: 'acudiente',
       activo: true,
-      telefono: '+573002223344',
+      telefono: TELEFONO_2,
     },
   });
 
@@ -336,7 +337,7 @@ async function main() {
       identificacion: 'ACU-CN-001',
       rol: 'acudiente',
       activo: true,
-      telefono: '+573003334455',
+      telefono: TELEFONO_2,
     },
   });
 
@@ -495,7 +496,7 @@ async function main() {
       identificacion: 'TI-1001234567',
       codigoQr: 'QR-SANTIAGO-001',
       nombreResponsable: 'María Mendoza',
-      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsable: TELEFONO_1,
       telefonoResponsableVerificado: true,
       aceptaNotificaciones: true,
     },
@@ -507,7 +508,7 @@ async function main() {
       identificacion: 'TI-1001234568',
       codigoQr: 'QR-MATEO-002',
       nombreResponsable: 'Patricia Castro',
-      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsable: TELEFONO_1,
       telefonoResponsableVerificado: true,
       aceptaNotificaciones: true,
     },
@@ -519,7 +520,7 @@ async function main() {
       identificacion: 'TI-1001234569',
       codigoQr: 'QR-VALENTINA-003',
       nombreResponsable: 'María Mendoza',
-      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsable: TELEFONO_1,
       telefonoResponsableVerificado: true,
       aceptaNotificaciones: true,
     },
@@ -531,7 +532,7 @@ async function main() {
       identificacion: 'TI-2001234567',
       codigoQr: 'QR-SOFIA-005',
       nombreResponsable: 'Carlos Núñez',
-      telefonoResponsable: TELEFONO_TEST,
+      telefonoResponsable: TELEFONO_2,
       telefonoResponsableVerificado: true,
       aceptaNotificaciones: true,
     },
@@ -580,14 +581,14 @@ async function main() {
     'Nicolás', 'Mariana', 'Daniel', 'Daniela', 'Diego', 'Gabriela', 'Juan', 'María'];
 
   let estudianteIdx = 5; // Empezar después de los del login
-  const estudiantesPorGrupo = [];
+  const todosEstudiantes = [perfilSantiago, perfilMateo, perfilValentina, perfilSofia];
 
   for (const grupo of grupos) {
-    const estudiantesGrupo = [];
     const numEstudiantes = 28 + Math.floor(Math.random() * 5);
 
     for (let i = 0; i < numEstudiantes; i++) {
       const nombre = nombresEst[Math.floor(Math.random() * nombresEst.length)];
+      const usaTelefono1 = estudianteIdx % 2 === 0; // Alternar entre los dos teléfonos
 
       const usuario = await prisma.usuario.create({
         data: {
@@ -607,7 +608,7 @@ async function main() {
           identificacion: `TI-${String(1000000000 + estudianteIdx)}`,
           codigoQr: `QR-EST-${String(estudianteIdx).padStart(4, '0')}`,
           nombreResponsable: `Acudiente ${estudianteIdx}`,
-          telefonoResponsable: TELEFONO_TEST,
+          telefonoResponsable: usaTelefono1 ? TELEFONO_1 : TELEFONO_2,
           telefonoResponsableVerificado: true,
           aceptaNotificaciones: true,
         },
@@ -628,21 +629,84 @@ async function main() {
         },
       });
 
-      estudiantesGrupo.push(estudiante);
+      todosEstudiantes.push(estudiante);
       estudianteIdx++;
     }
-
-    estudiantesPorGrupo.push({ grupo, estudiantes: estudiantesGrupo });
   }
 
   console.log(`✅ ${estudianteIdx - 5} estudiantes adicionales creados (total: ${estudianteIdx - 1})`);
 
   // ============================================================================
-  // 12. CREAR HORARIOS
+  // 12. CREAR ACUDIENTES PARA ESTUDIANTES MASIVOS
+  // ============================================================================
+  console.log('\n👨‍👩‍👧 Creando acudientes masivos...');
+
+  const acudientesAdicionales = [];
+  const numAcudientes = Math.floor((estudianteIdx - 5) / 2); // 1 acudiente por cada 2 estudiantes aprox
+
+  for (let i = 0; i < numAcudientes; i++) {
+    const usaTelefono1 = i % 2 === 0;
+
+    const acudiente = await prisma.usuario.create({
+      data: {
+        email: `acudiente${i + 5}@email.com`,
+        passwordHash: hashPassword('Acu123!'),
+        nombres: `Acudiente`,
+        apellidos: `Familia ${i + 5}`,
+        identificacion: `ACU-${String(i + 5).padStart(4, '0')}`,
+        rol: 'acudiente',
+        activo: true,
+        telefono: usaTelefono1 ? TELEFONO_1 : TELEFONO_2,
+      },
+    });
+
+    await prisma.usuarioInstitucion.create({
+      data: {
+        usuarioId: acudiente.id,
+        institucionId: colegioSanJose.id,
+        rolEnInstitucion: 'acudiente',
+      },
+    });
+
+    acudientesAdicionales.push(acudiente);
+  }
+
+  console.log(`✅ ${acudientesAdicionales.length} acudientes adicionales creados`);
+
+  // Vincular acudientes con estudiantes masivos
+  const todosAcudientes = [acudienteMaria, acudientePatricia, acudienteCarmen, acudienteCarlosN, ...acudientesAdicionales];
+  let acudienteActualIdx = 4; // Empezar después de los del login
+
+  for (let i = 4; i < todosEstudiantes.length; i++) {
+    const estudiante = todosEstudiantes[i];
+    const numHijos = Math.random() < 0.3 ? 2 : 1; // 30% tienen 2 hijos
+
+    // Asignar acudiente
+    const acudiente = todosAcudientes[acudienteActualIdx % todosAcudientes.length];
+
+    await prisma.acudienteEstudiante.create({
+      data: {
+        acudienteId: acudiente.id,
+        estudianteId: estudiante.id,
+        parentesco: Math.random() < 0.5 ? 'madre' : 'padre',
+        esPrincipal: true,
+        activo: true,
+      },
+    });
+
+    if (numHijos === 1) {
+      acudienteActualIdx++;
+    }
+  }
+
+  console.log('✅ Vínculos acudiente-estudiante creados');
+
+  // ============================================================================
+  // 13. CREAR HORARIOS
   // ============================================================================
   console.log('\n📅 Creando horarios...');
 
-  const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+  const diasSemana = [1, 2, 3, 4, 5]; // Lunes a Viernes
   const bloques = [
     { inicio: '07:00', fin: '08:00' },
     { inicio: '08:00', fin: '09:00' },
@@ -669,7 +733,9 @@ async function main() {
             grupoId: grupo.id,
             materiaId: materia.id,
             profesorId: profesor.id,
-            diaSemana: dia,
+            institucionId: colegioSanJose.id, // ← AGREGADO
+            periodoId: periodoSanJose.id,     // ← AGREGADO
+            diaSemana: dia,                    // ← AHORA ES NÚMERO
             horaInicio: bloque.inicio,
             horaFin: bloque.fin,
           },
@@ -696,8 +762,9 @@ async function main() {
   console.log(`👥 Grupos: ${grupos.length} (1° a 11°, secciones A y B)`);
   console.log(`👨‍🏫 Profesores: ${todosProfesores.length}`);
   console.log(`🎓 Estudiantes: ~${estudianteIdx - 1} (~30 por grupo)`);
-  console.log(`👨‍👩‍👧 Acudientes: 4 (del login)`);
+  console.log(`👨‍👩‍👧 Acudientes: ${todosAcudientes.length}`);
   console.log(`📅 Horarios: ${totalHorarios}`);
+  console.log(`📱 Teléfonos: ${TELEFONO_1} y ${TELEFONO_2}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('\n🔐 CREDENCIALES (coinciden con pantalla de login):');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

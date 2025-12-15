@@ -209,9 +209,9 @@ class AppColors {
   // Base colors - Paleta moderna y energética
   // Fucsia vibrante para una identidad visual única y audaz
   static const Color _primaryBase =
-      Color(0xFF8B1538); // Wine/Burgundy - elegante vinotinto
+      Color(0xFFFF6B35); // Elegant Orange - moderno y vibrante
   static const Color _secondaryBase =
-      Color(0xFFD4AF37); // Warm Gold - contraste dorado
+      Color(0xFF2D4654); // Deep Teal - contraste sofisticado
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
       Color(0xFFF3F4F6); // Cool Gray - fondo limpio y moderno
