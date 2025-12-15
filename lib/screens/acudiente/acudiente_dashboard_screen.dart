@@ -170,7 +170,7 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.family_restroom, color: Colors.white, size: 28),
+              const Icon(Icons.family_restroom, color: Colors.white, size: 28),
               SizedBox(width: context.spacing.sm),
               Text(
                 'Resumen General',
@@ -402,7 +402,7 @@ class _AcudienteDashboardScreenState extends State<AcudienteDashboardScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 14, color: color ?? context.colors.textSecondary),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
               value,
               style: context.textStyles.bodyMedium.copyWith(

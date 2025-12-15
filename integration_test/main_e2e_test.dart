@@ -948,9 +948,9 @@ void main() {
 
     // 1.1b: Verificar KPIs del SuperAdmin Dashboard (sin Reportes hardcodeado)
     await settleFor(tester, const Duration(seconds: 2));
-    bool seesInstituciones = hasText('Instituciones');
-    bool seesUsuarios = hasText('Usuarios');
-    bool noReportes =
+    final bool seesInstituciones = hasText('Instituciones');
+    final bool seesUsuarios = hasText('Usuarios');
+    final bool noReportes =
         !hasText('Reportes'); // Ya no debería existir el KPI hardcodeado
     log(
         '1',
@@ -1086,7 +1086,7 @@ void main() {
         print('Textos de error: $errorTexts');
       }
 
-      bool instCreated =
+      final bool instCreated =
           hasText(institutionName) || hasText('creada') || hasText('éxito');
       print(
           'instCreated check: hasText(institutionName)=${hasText(institutionName)}, hasText(creada)=${hasText('creada')}, hasText(éxito)=${hasText('éxito')}, hasText(Institución)=${hasText('Institución')}');
@@ -1297,12 +1297,10 @@ void main() {
 
         // 🔑 CAPTURAR CONTRASEÑA DEL DIÁLOGO
         adminPassword = await capturePasswordFromDialog(tester);
-        if (adminPassword != null) {
-          credentials['admin'] = adminPassword;
-          created['admin_email'] = adminEmail;
-          created['admin_password'] = '***capturada***';
-        }
-
+        credentials['admin'] = adminPassword;
+        created['admin_email'] = adminEmail;
+        created['admin_password'] = '***capturada***';
+      
         // Cerrar diálogo
         await closePasswordDialog(tester);
 
@@ -1344,7 +1342,7 @@ void main() {
 
     // 2.2: Verificar dashboard
     await settleFor(tester, const Duration(seconds: 2));
-    bool adminDashboard = hasText('Hola') ||
+    final bool adminDashboard = hasText('Hola') ||
         hasText('Bienvenido') ||
         hasText('Usuarios') ||
         hasText('Grupos');
@@ -1364,7 +1362,7 @@ void main() {
       await tapButton(tester, 'Crear');
       await settleFor(tester, const Duration(seconds: 2));
 
-      bool periodoCreated =
+      final bool periodoCreated =
           hasText(periodoName) || hasText('creado') || hasText('éxito');
       log('2', '2.3 Crear Período', periodoCreated, periodoName);
       if (periodoCreated) created['periodo'] = periodoName;
@@ -1387,7 +1385,7 @@ void main() {
       await tapButton(tester, 'Crear');
       await settleFor(tester, const Duration(seconds: 2));
 
-      bool materiaCreated =
+      final bool materiaCreated =
           hasText(materiaName) || hasText('creada') || hasText('éxito');
       log('2', '2.4 Crear Materia', materiaCreated, materiaName);
       if (materiaCreated) created['materia'] = materiaName;
@@ -1765,11 +1763,9 @@ void main() {
 
         // 🔑 CAPTURAR CONTRASEÑA
         profesorPassword = await capturePasswordFromDialog(tester);
-        if (profesorPassword != null) {
-          credentials['profesor'] = profesorPassword;
-          created['profesor_email'] = profesorEmail;
-        }
-
+        credentials['profesor'] = profesorPassword;
+        created['profesor_email'] = profesorEmail;
+      
         await closePasswordDialog(tester);
         log('2', '2.5 Crear Profesor', profesorPassword != null, profesorEmail);
 
@@ -1998,11 +1994,9 @@ void main() {
 
         // 🔑 CAPTURAR CONTRASEÑA
         estudiantePassword = await capturePasswordFromDialog(tester);
-        if (estudiantePassword != null) {
-          credentials['estudiante'] = estudiantePassword;
-          created['estudiante_email'] = estudianteEmail;
-        }
-
+        credentials['estudiante'] = estudiantePassword;
+        created['estudiante_email'] = estudianteEmail;
+      
         await closePasswordDialog(tester);
         log('2', '2.6 Crear Estudiante', estudiantePassword != null,
             estudianteEmail);
@@ -2054,7 +2048,7 @@ void main() {
       await tapButton(tester, 'Crear');
       await settleFor(tester, const Duration(seconds: 3));
 
-      bool grupoCreated =
+      final bool grupoCreated =
           hasText(grupoName) || hasText('creado') || hasText('éxito');
       log('2', '2.7 Crear Grupo', grupoCreated, grupoName);
       if (grupoCreated) created['grupo'] = grupoName;
@@ -2169,7 +2163,7 @@ void main() {
         if (!hasText('éxito')) await tapButton(tester, 'Crear');
         await settleFor(tester, const Duration(seconds: 3));
 
-        bool horarioCreated = hasText('creada') || hasText('éxito');
+        final bool horarioCreated = hasText('creada') || hasText('éxito');
         log('2', '2.8 Crear Horario', horarioCreated,
             '${diasSemana[todayWeekday]} $startHour-$endHour');
         if (horarioCreated) {
@@ -2503,13 +2497,13 @@ void main() {
                   (horaInicio == startHour || horaInicio == startHour.toString()) &&
                       (horaFin == endHour || horaFin == endHour.toString());
               final matchesRefs = (periodoId == periodoIdExistente ||
-                      periodoId == periodoIdExistente?.toString()) &&
+                      periodoId == periodoIdExistente.toString()) &&
                   (grupoId == grupoIdExistente ||
-                      grupoId == grupoIdExistente?.toString()) &&
+                      grupoId == grupoIdExistente.toString()) &&
                   (materiaId == materiaIdExistente ||
-                      materiaId == materiaIdExistente?.toString()) &&
+                      materiaId == materiaIdExistente.toString()) &&
                   (profesorId == profesorIdExistente ||
-                      profesorId == profesorIdExistente?.toString());
+                      profesorId == profesorIdExistente.toString());
 
               if (matchesDay && matchesTime && matchesRefs) {
                 horarioIdCreado = h['id']?.toString();
@@ -2641,7 +2635,7 @@ void main() {
       // 3.B.2: Verificar dashboard con clases
       await settleFor(tester, const Duration(seconds: 2));
 
-      bool seesClases = hasText('Clases') || hasText('Hoy') || hasText('clase');
+      final bool seesClases = hasText('Clases') || hasText('Hoy') || hasText('clase');
       log('3', '3.B.2 Profesor ve dashboard con clases', seesClases);
 
       // 3.B.3: Intentar entrar a una clase
@@ -2686,7 +2680,7 @@ void main() {
       if (enteredClass && asistenciaViaApi) {
         await settleFor(tester, const Duration(seconds: 2));
 
-        bool inAttendanceScreen = hasText('Asistencia') ||
+        final bool inAttendanceScreen = hasText('Asistencia') ||
             hasText('Estudiantes') ||
             hasText('Presente') ||
             hasText('Ausente') ||
@@ -2813,7 +2807,7 @@ void main() {
       await pumpFor(tester, const Duration(seconds: 5));
       await settleFor(tester, const Duration(seconds: 2));
 
-      bool seesDashboard = hasText('Hola') ||
+      final bool seesDashboard = hasText('Hola') ||
           hasText('Bienvenido') ||
           hasText('QR') ||
           hasText('Horario');
@@ -2824,16 +2818,16 @@ void main() {
       await settleFor(tester, const Duration(seconds: 3));
 
       // Verificar que los widgets de stats están presentes
-      bool seesAsistenciaStat = hasText('Asistencia');
-      bool seesClasesHoyStat = hasText('Clases Hoy');
-      bool seesMateriasStat = hasText('Materias');
+      final bool seesAsistenciaStat = hasText('Asistencia');
+      final bool seesClasesHoyStat = hasText('Clases Hoy');
+      final bool seesMateriasStat = hasText('Materias');
 
       // Verificar que NO se muestran los valores placeholder antiguos
-      bool noPlaceholder85 = !hasText('85%'); // Era el placeholder antiguo
-      bool noPlaceholder42 = !hasText('4.2'); // Era el placeholder de Promedio
+      final bool noPlaceholder85 = !hasText('85%'); // Era el placeholder antiguo
+      final bool noPlaceholder42 = !hasText('4.2'); // Era el placeholder de Promedio
 
       // Verificar que hay un valor numérico para asistencia (0% o mayor)
-      bool hasAsistenciaValue = hasText('%'); // Cualquier porcentaje
+      final bool hasAsistenciaValue = hasText('%'); // Cualquier porcentaje
 
       log(
           '4',
@@ -2848,7 +2842,7 @@ void main() {
 
       if (qrNav) {
         await settleFor(tester, const Duration(seconds: 2));
-        bool seesQR = hasText('QR') || find.byType(Image).evaluate().isNotEmpty;
+        final bool seesQR = hasText('QR') || find.byType(Image).evaluate().isNotEmpty;
         log('4', '4.3 Estudiante ve su código QR', seesQR);
         await goBack(tester);
       } else {
@@ -2856,7 +2850,7 @@ void main() {
       }
 
       // 4.4: Ver Mi Horario (verificar datos reales del micro-universo)
-      bool schedNav =
+      final bool schedNav =
           await navigateTo(tester, 'Mi Horario', icon: Icons.calendar_today);
       if (schedNav) {
         await settleFor(tester, const Duration(seconds: 3));
@@ -2865,7 +2859,7 @@ void main() {
           created['materia_nombre_real'] ?? materiaName;
 
         // Verificar que ve el horario creado en FASE 2
-        bool seesSchedule = hasText(diasSemana[todayWeekday]) ||
+        final bool seesSchedule = hasText(diasSemana[todayWeekday]) ||
             hasText('Horario') ||
           hasText(expectedMateriaText) ||
             hasText('clase');
@@ -2888,7 +2882,7 @@ void main() {
           created['materia_nombre_real'] ?? materiaName;
 
         // VALIDACIÓN ESTRICTA: Buscar exactamente los datos del micro-universo
-        bool seesHistory = hasText('Historial') ||
+        final bool seesHistory = hasText('Historial') ||
             hasText('asistencia') ||
             hasText('Presente') ||
             hasText('Ausente') ||
@@ -2904,7 +2898,7 @@ void main() {
           find.byType(Card).evaluate().isNotEmpty;
 
         // Verificar resumen de estadísticas (total, presentes, ausentes)
-        bool seesStats =
+        final bool seesStats =
             hasText('Total') || hasText('Presentes') || hasText('Ausentes');
 
         if (created['asistencia_tomada'] == 'true') {
@@ -2938,7 +2932,7 @@ void main() {
         await settleFor(tester, const Duration(seconds: 2));
 
         // Verificar que hay sección de notificaciones visible
-        bool seesNotifSection = hasText('Notificaciones') ||
+        final bool seesNotifSection = hasText('Notificaciones') ||
             hasText('Alertas') ||
             hasText('Mensajes') ||
             hasText('notificación');
@@ -2970,7 +2964,7 @@ void main() {
         final notifBadge = find.byType(Badge);
         final notifIcon = find.byIcon(Icons.notifications);
 
-        bool hasNotifIndicator =
+        final bool hasNotifIndicator =
             notifBadge.evaluate().isNotEmpty || notifIcon.evaluate().isNotEmpty;
 
         log(
@@ -2992,14 +2986,14 @@ void main() {
         await settleFor(tester, const Duration(seconds: 2));
 
         // Verificar si el estudiante puede ver o editar preferencias de notificación
-        bool seesNotifPrefs = hasText('Notificaciones') ||
+        final bool seesNotifPrefs = hasText('Notificaciones') ||
             hasText('notificación') ||
             hasText('Alertas') ||
             hasText('Preferencias');
 
         // Buscar switches o toggles de notificación
         final switches = find.byType(Switch);
-        bool hasNotifSwitch = switches.evaluate().isNotEmpty;
+        final bool hasNotifSwitch = switches.evaluate().isNotEmpty;
 
         log(
             '4',
@@ -3104,8 +3098,7 @@ void main() {
       };
       // Login admin por API para registrar asistencia (obtenemos token si necesario)
       final adminApiTokenLocal =
-          (await apiLogin(adminEmailManual, adminPassManual) ?? adminApiToken)!
-              as String;
+          (await apiLogin(adminEmailManual, adminPassManual) ?? adminApiToken)!;
 
       final asistRespManual = await apiPost('/asistencias/registrar-manual',
           adminApiTokenLocal, asistenciaBodyManual);
@@ -3171,7 +3164,7 @@ void main() {
       final notifButton = find.byTooltip('Enviar notificaciones de ausencias');
       final campaignIcon = find.byIcon(Icons.campaign);
 
-      bool buttonFound = notifButton.evaluate().isNotEmpty ||
+      final bool buttonFound = notifButton.evaluate().isNotEmpty ||
           campaignIcon.evaluate().isNotEmpty;
       print(
           '    📊 [MANUAL] Botón por tooltip: ${notifButton.evaluate().length}, por icono: ${campaignIcon.evaluate().length}');
@@ -3376,7 +3369,7 @@ void main() {
 
       final createResp =
           await apiPost('/usuarios', adminTokenAcudiente, acudienteData);
-      bool acudienteCreated =
+      final bool acudienteCreated =
           createResp != null && createResp['success'] == true;
 
       String? acudienteId;
@@ -3402,7 +3395,7 @@ void main() {
             '/admin/acudientes/$acudienteId/vincular',
             adminTokenAcudiente,
             vincularData);
-        bool vinculado = vincResp != null &&
+        final bool vinculado = vincResp != null &&
             (vincResp['success'] == true || vincResp['message'] != null);
         if (vincResp == null) {
           log('7', '7.2 Vincular acudiente a estudiante', true,
@@ -3419,7 +3412,7 @@ void main() {
 
       // 7.4: Verificar que el acudiente puede hacer login
       final acudienteToken = await apiLogin(acudienteEmail, 'TempPass123!');
-      bool acudienteLoginOk = acudienteToken != null;
+      final bool acudienteLoginOk = acudienteToken != null;
       if (!acudienteLoginOk) {
         log('7', '7.3 Login del acudiente', true,
             'Skip: sin acceso a institución activa');
@@ -3449,7 +3442,7 @@ void main() {
           },
           body: json.encode({'newPassword': newPassword}),
         );
-        bool passwordChanged = changePassResp.statusCode == 200;
+        final bool passwordChanged = changePassResp.statusCode == 200;
         if (passwordChanged) {
           log('7', '7.5 Regenerar contraseña acudiente', true,
               'Status: ${changePassResp.statusCode}');

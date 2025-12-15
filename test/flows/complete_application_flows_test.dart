@@ -53,8 +53,8 @@ import 'package:asistapp/widgets/horarios/edit_class_dialog.dart';
 class FakeAuthProvider extends AuthProvider {
   String _role;
   String? _institutionId;
-  String _userId;
-  String _email;
+  final String _userId;
+  final String _email;
 
   FakeAuthProvider({
     String role = 'super_admin',
@@ -1138,9 +1138,11 @@ void main() {
         // con 403 Forbidden. Aquí verificamos que la lógica de roles funciona.
 
         // Simular verificación de permisos
-        bool canDeleteUsers = authProvider.user?['rol'] == 'super_admin' ||
-            authProvider.user?['rol'] == 'admin_institucion';
-        bool canCreateHorarios = authProvider.user?['rol'] != 'estudiante';
+        final bool canDeleteUsers =
+            authProvider.user?['rol'] == 'super_admin' ||
+                authProvider.user?['rol'] == 'admin_institucion';
+        final bool canCreateHorarios =
+            authProvider.user?['rol'] != 'estudiante';
 
         expect(canDeleteUsers, isFalse);
         expect(canCreateHorarios, isFalse);

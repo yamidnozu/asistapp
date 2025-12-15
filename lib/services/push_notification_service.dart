@@ -67,9 +67,6 @@ class PushNotificationService {
   // Callback para cuando el usuario toca una notificación
   Function(RemoteMessage)? onNotificationTapped;
 
-  // Almacenar el BuildContext para mostrar diálogos
-  BuildContext? _currentContext;
-
   /// Inicializa Firebase (debe llamarse en main.dart antes de runApp)
   static Future<void> initializeFirebase() async {
     if (!_isMobilePlatform) {
@@ -109,14 +106,13 @@ class PushNotificationService {
   /// Configura el servicio de notificaciones push
   /// Debe llamarse después del login exitoso
   Future<void> configure(String accessToken, BuildContext context) async {
-    // Añadido BuildContext
     if (!_isMobilePlatform) {
       debugPrint('ℹ️ Push notifications no disponibles en esta plataforma');
       return;
     }
 
     _accessToken = accessToken;
-    _currentContext = context; // Guardar el contexto
+    // _currentContext = context; // Removed as unused
 
     // Solicitar permisos
     await _requestPermission();
@@ -217,8 +213,8 @@ class PushNotificationService {
       debugPrint('📩 Mensaje en foreground: ${message.notification?.title}');
       onForegroundMessage?.call(message);
 
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
+      final RemoteNotification? notification = message.notification;
+      final AndroidNotification? android = message.notification?.android;
 
       // Mostrar notificación en foreground usando flutter_local_notifications
       if (notification != null && android != null) {

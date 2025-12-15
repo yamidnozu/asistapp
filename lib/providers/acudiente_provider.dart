@@ -281,9 +281,9 @@ class AcudienteProvider extends ChangeNotifier {
 
   /// Obtiene resumen para el dashboard
   Map<String, dynamic> getResumenDashboard() {
-    int totalFaltasHoy = 0;
+    final int totalFaltasHoy = 0;
     int totalFaltasSemana = 0;
-    int totalFaltasMes = 0;
+    final int totalFaltasMes = 0;
 
     final ahora = DateTime.now();
     final inicioSemana = ahora.subtract(Duration(days: ahora.weekday - 1));

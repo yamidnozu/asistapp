@@ -274,7 +274,7 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
     final horasDisponibles = <String>[];
 
     // Generar intervalos de 30 minutos desde horaInicio+30min hasta 24:00
-    int totalMinutosInicio = hourInicio * 60 + minutesInicio;
+    final int totalMinutosInicio = hourInicio * 60 + minutesInicio;
 
     for (int minutos = totalMinutosInicio + 30;
         minutos <= 24 * 60;

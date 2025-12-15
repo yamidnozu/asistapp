@@ -98,7 +98,7 @@ class _GruposScreenState extends State<GruposScreen> {
       // Limpiar filtros y establecer los nuevos antes de cargar
       grupoProvider.filters.clear();
       if (_selectedGrado != null && _selectedGrado!.isNotEmpty) {
-        grupoProvider.filters['grado'] = _selectedGrado!;
+        grupoProvider.filters['grado'] = _selectedGrado;
       }
       if (search != null && search.isNotEmpty) {
         grupoProvider.filters['search'] = search;

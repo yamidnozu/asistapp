@@ -253,7 +253,7 @@ class _GestionarAcudientesSheetState extends State<GestionarAcudientesSheet> {
       }
     } catch (e) {
       if (mounted) {
-        String errorMsg = e.toString();
+        final String errorMsg = e.toString();
         // Si el email ya existe, sugerir vincularlo en lugar de crearlo
         if (errorMsg.contains('409') ||
             errorMsg.contains('email') ||

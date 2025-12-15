@@ -1364,7 +1364,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ),
             ),
             SizedBox(width: spacing.xs),
-            Icon(Icons.arrow_drop_down, color: Colors.white, size: 16),
+            const Icon(Icons.arrow_drop_down, color: Colors.white, size: 16),
           ],
         ),
       ),

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:asistapp/screens/academic/horarios_screen.dart';
+
 import 'package:asistapp/providers/auth_provider.dart';
 import 'package:asistapp/providers/horario_provider.dart';
 import 'package:asistapp/providers/materia_provider.dart';
