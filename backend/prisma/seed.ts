@@ -702,12 +702,12 @@ async function main() {
   console.log('✅ Vínculos acudiente-estudiante creados');
 
   // ============================================================================
-  // 13. CREAR HORARIOS
+  // 13. CREAR HORARIOS (SIN CONFLICTOS DE PROFESORES)
   // ============================================================================
-  console.log('\n📅 Creando horarios...');
+  console.log('\n📅 Creando horarios sin conflictos de profesores...');
+  console.log(`   📊 Grupos: ${grupos.length}, Profesores: ${todosProfesores.length}`);
 
   const diasSemana = [1, 2, 3, 4, 5]; // Lunes a Viernes
-  // Bloques en intervalos de 30 minutos (horas enteras o medias horas)
   const bloques = [
     { inicio: '07:00', fin: '08:00' },
     { inicio: '08:00', fin: '09:00' },
@@ -718,36 +718,67 @@ async function main() {
   ];
 
   let totalHorarios = 0;
+  let sinProfesor = 0;
 
-  for (const grupo of grupos) {
-    for (let diaIdx = 0; diaIdx < diasSemana.length; diaIdx++) {
-      const dia = diasSemana[diaIdx];
+  // Procesar SLOT por SLOT para evitar que un profesor esté en 2 lugares a la vez
+  for (let diaIdx = 0; diaIdx < diasSemana.length; diaIdx++) {
+    const dia = diasSemana[diaIdx];
 
-      for (let bloqueIdx = 0; bloqueIdx < bloques.length; bloqueIdx++) {
-        const bloque = bloques[bloqueIdx];
-        const materiaIdx = (diaIdx * bloques.length + bloqueIdx) % materiasSanJose.length;
+    for (let bloqueIdx = 0; bloqueIdx < bloques.length; bloqueIdx++) {
+      const bloque = bloques[bloqueIdx];
+
+      // Set de profesores ocupados EN ESTE SLOT específico (se reinicia cada slot)
+      const profesoresOcupadosEnSlot = new Set<string>();
+
+      // Asignar a TODOS los grupos en este slot
+      for (let grupoIdx = 0; grupoIdx < grupos.length; grupoIdx++) {
+        const grupo = grupos[grupoIdx];
+
+        // Rotación de materia para variedad
+        const materiaIdx = (grupoIdx + diaIdx * 3 + bloqueIdx * 2) % materiasSanJose.length;
         const materia = materiasSanJose[materiaIdx];
-        const profesor = todosProfesores[materiaIdx % todosProfesores.length];
 
-        await prisma.horario.create({
-          data: {
-            grupoId: grupo.id,
-            materiaId: materia.id,
-            profesorId: profesor.id,
-            institucionId: colegioSanJose.id, // ← AGREGADO
-            periodoId: periodoSanJose.id,     // ← AGREGADO
-            diaSemana: dia,                    // ← AHORA ES NÚMERO
-            horaInicio: bloque.inicio,
-            horaFin: bloque.fin,
-          },
-        });
+        // Buscar profesor DISPONIBLE (que NO esté ocupado en este slot)
+        let profesorAsignado = null;
 
-        totalHorarios++;
+        for (let i = 0; i < todosProfesores.length; i++) {
+          // Rotar inicio de búsqueda por grupo para distribuir equitativamente
+          const profIdx = (grupoIdx + i) % todosProfesores.length;
+          const prof = todosProfesores[profIdx];
+
+          if (!profesoresOcupadosEnSlot.has(prof.id)) {
+            profesorAsignado = prof;
+            profesoresOcupadosEnSlot.add(prof.id);
+            break;
+          }
+        }
+
+        if (profesorAsignado) {
+          await prisma.horario.create({
+            data: {
+              grupoId: grupo.id,
+              materiaId: materia.id,
+              profesorId: profesorAsignado.id,
+              institucionId: colegioSanJose.id,
+              periodoId: periodoSanJose.id,
+              diaSemana: dia,
+              horaInicio: bloque.inicio,
+              horaFin: bloque.fin,
+            },
+          });
+          totalHorarios++;
+        } else {
+          sinProfesor++;
+        }
       }
     }
   }
 
-  console.log(`✅ ${totalHorarios} horarios creados`);
+  console.log(`✅ ${totalHorarios} horarios creados sin conflictos`);
+  if (sinProfesor > 0) {
+    console.log(`   ⚠️ ${sinProfesor} clases sin profesor (se necesitan más profesores)`);
+  }
+
 
   // ============================================================================
   // RESUMEN FINAL
