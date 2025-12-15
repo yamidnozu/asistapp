@@ -33,6 +33,7 @@ import 'services/user_service.dart' as user_service;
 import 'services/push_notification_service.dart';
 
 /// Helper para verificar si estamos en plataforma móvil
+/// v1.5.2 - Release a prueba cerrada (alpha track)
 bool get isMobilePlatform {
   if (kIsWeb) return false;
   try {
