@@ -53,9 +53,9 @@ class WeeklyCalendar extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
-        final hourColumnWidth = isMobile ? 50.0 : 70.0;
-        // Celdas más pequeñas para intervalos de 30 min
-        final cellHeight = isMobile ? 40.0 : 50.0;
+        final hourColumnWidth = isMobile ? 55.0 : 75.0;
+        // Altura por cada slot de 30 min - más alto para ver mejor los bloques
+        final cellHeight = isMobile ? 25.0 : 30.0;
 
         final spacing = context.spacing;
 

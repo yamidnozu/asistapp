@@ -64,29 +64,31 @@ class AppColors {
     stateActive = const Color(0xFF16A34A);
 
     surface = _surfaceBase;
-    surfaceLight = const Color(0xFFF8FAFC);
+    surfaceLight = const Color(0xFFFFF9E6); // Light yellow tint
     surfaceContainer = const Color(0xFFFFFFFF);
-    surfaceVariant = const Color(0xFFF1F5F9);
+    surfaceVariant = const Color(0xFFFFF3CC); // Yellow tint
 
-    background = _backgroundBase;
-    backgroundLight = const Color(0xFFFFFFFF);
-    backgroundVariant = const Color(0xFFF8FAFC);
+    background = _backgroundBase; // Bright Yellow
+    backgroundLight = const Color(0xFFFFF9E6);
+    backgroundVariant = const Color(0xFFFFEEB3);
 
-    textPrimary = const Color(0xFF0F172A);
-    textSecondary = const Color(0xFF334155);
-    textMuted = const Color(0xFF64748B);
-    textDisabled = const Color(0xFF94A3B8);
+    // Texto marrón oscuro estilo Monkey
+    textPrimary = const Color(0xFF3D2314); // Dark Brown
+    textSecondary = const Color(0xFF5C3A24); // Medium Brown
+    textMuted = const Color(0xFF7A5840); // Light Brown
+    textDisabled = const Color(0xFFB89B7A); // Faded Brown
 
-    textOnDark = const Color(0xFFF8FAFC);
-    textOnDarkSecondary = const Color(0xFFE2E8F0);
-    textOnDarkMuted = const Color(0xFFCBD5E1);
+    textOnDark = const Color(0xFFFFC629); // Yellow on dark
+    textOnDarkSecondary = const Color(0xFFFFD966);
+    textOnDarkMuted = const Color(0xFFFFE699);
 
-    onPrimary = const Color(0xFFFFFFFF);
+    onPrimary = const Color(0xFF3D2314); // Brown text on yellow buttons
 
-    border = const Color(0xFFE2E8F0);
-    borderLight = const Color(0xFFF1F5F9);
-    borderStrong = const Color(0xFFCBD5E1);
-    divider = const Color(0xFFE2E8F0);
+    // Bordes marrón suave
+    border = const Color(0xFFD4B896); // Light brown border
+    borderLight = const Color(0xFFE8D4B8); // Very light brown
+    borderStrong = const Color(0xFF8B6914); // Golden brown
+    divider = const Color(0xFFD4B896);
 
     shadow = const Color(0x0A000000);
     shadowLight = const Color(0x05000000);
@@ -206,15 +208,15 @@ class AppColors {
   // PALETA MODERNA - CLARITY UI
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Base colors - Paleta moderna y energética
-  // Fucsia vibrante para una identidad visual única y audaz
+  // Base colors - Estilo "Monkey" - Audaz, vibrante y memorable
+  // Amarillo dorado como protagonista + Marrón chocolate
   static const Color _primaryBase =
-      Color(0xFFFF6B35); // Elegant Orange - moderno y vibrante
+      Color(0xFFF9B000); // Golden Yellow - el protagonista
   static const Color _secondaryBase =
-      Color(0xFF2D4654); // Deep Teal - contraste sofisticado
-  static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
+      Color(0xFF3D2314); // Chocolate Brown - texto y acentos
+  static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco para cards
   static const Color _backgroundBase =
-      Color(0xFFF3F4F6); // Cool Gray - fondo limpio y moderno
+      Color(0xFFFFC629); // Bright Yellow - fondo impactante estilo Monkey
 
   // Primary palette - Azul moderno y profesional
   late final Color primary;
