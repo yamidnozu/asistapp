@@ -183,136 +183,137 @@ export async function asistenciaRoutes(fastify: FastifyInstance): Promise<void> 
             type: 'string',
             description: 'ID del horario/clase',
           },
-          type: 'string',
-          description: 'ID del estudiante',
-        },
-        estado: {
-          type: 'string',
-          enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'],
-          description: 'Estado de la asistencia',
-        },
-        observacion: {
-          type: 'string',
-          description: 'Observación opcional',
-        },
-        justificada: {
-          type: 'boolean',
-          description: 'Si la falta está justificada',
-        },
-      },
-    },
-    response: {
-      201: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          message: { type: 'string' },
-          data: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              fecha: { type: 'string', format: 'date-time' },
-              estado: { type: 'string' },
-              horarioId: { type: 'string' },
-              estudianteId: { type: 'string' },
-              profesorId: { type: 'string' },
-              institucionId: { type: 'string' },
-              estudiante: { type: 'object' },
-              horario: { type: 'object' },
-            },
+          estudianteId: {
+            type: 'string',
+            description: 'ID del estudiante',
+          },
+          estado: {
+            type: 'string',
+            enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'],
+            description: 'Estado de la asistencia',
+          },
+          observacion: {
+            type: 'string',
+            description: 'Observación opcional',
+          },
+          justificada: {
+            type: 'boolean',
+            description: 'Si la falta está justificada',
           },
         },
       },
-      400: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          message: { type: 'string' },
-          error: { type: 'string' },
+      response: {
+        201: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                fecha: { type: 'string', format: 'date-time' },
+                estado: { type: 'string' },
+                horarioId: { type: 'string' },
+                estudianteId: { type: 'string' },
+                profesorId: { type: 'string' },
+                institucionId: { type: 'string' },
+                estudiante: { type: 'object' },
+                horario: { type: 'object' },
+              },
+            },
+          },
         },
-      },
-      403: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          message: { type: 'string' },
-          error: { type: 'string' },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
         },
-      },
-      404: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          message: { type: 'string' },
-          error: { type: 'string' },
+        403: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
         },
       },
     },
-  },
     handler: AsistenciaController.registrarAsistenciaManual,
   });
 
-// ============================================
-// LISTAR ASISTENCIAS (Admin/Profesor)
-// ============================================
-fastify.get('/', {
-  preHandler: [
-    authenticate,
-    authorize([UserRole.ADMIN_INSTITUCION, UserRole.PROFESOR]),
-  ],
-  handler: AsistenciaController.getAllAsistencias as any,
-});
+  // ============================================
+  // LISTAR ASISTENCIAS (Admin/Profesor)
+  // ============================================
+  fastify.get('/', {
+    preHandler: [
+      authenticate,
+      authorize([UserRole.ADMIN_INSTITUCION, UserRole.PROFESOR]),
+    ],
+    handler: AsistenciaController.getAllAsistencias as any,
+  });
 
-// ============================================
-// ASISTENCIAS DEL ESTUDIANTE AUTENTICADO
-// ============================================
-fastify.get('/estudiante', {
-  preHandler: [
-    authenticate,
-    authorize([UserRole.ESTUDIANTE]),
-  ],
-  handler: AsistenciaController.getAsistenciasEstudiante as any,
-});
+  // ============================================
+  // ASISTENCIAS DEL ESTUDIANTE AUTENTICADO
+  // ============================================
+  fastify.get('/estudiante', {
+    preHandler: [
+      authenticate,
+      authorize([UserRole.ESTUDIANTE]),
+    ],
+    handler: AsistenciaController.getAsistenciasEstudiante as any,
+  });
 
-// ============================================
-// ACTUALIZAR ASISTENCIA (Editar pasado)
-// ============================================
-fastify.put('/:id', {
-  preHandler: [
-    authenticate,
-    authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
-  ],
-  schema: {
-    description: 'Actualiza una asistencia existente (estado, observación)',
-    tags: ['Asistencias'],
-    params: {
-      type: 'object',
-      required: ['id'],
-      properties: {
-        id: { type: 'string' },
+  // ============================================
+  // ACTUALIZAR ASISTENCIA (Editar pasado)
+  // ============================================
+  fastify.put('/:id', {
+    preHandler: [
+      authenticate,
+      authorize([UserRole.PROFESOR, UserRole.ADMIN_INSTITUCION]),
+    ],
+    schema: {
+      description: 'Actualiza una asistencia existente (estado, observación)',
+      tags: ['Asistencias'],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string' },
+        },
       },
-    },
-    body: {
-      type: 'object',
-      properties: {
-        estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'] },
-        observacion: { type: 'string' },
-        justificada: { type: 'boolean' },
-      },
-    },
-    response: {
-      200: {
+      body: {
         type: 'object',
         properties: {
-          success: { type: 'boolean' },
-          message: { type: 'string' },
-          data: { type: 'object' }, // Simplificado para evitar duplicar esquema completo
+          estado: { type: 'string', enum: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO'] },
+          observacion: { type: 'string' },
+          justificada: { type: 'boolean' },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' }, // Simplificado para evitar duplicar esquema completo
+          },
         },
       },
     },
-  },
-  handler: AsistenciaController.updateAsistencia as any,
-});
+    handler: AsistenciaController.updateAsistencia as any,
+  });
 }
 
 export default asistenciaRoutes;
