@@ -64,31 +64,29 @@ class AppColors {
     stateActive = const Color(0xFF16A34A);
 
     surface = _surfaceBase;
-    surfaceLight = const Color(0xFFFFF9E6); // Light yellow tint
+    surfaceLight = const Color(0xFFF1F5F9); // Slate 100
     surfaceContainer = const Color(0xFFFFFFFF);
-    surfaceVariant = const Color(0xFFFFF3CC); // Yellow tint
+    surfaceVariant = const Color(0xFFE2E8F0); // Slate 200
 
-    background = _backgroundBase; // Bright Yellow
-    backgroundLight = const Color(0xFFFFF9E6);
-    backgroundVariant = const Color(0xFFFFEEB3);
+    background = _backgroundBase;
+    backgroundLight = const Color(0xFFFFFFFF);
+    backgroundVariant = const Color(0xFFF1F5F9);
 
-    // Texto marrón oscuro estilo Monkey
-    textPrimary = const Color(0xFF3D2314); // Dark Brown
-    textSecondary = const Color(0xFF5C3A24); // Medium Brown
-    textMuted = const Color(0xFF7A5840); // Light Brown
-    textDisabled = const Color(0xFFB89B7A); // Faded Brown
+    textPrimary = const Color(0xFF0F172A); // Slate 900
+    textSecondary = const Color(0xFF334155); // Slate 700
+    textMuted = const Color(0xFF64748B); // Slate 500
+    textDisabled = const Color(0xFF94A3B8); // Slate 400
 
-    textOnDark = const Color(0xFFFFC629); // Yellow on dark
-    textOnDarkSecondary = const Color(0xFFFFD966);
-    textOnDarkMuted = const Color(0xFFFFE699);
+    textOnDark = const Color(0xFFF8FAFC); // Slate 50
+    textOnDarkSecondary = const Color(0xFFE2E8F0); // Slate 200
+    textOnDarkMuted = const Color(0xFFCBD5E1); // Slate 300
 
-    onPrimary = const Color(0xFF3D2314); // Brown text on yellow buttons
+    onPrimary = const Color(0xFFFFFFFF); // White tex on blue buttons
 
-    // Bordes marrón suave
-    border = const Color(0xFFD4B896); // Light brown border
-    borderLight = const Color(0xFFE8D4B8); // Very light brown
-    borderStrong = const Color(0xFF8B6914); // Golden brown
-    divider = const Color(0xFFD4B896);
+    border = const Color(0xFFE2E8F0); // Slate 200
+    borderLight = const Color(0xFFF1F5F9); // Slate 100
+    borderStrong = const Color(0xFFCBD5E1); // Slate 300
+    divider = const Color(0xFFE2E8F0);
 
     shadow = const Color(0x0A000000);
     shadowLight = const Color(0x05000000);
@@ -208,15 +206,14 @@ class AppColors {
   // PALETA MODERNA - CLARITY UI
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Base colors - Estilo "Monkey" - Audaz, vibrante y memorable
-  // Amarillo dorado como protagonista + Marrón chocolate
+  // Base colors - Paleta Clarity UI (Azul Claro Moderno)
   static const Color _primaryBase =
-      Color(0xFFF9B000); // Golden Yellow - el protagonista
+      Color(0xFF0EA5E9); // Sky Blue 500 - Fresco y profesional
   static const Color _secondaryBase =
-      Color(0xFF3D2314); // Chocolate Brown - texto y acentos
-  static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco para cards
+      Color(0xFF0F172A); // Slate 900 - Contraste fuerte
+  static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
-      Color(0xFFFFC629); // Bright Yellow - fondo impactante estilo Monkey
+      Color(0xFFF8FAFC); // Slate 50 - Fondo limpio y profesional
 
   // Primary palette - Azul moderno y profesional
   late final Color primary;

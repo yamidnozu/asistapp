@@ -71,42 +71,50 @@ class AppTheme {
         labelSmall: textStyles.labelSmall,
       ),
 
-      // Estilo Monkey: AppBar amarillo con texto/iconos marrón
       appBarTheme: AppBarTheme(
-        backgroundColor: colors.primary, // Golden Yellow
-        foregroundColor: colors.secondary, // Dark Brown
+        backgroundColor: colors.primary,
+        foregroundColor: brightness == Brightness.light
+            ? colors.textPrimary
+            : colors.white, // Negro en light, blanco en dark
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: textStyles.headlineMedium.copyWith(
-          color: colors.secondary, // Dark Brown text
+          color: brightness == Brightness.light
+              ? colors.textPrimary
+              : colors.white, // Negro en light, blanco en dark
           fontWeight: FontWeight.bold,
         ),
-        iconTheme: IconThemeData(color: colors.secondary), // Brown icons
-        actionsIconTheme: IconThemeData(color: colors.secondary),
+        iconTheme: IconThemeData(
+            color: brightness == Brightness.light
+                ? colors.textPrimary
+                : colors.white), // Negro en light, blanco en dark
+        actionsIconTheme: IconThemeData(
+            color: brightness == Brightness.light
+                ? colors.textPrimary
+                : colors.white), // Negro en light, blanco en dark
         toolbarHeight: AppSpacing.instance.appBarHeight,
         centerTitle: true,
       ),
 
-      // Estilo Monkey: cards limpios sin borde visible, solo sombra suave
       cardTheme: CardThemeData(
         color: colors.surface,
-        shadowColor: colors.secondary.withValues(alpha: 0.15),
-        elevation: 4, // Sombra más visible
+        shadowColor: colors.shadowLight,
+        elevation: 1, // Elevación sutil
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
-          // Sin borde visible para look más limpio
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          side: BorderSide(color: colors.border, width: 0.5),
         ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          // Estilo Monkey: botón marrón oscuro con texto claro
-          backgroundColor: colors.secondary, // Dark Brown
-          foregroundColor: colors.primary, // Golden Yellow text
-          elevation: 2,
+          backgroundColor: colors.primary,
+          foregroundColor: brightness == Brightness.light
+              ? colors.textPrimary
+              : colors.white, // Negro en light, blanco en dark
+          elevation: 1, // Elevación sutil
           padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.instance.buttonPadding,
             vertical: AppSpacing.instance.md,
@@ -115,7 +123,7 @@ class AppTheme {
             borderRadius:
                 BorderRadius.circular(AppSpacing.instance.borderRadius),
           ),
-          textStyle: textStyles.button.copyWith(fontWeight: FontWeight.bold),
+          textStyle: textStyles.button,
         ),
       ),
 
@@ -148,34 +156,32 @@ class AppTheme {
         ),
       ),
 
-      // Estilo Monkey: inputs con línea inferior (underline), sin caja
       inputDecorationTheme: InputDecorationTheme(
-        filled: false, // Sin fondo para estilo limpio
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(color: colors.secondary, width: 1.5),
-        ),
-        enabledBorder: UnderlineInputBorder(
+        filled: true,
+        fillColor: colors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
           borderSide: BorderSide(
-              color: colors.secondary.withValues(alpha: 0.5), width: 1.5),
+              color: colors.border, width: AppSpacing.instance.borderWidth),
         ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: colors.secondary, width: 2.0),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(
+              color: colors.border, width: AppSpacing.instance.borderWidth),
         ),
-        errorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: colors.error, width: 1.5),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(color: colors.primaryLight, width: 1.5),
         ),
-        focusedErrorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: colors.error, width: 2.0),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
+          borderSide: BorderSide(
+              color: colors.error, width: AppSpacing.instance.borderWidth),
         ),
-        contentPadding: EdgeInsets.symmetric(
-          vertical: AppSpacing.instance.md,
-          horizontal: AppSpacing.instance.xs,
-        ),
-        labelStyle: textStyles.bodyLarge.copyWith(color: colors.textPrimary),
+        contentPadding: EdgeInsets.all(AppSpacing.instance.inputPadding),
+        labelStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         hintStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
         errorStyle: textStyles.bodySmall.copyWith(color: colors.error),
-        floatingLabelStyle:
-            textStyles.bodySmall.copyWith(color: colors.secondary),
       ),
 
       dialogTheme: DialogThemeData(
@@ -188,9 +194,9 @@ class AppTheme {
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colors.secondary, // Brown FAB
-        foregroundColor: colors.primary, // Yellow icon
-        elevation: 4,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.white,
+        elevation: 2, // Elevación sutil
         shape: RoundedRectangleBorder(
           borderRadius:
               BorderRadius.circular(AppSpacing.instance.borderRadiusLarge),
@@ -201,15 +207,15 @@ class AppTheme {
         backgroundColor: colors.surfaceLight,
         deleteIconColor: colors.textMuted,
         disabledColor: colors.stateInactive,
-        selectedColor: colors.secondary, // Brown selected
-        secondarySelectedColor: colors.primary,
+        selectedColor: colors.primary,
+        secondarySelectedColor: colors.secondary,
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.instance.sm,
           vertical: AppSpacing.instance.xs,
         ),
         labelStyle: textStyles.bodyMedium.copyWith(color: colors.textPrimary),
-        secondaryLabelStyle: textStyles.bodyMedium
-            .copyWith(color: colors.primary), // Yellow text on selected
+        secondaryLabelStyle:
+            textStyles.bodyMedium.copyWith(color: colors.white),
         brightness: brightness,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.instance.borderRadius),
@@ -227,24 +233,21 @@ class AppTheme {
       // useMaterial3: true, // Ya está activado arriba en _createTheme
 
       // Temas de navegación mejorados
-      // Temas de navegación mejorados - Estilo Monkey
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: colors.surface,
-        indicatorColor:
-            colors.secondary.withValues(alpha: 0.15), // Light brown indicator
+        indicatorColor: colors.primary,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return textStyles.labelSmall.copyWith(
-              color: colors.secondary, // Brown label
-              fontWeight: FontWeight.w700,
+              color: colors.primary,
+              fontWeight: FontWeight.w600,
             );
           }
           return textStyles.labelSmall.copyWith(color: colors.textMuted);
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(
-                color: colors.secondary); // Brown icon selected
+            return IconThemeData(color: colors.primary);
           }
           return IconThemeData(color: colors.textMuted);
         }),
@@ -253,10 +256,10 @@ class AppTheme {
       // Rail de navegación para tablet/desktop
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: colors.surface,
-        selectedIconTheme: IconThemeData(color: colors.secondary),
+        selectedIconTheme: IconThemeData(color: colors.primary),
         unselectedIconTheme: IconThemeData(color: colors.textMuted),
         selectedLabelTextStyle:
-            textStyles.labelSmall.copyWith(color: colors.secondary),
+            textStyles.labelSmall.copyWith(color: colors.primary),
         unselectedLabelTextStyle:
             textStyles.labelSmall.copyWith(color: colors.textMuted),
       ),
@@ -275,11 +278,10 @@ class AppTheme {
       ),
 
       // Centralizar estilo de SnackBars para consistencia de la UI
-      // Centralizar estilo de SnackBars para consistencia de la UI
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: colors.secondary, // Brown background
-        contentTextStyle: textStyles.bodyMedium
-            .copyWith(color: colors.primary), // Yellow text
+        backgroundColor: colors.surfaceVariant,
+        contentTextStyle:
+            textStyles.bodyMedium.copyWith(color: colors.textPrimary),
         actionTextColor: colors.primary,
         behavior: SnackBarBehavior.floating,
         elevation: 4,
