@@ -123,7 +123,8 @@ class AuthProvider with ChangeNotifier {
         await _storage.remove('user');
       }
       if (_selectedInstitutionId != null) {
-        await _storage.setString('selectedInstitutionId', _selectedInstitutionId!);
+        await _storage.setString(
+            'selectedInstitutionId', _selectedInstitutionId!);
       } else {
         await _storage.remove('selectedInstitutionId');
       }
@@ -138,8 +139,11 @@ class AuthProvider with ChangeNotifier {
     _user = null;
     _selectedInstitutionId = null;
 
-    // Limpiar todo el almacenamiento
-    await _storage.clear();
+    // Limpiar solo tokens y datos de sesión, preservando configuraciones
+    await _storage.remove('accessToken');
+    await _storage.remove('refreshToken');
+    await _storage.remove('user');
+    await _storage.remove('selectedInstitutionId');
 
     notifyListeners();
   }
