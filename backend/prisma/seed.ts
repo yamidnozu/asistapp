@@ -707,13 +707,14 @@ async function main() {
   console.log('\n📅 Creando horarios...');
 
   const diasSemana = [1, 2, 3, 4, 5]; // Lunes a Viernes
+  // Bloques en intervalos de 30 minutos (horas enteras o medias horas)
   const bloques = [
     { inicio: '07:00', fin: '08:00' },
     { inicio: '08:00', fin: '09:00' },
     { inicio: '09:00', fin: '10:00' },
-    { inicio: '10:20', fin: '11:20' },
-    { inicio: '11:20', fin: '12:20' },
-    { inicio: '13:30', fin: '14:30' },
+    { inicio: '10:30', fin: '11:30' }, // Descanso de 10:00 a 10:30
+    { inicio: '11:30', fin: '12:30' },
+    { inicio: '14:00', fin: '15:00' }, // Almuerzo de 12:30 a 14:00
   ];
 
   let totalHorarios = 0;

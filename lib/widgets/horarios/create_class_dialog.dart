@@ -246,9 +246,12 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   String _getHoraFin(String horaInicio) {
     final parts = horaInicio.split(':');
     final hour = int.parse(parts[0]);
-    // Si horaInicio + 2 excede 24, usar 24:00 (medianoche)
-    final nextHour = (hour + 2) > 24 ? 24 : (hour + 2);
-    return '${nextHour.toString().padLeft(2, '0')}:00';
+    final minutes = int.parse(parts[1]);
+    // Por defecto 1 hora después
+    final totalMinutos = hour * 60 + minutes + 60;
+    final nextHour = (totalMinutos ~/ 60) % 24;
+    final nextMinutes = totalMinutos % 60;
+    return '${nextHour.toString().padLeft(2, '0')}:${nextMinutes.toString().padLeft(2, '0')}';
   }
 
   String _getDiaNombre(int diaSemana) {
@@ -267,10 +270,24 @@ class _CreateClassDialogState extends State<CreateClassDialog> {
   List<String> _getHorasFinDisponibles(String horaInicio) {
     final parts = horaInicio.split(':');
     final hourInicio = int.parse(parts[0]);
+    final minutesInicio = int.parse(parts[1]);
     final horasDisponibles = <String>[];
-    // Permitir horas desde horaInicio+1 hasta 24:00 (medianoche)
-    for (int hour = hourInicio + 1; hour <= 24; hour++) {
-      horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
+
+    // Generar intervalos de 30 minutos desde horaInicio+30min hasta 24:00
+    int totalMinutosInicio = hourInicio * 60 + minutesInicio;
+
+    for (int minutos = totalMinutosInicio + 30;
+        minutos <= 24 * 60;
+        minutos += 30) {
+      final h = (minutos ~/ 60) % 24;
+      final m = minutos % 60;
+      // Si es exactamente 24:00 (1440 min), mostrar como 24:00
+      if (minutos == 24 * 60) {
+        horasDisponibles.add('24:00');
+      } else {
+        horasDisponibles.add(
+            '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}');
+      }
     }
     return horasDisponibles;
   }

@@ -166,10 +166,23 @@ class _EditClassDialogState extends State<EditClassDialog> {
   List<String> _getHorasFinDisponibles(String horaInicio) {
     final parts = horaInicio.split(':');
     final hourInicio = int.parse(parts[0]);
+    final minutesInicio = int.parse(parts[1]);
     final horasDisponibles = <String>[];
-    // Permitir horas desde horaInicio+1 hasta 24:00 (medianoche)
-    for (int hour = hourInicio + 1; hour <= 24; hour++) {
-      horasDisponibles.add('${hour.toString().padLeft(2, '0')}:00');
+
+    // Generar intervalos de 30 minutos desde horaInicio+30min hasta 24:00
+    int totalMinutosInicio = hourInicio * 60 + minutesInicio;
+
+    for (int minutos = totalMinutosInicio + 30;
+        minutos <= 24 * 60;
+        minutos += 30) {
+      final h = (minutos ~/ 60) % 24;
+      final m = minutos % 60;
+      if (minutos == 24 * 60) {
+        horasDisponibles.add('24:00');
+      } else {
+        horasDisponibles.add(
+            '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}');
+      }
     }
     return horasDisponibles;
   }
