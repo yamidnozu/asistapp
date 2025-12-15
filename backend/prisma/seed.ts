@@ -596,7 +596,45 @@ async function main() {
 
   console.log('✅ 4 grupos creados.');
 
-  // ============================================================================
+  // ===========================================================================
+  // ==== Generar datos de prueba masivos ====
+  const extraStudentsCount = 30;
+  const extraStudents = await Promise.all(
+    Array.from({ length: extraStudentsCount }).map(async (_, i) => {
+      const email = `student${i + 1}@example.com`;
+      const user = await prisma.usuario.create({
+        data: {
+          email,
+          passwordHash: hashPassword('Student123!'),
+          nombres: `Estudiante${i + 1}`,
+          apellidos: 'Demo',
+          identificacion: `EST-EX-${i + 1}`,
+          rol: 'estudiante',
+          activo: true,
+        },
+      });
+      const estudiante = await prisma.estudiante.create({
+        data: {
+          usuarioId: user.id,
+          identificacion: `TI-EX-${1000 + i}`,
+          codigoQr: `QR-EX-${i + 1}`,
+          nombreResponsable: 'Demo Parent',
+          telefonoResponsable: TELEFONO_TEST,
+          telefonoResponsableVerificado: true,
+          aceptaNotificaciones: true,
+        },
+      });
+      // Asignar aleatoriamente a uno de los grupos creados
+      const grupos = [grupo10A.id, grupo11B.id, grupo6_1.id, grupo7_2.id];
+      const grupoId = grupos[Math.floor(Math.random() * grupos.length)];
+      await prisma.estudianteGrupo.create({
+        data: { estudianteId: estudiante.id, grupoId },
+      });
+      return estudiante;
+    })
+  );
+  console.log(`✅ ${extraStudentsCount} estudiantes extra creados y asignados a grupos.`);
+
   // 9. PERFILES DE ESTUDIANTES (con códigos QR y responsables)
   // ============================================================================
   console.log('\n🎓 Creando perfiles de estudiantes...');
