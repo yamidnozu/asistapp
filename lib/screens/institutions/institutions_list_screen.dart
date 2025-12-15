@@ -153,6 +153,7 @@ class _InstitutionsListScreenState extends State<InstitutionsListScreen> {
 
         return ClarityManagementPage(
           title: 'Gestión de Instituciones',
+          showAppBar: false, // El AppShell ya provee el AppBar
           isLoading: institutionProvider.isLoading,
           loadingWidget:
               const SkeletonList(height: 100), // Skeleton personalizado

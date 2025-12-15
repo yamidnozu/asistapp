@@ -220,6 +220,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
         return ClarityManagementPage(
           title: title,
+          showAppBar: false, // El AppShell ya provee el AppBar
           isLoading: userProvider.isLoading,
           loadingWidget:
               const SkeletonList(height: 90), // Skeleton personalizado

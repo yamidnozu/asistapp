@@ -60,6 +60,13 @@ class UserDetailScreen extends StatelessWidget {
                 _buildInfoItem('Email', user.email ?? 'No especificado'),
                 _buildInfoItem('Teléfono', user.telefono ?? 'No especificado'),
                 _buildInfoItem('Rol', _getRoleDisplayName(user.rol ?? '')),
+                // Mostrar identificación para todos los usuarios que la tengan
+                if (user.esEstudiante && user.estudiante != null)
+                  _buildInfoItem(
+                      'Identificación', user.estudiante!.identificacion)
+                else if (user.identificacion != null &&
+                    user.identificacion!.isNotEmpty)
+                  _buildInfoItem('Identificación', user.identificacion!),
                 _buildInfoItem(
                     'Estado', (user.activo == true) ? 'Activo' : 'Inactivo',
                     valueColor:
@@ -69,14 +76,28 @@ class UserDetailScreen extends StatelessWidget {
 
             SizedBox(height: spacing.lg),
 
+            // Información específica para profesores
+            if (user.esProfesor) ...[
+              _buildInfoSection(
+                context,
+                'Información del Profesor',
+                [
+                  if (user.titulo != null && user.titulo!.isNotEmpty)
+                    _buildInfoItem('Título', user.titulo!),
+                  if (user.especialidad != null &&
+                      user.especialidad!.isNotEmpty)
+                    _buildInfoItem('Especialidad', user.especialidad!),
+                ],
+              ),
+              SizedBox(height: spacing.lg),
+            ],
+
             // Información específica del rol
             if (user.esEstudiante && user.estudiante != null) ...[
               _buildInfoSection(
                 context,
                 'Información del Estudiante',
                 [
-                  _buildInfoItem(
-                      'Identificación', user.estudiante!.identificacion),
                   _buildInfoItem('Código QR', user.estudiante!.codigoQr),
                   if (user.estudiante!.nombreResponsable != null)
                     _buildInfoItem('Nombre del Responsable',
@@ -118,7 +139,7 @@ class UserDetailScreen extends StatelessWidget {
                 (user.instituciones ?? [])
                     .map((inst) => _buildInfoItem(
                           inst.nombre,
-                          inst.rolEnInstitucion ?? 'Sin rol específico',
+                          _getInstitutionRoleDisplayName(inst.rolEnInstitucion),
                         ))
                     .toList(),
               ),
@@ -427,6 +448,24 @@ class UserDetailScreen extends StatelessWidget {
         return 'Acudiente';
       default:
         return role;
+    }
+  }
+
+  String _getInstitutionRoleDisplayName(String? role) {
+    if (role == null || role.isEmpty) return 'Sin rol específico';
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return 'Administrador';
+      case 'miembro':
+      case 'member':
+        return 'Miembro';
+      case 'director':
+        return 'Director';
+      case 'profesor':
+        return 'Profesor';
+      default:
+        // Capitalizar la primera letra
+        return role[0].toUpperCase() + role.substring(1);
     }
   }
 }

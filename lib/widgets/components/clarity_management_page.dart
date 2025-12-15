@@ -78,6 +78,9 @@ class ClarityManagementPage extends StatelessWidget {
   /// Widget de carga personalizado (Skeleton)
   final Widget? loadingWidget;
 
+  /// Si mostrar el AppBar propio (false cuando la pantalla ya está dentro de AppShell)
+  final bool showAppBar;
+
   const ClarityManagementPage({
     super.key,
     required this.title,
@@ -101,6 +104,7 @@ class ClarityManagementPage extends StatelessWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.loadingWidget,
+    this.showAppBar = true,
   });
 
   @override
@@ -125,6 +129,131 @@ class ClarityManagementPage extends StatelessWidget {
       );
     }
 
+    // Contenido principal reutilizable
+    final mainContent = RefreshIndicator(
+      onRefresh: onRefresh ?? () async {},
+      child: CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          // Estadísticas y filtros
+          SliverToBoxAdapter(
+            child: Container(
+              color: colors.surface,
+              padding: EdgeInsets.all(spacing.screenPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título cuando no hay AppBar
+                  if (!showAppBar) ...[
+                    Text(title, style: textStyles.headlineMedium),
+                    SizedBox(height: spacing.md),
+                  ],
+                  if (statisticWidgets != null &&
+                      statisticWidgets!.isNotEmpty) ...[
+                    // Usamos Wrap para que sea responsivo
+                    Wrap(
+                      spacing: spacing.lg,
+                      runSpacing: spacing.md,
+                      alignment: WrapAlignment.center,
+                      children: statisticWidgets!,
+                    ),
+                    SizedBox(height: spacing.lg),
+                  ],
+                  if (filterWidgets != null && filterWidgets!.isNotEmpty)
+                    ...filterWidgets!,
+                ],
+              ),
+            ),
+          ),
+
+          // Estados de carga, error o vacío
+          if (isLoading && itemCount == 0)
+            SliverFillRemaining(
+              child: loadingWidget ??
+                  const Center(child: CircularProgressIndicator()),
+            )
+          else if (hasError)
+            SliverFillRemaining(
+              child: errorStateWidget ??
+                  ClarityEmptyState(
+                    icon: Icons.error_outline,
+                    title: 'Error al cargar datos',
+                    subtitle: errorMessage ?? 'Error desconocido',
+                    action: onRefresh != null
+                        ? ElevatedButton.icon(
+                            onPressed: onRefresh,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Reintentar'),
+                          )
+                        : null,
+                  ),
+            )
+          else if (itemCount == 0)
+            SliverFillRemaining(
+              child: emptyStateWidget ??
+                  ClarityEmptyState(
+                    icon: Icons.inbox_outlined,
+                    title: 'No hay elementos',
+                    subtitle: 'Comienza agregando tu primer elemento',
+                  ),
+            )
+          else
+            // Lista de items
+            SliverPadding(
+              padding: EdgeInsets.all(spacing.screenPadding),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    // Último item: mostrar indicador de carga si hay más datos
+                    if (index >= itemCount) {
+                      if (hasMoreData && !isLoadingMore) {
+                        // Trigger load more automáticamente
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          // El callback debe ser manejado por el padre
+                        });
+                      }
+                      return isLoadingMore
+                          ? Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(spacing.md),
+                                child: const CircularProgressIndicator(),
+                              ),
+                            )
+                          : const SizedBox.shrink();
+                    }
+
+                    // Item normal
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: itemSpacing ?? spacing.md,
+                      ),
+                      child: itemBuilder(context, index),
+                    );
+                  },
+                  childCount: itemCount + (hasMoreData ? 1 : 0),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    // Si no se debe mostrar AppBar, retornamos solo el contenido
+    if (!showAppBar) {
+      return Stack(
+        children: [
+          mainContent,
+          if (floatingActionButton != null)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: floatingActionButton!,
+            ),
+        ],
+      );
+    }
+
+    // Con AppBar (comportamiento original)
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.background,
       appBar: AppBar(
@@ -135,110 +264,8 @@ class ClarityManagementPage extends StatelessWidget {
             effectiveLeading == null && automaticallyImplyLeading,
         title: Text(title, style: textStyles.headlineMedium),
         centerTitle: false,
-        // ▼▼▼ ELIMINAMOS LOS ACTIONS DE AQUÍ ▼▼▼
       ),
-      body: RefreshIndicator(
-        onRefresh: onRefresh ?? () async {},
-        child: CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            // ▼▼▼ AÑADIMOS LAS ESTADÍSTICAS Y FILTROS AQUÍ ▼▼▼
-            SliverToBoxAdapter(
-              child: Container(
-                color: colors.surface,
-                padding: EdgeInsets.all(spacing.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (statisticWidgets != null &&
-                        statisticWidgets!.isNotEmpty) ...[
-                      // Usamos Wrap para que sea responsivo
-                      Wrap(
-                        spacing: spacing.lg,
-                        runSpacing: spacing.md,
-                        alignment: WrapAlignment.center,
-                        children: statisticWidgets!,
-                      ),
-                      SizedBox(height: spacing.lg),
-                    ],
-                    if (filterWidgets != null && filterWidgets!.isNotEmpty)
-                      ...filterWidgets!,
-                  ],
-                ),
-              ),
-            ),
-
-            // Estados de carga, error o vacío
-            if (isLoading && itemCount == 0)
-              SliverFillRemaining(
-                child: loadingWidget ??
-                    const Center(child: CircularProgressIndicator()),
-              )
-            else if (hasError)
-              SliverFillRemaining(
-                child: errorStateWidget ??
-                    ClarityEmptyState(
-                      icon: Icons.error_outline,
-                      title: 'Error al cargar datos',
-                      subtitle: errorMessage ?? 'Error desconocido',
-                      action: onRefresh != null
-                          ? ElevatedButton.icon(
-                              onPressed: onRefresh,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Reintentar'),
-                            )
-                          : null,
-                    ),
-              )
-            else if (itemCount == 0)
-              SliverFillRemaining(
-                child: emptyStateWidget ??
-                    ClarityEmptyState(
-                      icon: Icons.inbox_outlined,
-                      title: 'No hay elementos',
-                      subtitle: 'Comienza agregando tu primer elemento',
-                    ),
-              )
-            else
-              // Lista de items
-              SliverPadding(
-                padding: EdgeInsets.all(spacing.screenPadding),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      // Último item: mostrar indicador de carga si hay más datos
-                      if (index >= itemCount) {
-                        if (hasMoreData && !isLoadingMore) {
-                          // Trigger load more automáticamente
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            // El callback debe ser manejado por el padre
-                          });
-                        }
-                        return isLoadingMore
-                            ? Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(spacing.md),
-                                  child: const CircularProgressIndicator(),
-                                ),
-                              )
-                            : const SizedBox.shrink();
-                      }
-
-                      // Item normal
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: itemSpacing ?? spacing.md,
-                        ),
-                        child: itemBuilder(context, index),
-                      );
-                    },
-                    childCount: itemCount + (hasMoreData ? 1 : 0),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+      body: mainContent,
       floatingActionButton: floatingActionButton,
     );
   }

@@ -128,7 +128,7 @@ class _UserAccountStepState extends State<UserAccountStep> {
           labelText: 'Email',
           hintText: '${widget.userRole}@ejemplo.com',
           keyboardType: TextInputType.emailAddress,
-          enabled: !widget.isEditMode, // No editable en modo edición
+          enabled: true, // Editable tanto en creación como edición
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'El email es requerido';

@@ -219,7 +219,7 @@ export class UserService {
             data: {
               usuarioId: newUser.id,
               institucionId: userData.institucionId,
-              rolEnInstitucion: userData.rolEnInstitucion ?? (userData.rol === UserRole.ADMIN_INSTITUCION ? 'admin' : 'member'),
+              rolEnInstitucion: userData.rolEnInstitucion ?? (userData.rol === UserRole.ADMIN_INSTITUCION ? 'admin' : 'miembro'),
             },
           });
         }

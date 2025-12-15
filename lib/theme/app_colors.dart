@@ -209,9 +209,9 @@ class AppColors {
   // Base colors - Paleta moderna y energética
   // Fucsia vibrante para una identidad visual única y audaz
   static const Color _primaryBase =
-      Color(0xFF6200EA); // Deep Purple Accent - Tech & Modern
+      Color(0xFF00695C); // Teal - nuevo look moderno
   static const Color _secondaryBase =
-      Color(0xFF00E676); // Green Accent - High Contrast Energy
+      Color(0xFFFFA000); // Amber - contraste vibrante
   static const Color _surfaceBase = Color(0xFFFFFFFF); // Blanco puro
   static const Color _backgroundBase =
       Color(0xFFF3F4F6); // Cool Gray - fondo limpio y moderno
