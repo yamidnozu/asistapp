@@ -1,5 +1,16 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+
+# Prefer the Visual Studio Community instance when multiple VS installations
+# exist (e.g., Community + BuildTools). This avoids toolset mismatches with
+# prebuilt native dependencies (e.g., Firebase C++ SDK).
+if(WIN32)
+  set(_PREFERRED_VS_INSTANCE "C:/Program Files/Microsoft Visual Studio/2022/Community")
+  if(EXISTS "${_PREFERRED_VS_INSTANCE}")
+    set(CMAKE_GENERATOR_INSTANCE "${_PREFERRED_VS_INSTANCE}" CACHE PATH "" FORCE)
+  endif()
+endif()
+
 project(asistapp LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change

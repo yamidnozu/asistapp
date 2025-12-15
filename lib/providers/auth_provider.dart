@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart'; // Importación faltante
 import '../models/institution.dart';
@@ -10,7 +10,17 @@ import 'institution_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
-  final _storage = const FlutterSecureStorage();
+  late final SharedPreferences _storage;
+
+  AuthProvider({AuthService? authService})
+      : _authService = authService ?? AuthService() {
+    _initStorage();
+  }
+
+  void _initStorage() async {
+    _storage = await SharedPreferences.getInstance();
+    _loadTokensFromStorage();
+  }
 
   String? _accessToken;
   String? _refreshToken;
@@ -80,56 +90,45 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  AuthProvider({AuthService? authService})
-      : _authService = authService ?? AuthService() {
-    _loadTokensFromStorage();
-  }
-
   Future<void> _loadTokensFromStorage() async {
     try {
-      _accessToken = await _storage.read(key: 'accessToken');
-      _refreshToken = await _storage.read(key: 'refreshToken');
-      final userJson = await _storage.read(key: 'user');
-
+      _accessToken = _storage.getString('accessToken');
+      _refreshToken = _storage.getString('refreshToken');
+      final userJson = _storage.getString('user');
       if (userJson != null) {
         _user = Map<String, dynamic>.from(jsonDecode(userJson));
       }
-      _selectedInstitutionId =
-          await _storage.read(key: 'selectedInstitutionId');
+      _selectedInstitutionId = _storage.getString('selectedInstitutionId');
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading from secure storage: $e');
+      debugPrint('Error loading from storage: $e');
     }
   }
 
   Future<void> _saveTokensToStorage() async {
     try {
       if (_accessToken != null) {
-        await _storage.write(key: 'accessToken', value: _accessToken!);
+        await _storage.setString('accessToken', _accessToken!);
       } else {
-        await _storage.delete(key: 'accessToken');
+        await _storage.remove('accessToken');
       }
-
       if (_refreshToken != null) {
-        await _storage.write(key: 'refreshToken', value: _refreshToken!);
+        await _storage.setString('refreshToken', _refreshToken!);
       } else {
-        await _storage.delete(key: 'refreshToken');
+        await _storage.remove('refreshToken');
       }
-
       if (_user != null) {
-        await _storage.write(key: 'user', value: jsonEncode(_user));
+        await _storage.setString('user', jsonEncode(_user));
       } else {
-        await _storage.delete(key: 'user');
+        await _storage.remove('user');
       }
-
       if (_selectedInstitutionId != null) {
-        await _storage.write(
-            key: 'selectedInstitutionId', value: _selectedInstitutionId!);
+        await _storage.setString('selectedInstitutionId', _selectedInstitutionId!);
       } else {
-        await _storage.delete(key: 'selectedInstitutionId');
+        await _storage.remove('selectedInstitutionId');
       }
     } catch (e) {
-      debugPrint('Error saving to secure storage: $e');
+      debugPrint('Error saving to storage: $e');
     }
   }
 
@@ -139,8 +138,8 @@ class AuthProvider with ChangeNotifier {
     _user = null;
     _selectedInstitutionId = null;
 
-    // Limpiar todo el almacenamiento seguro
-    await _storage.deleteAll();
+    // Limpiar todo el almacenamiento
+    await _storage.clear();
 
     notifyListeners();
   }
@@ -197,9 +196,11 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> login(
       String email, String password, BuildContext context) async {
+    print('AuthProvider.login called with $email');
     try {
       final result = await _authService.login(email, password);
       if (result != null) {
+        print('AuthProvider.login success');
         _accessToken = result.accessToken;
         _refreshToken = result.refreshToken;
         _user = result.user;

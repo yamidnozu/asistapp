@@ -65,8 +65,8 @@ class AuthService {
         'password': password,
       });
 
-      debugPrint('AuthService.login - URL: $url');
-      debugPrint('AuthService.login - Config Base URL: $baseUrlValue');
+      print('AuthService.login - URL: $url');
+      print('AuthService.login - Config Base URL: $baseUrlValue');
 
       final response = await _httpClient
           .post(
@@ -80,9 +80,9 @@ class AuthService {
         },
       );
 
-      debugPrint('   Status: ${response.statusCode}');
-      debugPrint('   Body: ${response.body}');
-      debugPrint('========================================');
+      print('   Status: ${response.statusCode}');
+      print('   Body: ${response.body}');
+      print('========================================');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);

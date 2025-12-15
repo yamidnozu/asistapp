@@ -529,7 +529,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success) {
-        debugPrint('Login exitoso, AuthWrapper manejará la navegación');
+        print('Login exitoso, AuthWrapper manejará la navegación');
       } else {
         setState(() {
           _errorMessage = 'Credenciales incorrectas';

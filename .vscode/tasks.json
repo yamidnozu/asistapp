@@ -1,169 +1,697 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "docker: down (remove volumes)",
-      "type": "shell",
-      "command": "docker compose -f docker-compose.yml down -v",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
-    },
-    {
-      "label": "docker: up db",
-      "type": "shell",
-      "command": "docker compose -f docker-compose.yml up -d db",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
-      "group": "build"
-    },
-    {
-      "label": "docker: prisma db push",
-      "type": "shell",
-      "command": "docker compose run --rm app npx prisma db push --accept-data-loss",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
-    },
-    {
-      "label": "docker: seed (container)",
-      "type": "shell",
-      "command": "docker compose run --rm app npm run prisma:seed",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
-    },
-    {
-      "label": "docker: up backend (build)",
-      "type": "shell",
-      "command": "docker compose -f docker-compose.yml up -d --build app",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
-      "group": "build"
-    },
-    {
-      "label": "docker: logs backend",
-      "type": "shell",
-      "command": "docker compose -f docker-compose.yml logs --tail 200 app",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
-    },
-    {
-      "label": "docker: seed (host)",
-      "type": "shell",
-      "command": "cd backend && npm run prisma:seed:host",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } }
-    },
-    {
-      "label": "docker: rebuild all",
-      "type": "shell",
-      "command": "docker compose -f docker-compose.yml up -d --build",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}", "shell": { "executable": "bash.exe", "args": ["-lc"] } },
-      "group": "build"
-    },
-
-    {
-      "label": "flutter: get packages",
-      "type": "flutter",
-      "command": "flutter",
-      "args": ["pub", "get"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "silent", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "flutter: analyze",
-      "type": "flutter",
-      "command": "flutter",
-      "args": ["analyze"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "silent", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "flutter: run",
-      "type": "flutter",
-      "command": "flutter",
-      "args": ["run"],
-      "group": { "kind": "build", "isDefault": true },
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "flutter: build runner",
-      "type": "shell",
-      "command": "flutter",
-      "args": ["pub", "run", "build_runner", "build", "--delete-conflicting-outputs"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "firebase: deploy functions",
-      "type": "shell",
-      "command": "cd functions && npm run build && cd .. && firebase deploy --only functions",
-      "group": "none",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "firebase: deploy indexes",
-      "type": "shell",
-      "command": "firebase deploy --only firestore:indexes",
-      "group": "none",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "firebase: deploy all",
-      "type": "shell",
-      "command": "firebase deploy",
-      "group": "none",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "flutter: clean & pub get",
-      "type": "shell",
-      "command": "flutter",
-      "args": ["clean", "&&", "flutter", "pub", "get"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "android: restart adb",
-      "type": "shell",
-      "command": "adb",
-      "args": ["kill-server", "&&", "adb", "start-server"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "android: check device",
-      "type": "shell",
-      "command": "adb",
-      "args": ["devices"],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "android: diagnostic",
-      "type": "shell",
-      "command": "${workspaceFolder}/android_debug_diagnostic.bat",
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
-    },
-    {
-      "label": "android: force install",
-      "type": "shell",
-      "command": "${workspaceFolder}/force_install_apk.bat",
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" }
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "docker: down (remove volumes)",
+			"type": "shell",
+			"command": "docker compose -f docker-compose.yml down -v",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			}
+		},
+		{
+			"label": "docker: up db",
+			"type": "shell",
+			"command": "docker compose -f docker-compose.yml up -d db",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			},
+			"group": "build"
+		},
+		{
+			"label": "docker: prisma db push",
+			"type": "shell",
+			"command": "docker compose run --rm app npx prisma db push --accept-data-loss",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			}
+		},
+		{
+			"label": "docker: seed (container)",
+			"type": "shell",
+			"command": "docker compose run --rm app npm run prisma:seed",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			}
+		},
+		{
+			"label": "docker: up backend (build)",
+			"type": "shell",
+			"command": "docker compose -f docker-compose.yml up -d --build app",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			},
+			"group": "build"
+		},
+		{
+			"label": "docker: logs backend",
+			"type": "shell",
+			"command": "docker compose -f docker-compose.yml logs --tail 200 app",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			}
+		},
+		{
+			"label": "docker: seed (host)",
+			"type": "shell",
+			"command": "cd backend && npm run prisma:seed:host",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			}
+		},
+		{
+			"label": "docker: rebuild all",
+			"type": "shell",
+			"command": "docker compose -f docker-compose.yml up -d --build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			},
+			"group": "build"
+		},
+		{
+			"label": "flutter: get packages",
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"get"
+			],
+			"group": "build"
+		},
+		{
+			"label": "flutter: analyze",
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"analyze"
+			],
+			"group": "build"
+		},
+		{
+			"label": "flutter: e2e (windows)",
+			"type": "shell",
+			"command": "cd /c/Proyectos/DemoLife && (taskkill.exe /IM asistapp.exe /F >/dev/null 2>&1 || true) && flutter test integration_test/main_e2e_test.dart -d windows -r expanded 2>&1 | tee test_main_output_windows.log",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "bash.exe",
+					"args": [
+						"-lc"
+					]
+				}
+			},
+			"group": "test"
+		},
+		{
+			"label": "flutter: run",
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"run"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "flutter: build runner",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"run",
+				"build_runner",
+				"build",
+				"--delete-conflicting-outputs"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "firebase: deploy functions",
+			"type": "shell",
+			"command": "cd functions && npm run build && cd .. && firebase deploy --only functions",
+			"group": "none",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "firebase: deploy indexes",
+			"type": "shell",
+			"command": "firebase deploy --only firestore:indexes",
+			"group": "none",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "firebase: deploy all",
+			"type": "shell",
+			"command": "firebase deploy",
+			"group": "none",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: clean & pub get",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"clean",
+				"&&",
+				"flutter",
+				"pub",
+				"get"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "android: restart adb",
+			"type": "shell",
+			"command": "adb",
+			"args": [
+				"kill-server",
+				"&&",
+				"adb",
+				"start-server"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "android: check device",
+			"type": "shell",
+			"command": "adb",
+			"args": [
+				"devices"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "android: diagnostic",
+			"type": "shell",
+			"command": "${workspaceFolder}/android_debug_diagnostic.bat",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "android: force install",
+			"type": "shell",
+			"command": "${workspaceFolder}/force_install_apk.bat",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "flutter: test e2e windows",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"test",
+				"integration_test/main_e2e_test.dart",
+				"-d",
+				"windows"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "clean: rm build/windows",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && rm -rf build/windows"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: test e2e windows (clean build)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && rm -rf build/windows && flutter test integration_test/main_e2e_test.dart -d windows"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect: msvc dir",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/\" | head -50"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: msvc libs x64",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/\""
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: msvcp libs",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64/\" | grep -i '^msvcp' | head -50"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: onecore msvc libs",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/onecore/x64/\" | grep -i '^msvc' | head -50"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: onecore root",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/onecore\""
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin __std symbols",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; LIB=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64/msvcprt.lib\"; \"$DUMPBIN\" /symbols \"$LIB\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin debug std symbols",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; LIB=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64/msvcprtd.lib\"; \"$DUMPBIN\" /symbols \"$LIB\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin libcpmt std symbols",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; LIB=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64/libcpmt.lib\"; \"$DUMPBIN\" /symbols \"$LIB\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1|find_last_trivial_1|find_first_of_trivial_1)\" | head -20"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: list std libs",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64\" | grep -i 'libcpm|msvc' | head -40"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: list std libs (fixed)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64\" | grep -Ei \"libcpm|msvc\" | head -40"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: find __std symbols in libs",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"set -e\nDUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"\nLIBDIR=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64\"\nfor f in msvcprt.lib msvcprtd.lib msvcmrt.lib msvcmrtd.lib libcpmtd1.lib; do\n  echo \"--- $f\";\n  \"$DUMPBIN\" /symbols \"$LIBDIR/$f\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -5 || true;\ndone"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin libcpmtd1 __std",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; LIB=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64/libcpmtd1.lib\"; \"$DUMPBIN\" /symbols \"$LIB\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20 || true"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: msvcp140 exports",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; DLL=\"/c/Windows/System32/msvcp140.dll\"; \"$DUMPBIN\" /exports \"$DLL\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20 || true"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: msvcp140_1/_2 exports",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; for dll in /c/Windows/System32/msvcp140_1.dll /c/Windows/System32/msvcp140_2.dll; do echo \"--- $dll\"; \"$DUMPBIN\" /exports \"$dll\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -5 || true; done"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: list msvcp dlls",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 /c/Windows/System32/msvcp140*.dll"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin exports head",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; \"$DUMPBIN\" /exports /c/Windows/System32/msvcp140_1.dll | head -60"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin exports (no msys conv)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /EXPORTS C:\\\\Windows\\\\System32\\\\msvcp140_1.dll | head -40"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin exports msvcp140_1",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /EXPORTS 'C:\\Windows\\System32\\msvcp140_1.dll' | head -60"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: dumpbin exports msvcp140_1 (forward slashes)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /EXPORTS 'C:/Windows/System32/msvcp140_1.dll' | head -40"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: grep __std in msvcp140_1",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /EXPORTS 'C:/Windows/System32/msvcp140_1.dll' 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20 || true"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: grep __std in msvcp140_2",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /EXPORTS 'C:/Windows/System32/msvcp140_2.dll' 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -20 || true"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: list libcpm libs",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"ls -1 \"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64\" | grep -Ei '^libcpm' | head -50"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "inspect: grep __std in libcpmt",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"DUMPBIN=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/dumpbin.exe\"; LIBDIR=\"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/lib/x64\"; for f in libcpmt.lib libcpmt1.lib libcpmtd.lib libcpmtd0.lib; do echo \"--- $f\"; MSYS2_ARG_CONV_EXCL='*' \"$DUMPBIN\" /SYMBOLS \"$LIBDIR/$f\" 2>/dev/null | grep -E \"__std_(remove_8|find_last_of_trivial_pos_1)\" | head -5 || true; done"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: test e2e windows (clean, stub firebase_core)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && rm -rf build/windows && flutter test integration_test/main_e2e_test.dart -d windows"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "flutter: test e2e windows",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && taskkill //F //IM asistapp.exe 2>/dev/null || true; flutter test integration_test/main_e2e_test.dart -d windows -r expanded"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "flutter: test e2e windows (log)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && taskkill //F //IM asistapp.exe 2>/dev/null || true; flutter test integration_test/main_e2e_test.dart -d windows -r expanded 2>&1 | tee test_main_output_windows.log"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "flutter: test e2e windows (to file)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && taskkill //F //IM asistapp.exe 2>/dev/null || true; flutter test integration_test/main_e2e_test.dart -d windows -r expanded > test_results.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "flutter: test e2e windows (bash log full)",
+			"type": "shell",
+			"command": "bash.exe",
+			"args": [
+				"-lc",
+				"cd /c/Proyectos/DemoLife && taskkill //F //IM asistapp.exe 2>/dev/null || true; flutter test integration_test/main_e2e_test.dart -d windows -r expanded 2>&1 | tee test_results_full.log"
+			],
+			"isBackground": false
+		}
+	]
 }
