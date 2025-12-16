@@ -1,6 +1,6 @@
 # Manual de Usuario - AsistApp
 
-**Versión:** 1.4.11  
+**Versión:** 1.5.3  
 **Fecha:** Diciembre 2025
 
 ---
@@ -245,6 +245,8 @@ Administre profesores, estudiantes y acudientes de su institución.
 **Contraseña temporal:**
 Al crear un usuario, el sistema genera una **contraseña temporal** que se muestra una única vez. Debe copiarla y entregarla al usuario.
 
+![Formulario de Usuario](images/user_form.png)
+
 > **Nota:** La contraseña no se puede recuperar posteriormente. El usuario debe cambiarla en su primer inicio de sesión.
 
 **Acciones en la lista de usuarios:**
@@ -334,6 +336,8 @@ Administre el catálogo de materias de la institución.
    - Código (opcional)
 3. Presione **"Crear"**
 
+![Gestión de Materias](images/materias_screen.png)
+
 **Acciones por materia:**
 - Editar información
 - Eliminar materia
@@ -346,6 +350,8 @@ Configure los períodos lectivos de su institución.
 - Lista de todos los períodos creados
 - Indicador de estado (Activo/Inactivo)
 - Fechas de inicio y fin visibles
+
+![Gestión de Períodos](images/periodos_screen.png)
 
 **Para crear un período:**
 1. Presione el botón flotante **"+"**
@@ -570,6 +576,8 @@ Los acudientes pueden monitorear la asistencia de sus hijos y recibir notificaci
 
 Al tocar la tarjeta de un hijo, accede a una pantalla con **dos pestañas**:
 
+![Detalle del Estudiante](images/estudiante_detail.png)
+
 **Pestaña "Estadísticas":**
 - Porcentaje de asistencia general (indicador grande con color)
 - Desglose: Total clases, Presente, Ausente, Tardanza
@@ -594,6 +602,8 @@ Acceda al centro de notificaciones desde el ícono de campana en el dashboard.
 - Botón **"Marcar todas"** para leer todas las notificaciones
 - **Deslizar para eliminar** notificaciones individuales
 
+![Centro de Notificaciones](images/notificaciones_inapp.png)
+
 **Tipos de notificación:**
 - ⚠️ **Ausencia:** Ícono rojo cuando se registra una falta
 - 🕐 **Tardanza:** Ícono naranja para llegadas tarde
@@ -613,6 +623,8 @@ Según la configuración de la institución:
 ### Pantalla de Ajustes
 
 Acceda desde el menú principal para personalizar la aplicación:
+
+![Pantalla de Ajustes](images/settings_screen.png)
 
 **Sección "Apariencia":**
 - **Tema Oscuro:** Active/desactive el tema oscuro de la aplicación
