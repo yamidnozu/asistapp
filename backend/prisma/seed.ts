@@ -317,7 +317,7 @@ async function main() {
 
   const hashPassword = (password: string) => bcrypt.hashSync(password, 10);
   const TELEFONO_1 = '+573103816321'; // Para pruebas WhatsApp
-  const TELEFONO_2 = '+573217645654'; // Alternativo
+  const TELEFONO_2 = '+573103816321'; // Alternativo
 
   // ============================================================================
   // 2. CREAR INSTITUCIONES
