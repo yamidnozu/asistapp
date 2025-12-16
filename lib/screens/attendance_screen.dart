@@ -32,7 +32,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   // Estado para tracking del estudiante seleccionado (primer toque)
   String? _estudianteSeleccionadoId;
-  DateTime _selectedDate = DateTime.now();
 
   // Estado para modo de selección múltiple
   bool _multiSelectMode = false;
@@ -89,47 +88,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     final token = authProvider.accessToken;
     if (token != null) {
-      await asistenciaProvider.fetchAsistencias(token, widget.clase.id,
-          date: _selectedDate);
-    }
-  }
-
-  Future<void> _pickDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        final colors = context.colors;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDark
-                ? ColorScheme.dark(
-                    primary: colors.primary,
-                    onPrimary: colors.white,
-                    surface: colors.surfaceContainer,
-                    onSurface: colors.textPrimary,
-                  )
-                : ColorScheme.light(
-                    primary: colors.primary,
-                    onPrimary: colors.white,
-                    surface: colors.surface,
-                    onSurface: colors.textPrimary,
-                  ),
-            dialogBackgroundColor:
-                isDark ? colors.surfaceContainer : colors.surface,
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-      _loadAsistencias();
+      await asistenciaProvider.fetchAsistencias(token, widget.clase.id);
     }
   }
 
@@ -149,8 +108,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (result == true) {
       final token = authProvider.accessToken;
       if (token != null) {
-        await asistenciaProvider.fetchAsistencias(token, widget.clase.id,
-            date: _selectedDate);
+        await asistenciaProvider.fetchAsistencias(token, widget.clase.id);
       }
     }
   }
@@ -637,63 +595,39 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           subtitle: Row(
             children: [
-              Text(
-                'ID: ${estudiante.identificacion}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.textMuted,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (estaSeleccionado) ...[
-                SizedBox(width: spacing.sm),
-                Expanded(
-                  child: Text(
-                    'Toca de nuevo para confirmar',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.warning,
-                          fontWeight: FontWeight.bold,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+              // ID del estudiante
+              Expanded(
+                child: Text(
+                  estudiante.identificacion,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.textMuted,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
+              ),
+              if (estaSeleccionado)
+                Text(
+                  'Toca de nuevo • ',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.warning,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              // Chip de estado compacto a la derecha
+              _buildCompactStatusChip(estudiante),
             ],
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildStatusChip(estudiante),
-              if (puedeMarcarManualmente && !estaSeleccionado) ...[
-                SizedBox(width: spacing.xs),
-                Icon(
-                  Icons.touch_app,
-                  color: colors.primary.withValues(alpha: 0.5),
-                  size: 20,
-                ),
-              ],
-              if (estaSeleccionado) ...[
-                SizedBox(width: spacing.xs),
-                Icon(
-                  Icons.check_circle_outline,
-                  color: colors.warning,
-                  size: 24,
-                ),
-              ],
-              // Botón de edición
-              IconButton(
-                icon: const Icon(Icons.edit),
-                color: colors.primary,
-                onPressed: () => _showEditDialog(estudiante),
-                tooltip: 'Editar asistencia',
-              ),
-            ],
+          trailing: IconButton(
+            icon: Icon(
+              estaSeleccionado ? Icons.check_circle : Icons.edit_outlined,
+              color: estaSeleccionado ? colors.warning : colors.textMuted,
+            ),
+            onPressed: () => _showEditDialog(estudiante),
+            tooltip: 'Editar asistencia',
           ),
           // Agregar long press para activar modo multi-selección
           onLongPress: () => _toggleMultiSelectMode(estudiante),
@@ -1176,11 +1110,80 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   children: [
                     DropdownButtonFormField<String>(
                       value: estado,
-                      decoration: const InputDecoration(labelText: 'Estado'),
-                      items: ['PRESENTE', 'AUSENTE', 'TARDANZA', 'JUSTIFICADO']
-                          .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(),
+                      decoration: InputDecoration(
+                        labelText: 'Estado de Asistencia',
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'PRESENTE',
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle,
+                                    color: colors.success, size: 24),
+                                const SizedBox(width: 12),
+                                const Text('Presente',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'AUSENTE',
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.cancel,
+                                    color: colors.error, size: 24),
+                                const SizedBox(width: 12),
+                                const Text('Ausente',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'TARDANZA',
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.schedule,
+                                    color: colors.warning, size: 24),
+                                const SizedBox(width: 12),
+                                const Text('Tardanza',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'JUSTIFICADO',
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.assignment_turned_in,
+                                    color: colors.info, size: 24),
+                                const SizedBox(width: 12),
+                                const Text('Justificado',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       onChanged: (value) {
                         if (value != null) {
                           setStateDialog(() {
@@ -1295,6 +1298,80 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
+  /// Construye un chip de estado COMPACTO para el subtitle
+  /// Muestra texto visible y al tocarlo permite cambiar el estado
+  Widget _buildCompactStatusChip(AsistenciaEstudiante estudiante) {
+    final colors = context.colors;
+    final Color chipColor;
+    final String statusText;
+    final IconData statusIcon;
+
+    if (estudiante.estaPresente) {
+      chipColor = colors.success;
+      statusText = 'Presente';
+      statusIcon = Icons.check_circle;
+    } else if (estudiante.estaAusente) {
+      chipColor = colors.error;
+      statusText = 'Ausente';
+      statusIcon = Icons.cancel;
+    } else if (estudiante.tieneTardanza) {
+      chipColor = colors.warning;
+      statusText = 'Tardanza';
+      statusIcon = Icons.schedule;
+    } else if (estudiante.estaJustificado) {
+      chipColor = colors.info;
+      statusText = 'Justificado';
+      statusIcon = Icons.assignment_turned_in;
+    } else {
+      chipColor = colors.textMuted;
+      statusText = 'Sin registro';
+      statusIcon = Icons.radio_button_unchecked;
+    }
+
+    return PopupMenuButton<String>(
+      tooltip: 'Cambiar estado',
+      onSelected: (nuevoEstado) =>
+          _quickMarkAttendance(estudiante, nuevoEstado),
+      offset: const Offset(0, 36),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.zero,
+      itemBuilder: (context) => [
+        _buildStatusMenuItem('PRESENTE', 'Presente', Icons.check_circle,
+            colors.success, estudiante.estado),
+        _buildStatusMenuItem('AUSENTE', 'Ausente', Icons.cancel, colors.error,
+            estudiante.estado),
+        _buildStatusMenuItem('TARDANZA', 'Tardanza', Icons.schedule,
+            colors.warning, estudiante.estado),
+        _buildStatusMenuItem('JUSTIFICADO', 'Justificado',
+            Icons.assignment_turned_in, colors.info, estudiante.estado),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: chipColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(statusIcon, color: Colors.white, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              statusText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 2),
+            const Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Construye un chip de estado INTERACTIVO
   /// Al tocarlo, muestra un menú rápido para cambiar el estado
   Widget _buildStatusChip(AsistenciaEstudiante estudiante) {
@@ -1382,15 +1459,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final isSelected = currentStatus == value;
     return PopupMenuItem<String>(
       value: value,
+      height: 56, // Altura más cómoda para tocar
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Text(label),
-          if (isSelected) ...[
-            const Spacer(),
-            Icon(Icons.check, color: color, size: 18),
-          ],
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? color : null,
+              ),
+            ),
+          ),
+          if (isSelected) Icon(Icons.check_circle, color: color, size: 20),
         ],
       ),
     );
@@ -1408,12 +1500,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             backgroundColor: colors.surface,
             foregroundColor: colors.textPrimary,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+              tooltip: 'Volver',
+            ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: () => _pickDate(context),
-                tooltip: 'Seleccionar fecha',
-              ),
               IconButton(
                 icon: const Icon(Icons.qr_code_scanner),
                 onPressed: _onScanQR,

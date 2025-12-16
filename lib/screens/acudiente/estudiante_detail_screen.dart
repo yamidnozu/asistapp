@@ -75,6 +75,11 @@ class _EstudianteDetailScreenState extends State<EstudianteDetailScreen>
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'Volver',
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

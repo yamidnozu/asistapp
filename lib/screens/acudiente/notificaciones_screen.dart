@@ -63,6 +63,11 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'Volver',
+        ),
         actions: [
           Consumer<AcudienteProvider>(
             builder: (context, provider, _) {

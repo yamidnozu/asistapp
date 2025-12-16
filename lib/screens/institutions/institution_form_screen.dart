@@ -82,6 +82,11 @@ class _InstitutionFormScreenState extends State<InstitutionFormScreen> {
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: 'Volver',
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(spacing.screenPadding),

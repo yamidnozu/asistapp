@@ -554,6 +554,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
           backgroundColor: colors.surface,
           foregroundColor: colors.textPrimary,
           elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+            tooltip: 'Volver',
+          ),
         ),
         body: Center(
           child: const Column(
@@ -578,6 +583,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: 'Volver',
+        ),
       ),
       body: Form(
         key: _formKey,
