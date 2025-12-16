@@ -1,5 +1,5 @@
 // backend/prisma/seed.ts
-// Seed maestro completo para AsistApp - Mantiene usuarios de login + Nueva estructura
+// Seed maestro completo para AsistApp - Secundaria con horarios perfectamente distribuidos
 // Última actualización: Diciembre 2025
 
 const { PrismaClient } = require('@prisma/client');
@@ -7,8 +7,289 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
+// ============================================================================
+// CONFIGURACIÓN DE MATERIAS DE SECUNDARIA
+// ============================================================================
+interface MateriaConfig {
+  nombre: string;
+  codigo: string;
+  horasSemana: number; // Horas semanales requeridas
+}
+
+const MATERIAS_SECUNDARIA: MateriaConfig[] = [
+  { nombre: 'Matemáticas', codigo: 'MAT', horasSemana: 5 },
+  { nombre: 'Lengua Castellana', codigo: 'ESP', horasSemana: 4 },
+  { nombre: 'Inglés', codigo: 'ING', horasSemana: 4 },
+  { nombre: 'Ciencias Naturales', codigo: 'NAT', horasSemana: 4 },
+  { nombre: 'Ciencias Sociales', codigo: 'SOC', horasSemana: 3 },
+  { nombre: 'Educación Física', codigo: 'EFI', horasSemana: 2 },
+  { nombre: 'Ética y Valores', codigo: 'ETI', horasSemana: 1 },
+  { nombre: 'Educación Artística', codigo: 'ART', horasSemana: 2 },
+  { nombre: 'Tecnología e Informática', codigo: 'TEC', horasSemana: 2 },
+  { nombre: 'Educación Religiosa', codigo: 'REL', horasSemana: 1 },
+  { nombre: 'Filosofía', codigo: 'FIL', horasSemana: 2 }, // Solo para 10° y 11°
+];
+
+// Total: 30 horas semanales (6 horas × 5 días)
+
+// ============================================================================
+// CONFIGURACIÓN DE BLOQUES HORARIOS
+// ============================================================================
+interface BloqueHorario {
+  inicio: string;
+  fin: string;
+}
+
+const BLOQUES_HORARIOS: BloqueHorario[] = [
+  { inicio: '07:00', fin: '08:00' }, // Bloque 1
+  { inicio: '08:00', fin: '09:00' }, // Bloque 2
+  { inicio: '09:00', fin: '10:00' }, // Bloque 3
+  // DESCANSO 10:00 - 10:30
+  { inicio: '10:30', fin: '11:30' }, // Bloque 4
+  { inicio: '11:30', fin: '12:30' }, // Bloque 5
+  // ALMUERZO 12:30 - 14:00
+  { inicio: '14:00', fin: '15:00' }, // Bloque 6
+];
+
+const DIAS_SEMANA = [1, 2, 3, 4, 5]; // Lunes a Viernes
+
+// ============================================================================
+// GRADOS DE SECUNDARIA
+// ============================================================================
+const GRADOS_SECUNDARIA = [
+  { nombre: 'Sexto', grado: '6' },
+  { nombre: 'Séptimo', grado: '7' },
+  { nombre: 'Octavo', grado: '8' },
+  { nombre: 'Noveno', grado: '9' },
+  { nombre: 'Décimo', grado: '10' },
+  { nombre: 'Once', grado: '11' },
+];
+
+const SECCIONES = ['A', 'B'];
+
+// ============================================================================
+// ALGORITMO DE DISTRIBUCIÓN DE HORARIOS
+// ============================================================================
+
+interface SlotOcupado {
+  profesorId: string;
+  grupoId: string;
+  materiaId: string;
+}
+
+interface AsignacionProfesor {
+  profesorId: string;
+  materiaIds: string[];
+}
+
+interface HorarioParaCrear {
+  grupoId: string;
+  materiaId: string;
+  profesorId: string;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+}
+
+class GeneradorHorarios {
+  private ocupacionGlobal: Map<string, SlotOcupado[]> = new Map(); // Clave: "dia-bloque"
+  private horasAsignadasPorGrupoMateria: Map<string, number> = new Map(); // Clave: "grupoId-materiaId"
+  private horasAsignadasPorGrupoMateriaDia: Map<string, number> = new Map(); // Clave: "grupoId-materiaId-dia"
+  private diasMateriaGrupo: Map<string, Set<number>> = new Map(); // Clave: "grupoId-materiaId" -> set de días
+  private horariosGenerados: HorarioParaCrear[] = [];
+
+  constructor(
+    private grupos: any[],
+    private materias: any[],
+    private profesoresPorMateria: Map<string, string[]>, // materiaId -> [profesorId1, profesorId2]
+    private horasRequeridas: Map<string, number>, // materiaId -> horas semanales
+  ) { }
+
+  private getSlotKey(dia: number, bloqueIdx: number): string {
+    return `${dia}-${bloqueIdx}`;
+  }
+
+  private getGrupoMateriaKey(grupoId: string, materiaId: string): string {
+    return `${grupoId}-${materiaId}`;
+  }
+
+  private getGrupoMateriaDiaKey(grupoId: string, materiaId: string, dia: number): string {
+    return `${grupoId}-${materiaId}-${dia}`;
+  }
+
+  private esSlotDisponibleParaProfesor(dia: number, bloqueIdx: number, profesorId: string): boolean {
+    const slotKey = this.getSlotKey(dia, bloqueIdx);
+    const ocupados = this.ocupacionGlobal.get(slotKey) || [];
+    return !ocupados.some(o => o.profesorId === profesorId);
+  }
+
+  private esSlotDisponibleParaGrupo(dia: number, bloqueIdx: number, grupoId: string): boolean {
+    const slotKey = this.getSlotKey(dia, bloqueIdx);
+    const ocupados = this.ocupacionGlobal.get(slotKey) || [];
+    return !ocupados.some(o => o.grupoId === grupoId);
+  }
+
+  private puedeAsignarMasHorasMateria(grupoId: string, materiaId: string, dia: number): boolean {
+    // Verificar límite semanal
+    const claveGM = this.getGrupoMateriaKey(grupoId, materiaId);
+    const horasActuales = this.horasAsignadasPorGrupoMateria.get(claveGM) || 0;
+    const horasRequeridas = this.horasRequeridas.get(materiaId) || 0;
+    if (horasActuales >= horasRequeridas) return false;
+
+    // Verificar máximo 2 horas por día (bloque de 2 horas máximo)
+    const claveGMD = this.getGrupoMateriaDiaKey(grupoId, materiaId, dia);
+    const horasDia = this.horasAsignadasPorGrupoMateriaDia.get(claveGMD) || 0;
+    if (horasDia >= 2) return false;
+
+    // Verificar que la materia se distribuya en máximo 3 días a la semana
+    // (cada materia puede repetirse hasta 2 veces, así que repartir en varios días)
+    const diasKey = this.getGrupoMateriaKey(grupoId, materiaId);
+    const diasUsados = this.diasMateriaGrupo.get(diasKey) || new Set();
+
+    // Si ya está en 3 días y este no es uno de ellos, no asignar más
+    if (diasUsados.size >= 3 && !diasUsados.has(dia)) return false;
+
+    return true;
+  }
+
+  private registrarAsignacion(
+    grupoId: string,
+    materiaId: string,
+    profesorId: string,
+    dia: number,
+    bloqueIdx: number,
+  ): void {
+    const slotKey = this.getSlotKey(dia, bloqueIdx);
+    if (!this.ocupacionGlobal.has(slotKey)) {
+      this.ocupacionGlobal.set(slotKey, []);
+    }
+    this.ocupacionGlobal.get(slotKey)!.push({ profesorId, grupoId, materiaId });
+
+    // Incrementar horas semanales
+    const claveGM = this.getGrupoMateriaKey(grupoId, materiaId);
+    this.horasAsignadasPorGrupoMateria.set(
+      claveGM,
+      (this.horasAsignadasPorGrupoMateria.get(claveGM) || 0) + 1
+    );
+
+    // Incrementar horas por día
+    const claveGMD = this.getGrupoMateriaDiaKey(grupoId, materiaId, dia);
+    this.horasAsignadasPorGrupoMateriaDia.set(
+      claveGMD,
+      (this.horasAsignadasPorGrupoMateriaDia.get(claveGMD) || 0) + 1
+    );
+
+    // Registrar día usado
+    if (!this.diasMateriaGrupo.has(claveGM)) {
+      this.diasMateriaGrupo.set(claveGM, new Set());
+    }
+    this.diasMateriaGrupo.get(claveGM)!.add(dia);
+  }
+
+  private buscarProfesorDisponible(materiaId: string, dia: number, bloqueIdx: number): string | null {
+    const profesores = this.profesoresPorMateria.get(materiaId) || [];
+    for (const profId of profesores) {
+      if (this.esSlotDisponibleParaProfesor(dia, bloqueIdx, profId)) {
+        return profId;
+      }
+    }
+    return null;
+  }
+
+  generar(): HorarioParaCrear[] {
+    console.log('\n📅 Generando horarios optimizados...');
+
+    // Para cada grupo, asignar todas las materias con sus horas requeridas
+    for (const grupo of this.grupos) {
+      console.log(`   📚 Procesando grupo: ${grupo.nombre}`);
+
+      // Crear lista de materias que aplican a este grupo
+      // Filosofía solo para 10° y 11°
+      const materiasGrupo = this.materias.filter(m => {
+        if (m.codigo === 'FIL-101' || m.nombre === 'Filosofía') {
+          return grupo.grado === '10' || grupo.grado === '11';
+        }
+        return true;
+      });
+
+      // Ordenar materias por horas requeridas (más horas primero para mejor distribución)
+      const materiasOrdenadas = [...materiasGrupo].sort((a, b) => {
+        const horasA = this.horasRequeridas.get(a.id) || 0;
+        const horasB = this.horasRequeridas.get(b.id) || 0;
+        return horasB - horasA;
+      });
+
+      // Iterar por días y bloques
+      for (const dia of DIAS_SEMANA) {
+        for (let bloqueIdx = 0; bloqueIdx < BLOQUES_HORARIOS.length; bloqueIdx++) {
+          // Verificar si el slot está disponible para este grupo
+          if (!this.esSlotDisponibleParaGrupo(dia, bloqueIdx, grupo.id)) {
+            continue;
+          }
+
+          // Buscar materia que necesite más horas y pueda asignarse
+          for (const materia of materiasOrdenadas) {
+            if (!this.puedeAsignarMasHorasMateria(grupo.id, materia.id, dia)) {
+              continue;
+            }
+
+            // Buscar profesor disponible
+            const profesorId = this.buscarProfesorDisponible(materia.id, dia, bloqueIdx);
+            if (!profesorId) {
+              continue;
+            }
+
+            // Asignar horario
+            this.registrarAsignacion(grupo.id, materia.id, profesorId, dia, bloqueIdx);
+
+            this.horariosGenerados.push({
+              grupoId: grupo.id,
+              materiaId: materia.id,
+              profesorId: profesorId,
+              diaSemana: dia,
+              horaInicio: BLOQUES_HORARIOS[bloqueIdx].inicio,
+              horaFin: BLOQUES_HORARIOS[bloqueIdx].fin,
+            });
+
+            break; // Solo una materia por slot
+          }
+        }
+      }
+    }
+
+    console.log(`   ✅ ${this.horariosGenerados.length} horarios generados`);
+    return this.horariosGenerados;
+  }
+
+  verificarConflictos(): { conflictosProfesor: number; conflictosGrupo: number } {
+    let conflictosProfesor = 0;
+    let conflictosGrupo = 0;
+
+    for (const [_slotKey, ocupados] of this.ocupacionGlobal) {
+      // Verificar conflictos de profesores
+      const profesores = ocupados.map(o => o.profesorId);
+      const profesoresUnicos = new Set(profesores);
+      if (profesoresUnicos.size < profesores.length) {
+        conflictosProfesor += profesores.length - profesoresUnicos.size;
+      }
+
+      // Verificar conflictos de grupos
+      const grupos = ocupados.map(o => o.grupoId);
+      const gruposUnicos = new Set(grupos);
+      if (gruposUnicos.size < grupos.length) {
+        conflictosGrupo += grupos.length - gruposUnicos.size;
+      }
+    }
+
+    return { conflictosProfesor, conflictosGrupo };
+  }
+}
+
+// ============================================================================
+// FUNCIÓN PRINCIPAL DEL SEED
+// ============================================================================
 async function main() {
-  console.log('🚀 Iniciando seed maestro para AsistApp...');
+  console.log('🚀 Iniciando seed maestro para AsistApp - Secundaria...');
   console.log('📅 Fecha de ejecución:', new Date().toISOString());
 
   // ============================================================================
@@ -39,7 +320,7 @@ async function main() {
   const TELEFONO_2 = '+573217645654'; // Alternativo
 
   // ============================================================================
-  // 2. CREAR INSTITUCIONES (mantener las originales del login)
+  // 2. CREAR INSTITUCIONES
   // ============================================================================
   console.log('\n🏫 Creando instituciones...');
 
@@ -174,7 +455,12 @@ async function main() {
   });
   console.log('   ✅ Admin Multi-Sede: multiadmin@asistapp.com / Multi123!');
 
-  // ==================== PROFESORES DEL LOGIN ====================
+  // ============================================================================
+  // 5. CREAR PROFESORES
+  // ============================================================================
+  console.log('\n👨‍🏫 Creando profesores...');
+
+  // Profesores del login (existentes)
   const profesorJuan = await prisma.usuario.create({
     data: {
       email: 'juan.perez@sanjose.edu',
@@ -183,7 +469,7 @@ async function main() {
       apellidos: 'Pérez',
       identificacion: 'PROF-JP-001',
       titulo: 'Licenciado en Matemáticas',
-      especialidad: 'Cálculo y Álgebra',
+      especialidad: 'Matemáticas, Física',
       rol: 'profesor',
       activo: true,
       telefono: '+573101234567',
@@ -197,8 +483,8 @@ async function main() {
       nombres: 'Laura',
       apellidos: 'Gómez',
       identificacion: 'PROF-LG-001',
-      titulo: 'Licenciada en Ciencias',
-      especialidad: 'Física y Química',
+      titulo: 'Licenciada en Ciencias Naturales',
+      especialidad: 'Ciencias Naturales, Química',
       rol: 'profesor',
       activo: true,
       telefono: '+573101234568',
@@ -213,7 +499,7 @@ async function main() {
       apellidos: 'Sin Clases',
       identificacion: 'PROF-SC-001',
       titulo: 'Licenciado en Educación',
-      especialidad: 'Educación Física',
+      especialidad: 'Sin asignación',
       rol: 'profesor',
       activo: true,
       telefono: '+573101234569',
@@ -228,7 +514,7 @@ async function main() {
       apellidos: 'Díaz',
       identificacion: 'PROF-CD-001',
       titulo: 'Licenciado en Ciencias Sociales',
-      especialidad: 'Historia y Geografía',
+      especialidad: 'Ciencias Sociales, Historia',
       rol: 'profesor',
       activo: true,
       telefono: '+573101234570',
@@ -237,7 +523,64 @@ async function main() {
 
   console.log('   ✅ 4 profesores del login creados');
 
-  // ==================== ESTUDIANTES DEL LOGIN ====================
+  // Crear profesores adicionales (2 por cada materia, pueden impartir 2-3 materias)
+  // Necesitamos 11 materias × 2 profesores = 22 posiciones, pero con profesores compartidos
+  // serán aproximadamente 15-18 profesores únicos
+
+  const profesoresData = [
+    { nombres: 'Roberto', apellidos: 'Martínez', materias: ['Matemáticas', 'Tecnología e Informática'] },
+    { nombres: 'Claudia', apellidos: 'Rodríguez', materias: ['Lengua Castellana', 'Ética y Valores'] },
+    { nombres: 'Andrés', apellidos: 'García', materias: ['Lengua Castellana', 'Educación Religiosa'] },
+    { nombres: 'Beatriz', apellidos: 'López', materias: ['Inglés', 'Lengua Castellana'] },
+    { nombres: 'Javier', apellidos: 'Hernández', materias: ['Inglés', 'Ética y Valores'] },
+    { nombres: 'Diana', apellidos: 'Moreno', materias: ['Ciencias Naturales', 'Educación Religiosa'] },
+    { nombres: 'Alberto', apellidos: 'Torres', materias: ['Ciencias Sociales', 'Filosofía', 'Ética y Valores'] },
+    { nombres: 'Mónica', apellidos: 'Ramírez', materias: ['Ciencias Sociales', 'Filosofía'] },
+    { nombres: 'Rafael', apellidos: 'Sánchez', materias: ['Educación Física', 'Educación Artística'] },
+    { nombres: 'Patricia', apellidos: 'Vargas', materias: ['Educación Física', 'Ética y Valores'] },
+    { nombres: 'Jorge', apellidos: 'Castro', materias: ['Educación Artística', 'Tecnología e Informática'] },
+    { nombres: 'Isabel', apellidos: 'Mendoza', materias: ['Tecnología e Informática', 'Matemáticas'] },
+    { nombres: 'Fernando', apellidos: 'Ruiz', materias: ['Matemáticas', 'Física'] },
+    { nombres: 'Gloria', apellidos: 'Ortiz', materias: ['Ciencias Naturales', 'Química'] },
+    { nombres: 'Miguel', apellidos: 'Pineda', materias: ['Inglés', 'Tecnología e Informática'] },
+    { nombres: 'Carmen', apellidos: 'Reyes', materias: ['Educación Religiosa', 'Ética y Valores'] },
+  ];
+
+  const profesoresAdicionales: any[] = [];
+  for (let i = 0; i < profesoresData.length; i++) {
+    const data = profesoresData[i];
+    const prof = await prisma.usuario.create({
+      data: {
+        email: `profesor${i + 5}@sanjose.edu`,
+        passwordHash: hashPassword('Prof123!'),
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        identificacion: `PROF-${String(i + 5).padStart(3, '0')}`,
+        titulo: 'Licenciado/a en Educación',
+        especialidad: data.materias.join(', '),
+        rol: 'profesor',
+        activo: true,
+        telefono: `+57310${String(1234571 + i).slice(-7)}`,
+      },
+    });
+    profesoresAdicionales.push({ ...prof, materias: data.materias });
+  }
+
+  // Todos los profesores (incluyendo los del login con sus materias)
+  const todosProfesores = [
+    { ...profesorJuan, materias: ['Matemáticas', 'Tecnología e Informática'] },
+    { ...profesorLaura, materias: ['Ciencias Naturales'] },
+    { ...profesorCarlos, materias: ['Ciencias Sociales', 'Filosofía'] },
+    ...profesoresAdicionales,
+  ];
+
+  console.log(`   ✅ ${profesoresAdicionales.length} profesores adicionales creados (total: ${todosProfesores.length + 1})`);
+
+  // ============================================================================
+  // 6. CREAR ESTUDIANTES DEL LOGIN
+  // ============================================================================
+  console.log('\n🎓 Creando estudiantes del login...');
+
   const estudianteSantiago = await prisma.usuario.create({
     data: {
       email: 'santiago.mendoza@sanjose.edu',
@@ -274,6 +617,19 @@ async function main() {
     },
   });
 
+  // Estudiante Andrés (para Carmen López como acudiente)
+  const estudianteAndres = await prisma.usuario.create({
+    data: {
+      email: 'andres.lopez@sanjose.edu',
+      passwordHash: hashPassword('Est123!'),
+      nombres: 'Andrés',
+      apellidos: 'López',
+      identificacion: 'EST-AL-001',
+      rol: 'estudiante',
+      activo: true,
+    },
+  });
+
   const estudianteSofia = await prisma.usuario.create({
     data: {
       email: 'sofia.nunez@santander.edu',
@@ -286,9 +642,13 @@ async function main() {
     },
   });
 
-  console.log('   ✅ 4 estudiantes del login creados');
+  console.log('   ✅ 5 estudiantes del login creados');
 
-  // ==================== ACUDIENTES DEL LOGIN ====================
+  // ============================================================================
+  // 7. CREAR ACUDIENTES DEL LOGIN
+  // ============================================================================
+  console.log('\n👨‍👩‍👧 Creando acudientes del login...');
+
   const acudienteMaria = await prisma.usuario.create({
     data: {
       email: 'maria.mendoza@email.com',
@@ -344,38 +704,7 @@ async function main() {
   console.log('   ✅ 4 acudientes del login creados');
 
   // ============================================================================
-  // 5. CREAR PROFESORES ADICIONALES PARA COMPLETAR PLANTILLA
-  // ============================================================================
-  console.log('\n👨‍🏫 Creando profesores adicionales...');
-
-  const nombresProf = ['Roberto', 'Claudia', 'Andrés', 'Beatriz', 'Javier', 'Diana', 'Alberto', 'Mónica',
-    'Rafael', 'Patricia', 'Jorge', 'Isabel', 'Fernando', 'Gloria', 'Miguel', 'Carmen',
-    'Eduardo', 'Silvia', 'Ricardo', 'Teresa'];
-
-  const profesoresAdicionales = [];
-  for (let i = 0; i < 20; i++) {
-    const prof = await prisma.usuario.create({
-      data: {
-        email: `profesor${i + 5}@sanjose.edu`,
-        passwordHash: hashPassword('Prof123!'),
-        nombres: nombresProf[i],
-        apellidos: `Docente ${i + 5}`,
-        identificacion: `PROF-${String(i + 5).padStart(3, '0')}`,
-        titulo: 'Licenciado en Educación',
-        especialidad: 'Educación General',
-        rol: 'profesor',
-        activo: true,
-        telefono: `+57310${String(1234570 + i).slice(-7)}`,
-      },
-    });
-    profesoresAdicionales.push(prof);
-  }
-
-  const todosProfesores = [profesorJuan, profesorLaura, profesorVacio, profesorCarlos, ...profesoresAdicionales];
-  console.log(`   ✅ ${profesoresAdicionales.length} profesores adicionales creados (total: ${todosProfesores.length})`);
-
-  // ============================================================================
-  // 6. VINCULAR USUARIOS A INSTITUCIONES
+  // 8. VINCULAR USUARIOS A INSTITUCIONES
   // ============================================================================
   console.log('\n🔗 Vinculando usuarios a instituciones...');
 
@@ -388,15 +717,30 @@ async function main() {
       { usuarioId: adminMultiSede.id, institucionId: liceoSantander.id, rolEnInstitucion: 'admin' },
       { usuarioId: adminMultiSede.id, institucionId: colegioBolivar.id, rolEnInstitucion: 'admin' },
 
-      // Profesores a San José
+      // Profesores (todos a San José excepto profesorCarlos que es de Santander pero también lo añadimos a San José para horarios)
       ...todosProfesores.map(p => ({ usuarioId: p.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'profesor' })),
+      { usuarioId: profesorVacio.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'profesor' },
+      { usuarioId: profesorCarlos.id, institucionId: liceoSantander.id, rolEnInstitucion: 'profesor' },
+
+      // Estudiantes
+      { usuarioId: estudianteSantiago.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteMateo.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteValentina.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteAndres.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
+      { usuarioId: estudianteSofia.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
+
+      // Acudientes
+      { usuarioId: acudienteMaria.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+      { usuarioId: acudientePatricia.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+      { usuarioId: acudienteCarmen.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
+      { usuarioId: acudienteCarlosN.id, institucionId: liceoSantander.id, rolEnInstitucion: 'acudiente' },
     ],
   });
 
-  console.log('✅ Vínculos creados');
+  console.log('✅ Vínculos usuario-institución creados');
 
   // ============================================================================
-  // 7. PERÍODOS ACADÉMICOS
+  // 9. PERÍODOS ACADÉMICOS
   // ============================================================================
   console.log('\n📚 Creando períodos académicos...');
 
@@ -425,51 +769,36 @@ async function main() {
   console.log(`✅ 2 períodos académicos creados (${currentYear})`);
 
   // ============================================================================
-  // 8. MATERIAS
+  // 10. MATERIAS DE SECUNDARIA
   // ============================================================================
-  console.log('\n📖 Creando materias...');
+  console.log('\n📖 Creando materias de secundaria...');
 
-  const nombresMaterias = ['Matemáticas', 'Español', 'Inglés', 'Ciencias Naturales', 'Ciencias Sociales',
-    'Física', 'Química', 'Biología', 'Filosofía', 'Educación Física', 'Artes', 'Tecnología'];
+  const materiasSanJose: any[] = [];
+  const horasRequeridas = new Map<string, number>();
 
-  const materiasSanJose = [];
-  for (const nombre of nombresMaterias) {
+  for (const matConfig of MATERIAS_SECUNDARIA) {
     const materia = await prisma.materia.create({
       data: {
-        nombre,
-        codigo: nombre.substring(0, 3).toUpperCase() + '-101',
+        nombre: matConfig.nombre,
+        codigo: `${matConfig.codigo}-101`,
         institucionId: colegioSanJose.id,
       },
     });
     materiasSanJose.push(materia);
+    horasRequeridas.set(materia.id, matConfig.horasSemana);
   }
 
-  console.log(`✅ ${materiasSanJose.length} materias creadas`);
+  console.log(`✅ ${materiasSanJose.length} materias de secundaria creadas`);
 
   // ============================================================================
-  // 9. GRUPOS (11 grados × 2 secciones = 22 grupos)
+  // 11. GRUPOS (6° a 11°, secciones A y B = 12 grupos)
   // ============================================================================
-  console.log('\n👥 Creando grupos...');
+  console.log('\n👥 Creando grupos de secundaria...');
 
-  const grados = [
-    { nombre: 'Primero', grado: '1' },
-    { nombre: 'Segundo', grado: '2' },
-    { nombre: 'Tercero', grado: '3' },
-    { nombre: 'Cuarto', grado: '4' },
-    { nombre: 'Quinto', grado: '5' },
-    { nombre: 'Sexto', grado: '6' },
-    { nombre: 'Séptimo', grado: '7' },
-    { nombre: 'Octavo', grado: '8' },
-    { nombre: 'Noveno', grado: '9' },
-    { nombre: 'Décimo', grado: '10' },
-    { nombre: 'Once', grado: '11' },
-  ];
+  const grupos: any[] = [];
 
-  const secciones = ['A', 'B'];
-  const grupos = [];
-
-  for (const gradoInfo of grados) {
-    for (const seccion of secciones) {
+  for (const gradoInfo of GRADOS_SECUNDARIA) {
+    for (const seccion of SECCIONES) {
       const grupo = await prisma.grupo.create({
         data: {
           nombre: `${gradoInfo.nombre} ${seccion}`,
@@ -483,12 +812,31 @@ async function main() {
     }
   }
 
-  console.log(`✅ ${grupos.length} grupos creados (1° a 11°, secciones A y B)`);
+  console.log(`✅ ${grupos.length} grupos creados (6° a 11°, secciones A y B)`);
+
+  // Grupo para Sofía en Liceo Santander
+  const grupoSofia = await prisma.grupo.create({
+    data: {
+      nombre: 'Sexto 1',
+      grado: '6',
+      seccion: '1',
+      periodoId: periodoSantander.id,
+      institucionId: liceoSantander.id,
+    },
+  });
 
   // ============================================================================
-  // 10. CREAR PERFILES DE ESTUDIANTES DEL LOGIN
+  // 12. CREAR PERFILES DE ESTUDIANTES
   // ============================================================================
   console.log('\n🎓 Creando perfiles de estudiantes del login...');
+
+  // Encontrar grupos específicos:
+  // - Santiago y Valentina: 10-A (hermanos)
+  // - Mateo: 11-B
+  // - Andrés: 9-A
+  const grupo10A = grupos.find(g => g.grado === '10' && g.seccion === 'A');
+  const grupo11B = grupos.find(g => g.grado === '11' && g.seccion === 'B');
+  const grupo9A = grupos.find(g => g.grado === '9' && g.seccion === 'A');
 
   const perfilSantiago = await prisma.estudiante.create({
     data: {
@@ -526,6 +874,18 @@ async function main() {
     },
   });
 
+  const perfilAndres = await prisma.estudiante.create({
+    data: {
+      usuarioId: estudianteAndres.id,
+      identificacion: 'TI-1001234500',
+      codigoQr: 'QR-ANDRES-004',
+      nombreResponsable: 'Carmen López',
+      telefonoResponsable: TELEFONO_2,
+      telefonoResponsableVerificado: true,
+      aceptaNotificaciones: true,
+    },
+  });
+
   const perfilSofia = await prisma.estudiante.create({
     data: {
       usuarioId: estudianteSofia.id,
@@ -538,64 +898,55 @@ async function main() {
     },
   });
 
-  // Asignar a grupos
+  // Asignar estudiantes a grupos
   await prisma.estudianteGrupo.createMany({
     data: [
-      { estudianteId: perfilSantiago.id, grupoId: grupos[18].id }, // 10-A
-      { estudianteId: perfilMateo.id, grupoId: grupos[20].id }, // 11-A
-      { estudianteId: perfilValentina.id, grupoId: grupos[18].id }, // 10-A (hermana de Santiago)
+      { estudianteId: perfilSantiago.id, grupoId: grupo10A.id }, // Santiago: 10-A
+      { estudianteId: perfilValentina.id, grupoId: grupo10A.id }, // Valentina: 10-A (hermana)
+      { estudianteId: perfilMateo.id, grupoId: grupo11B.id }, // Mateo: 11-B
+      { estudianteId: perfilAndres.id, grupoId: grupo9A.id }, // Andrés: 9-A
+      { estudianteId: perfilSofia.id, grupoId: grupoSofia.id }, // Sofía: 6-1 (Santander)
     ],
   });
 
-  await prisma.usuarioInstitucion.createMany({
-    data: [
-      { usuarioId: estudianteSantiago.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estudianteMateo.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estudianteValentina.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: estudianteSofia.id, institucionId: liceoSantander.id, rolEnInstitucion: 'estudiante' },
-      { usuarioId: acudienteMaria.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
-      { usuarioId: acudientePatricia.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
-      { usuarioId: acudienteCarmen.id, institucionId: colegioSanJose.id, rolEnInstitucion: 'acudiente' },
-      { usuarioId: acudienteCarlosN.id, institucionId: liceoSantander.id, rolEnInstitucion: 'acudiente' },
-    ],
-  });
-
-  // Vincular acudientes con estudiantes del login
+  // Vincular acudientes con estudiantes
   await prisma.acudienteEstudiante.createMany({
     data: [
       { acudienteId: acudienteMaria.id, estudianteId: perfilSantiago.id, parentesco: 'madre', esPrincipal: true, activo: true },
       { acudienteId: acudienteMaria.id, estudianteId: perfilValentina.id, parentesco: 'madre', esPrincipal: true, activo: true },
       { acudienteId: acudientePatricia.id, estudianteId: perfilMateo.id, parentesco: 'madre', esPrincipal: true, activo: true },
+      { acudienteId: acudienteCarmen.id, estudianteId: perfilAndres.id, parentesco: 'madre', esPrincipal: true, activo: true },
       { acudienteId: acudienteCarlosN.id, estudianteId: perfilSofia.id, parentesco: 'padre', esPrincipal: true, activo: true },
     ],
   });
 
-  console.log('✅ 4 perfiles de estudiantes del login creados y asignados');
+  console.log('✅ 5 perfiles de estudiantes del login creados y asignados');
 
   // ============================================================================
-  // 11. CREAR ESTUDIANTES MASIVOS (~30 por grupo = ~660 estudiantes)
+  // 13. CREAR ESTUDIANTES ADICIONALES (~25 por grupo)
   // ============================================================================
-  console.log('\n🎓 Creando estudiantes masivos...');
+  console.log('\n🎓 Creando estudiantes adicionales...');
 
   const nombresEst = ['Alejandro', 'Sofía', 'Mateo', 'Valentina', 'Santiago', 'Isabella', 'Sebastián', 'Camila',
-    'Nicolás', 'Mariana', 'Daniel', 'Daniela', 'Diego', 'Gabriela', 'Juan', 'María'];
+    'Nicolás', 'Mariana', 'Daniel', 'Daniela', 'Diego', 'Gabriela', 'Juan', 'María', 'Andrés', 'Paula',
+    'Felipe', 'Sara', 'Julián', 'Lucía', 'Samuel', 'Emma', 'Tomás'];
 
-  let estudianteIdx = 5; // Empezar después de los del login
-  const todosEstudiantes = [perfilSantiago, perfilMateo, perfilValentina, perfilSofia];
+  let estudianteIdx = 10;
+  const todosEstudiantes = [perfilSantiago, perfilMateo, perfilValentina, perfilAndres, perfilSofia];
 
   for (const grupo of grupos) {
-    const numEstudiantes = 28 + Math.floor(Math.random() * 5);
+    const numEstudiantes = 23 + Math.floor(Math.random() * 5); // 23-27 estudiantes por grupo
 
     for (let i = 0; i < numEstudiantes; i++) {
       const nombre = nombresEst[Math.floor(Math.random() * nombresEst.length)];
-      const usaTelefono1 = estudianteIdx % 2 === 0; // Alternar entre los dos teléfonos
+      const usaTelefono1 = estudianteIdx % 2 === 0;
 
       const usuario = await prisma.usuario.create({
         data: {
           email: `estudiante${estudianteIdx}@sanjose.edu`,
           passwordHash: hashPassword('Est123!'),
           nombres: nombre,
-          apellidos: `Est ${estudianteIdx}`,
+          apellidos: `Apellido ${estudianteIdx}`,
           identificacion: `EST-${String(estudianteIdx).padStart(4, '0')}`,
           rol: 'estudiante',
           activo: true,
@@ -634,151 +985,101 @@ async function main() {
     }
   }
 
-  console.log(`✅ ${estudianteIdx - 5} estudiantes adicionales creados (total: ${estudianteIdx - 1})`);
+  console.log(`✅ ${estudianteIdx - 10} estudiantes adicionales creados`);
 
   // ============================================================================
-  // 12. CREAR ACUDIENTES PARA ESTUDIANTES MASIVOS
+  // 14. GENERAR HORARIOS SIN CONFLICTOS
   // ============================================================================
-  console.log('\n👨‍👩‍👧 Creando acudientes masivos...');
+  console.log('\n📅 Generando horarios optimizados...');
 
-  const acudientesAdicionales = [];
-  const numAcudientes = Math.floor((estudianteIdx - 5) / 2); // 1 acudiente por cada 2 estudiantes aprox
+  // Crear mapa de profesores por materia (2 profesores por materia)
+  const profesoresPorMateria = new Map<string, string[]>();
 
-  for (let i = 0; i < numAcudientes; i++) {
-    const usaTelefono1 = i % 2 === 0;
+  for (const materia of materiasSanJose) {
+    const profesoresParaMateria: string[] = [];
 
-    const acudiente = await prisma.usuario.create({
-      data: {
-        email: `acudiente${i + 5}@email.com`,
-        passwordHash: hashPassword('Acu123!'),
-        nombres: `Acudiente`,
-        apellidos: `Familia ${i + 5}`,
-        identificacion: `ACU-${String(i + 5).padStart(4, '0')}`,
-        rol: 'acudiente',
-        activo: true,
-        telefono: usaTelefono1 ? TELEFONO_1 : TELEFONO_2,
-      },
-    });
-
-    await prisma.usuarioInstitucion.create({
-      data: {
-        usuarioId: acudiente.id,
-        institucionId: colegioSanJose.id,
-        rolEnInstitucion: 'acudiente',
-      },
-    });
-
-    acudientesAdicionales.push(acudiente);
-  }
-
-  console.log(`✅ ${acudientesAdicionales.length} acudientes adicionales creados`);
-
-  // Vincular acudientes con estudiantes masivos
-  const todosAcudientes = [acudienteMaria, acudientePatricia, acudienteCarmen, acudienteCarlosN, ...acudientesAdicionales];
-  let acudienteActualIdx = 4; // Empezar después de los del login
-
-  for (let i = 4; i < todosEstudiantes.length; i++) {
-    const estudiante = todosEstudiantes[i];
-    const numHijos = Math.random() < 0.3 ? 2 : 1; // 30% tienen 2 hijos
-
-    // Asignar acudiente
-    const acudiente = todosAcudientes[acudienteActualIdx % todosAcudientes.length];
-
-    await prisma.acudienteEstudiante.create({
-      data: {
-        acudienteId: acudiente.id,
-        estudianteId: estudiante.id,
-        parentesco: Math.random() < 0.5 ? 'madre' : 'padre',
-        esPrincipal: true,
-        activo: true,
-      },
-    });
-
-    if (numHijos === 1) {
-      acudienteActualIdx++;
-    }
-  }
-
-  console.log('✅ Vínculos acudiente-estudiante creados');
-
-  // ============================================================================
-  // 13. CREAR HORARIOS (SIN CONFLICTOS DE PROFESORES)
-  // ============================================================================
-  console.log('\n📅 Creando horarios sin conflictos de profesores...');
-  console.log(`   📊 Grupos: ${grupos.length}, Profesores: ${todosProfesores.length}`);
-
-  const diasSemana = [1, 2, 3, 4, 5]; // Lunes a Viernes
-  const bloques = [
-    { inicio: '07:00', fin: '08:00' },
-    { inicio: '08:00', fin: '09:00' },
-    { inicio: '09:00', fin: '10:00' },
-    { inicio: '10:30', fin: '11:30' }, // Descanso de 10:00 a 10:30
-    { inicio: '11:30', fin: '12:30' },
-    { inicio: '14:00', fin: '15:00' }, // Almuerzo de 12:30 a 14:00
-  ];
-
-  let totalHorarios = 0;
-  let sinProfesor = 0;
-
-  // Procesar SLOT por SLOT para evitar que un profesor esté en 2 lugares a la vez
-  for (let diaIdx = 0; diaIdx < diasSemana.length; diaIdx++) {
-    const dia = diasSemana[diaIdx];
-
-    for (let bloqueIdx = 0; bloqueIdx < bloques.length; bloqueIdx++) {
-      const bloque = bloques[bloqueIdx];
-
-      // Set de profesores ocupados EN ESTE SLOT específico (se reinicia cada slot)
-      const profesoresOcupadosEnSlot = new Set<string>();
-
-      // Asignar a TODOS los grupos en este slot
-      for (let grupoIdx = 0; grupoIdx < grupos.length; grupoIdx++) {
-        const grupo = grupos[grupoIdx];
-
-        // Rotación de materia para variedad
-        const materiaIdx = (grupoIdx + diaIdx * 3 + bloqueIdx * 2) % materiasSanJose.length;
-        const materia = materiasSanJose[materiaIdx];
-
-        // Buscar profesor DISPONIBLE (que NO esté ocupado en este slot)
-        let profesorAsignado = null;
-
-        for (let i = 0; i < todosProfesores.length; i++) {
-          // Rotar inicio de búsqueda por grupo para distribuir equitativamente
-          const profIdx = (grupoIdx + i) % todosProfesores.length;
-          const prof = todosProfesores[profIdx];
-
-          if (!profesoresOcupadosEnSlot.has(prof.id)) {
-            profesorAsignado = prof;
-            profesoresOcupadosEnSlot.add(prof.id);
-            break;
-          }
-        }
-
-        if (profesorAsignado) {
-          await prisma.horario.create({
-            data: {
-              grupoId: grupo.id,
-              materiaId: materia.id,
-              profesorId: profesorAsignado.id,
-              institucionId: colegioSanJose.id,
-              periodoId: periodoSanJose.id,
-              diaSemana: dia,
-              horaInicio: bloque.inicio,
-              horaFin: bloque.fin,
-            },
-          });
-          totalHorarios++;
-        } else {
-          sinProfesor++;
-        }
+    // Buscar profesores que enseñan esta materia
+    for (const prof of todosProfesores) {
+      if (prof.materias && prof.materias.includes(materia.nombre)) {
+        profesoresParaMateria.push(prof.id);
       }
     }
+
+    // Si no hay suficientes profesores, agregar algunos genéricos
+    while (profesoresParaMateria.length < 2) {
+      // Buscar un profesor con menos asignaciones
+      for (const prof of todosProfesores) {
+        if (!profesoresParaMateria.includes(prof.id)) {
+          profesoresParaMateria.push(prof.id);
+          break;
+        }
+      }
+      if (profesoresParaMateria.length === 0) break;
+    }
+
+    profesoresPorMateria.set(materia.id, profesoresParaMateria);
   }
 
-  console.log(`✅ ${totalHorarios} horarios creados sin conflictos`);
-  if (sinProfesor > 0) {
-    console.log(`   ⚠️ ${sinProfesor} clases sin profesor (se necesitan más profesores)`);
+  // Generar horarios
+  const generador = new GeneradorHorarios(
+    grupos,
+    materiasSanJose,
+    profesoresPorMateria,
+    horasRequeridas,
+  );
+
+  const horariosGenerados = generador.generar();
+  const conflictos = generador.verificarConflictos();
+
+  console.log(`   📊 Conflictos de profesores: ${conflictos.conflictosProfesor}`);
+  console.log(`   📊 Conflictos de grupos: ${conflictos.conflictosGrupo}`);
+
+  // Insertar horarios en la base de datos
+  let insertados = 0;
+  for (const h of horariosGenerados) {
+    await prisma.horario.create({
+      data: {
+        grupoId: h.grupoId,
+        materiaId: h.materiaId,
+        profesorId: h.profesorId,
+        institucionId: colegioSanJose.id,
+        periodoId: periodoSanJose.id,
+        diaSemana: h.diaSemana,
+        horaInicio: h.horaInicio,
+        horaFin: h.horaFin,
+      },
+    });
+    insertados++;
   }
 
+  console.log(`✅ ${insertados} horarios creados sin conflictos`);
+
+  // ============================================================================
+  // 15. ESTADÍSTICAS DE DISTRIBUCIÓN
+  // ============================================================================
+  console.log('\n📊 Estadísticas de distribución de horarios:');
+
+  // Contar clases por profesor
+  const clasesPorProfesor = new Map<string, number>();
+  for (const h of horariosGenerados) {
+    clasesPorProfesor.set(h.profesorId, (clasesPorProfesor.get(h.profesorId) || 0) + 1);
+  }
+
+  const clasesArray = Array.from(clasesPorProfesor.values());
+  const minClases = Math.min(...clasesArray);
+  const maxClases = Math.max(...clasesArray);
+  const avgClases = clasesArray.reduce((a, b) => a + b, 0) / clasesArray.length;
+
+  console.log(`   👨‍🏫 Clases por profesor: min=${minClases}, max=${maxClases}, promedio=${avgClases.toFixed(1)}`);
+
+  // Contar clases por grupo
+  const clasesPorGrupo = new Map<string, number>();
+  for (const h of horariosGenerados) {
+    clasesPorGrupo.set(h.grupoId, (clasesPorGrupo.get(h.grupoId) || 0) + 1);
+  }
+
+  const clasesGrupoArray = Array.from(clasesPorGrupo.values());
+  console.log(`   📚 Clases por grupo: min=${Math.min(...clasesGrupoArray)}, max=${Math.max(...clasesGrupoArray)}`);
 
   // ============================================================================
   // RESUMEN FINAL
@@ -790,12 +1091,11 @@ async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`🏫 Instituciones: 3 (San José, Santander, Bolívar)`);
   console.log(`📚 Períodos: 2 (${currentYear})`);
-  console.log(`📖 Materias: ${materiasSanJose.length}`);
-  console.log(`👥 Grupos: ${grupos.length} (1° a 11°, secciones A y B)`);
-  console.log(`👨‍🏫 Profesores: ${todosProfesores.length}`);
-  console.log(`🎓 Estudiantes: ~${estudianteIdx - 1} (~30 por grupo)`);
-  console.log(`👨‍👩‍👧 Acudientes: ${todosAcudientes.length}`);
-  console.log(`📅 Horarios: ${totalHorarios}`);
+  console.log(`📖 Materias: ${materiasSanJose.length} materias de secundaria`);
+  console.log(`👥 Grupos: ${grupos.length} (6° a 11°, secciones A y B)`);
+  console.log(`👨‍🏫 Profesores: ${todosProfesores.length + 1} (+ 1 sin asignación)`);
+  console.log(`🎓 Estudiantes: ${todosEstudiantes.length}`);
+  console.log(`📅 Horarios: ${insertados} (sin conflictos)`);
   console.log(`📱 Teléfonos: ${TELEFONO_1} y ${TELEFONO_2}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('\n🔐 CREDENCIALES (coinciden con pantalla de login):');
@@ -808,15 +1108,17 @@ async function main() {
   console.log('👨‍🏫 Laura Gómez: laura.gomez@sanjose.edu / Prof123!');
   console.log('👨‍🏫 Pedro Sin Clases: vacio.profe@sanjose.edu / Prof123!');
   console.log('👨‍🏫 Carlos Díaz: carlos.diaz@santander.edu / Prof123!');
-  console.log('🎓 Santiago Mendoza: santiago.mendoza@sanjose.edu / Est123!');
-  console.log('🎓 Mateo Castro: mateo.castro@sanjose.edu / Est123!');
-  console.log('🎓 Sofía Núñez: sofia.nunez@santander.edu / Est123!');
-  console.log('👨‍👩‍👧 María Mendoza: maria.mendoza@email.com / Acu123!');
-  console.log('👨‍👩‍👧 Patricia Castro: patricia.castro@email.com / Acu123!');
-  console.log('👨‍👩‍👧 Carmen López: carmen.lopez@email.com / Acu123!');
-  console.log('👨‍👩‍👧 Carlos Núñez: carlos.nunez@email.com / Acu123!');
+  console.log('🎓 Santiago Mendoza: santiago.mendoza@sanjose.edu / Est123! (10-A)');
+  console.log('🎓 Mateo Castro: mateo.castro@sanjose.edu / Est123! (11-B)');
+  console.log('🎓 Valentina Rojas: valentina.rojas@sanjose.edu / Est123! (10-A)');
+  console.log('🎓 Andrés López: andres.lopez@sanjose.edu / Est123! (9-A)');
+  console.log('🎓 Sofía Núñez: sofia.nunez@santander.edu / Est123! (6-1)');
+  console.log('👨‍👩‍👧 María Mendoza: maria.mendoza@email.com / Acu123! (Madre de Santiago y Valentina)');
+  console.log('👨‍👩‍👧 Patricia Castro: patricia.castro@email.com / Acu123! (Madre de Mateo)');
+  console.log('👨‍👩‍👧 Carmen López: carmen.lopez@email.com / Acu123! (Madre de Andrés)');
+  console.log('👨‍👩‍👧 Carlos Núñez: carlos.nunez@email.com / Acu123! (Padre de Sofía)');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('\n✨ Listos para probar paginación, búsquedas, filtros y más!\n');
+  console.log('\n✨ Horarios distribuidos correctamente sin conflictos!\n');
 }
 
 main()
