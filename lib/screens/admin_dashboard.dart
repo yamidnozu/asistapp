@@ -116,6 +116,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     onTap: () => context.go('/academic/horarios'),
                   ),
                   MenuActionCard(
+                    icon: Icons.auto_stories, // Icono de libro/materias
+                    title: 'Materias',
+                    subtitle: 'Gestión de asignaturas',
+                    onTap: () => context.go('/academic/materias'),
+                  ),
+                  MenuActionCard(
+                    icon: Icons.date_range,
+                    title:
+                        'Períodos', // Tilde o sin tilde según consistencia, usaré Períodos por si acaso
+                    subtitle: 'Años lectivos',
+                    onTap: () => context.go('/academic/periodos'),
+                  ),
+                  MenuActionCard(
                     icon: Icons.settings,
                     title: 'Configuración',
                     subtitle: 'Ajustes de la institución',

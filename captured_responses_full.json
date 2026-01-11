@@ -1,0 +1,4284 @@
+{
+  "Login_SUPER_ADMIN": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwN2YwZmI5LTdjMjAtNDRmZS1hNDQ1LTM0N2Q0MDkyNzhiNSIsInJvbCI6InN1cGVyX2FkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQGFzaXN0YXBwLmNvbSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY1OTY3ODc5LCJleHAiOjE3NjYwNTQyNzl9.IIOYp5anKpfov1uxmZy7cigc9tYbMHDFUbi8KXGOIb0",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwN2YwZmI5LTdjMjAtNDRmZS1hNDQ1LTM0N2Q0MDkyNzhiNSIsInJvbCI6InN1cGVyX2FkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQGFzaXN0YXBwLmNvbSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiYjM5ZTQxZWYtYjcyNS00NTlmLThkMmEtYTIyODEwMjUyN2RlIiwiaWF0IjoxNzY1OTY3ODc5LCJleHAiOjE3NjY1NzI2Nzl9.tNoBsm0EaPxsVePEw34QeH0WQNHWwQUKRrJuiMlE0ko",
+        "expiresIn": 24,
+        "usuario": {
+          "id": "907f0fb9-7c20-44fe-a445-347d409278b5",
+          "nombres": "Super",
+          "apellidos": "Administrador",
+          "rol": "super_admin",
+          "instituciones": []
+        }
+      }
+    }
+  },
+  "Login_ADMIN_INST": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhMjAwMDIyLTRjYTItNDMwYy1iOGE0LTM1Mzg3MmE0YjJkNiIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbkBzYW5qb3NlLmVkdSIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY1OTY3ODc5LCJleHAiOjE3NjYwNTQyNzl9.SFQW7DwZPnmoc-aHkmNJH3nO_pW0bpbSjVNyUl3WRa0",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhMjAwMDIyLTRjYTItNDMwYy1iOGE0LTM1Mzg3MmE0YjJkNiIsInJvbCI6ImFkbWluX2luc3RpdHVjaW9uIiwiZW1haWwiOiJhZG1pbkBzYW5qb3NlLmVkdSIsInRva2VuVmVyc2lvbiI6MSwianRpIjoiMzhhYWNjYmItNzg4NC00M2IwLWE2MWUtM2JlNDliYjdkOWE0IiwiaWF0IjoxNzY1OTY3ODc5LCJleHAiOjE3NjY1NzI2Nzl9.58jK1q8232XJ-syF1ZEiBjQfhHn15l9nKTCvjmflB1E",
+        "expiresIn": 24,
+        "usuario": {
+          "id": "8a200022-4ca2-430c-b8a4-353872a4b2d6",
+          "nombres": "Administrador",
+          "apellidos": "San José",
+          "rol": "admin_institucion",
+          "instituciones": [
+            {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "rolEnInstitucion": "admin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Login_PROFESOR": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkMDMyNDNlLTVjNmMtNDI0Mi05MDIxLTRlM2U1ZmEwNGY4NyIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJqdWFuLnBlcmV6QHNhbmpvc2UuZWR1IiwidG9rZW5WZXJzaW9uIjoxLCJpYXQiOjE3NjU5Njc4NzksImV4cCI6MTc2NjA1NDI3OX0.-Ly2gtO3B05OqoiPGr6SNrMr3tftrtbKnlszh-tIg6I",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkMDMyNDNlLTVjNmMtNDI0Mi05MDIxLTRlM2U1ZmEwNGY4NyIsInJvbCI6InByb2Zlc29yIiwiZW1haWwiOiJqdWFuLnBlcmV6QHNhbmpvc2UuZWR1IiwidG9rZW5WZXJzaW9uIjoxLCJqdGkiOiI0NTI5YzQxMS04NTZlLTRlZWEtYTFjNi02NjEwODI4YzBkN2MiLCJpYXQiOjE3NjU5Njc4NzksImV4cCI6MTc2NjU3MjY3OX0.nw4OES7tGe5oqJjvUlHMwGKb7xti2lQAdH7hYsk_xQU",
+        "expiresIn": 24,
+        "usuario": {
+          "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "nombres": "Juan",
+          "apellidos": "Pérez",
+          "rol": "profesor",
+          "instituciones": [
+            {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "rolEnInstitucion": "profesor"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Login_ESTUDIANTE": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE0MTk3OWRjLWYyYjAtNGI0Ny1hODYzLTUxMGFkYTk0Y2JmYyIsInJvbCI6ImVzdHVkaWFudGUiLCJlbWFpbCI6InNhbnRpYWdvLm1lbmRvemFAc2Fuam9zZS5lZHUiLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTc2NTk2Nzg3OSwiZXhwIjoxNzY2MDU0Mjc5fQ.fYverHkAbLDYAQw0krZRHlwHHVxkyl1EJFOsEkIVCPY",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE0MTk3OWRjLWYyYjAtNGI0Ny1hODYzLTUxMGFkYTk0Y2JmYyIsInJvbCI6ImVzdHVkaWFudGUiLCJlbWFpbCI6InNhbnRpYWdvLm1lbmRvemFAc2Fuam9zZS5lZHUiLCJ0b2tlblZlcnNpb24iOjEsImp0aSI6IjU3MGE4YjQ2LWI3MzQtNDcxZi1iMzM4LTllODVjYjNmYjNmNyIsImlhdCI6MTc2NTk2Nzg3OSwiZXhwIjoxNzY2NTcyNjc5fQ.Az4tXeQYBNxj2gNgLBc_m6PxKo7HCoXdNXSaRxmkIdU",
+        "expiresIn": 24,
+        "usuario": {
+          "id": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+          "nombres": "Santiago",
+          "apellidos": "Mendoza",
+          "rol": "estudiante",
+          "instituciones": [
+            {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "rolEnInstitucion": "estudiante"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Login_ACUDIENTE": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ5ODNjZTJjLTQ5M2EtNGVjMC1iOGE4LWQ0ZjI0MjEzNzc1YSIsInJvbCI6ImFjdWRpZW50ZSIsImVtYWlsIjoibWFyaWEubWVuZG96YUBlbWFpbC5jb20iLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTc2NTk2Nzg4MCwiZXhwIjoxNzY2MDU0MjgwfQ.27SOLh0dQ1FtOOIfe730hX4VE7kGisWIICdcz54Ds6w",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ5ODNjZTJjLTQ5M2EtNGVjMC1iOGE4LWQ0ZjI0MjEzNzc1YSIsInJvbCI6ImFjdWRpZW50ZSIsImVtYWlsIjoibWFyaWEubWVuZG96YUBlbWFpbC5jb20iLCJ0b2tlblZlcnNpb24iOjEsImp0aSI6IjM0MDU4MTdjLTIzMjUtNGY2ZC04YWQzLWNkMWI4MzQ5NzIwMCIsImlhdCI6MTc2NTk2Nzg4MCwiZXhwIjoxNzY2NTcyNjgwfQ.tO_tAnsk7T6p-T0VLR6GZteD8azkZ7lM2d3qD5rgOcI",
+        "expiresIn": 24,
+        "usuario": {
+          "id": "d983ce2c-493a-4ec0-b8a8-d4f24213775a",
+          "nombres": "María",
+          "apellidos": "Mendoza",
+          "rol": "acudiente",
+          "instituciones": [
+            {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "rolEnInstitucion": "acudiente"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Listar_Instituciones": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "2676c158-1aa6-470b-aa6c-91e30c9f685f",
+          "nombre": "Instituto del Pasado (Inactivo)",
+          "direccion": "Avenida 1 #22-33, Ciudad",
+          "telefono": "+573215551236",
+          "email": "contacto@institutopasado.edu.co",
+          "activa": false,
+          "configuraciones": {
+            "notificacionesActivas": false,
+            "canalNotificacion": "NONE",
+            "modoNotificacionAsistencia": "MANUAL_ONLY",
+            "horaDisparoNotificacion": null,
+            "notificarAusenciaTotalDiaria": false
+          },
+          "createdAt": "2025-12-16T16:48:45.141Z",
+          "updatedAt": "2025-12-16T16:48:45.141Z"
+        },
+        {
+          "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+          "nombre": "Colegio Simón Bolívar",
+          "direccion": "Avenida Principal #100-50, Medellín",
+          "telefono": "+573215551237",
+          "email": "contacto@bolivar.edu.co",
+          "activa": true,
+          "configuraciones": {
+            "notificacionesActivas": true,
+            "canalNotificacion": "WHATSAPP",
+            "modoNotificacionAsistencia": "END_OF_DAY",
+            "horaDisparoNotificacion": "16:00:00",
+            "notificarAusenciaTotalDiaria": false
+          },
+          "createdAt": "2025-12-16T16:48:45.136Z",
+          "updatedAt": "2025-12-16T16:48:45.136Z"
+        },
+        {
+          "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+          "nombre": "Liceo Santander",
+          "direccion": "Calle 9 #10-20, Bucaramanga",
+          "telefono": "+573215551235",
+          "email": "contacto@santander.edu.co",
+          "activa": true,
+          "configuraciones": {
+            "notificacionesActivas": true,
+            "canalNotificacion": "WHATSAPP",
+            "modoNotificacionAsistencia": "MANUAL_ONLY",
+            "horaDisparoNotificacion": "17:00:00",
+            "notificarAusenciaTotalDiaria": false
+          },
+          "createdAt": "2025-12-16T16:48:45.132Z",
+          "updatedAt": "2025-12-16T16:48:45.132Z"
+        },
+        {
+          "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "nombre": "Colegio San José",
+          "direccion": "Carrera 12 #45-67, Bogotá",
+          "telefono": "+573215551234",
+          "email": "contacto@sanjose.edu.co",
+          "activa": true,
+          "configuraciones": {
+            "notificacionesActivas": true,
+            "canalNotificacion": "WHATSAPP",
+            "modoNotificacionAsistencia": "INSTANT",
+            "horaDisparoNotificacion": "18:00:00",
+            "notificarAusenciaTotalDiaria": false
+          },
+          "createdAt": "2025-12-16T16:48:45.126Z",
+          "updatedAt": "2025-12-16T16:48:45.126Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 4,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Listar_Usuarios": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "0d96a269-db53-4fa5-8ac9-65a1a7635c64",
+          "email": "admin_31693217@test.com",
+          "passwordHash": "$2b$10$2mWUa3KidmeWyVj.a7ufFOHitioj2HksyE5nWmjQ6nRgjhNlFnGMC",
+          "nombres": "Admin 31693217",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:35:20.105Z",
+          "updatedAt": "2025-12-17T00:35:20.105Z",
+          "usuarioInstituciones": [
+            {
+              "id": "251fb216-89ad-46e8-b513-d0739b911b46",
+              "usuarioId": "0d96a269-db53-4fa5-8ac9-65a1a7635c64",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:35:20.108Z",
+              "updatedAt": "2025-12-17T00:35:20.108Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "934c4665-3d10-46dd-9b03-bb9426043a46",
+          "email": "admin_30216913@test.com",
+          "passwordHash": "$2b$10$HelEdqPa8vor0hr8KVk/lOMKnAfoQ3o0Q3UFpjU7jtn8J/r1DlZWG",
+          "nombres": "Admin 30216913",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:10:46.671Z",
+          "updatedAt": "2025-12-17T00:10:46.671Z",
+          "usuarioInstituciones": [
+            {
+              "id": "66c3882a-533d-4780-b039-362482a39e87",
+              "usuarioId": "934c4665-3d10-46dd-9b03-bb9426043a46",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:10:46.675Z",
+              "updatedAt": "2025-12-17T00:10:46.675Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "aa687d19-3047-4a62-835f-594dd2c9f50a",
+          "email": "admin_30088180@test.com",
+          "passwordHash": "$2b$10$3FyM./vGr985XuyeBTVvdOOymgIogkrw8leuPuATfjdiM32nLFJ6O",
+          "nombres": "Admin 30088180",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:08:35.620Z",
+          "updatedAt": "2025-12-17T00:08:35.620Z",
+          "usuarioInstituciones": [
+            {
+              "id": "4a934723-8065-41af-9264-52f3bfd86074",
+              "usuarioId": "aa687d19-3047-4a62-835f-594dd2c9f50a",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:08:35.622Z",
+              "updatedAt": "2025-12-17T00:08:35.622Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "dfab9f93-422a-40bb-876a-d46a70e03180",
+          "email": "admin_29958272@test.com",
+          "passwordHash": "$2b$10$VaN.K494QZGF/mblL17VjOfY0x1JeddgCh6dgpwA54ZIHB.Ds.Bk.",
+          "nombres": "Admin 29958272",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:06:25.773Z",
+          "updatedAt": "2025-12-17T00:06:25.773Z",
+          "usuarioInstituciones": [
+            {
+              "id": "8e615750-b4a1-4e89-b374-511cd321b60b",
+              "usuarioId": "dfab9f93-422a-40bb-876a-d46a70e03180",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:06:25.780Z",
+              "updatedAt": "2025-12-17T00:06:25.780Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ee606f1f-2c17-4dfc-a872-017e9eb021ce",
+          "email": "admin_29819297@test.com",
+          "passwordHash": "$2b$10$MS9THCw1uV9ksbYMqUonSO7yAbryWQ2TZaS6XXF5bLp/uSyFjbJme",
+          "nombres": "Admin 29819297",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:04:08.077Z",
+          "updatedAt": "2025-12-17T00:04:08.077Z",
+          "usuarioInstituciones": [
+            {
+              "id": "48f6c89d-848a-4ae4-b9ee-1d773c7dda5d",
+              "usuarioId": "ee606f1f-2c17-4dfc-a872-017e9eb021ce",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:04:08.081Z",
+              "updatedAt": "2025-12-17T00:04:08.081Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "df78531e-7d6c-44ed-a233-df35b9cf0e92",
+          "email": "admin_29677466@test.com",
+          "passwordHash": "$2b$10$oYbuZzSdyoAHlBsUq.r7Oe6FNj3TFwC96HtpsTiee7nhqrxh9U6.K",
+          "nombres": "Admin 29677466",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-17T00:01:49.522Z",
+          "updatedAt": "2025-12-17T00:01:49.522Z",
+          "usuarioInstituciones": [
+            {
+              "id": "d63355b9-650f-4ecc-8d0f-ad8b68abeb4c",
+              "usuarioId": "df78531e-7d6c-44ed-a233-df35b9cf0e92",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-17T00:01:49.524Z",
+              "updatedAt": "2025-12-17T00:01:49.524Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "fbde9630-4132-47f7-82bf-e006e5ca11c9",
+          "email": "admin_29522072@test.com",
+          "passwordHash": "$2b$10$Ry.1Lfv7kGZ409xBhjMboO7Cbf0B4jRz43rnbNKLRrNXsK8PDub96",
+          "nombres": "Admin 29522072",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:59:12.266Z",
+          "updatedAt": "2025-12-16T23:59:12.266Z",
+          "usuarioInstituciones": [
+            {
+              "id": "ed16ff31-703b-4aeb-9994-6b8b860af499",
+              "usuarioId": "fbde9630-4132-47f7-82bf-e006e5ca11c9",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:59:12.269Z",
+              "updatedAt": "2025-12-16T23:59:12.269Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "1723c502-b66f-4705-ad2d-883bcfea297e",
+          "email": "admin_29278992@test.com",
+          "passwordHash": "$2b$10$ADq0nsGc/F6dmO4PR9shXOT0T/2A6dFr3onQPIwh/YkzCKY2MS3XW",
+          "nombres": "Admin 29278992",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:55:10.284Z",
+          "updatedAt": "2025-12-16T23:55:10.284Z",
+          "usuarioInstituciones": [
+            {
+              "id": "f59d2d1a-9294-46b1-ba80-bd853b2243f7",
+              "usuarioId": "1723c502-b66f-4705-ad2d-883bcfea297e",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:55:10.287Z",
+              "updatedAt": "2025-12-16T23:55:10.287Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ad9d6482-2953-4677-9cd0-bc24d700a606",
+          "email": "admin_29102483@test.com",
+          "passwordHash": "$2b$10$RoJNW7icX2sdc1Msvc5CAucDjQ8x/AVUhGsO1lRsnDBQPTALDt2Eq",
+          "nombres": "Admin 29102483",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:52:16.514Z",
+          "updatedAt": "2025-12-16T23:52:16.514Z",
+          "usuarioInstituciones": [
+            {
+              "id": "fb590387-2cd6-4e1f-a71e-37f4e4d1b599",
+              "usuarioId": "ad9d6482-2953-4677-9cd0-bc24d700a606",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:52:16.518Z",
+              "updatedAt": "2025-12-16T23:52:16.518Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "c973f875-28aa-486b-9527-00944dc71239",
+          "email": "admin_28920682@test.com",
+          "passwordHash": "$2b$10$4n24xjGR03Q422TXtt9Ik.wMmmVYhenhfZDZ4L7yC.7pkRgK1rmoS",
+          "nombres": "Admin 28920682",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:49:10.824Z",
+          "updatedAt": "2025-12-16T23:49:10.824Z",
+          "usuarioInstituciones": [
+            {
+              "id": "e897a8c1-9f58-431b-a557-332f4b029a57",
+              "usuarioId": "c973f875-28aa-486b-9527-00944dc71239",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:49:10.830Z",
+              "updatedAt": "2025-12-16T23:49:10.830Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "b43f4ddb-c46e-4716-8186-29680bc7da2f",
+          "email": "admin_28772230@test.com",
+          "passwordHash": "$2b$10$IcqNWbtNmkrW7z7U1knwDujuI8iyHOPQMjiXf0hsR8Luc6aRb0vk2",
+          "nombres": "Admin 28772230",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:46:43.431Z",
+          "updatedAt": "2025-12-16T23:46:43.431Z",
+          "usuarioInstituciones": [
+            {
+              "id": "c4ed867e-332e-4172-a012-5544b42e12d1",
+              "usuarioId": "b43f4ddb-c46e-4716-8186-29680bc7da2f",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:46:43.436Z",
+              "updatedAt": "2025-12-16T23:46:43.436Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "736300ac-f847-4090-b7ee-c4a11a00985e",
+          "email": "admin_28620609@test.com",
+          "passwordHash": "$2b$10$61kE65eb8G3R.x5ApNVujuCYxYZvlX7ZNtkpZllVPzz050N5/0ZWq",
+          "nombres": "Admin 28620609",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:44:10.466Z",
+          "updatedAt": "2025-12-16T23:44:10.466Z",
+          "usuarioInstituciones": [
+            {
+              "id": "b8c77db8-b398-4808-9314-0c7635bd9f38",
+              "usuarioId": "736300ac-f847-4090-b7ee-c4a11a00985e",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:44:10.469Z",
+              "updatedAt": "2025-12-16T23:44:10.469Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "9ea61ad4-40bf-468e-a523-b4ca564654ab",
+          "email": "admin_28484057@test.com",
+          "passwordHash": "$2b$10$pvNn35WTMS5XGgRhR45JmemR3cyP3v48nwYGTInQfpIp2UWbI/x0G",
+          "nombres": "Admin 28484057",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:41:51.990Z",
+          "updatedAt": "2025-12-16T23:41:51.990Z",
+          "usuarioInstituciones": [
+            {
+              "id": "288e6b67-2e60-44dd-b522-75e983fc5589",
+              "usuarioId": "9ea61ad4-40bf-468e-a523-b4ca564654ab",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:41:51.996Z",
+              "updatedAt": "2025-12-16T23:41:51.996Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "66084ee2-f5b4-49ee-819e-09f39bc00de0",
+          "email": "admin_28348597@test.com",
+          "passwordHash": "$2b$10$Wa9ZeEgNd.ngV/S6LGBFL.K7QuXGb1eZOY9XIAKs2kY7Xd3qyhhcW",
+          "nombres": "Admin 28348597",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:39:35.894Z",
+          "updatedAt": "2025-12-16T23:39:35.894Z",
+          "usuarioInstituciones": [
+            {
+              "id": "527777a1-f6b0-4fd8-b7c3-7faf568262b6",
+              "usuarioId": "66084ee2-f5b4-49ee-819e-09f39bc00de0",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:39:35.898Z",
+              "updatedAt": "2025-12-16T23:39:35.898Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "f667c895-9eb1-4906-9c36-585e63623fce",
+          "email": "admin_28199989@test.com",
+          "passwordHash": "$2b$10$m1BSMneKgQdKtJiKVGdrn.6hc3nTXo0PH3540CitCMVkJmyzPR.Qe",
+          "nombres": "Admin 28199989",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:37:08.778Z",
+          "updatedAt": "2025-12-16T23:37:08.778Z",
+          "usuarioInstituciones": [
+            {
+              "id": "e576e784-b7e6-4010-8640-81afd3263ce5",
+              "usuarioId": "f667c895-9eb1-4906-9c36-585e63623fce",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:37:08.782Z",
+              "updatedAt": "2025-12-16T23:37:08.782Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ed248987-fc0c-47d1-863e-b4fdc9ef1da4",
+          "email": "admin_27958735@test.com",
+          "passwordHash": "$2b$10$yrhFN8HKwqS2wOa.1l7Yae3pvQEj77JyzyVVzWqc.n7/SrGSwn0TK",
+          "nombres": "Admin 27958735",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:33:09.178Z",
+          "updatedAt": "2025-12-16T23:33:09.178Z",
+          "usuarioInstituciones": [
+            {
+              "id": "0449ed40-e039-4bcb-9f64-2f18ec9599e0",
+              "usuarioId": "ed248987-fc0c-47d1-863e-b4fdc9ef1da4",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:33:09.182Z",
+              "updatedAt": "2025-12-16T23:33:09.182Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "21adafe0-f62e-4e58-a663-f789479e89d4",
+          "email": "admin_26641796@test.com",
+          "passwordHash": "$2b$10$OwB1ZZkvCDugVAonkUYHFOlxt/Q8KcLLgJ40Wl.1cT4AKkdx1sTqe",
+          "nombres": "Admin 26641796",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:11:09.914Z",
+          "updatedAt": "2025-12-16T23:11:09.914Z",
+          "usuarioInstituciones": [
+            {
+              "id": "9ab1755e-9e8d-4ac3-8a22-f4d4730362ed",
+              "usuarioId": "21adafe0-f62e-4e58-a663-f789479e89d4",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:11:09.919Z",
+              "updatedAt": "2025-12-16T23:11:09.919Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "075eec3f-8b1f-4b0b-b56a-c08fea7811d2",
+          "email": "admin_26498748@test.com",
+          "passwordHash": "$2b$10$0lpLIkPL38t5w16rCvG4CuJrjnexsJvPp6Cxd4ubbLWCBYm0qB/I.",
+          "nombres": "Admin 26498748",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:08:48.206Z",
+          "updatedAt": "2025-12-16T23:08:48.206Z",
+          "usuarioInstituciones": [
+            {
+              "id": "1e39fec3-1489-48ff-b39c-d667e422c79a",
+              "usuarioId": "075eec3f-8b1f-4b0b-b56a-c08fea7811d2",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:08:48.210Z",
+              "updatedAt": "2025-12-16T23:08:48.210Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "41f75c28-d5f8-4f1f-a34d-d2ca777fbff4",
+          "email": "admin_26344892@test.com",
+          "passwordHash": "$2b$10$j6iz/EpvlbnK8H.yZcDXl.tsWiXePn1SsCRX4PY0uRaYzRlmEQz6y",
+          "nombres": "Admin 26344892",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:06:14.230Z",
+          "updatedAt": "2025-12-16T23:06:14.230Z",
+          "usuarioInstituciones": [
+            {
+              "id": "775e2222-8bde-4220-8fe0-7cad8cf71f43",
+              "usuarioId": "41f75c28-d5f8-4f1f-a34d-d2ca777fbff4",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:06:14.235Z",
+              "updatedAt": "2025-12-16T23:06:14.235Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "e993e41c-44b8-40a4-826e-0f2387bcf644",
+          "email": "admin_26196196@test.com",
+          "passwordHash": "$2b$10$eekQTd3y7Hdfyye9C5BkR.FklFJ9du3w4P54ySXJVFthwKXxIRpc2",
+          "nombres": "Admin 26196196",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:03:46.888Z",
+          "updatedAt": "2025-12-16T23:03:46.888Z",
+          "usuarioInstituciones": [
+            {
+              "id": "16524b54-39f7-4444-b34a-12cdc63e08c8",
+              "usuarioId": "e993e41c-44b8-40a4-826e-0f2387bcf644",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:03:46.891Z",
+              "updatedAt": "2025-12-16T23:03:46.891Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "f3626fe1-3361-4035-8786-382f5320af81",
+          "email": "admin_26045094@test.com",
+          "passwordHash": "$2b$10$7miuuI5sDwSU4Y2ONS6TlOY2YzfoIQ7G5wvLpy4O1CQ3QYDbZyaxO",
+          "nombres": "Admin 26045094",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T23:01:15.881Z",
+          "updatedAt": "2025-12-16T23:01:15.881Z",
+          "usuarioInstituciones": [
+            {
+              "id": "c9e92cce-3a33-4ecc-8157-a7a8f20f3428",
+              "usuarioId": "f3626fe1-3361-4035-8786-382f5320af81",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T23:01:15.886Z",
+              "updatedAt": "2025-12-16T23:01:15.886Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "16432000-05d0-433e-9246-7598a1255eb9",
+          "email": "admin_25810130@test.com",
+          "passwordHash": "$2b$10$9U24oxLAPba.snjv8.05L.xJUptGZOV7PNwa4arMJMudzJxfsZhKS",
+          "nombres": "Admin 25810130",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:57:20.614Z",
+          "updatedAt": "2025-12-16T22:57:20.614Z",
+          "usuarioInstituciones": [
+            {
+              "id": "517c75b3-c73a-4f8d-b964-e617a2b6c1e4",
+              "usuarioId": "16432000-05d0-433e-9246-7598a1255eb9",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:57:20.617Z",
+              "updatedAt": "2025-12-16T22:57:20.617Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "a6f29bdf-2bd8-44ee-ba09-60f3defd0f8d",
+          "email": "admin_25674456@test.com",
+          "passwordHash": "$2b$10$hoGAqRu1RgJQie89BB1A5OvZehe/K0yzMTJH0.5gsaVnkkYcC9.ZS",
+          "nombres": "Admin 25674456",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:55:03.502Z",
+          "updatedAt": "2025-12-16T22:55:03.502Z",
+          "usuarioInstituciones": [
+            {
+              "id": "757b9a8f-31ca-4104-80fa-12a046b21376",
+              "usuarioId": "a6f29bdf-2bd8-44ee-ba09-60f3defd0f8d",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:55:03.504Z",
+              "updatedAt": "2025-12-16T22:55:03.504Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "943c9610-484e-423d-9dc5-c1178cf8356b",
+          "email": "admin_25529228@test.com",
+          "passwordHash": "$2b$10$EAHOM4V3/7bcNl/GamsCludJKeNJYSTMHvSWc171WeYWxVafeMfrm",
+          "nombres": "Admin 25529228",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:52:39.537Z",
+          "updatedAt": "2025-12-16T22:52:39.537Z",
+          "usuarioInstituciones": [
+            {
+              "id": "7f02c071-17e9-455b-b73c-6147f283d211",
+              "usuarioId": "943c9610-484e-423d-9dc5-c1178cf8356b",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:52:39.541Z",
+              "updatedAt": "2025-12-16T22:52:39.541Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "927e5353-a658-4c0a-a608-252378fa416e",
+          "email": "admin_25386674@test.com",
+          "passwordHash": "$2b$10$zY5LspIn6ikvbERfauem0.ai.i3nPfjvOu5xYK0zQif3Kb87/1XU2",
+          "nombres": "Admin 25386674",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:50:16.980Z",
+          "updatedAt": "2025-12-16T22:50:16.980Z",
+          "usuarioInstituciones": [
+            {
+              "id": "0f4ffb76-fb34-4bcf-a9e4-9f078cfb5f26",
+              "usuarioId": "927e5353-a658-4c0a-a608-252378fa416e",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:50:16.982Z",
+              "updatedAt": "2025-12-16T22:50:16.982Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "5f50d149-96ab-40ac-ac81-98708ca0176a",
+          "email": "admin_25245078@test.com",
+          "passwordHash": "$2b$10$PnpmjCaABaGkzxY4lwBTGOX.Ql7JX0q1VOtVj01bkGi.nvTMssb9m",
+          "nombres": "Admin 25245078",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:47:53.822Z",
+          "updatedAt": "2025-12-16T22:47:53.822Z",
+          "usuarioInstituciones": [
+            {
+              "id": "d6c8f6f7-831d-4602-b8b9-df5c0f44b2fb",
+              "usuarioId": "5f50d149-96ab-40ac-ac81-98708ca0176a",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:47:53.824Z",
+              "updatedAt": "2025-12-16T22:47:53.824Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "00ecf893-e312-45a7-b42d-d9fd8f64c159",
+          "email": "admin_24792782@test.com",
+          "passwordHash": "$2b$10$zBspNLTiq4IxMje.k6CH/O8XhyYHxRvwGWCOBDHTSkQoEyBF86N6K",
+          "nombres": "Admin 24792782",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:40:25.695Z",
+          "updatedAt": "2025-12-16T22:40:25.695Z",
+          "usuarioInstituciones": [
+            {
+              "id": "8e66e5ac-ed1b-4df9-9fd4-008f17a3107c",
+              "usuarioId": "00ecf893-e312-45a7-b42d-d9fd8f64c159",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:40:25.698Z",
+              "updatedAt": "2025-12-16T22:40:25.698Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "cf128847-9af6-4f06-b035-19fbaa954519",
+          "email": "admin_24638466@test.com",
+          "passwordHash": "$2b$10$080X3HRC1CbRXUyQww0pcOtZKUa9Xc7/.i7lwUGvgxIVsdhKBNvtq",
+          "nombres": "Admin 24638466",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:37:46.832Z",
+          "updatedAt": "2025-12-16T22:37:46.832Z",
+          "usuarioInstituciones": [
+            {
+              "id": "65f9b47a-e52c-49bc-9ae7-d2ca47fd3d8f",
+              "usuarioId": "cf128847-9af6-4f06-b035-19fbaa954519",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:37:46.836Z",
+              "updatedAt": "2025-12-16T22:37:46.836Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "6dabe9ea-3dc0-4969-b827-88d9af56d1b4",
+          "email": "admin_24520752@test.com",
+          "passwordHash": "$2b$10$OUg.z3wOKaPQIt/ofcZqC.0U3ApAWDFHfQTN/TaDUYxPerbicNyQa",
+          "nombres": "Admin 24520752",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:35:49.483Z",
+          "updatedAt": "2025-12-16T22:35:49.483Z",
+          "usuarioInstituciones": [
+            {
+              "id": "66816225-a980-43de-8ccb-b8cc18d30684",
+              "usuarioId": "6dabe9ea-3dc0-4969-b827-88d9af56d1b4",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:35:49.485Z",
+              "updatedAt": "2025-12-16T22:35:49.485Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "c7ed6399-fee5-4e9d-8cf1-ac04cfc365e8",
+          "email": "admin_24342844@test.com",
+          "passwordHash": "$2b$10$K1lDRrbH35LAVHzQTHNzqeOhDh8XetnUwG4/SdzQ7KRrjBDOyBhLm",
+          "nombres": "Admin 24342844",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:32:50.769Z",
+          "updatedAt": "2025-12-16T22:32:50.769Z",
+          "usuarioInstituciones": [
+            {
+              "id": "f58775eb-6bff-42e5-9f94-454b0f2bcba6",
+              "usuarioId": "c7ed6399-fee5-4e9d-8cf1-ac04cfc365e8",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:32:50.772Z",
+              "updatedAt": "2025-12-16T22:32:50.772Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "af181465-48c4-40f1-8c03-c3d92497efa4",
+          "email": "admin_24159885@test.com",
+          "passwordHash": "$2b$10$TerQZd1spWGzk9amblVCEu1FICNpob7L8zGlVciTJlFMfWWma/1WK",
+          "nombres": "Admin 24159885",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:29:47.774Z",
+          "updatedAt": "2025-12-16T22:29:47.774Z",
+          "usuarioInstituciones": [
+            {
+              "id": "b0afbaac-3af7-4f56-9fd4-913854d6fa4e",
+              "usuarioId": "af181465-48c4-40f1-8c03-c3d92497efa4",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:29:47.776Z",
+              "updatedAt": "2025-12-16T22:29:47.776Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d472c1a7-0043-45c1-aa2a-54fa2a593e6f",
+          "email": "admin_24025269@test.com",
+          "passwordHash": "$2b$10$hWePVtoo.Ofb3TvLoFEp5upq/AP6sY66RJ0VfsF/g.MY2bP3Fg/Z.",
+          "nombres": "Admin 24025269",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:27:35.568Z",
+          "updatedAt": "2025-12-16T22:27:35.568Z",
+          "usuarioInstituciones": [
+            {
+              "id": "8ddcc963-5e68-47cc-956a-a09ccfe21175",
+              "usuarioId": "d472c1a7-0043-45c1-aa2a-54fa2a593e6f",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:27:35.572Z",
+              "updatedAt": "2025-12-16T22:27:35.572Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "11e0198c-79d5-4df1-a541-f7b83fb573ae",
+          "email": "admin_22672910@test.com",
+          "passwordHash": "$2b$10$I7cRBnbrvxRGbgq04aiES.8SYoTNCX/Ast0ijvaRSnf7fEEG4i3WC",
+          "nombres": "Admin 22672910",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:05:04.114Z",
+          "updatedAt": "2025-12-16T22:05:04.114Z",
+          "usuarioInstituciones": [
+            {
+              "id": "0d9ee91b-c48d-46d2-9626-c6027ce4152e",
+              "usuarioId": "11e0198c-79d5-4df1-a541-f7b83fb573ae",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:05:04.121Z",
+              "updatedAt": "2025-12-16T22:05:04.121Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "948e09f4-7fd9-4034-a02f-95cc40d2a838",
+          "email": "admin_22507935@test.com",
+          "passwordHash": "$2b$10$XesuMQkGQg/u2N3J.pNyCunu.DcuCKDj0t0knw95rbNq59usPzbju",
+          "nombres": "Admin 22507935",
+          "apellidos": "TestApellido",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "admin_institucion",
+          "telefono": "+57 300 123 4567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T22:02:17.834Z",
+          "updatedAt": "2025-12-16T22:02:17.834Z",
+          "usuarioInstituciones": [
+            {
+              "id": "74682bd7-1561-4277-9a03-4b8abe669eae",
+              "usuarioId": "948e09f4-7fd9-4034-a02f-95cc40d2a838",
+              "institucionId": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+              "rolEnInstitucion": "admin",
+              "activo": true,
+              "createdAt": "2025-12-16T22:02:17.837Z",
+              "updatedAt": "2025-12-16T22:02:17.837Z",
+              "institucion": {
+                "id": "72aa9a8a-f882-4a52-affc-f93be299fce4",
+                "nombre": "Colegio Simón Bolívar",
+                "direccion": "Avenida Principal #100-50, Medellín",
+                "telefono": "+573215551237",
+                "email": "contacto@bolivar.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.136Z",
+                "updatedAt": "2025-12-16T16:48:45.136Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ee3c1fc6-0477-4905-9c94-1e9f1a59e612",
+          "email": "admin@asistapp.com",
+          "passwordHash": "$2b$10$b4HPslxWTwMsLB/c7U3I5uAW3h17eGIQUCksJ7ZQSd5KwGGulAU0C",
+          "nombres": "Administrador",
+          "apellidos": "Sistema",
+          "identificacion": null,
+          "titulo": null,
+          "especialidad": null,
+          "rol": "super_admin",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T20:55:00.700Z",
+          "updatedAt": "2025-12-16T20:55:00.700Z",
+          "usuarioInstituciones": []
+        },
+        {
+          "id": "da405c7c-9fca-4f12-a27d-faec7c397885",
+          "email": "carlos.nunez@email.com",
+          "passwordHash": "$2b$10$OcLDxpcbNhKO/AYquEn.kuT7jugrGQT3XKnMMeAfwJNuToKdLEpHC",
+          "nombres": "Carlos",
+          "apellidos": "Núñez",
+          "identificacion": "ACU-CN-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "acudiente",
+          "telefono": "+573003334455",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:47.666Z",
+          "updatedAt": "2025-12-16T16:48:47.666Z",
+          "usuarioInstituciones": [
+            {
+              "id": "76b5b2ac-73f1-4a3e-bd90-682b94e3ad9c",
+              "usuarioId": "da405c7c-9fca-4f12-a27d-faec7c397885",
+              "institucionId": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+              "rolEnInstitucion": "acudiente",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+                "nombre": "Liceo Santander",
+                "direccion": "Calle 9 #10-20, Bucaramanga",
+                "telefono": "+573215551235",
+                "email": "contacto@santander.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.132Z",
+                "updatedAt": "2025-12-16T16:48:45.132Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "6dbe28a9-8ec2-4f2f-9471-108bfd2dafda",
+          "email": "carmen.lopez@email.com",
+          "passwordHash": "$2b$10$qoVEyVZfA4DfoePXoaH2dOpxZajWvjYLrbRsrhf27zoxg4UqijPv2",
+          "nombres": "Carmen",
+          "apellidos": "López",
+          "identificacion": "ACU-CL-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "acudiente",
+          "telefono": "+573002223344",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:47.369Z",
+          "updatedAt": "2025-12-16T16:48:47.369Z",
+          "usuarioInstituciones": [
+            {
+              "id": "3fd0d15f-4fd7-4ef3-8979-a4f46a9f95cf",
+              "usuarioId": "6dbe28a9-8ec2-4f2f-9471-108bfd2dafda",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "acudiente",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "3c1f385e-157b-4926-b004-2616eb3c16ed",
+          "email": "patricia.castro@email.com",
+          "passwordHash": "$2b$10$qOftsZMdIal4fo5CTAMWeeZiRt74aWRULXQonxMylnjhU.geenoma",
+          "nombres": "Patricia",
+          "apellidos": "Castro",
+          "identificacion": "ACU-PC-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "acudiente",
+          "telefono": "+573001112233",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:47.230Z",
+          "updatedAt": "2025-12-16T16:48:47.230Z",
+          "usuarioInstituciones": [
+            {
+              "id": "28f08902-4b02-41e5-9627-7bba0b5af7f4",
+              "usuarioId": "3c1f385e-157b-4926-b004-2616eb3c16ed",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "acudiente",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d983ce2c-493a-4ec0-b8a8-d4f24213775a",
+          "email": "maria.mendoza@email.com",
+          "passwordHash": "$2b$10$k5he.iY2p3uBKuQe3X4pVu3kkxIq.gHws51nAJgCj1wX4BzZ5ucj.",
+          "nombres": "María",
+          "apellidos": "Mendoza",
+          "identificacion": "ACU-MM-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "acudiente",
+          "telefono": "+573103816321",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:47.122Z",
+          "updatedAt": "2025-12-16T16:48:47.122Z",
+          "usuarioInstituciones": [
+            {
+              "id": "fe2db8dd-ba85-4832-b875-c34cff3a4383",
+              "usuarioId": "d983ce2c-493a-4ec0-b8a8-d4f24213775a",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "acudiente",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "57fc66be-5ed2-4a6d-a101-a931be77f036",
+          "email": "paula.mendez@santander.edu",
+          "passwordHash": "$2b$10$WdAQTyuw/T977b7fKG/IZuu9evmGrGWojnBN24bPgJPG0VjxFr9MW",
+          "nombres": "Paula",
+          "apellidos": "Méndez",
+          "identificacion": "EST-PM-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:47.008Z",
+          "updatedAt": "2025-12-16T16:48:47.008Z",
+          "usuarioInstituciones": [
+            {
+              "id": "031e5213-fc2b-47ca-acc4-7aff8f1f104c",
+              "usuarioId": "57fc66be-5ed2-4a6d-a101-a931be77f036",
+              "institucionId": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+                "nombre": "Liceo Santander",
+                "direccion": "Calle 9 #10-20, Bucaramanga",
+                "telefono": "+573215551235",
+                "email": "contacto@santander.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.132Z",
+                "updatedAt": "2025-12-16T16:48:45.132Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "5f6cc0ad-46c1-4eb2-a242-3c3b1663d87c",
+          "email": "daniel.ruiz@santander.edu",
+          "passwordHash": "$2b$10$oJ1zbLz0IwNzwOpD8g7XKuEwpBhoDZCHA6WpRbOzzjvz9ZaTI33zC",
+          "nombres": "Daniel",
+          "apellidos": "Ruiz",
+          "identificacion": "EST-DR-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.896Z",
+          "updatedAt": "2025-12-16T16:48:46.896Z",
+          "usuarioInstituciones": [
+            {
+              "id": "a78d4b7f-4f23-4633-a22b-2bfac12c3f62",
+              "usuarioId": "5f6cc0ad-46c1-4eb2-a242-3c3b1663d87c",
+              "institucionId": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+                "nombre": "Liceo Santander",
+                "direccion": "Calle 9 #10-20, Bucaramanga",
+                "telefono": "+573215551235",
+                "email": "contacto@santander.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.132Z",
+                "updatedAt": "2025-12-16T16:48:45.132Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "1967cc10-1f49-40d0-971d-3dc2df0763ce",
+          "email": "sofia.nunez@santander.edu",
+          "passwordHash": "$2b$10$l0JyXKY3YqqUV80.KGHvYuzP9PbPWez0DyNofzOf9WqZN6HCOHVuG",
+          "nombres": "Sofía",
+          "apellidos": "Núñez",
+          "identificacion": "EST-SN-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.773Z",
+          "updatedAt": "2025-12-16T16:48:46.773Z",
+          "usuarioInstituciones": [
+            {
+              "id": "71635e1c-df5f-4cdb-834b-14e0f271c07c",
+              "usuarioId": "1967cc10-1f49-40d0-971d-3dc2df0763ce",
+              "institucionId": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+                "nombre": "Liceo Santander",
+                "direccion": "Calle 9 #10-20, Bucaramanga",
+                "telefono": "+573215551235",
+                "email": "contacto@santander.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.132Z",
+                "updatedAt": "2025-12-16T16:48:45.132Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "928ce85e-edc8-4c81-80be-3ac52f68160d",
+          "email": "andres.lopez@sanjose.edu",
+          "passwordHash": "$2b$10$aE1X4g5HFNhNrH0AA4MQmeS/QjtxNWcTfe3xVQ0MdhPGRGyXHY4.u",
+          "nombres": "Andrés",
+          "apellidos": "López",
+          "identificacion": "EST-AL-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.675Z",
+          "updatedAt": "2025-12-16T16:48:46.675Z",
+          "usuarioInstituciones": [
+            {
+              "id": "e1b697db-039a-40e9-ab9b-cba5d630d083",
+              "usuarioId": "928ce85e-edc8-4c81-80be-3ac52f68160d",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "55f38d51-daa4-43a7-804d-a9f41f4b98cd",
+          "email": "valentina.rojas@sanjose.edu",
+          "passwordHash": "$2b$10$Cw9Usq3yTha5l6s4Chu0kOVyr0EGPdpg4ht3Q6XSGyQ62uJGisnCC",
+          "nombres": "Valentina",
+          "apellidos": "Rojas",
+          "identificacion": "EST-VR-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.574Z",
+          "updatedAt": "2025-12-16T16:48:46.574Z",
+          "usuarioInstituciones": [
+            {
+              "id": "a8cb8eca-f256-414c-b551-98acda87c88c",
+              "usuarioId": "55f38d51-daa4-43a7-804d-a9f41f4b98cd",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d9f3c0b6-e3b3-49cf-946d-8f40508cc67f",
+          "email": "mateo.castro@sanjose.edu",
+          "passwordHash": "$2b$10$sYtNuNPJTfBWsFoTPnGFbeDwKMXsuR.rniNLrB1j.dLv1oK57NYnO",
+          "nombres": "Mateo",
+          "apellidos": "Castro",
+          "identificacion": "EST-MC-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.471Z",
+          "updatedAt": "2025-12-16T16:48:46.471Z",
+          "usuarioInstituciones": [
+            {
+              "id": "1c2c4dc3-6520-4044-9fab-08188b0de6fd",
+              "usuarioId": "d9f3c0b6-e3b3-49cf-946d-8f40508cc67f",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+          "email": "santiago.mendoza@sanjose.edu",
+          "passwordHash": "$2b$10$emHQOdmyJi8wQtOhEwAIyOiylymCW3REzbbt3byr/e8S9WseuDNw.",
+          "nombres": "Santiago",
+          "apellidos": "Mendoza",
+          "identificacion": "EST-SM-001",
+          "titulo": null,
+          "especialidad": null,
+          "rol": "estudiante",
+          "telefono": null,
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.345Z",
+          "updatedAt": "2025-12-16T16:48:46.345Z",
+          "usuarioInstituciones": [
+            {
+              "id": "15b36aa6-6327-40ae-b73b-122fa52fb786",
+              "usuarioId": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "estudiante",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "0fee44fb-14f6-4999-a66c-46cd4a7bdaa9",
+          "email": "carlos.diaz@santander.edu",
+          "passwordHash": "$2b$10$VDXBVzZDI8AXw11cliJ4ruE9wX/5e213WXj7Zvt2S9dNwJZ9whroO",
+          "nombres": "Carlos",
+          "apellidos": "Díaz",
+          "identificacion": "PROF-CD-001",
+          "titulo": "Licenciado en Ciencias Sociales",
+          "especialidad": "Historia y Geografía",
+          "rol": "profesor",
+          "telefono": "+573101234570",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.218Z",
+          "updatedAt": "2025-12-16T16:48:46.218Z",
+          "usuarioInstituciones": [
+            {
+              "id": "377968a1-e4af-4895-9f68-a86d8afa32a7",
+              "usuarioId": "0fee44fb-14f6-4999-a66c-46cd4a7bdaa9",
+              "institucionId": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+              "rolEnInstitucion": "profesor",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02",
+                "nombre": "Liceo Santander",
+                "direccion": "Calle 9 #10-20, Bucaramanga",
+                "telefono": "+573215551235",
+                "email": "contacto@santander.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.132Z",
+                "updatedAt": "2025-12-16T16:48:45.132Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "9c5015e2-799d-4c1c-8507-11d5d7cd44bc",
+          "email": "vacio.profe@sanjose.edu",
+          "passwordHash": "$2b$10$eFci5BKh3HVmyNXBoN2shOagLEtL233lWS3f8vG91Go3nMwn/u83W",
+          "nombres": "Pedro",
+          "apellidos": "Sin Clases",
+          "identificacion": "PROF-SC-001",
+          "titulo": "Licenciado en Educación",
+          "especialidad": "Educación Física",
+          "rol": "profesor",
+          "telefono": "+573101234569",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.112Z",
+          "updatedAt": "2025-12-16T16:48:46.112Z",
+          "usuarioInstituciones": [
+            {
+              "id": "a9f8d6fc-788e-49ce-aad4-b745ff9a5db7",
+              "usuarioId": "9c5015e2-799d-4c1c-8507-11d5d7cd44bc",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "profesor",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "email": "laura.gomez@sanjose.edu",
+          "passwordHash": "$2b$10$wNrMHAOYhYM/yI4QIC6JSOkc2FiWDSkS2SlfeVRWPm5SppqMEvqxS",
+          "nombres": "Laura",
+          "apellidos": "Gómez",
+          "identificacion": "PROF-LG-001",
+          "titulo": "Licenciada en Ciencias",
+          "especialidad": "Física y Química",
+          "rol": "profesor",
+          "telefono": "+573101234568",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:46.000Z",
+          "updatedAt": "2025-12-16T16:48:46.000Z",
+          "usuarioInstituciones": [
+            {
+              "id": "bcfc5e81-0965-48e2-a708-32fefdc23197",
+              "usuarioId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "profesor",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "email": "juan.perez@sanjose.edu",
+          "passwordHash": "$2b$10$k1Y2mNmvZTmt56lqYwE4iO3GeljotMy3l1pwlrw.puNJrVSQwIJH2",
+          "nombres": "Juan",
+          "apellidos": "Pérez",
+          "identificacion": "PROF-JP-001",
+          "titulo": "Licenciado en Matemáticas",
+          "especialidad": "Cálculo y Álgebra",
+          "rol": "profesor",
+          "telefono": "+573101234567",
+          "activo": true,
+          "tokenVersion": 1,
+          "createdAt": "2025-12-16T16:48:45.877Z",
+          "updatedAt": "2025-12-16T16:48:45.877Z",
+          "usuarioInstituciones": [
+            {
+              "id": "7b7e4f7a-ca58-45d6-8d66-b329a458f0a2",
+              "usuarioId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+              "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "rolEnInstitucion": "profesor",
+              "activo": true,
+              "createdAt": "2025-12-16T16:48:47.672Z",
+              "updatedAt": "2025-12-16T16:48:47.672Z",
+              "institucion": {
+                "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+                "nombre": "Colegio San José",
+                "direccion": "Carrera 12 #45-67, Bogotá",
+                "telefono": "+573215551234",
+                "email": "contacto@sanjose.edu.co",
+                "activa": true,
+                "createdAt": "2025-12-16T16:48:45.126Z",
+                "updatedAt": "2025-12-16T16:48:45.126Z"
+              }
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 50,
+        "total": 54,
+        "totalPages": 2,
+        "hasNext": true,
+        "hasPrev": false
+      }
+    }
+  },
+  "Verificar_Token": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "usuario": {
+          "id": "907f0fb9-7c20-44fe-a445-347d409278b5",
+          "rol": "super_admin",
+          "email": "superadmin@asistapp.com",
+          "tokenVersion": 1,
+          "iat": 1765967879,
+          "exp": 1766054279
+        },
+        "valid": true
+      }
+    }
+  },
+  "Listar_Periodos": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "nombre": "Año Lectivo 2025",
+          "fechaInicio": "2025-01-15T00:00:00.000Z",
+          "fechaFin": "2025-12-15T00:00:00.000Z",
+          "activo": true,
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.688Z",
+          "_count": {
+            "grupos": 2
+          }
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 1,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Listar_Materias": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "nombre": "Cálculo",
+          "codigo": "MAT-101",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.704Z",
+          "_count": {
+            "horarios": 5
+          }
+        },
+        {
+          "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "nombre": "Español",
+          "codigo": "ESP-101",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.704Z",
+          "_count": {
+            "horarios": 5
+          }
+        },
+        {
+          "id": "d4c75bab-5666-410e-a38d-03de62621940",
+          "nombre": "Física",
+          "codigo": "FIS-101",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.704Z",
+          "_count": {
+            "horarios": 5
+          }
+        },
+        {
+          "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "nombre": "Inglés",
+          "codigo": "ING-101",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.705Z",
+          "_count": {
+            "horarios": 5
+          }
+        },
+        {
+          "id": "eebcadf9-4957-4425-811c-e6d17f0a04f5",
+          "nombre": "Química",
+          "codigo": "QUI-101",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.705Z",
+          "_count": {
+            "horarios": 5
+          }
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 5,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Listar_Grupos": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "nombre": "Décimo A",
+          "grado": "10",
+          "seccion": "A",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.804Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "_count": {
+            "estudiantesGrupos": 3,
+            "horarios": 20
+          }
+        },
+        {
+          "id": "373b5192-9995-4f7a-a3da-73392ec8acc2",
+          "nombre": "Once B",
+          "grado": "11",
+          "seccion": "B",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.812Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "_count": {
+            "estudiantesGrupos": 1,
+            "horarios": 5
+          }
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 2,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Listar_Estudiantes_Grupo": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "1d521237-9073-4329-b826-c7b3ba574045",
+          "nombres": "Santiago",
+          "apellidos": "Mendoza",
+          "usuario": {
+            "nombres": "Santiago",
+            "apellidos": "Mendoza"
+          },
+          "identificacion": "TI-1001234567",
+          "telefonoResponsable": "+573103816321",
+          "createdAt": "2025-12-16T16:48:47.824Z",
+          "asignadoAt": "2025-12-16T16:48:47.859Z"
+        },
+        {
+          "id": "81787e72-247b-4daf-b9b7-793f726e333d",
+          "nombres": "Valentina",
+          "apellidos": "Rojas",
+          "usuario": {
+            "nombres": "Valentina",
+            "apellidos": "Rojas"
+          },
+          "identificacion": "TI-1001234569",
+          "telefonoResponsable": "+573103816321",
+          "createdAt": "2025-12-16T16:48:47.833Z",
+          "asignadoAt": "2025-12-16T16:48:47.859Z"
+        },
+        {
+          "id": "031d2c92-4c2b-4db0-a13f-a53286a3bff0",
+          "nombres": "Andrés",
+          "apellidos": "López",
+          "usuario": {
+            "nombres": "Andrés",
+            "apellidos": "López"
+          },
+          "identificacion": "TI-1001234570",
+          "telefonoResponsable": "+573103816321",
+          "createdAt": "2025-12-16T16:48:47.841Z",
+          "asignadoAt": "2025-12-16T16:48:47.859Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 3,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Listar_Horarios_Grupo": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "2ac66df0-6b1d-4ddc-a0fc-6042c4c812f4",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 1,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "33e67f7c-e058-4d93-9cad-9e03ce7fed2b",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "d4c75bab-5666-410e-a38d-03de62621940",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 1,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "43e72ed6-fc88-40f8-887e-8ba17e583984",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 1,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "1101e49a-8c9c-4d48-934f-c7e1ad68dbcf",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 1,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 2
+          }
+        },
+        {
+          "id": "b4903690-cadd-4728-9233-fcb931639a80",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 2,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "610d4982-91c5-4c2d-8c52-f9fdf6e16946",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "d4c75bab-5666-410e-a38d-03de62621940",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 2,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "de51d48b-dba3-4c74-8b55-0629a295b71e",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 2,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "aa41cd24-3455-41a5-9aac-712a49ae7e1c",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 2,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "266faafa-575d-4db2-ba20-b1ba26c6f1b6",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 3,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "d4c75bab-5666-410e-a38d-03de62621940",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 3,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 5
+          }
+        },
+        {
+          "id": "5445df16-52cf-40d8-9799-9db3c4be8a0d",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 3,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "ab1d752d-cd90-4f20-9aac-bd08097ef3a9",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 3,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "88aeec95-16fc-4d95-a2dc-49896143dd2d",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 4,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "eed5f2ac-a489-445c-81e6-2bbcaf4f301c",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "d4c75bab-5666-410e-a38d-03de62621940",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 4,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "d8fc7913-3d34-4c5c-b1e5-5413d5151aca",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 4,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "4ababa7a-df77-4e7c-a342-3dcf3dbead18",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 4,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "15857ce9-c8c4-4ae2-a6c9-a69591a8d5e2",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 5,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "3123c73f-257a-43e2-8ad6-60d8a2fadf4a",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "d4c75bab-5666-410e-a38d-03de62621940",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 5,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "3343d485-a978-4632-a4ad-7c93de4dd59b",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "diaSemana": 5,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        },
+        {
+          "id": "6f1bc6c6-3d1a-45d2-9121-3df58213a776",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "grupoId": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "materiaId": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "diaSemana": 5,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "createdAt": "2025-12-16T16:48:47.887Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "createdAt": "2025-12-16T16:48:47.804Z",
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "fechaInicio": "2025-01-15T00:00:00.000Z",
+              "fechaFin": "2025-12-15T00:00:00.000Z",
+              "activo": true
+            }
+          },
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "_count": {
+            "asistencias": 0
+          }
+        }
+      ]
+    }
+  },
+  "Profesor_Dashboard_ClasesHoy": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "266faafa-575d-4db2-ba20-b1ba26c6f1b6",
+          "diaSemana": 3,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          },
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "activo": true
+          },
+          "institucion": {
+            "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "nombre": "Colegio San José",
+            "configuraciones": {
+              "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+              "notificacionesActivas": true,
+              "canalNotificacion": "WHATSAPP",
+              "modoNotificacionAsistencia": "INSTANT",
+              "horaDisparoNotificacion": "18:00:00"
+            }
+          }
+        },
+        {
+          "id": "5445df16-52cf-40d8-9799-9db3c4be8a0d",
+          "diaSemana": 3,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          },
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "nombre": "Año Lectivo 2025",
+            "activo": true
+          },
+          "institucion": {
+            "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "nombre": "Colegio San José",
+            "configuraciones": {
+              "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+              "notificacionesActivas": true,
+              "canalNotificacion": "WHATSAPP",
+              "modoNotificacionAsistencia": "INSTANT",
+              "horaDisparoNotificacion": "18:00:00"
+            }
+          }
+        }
+      ],
+      "message": "Clases del día obtenidas exitosamente"
+    }
+  },
+  "Profesor_Dashboard_Semanal": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "1": [
+          {
+            "id": "2ac66df0-6b1d-4ddc-a0fc-6042c4c812f4",
+            "diaSemana": 1,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+              "nombre": "Cálculo",
+              "codigo": "MAT-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          },
+          {
+            "id": "43e72ed6-fc88-40f8-887e-8ba17e583984",
+            "diaSemana": 1,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+              "nombre": "Español",
+              "codigo": "ESP-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          }
+        ],
+        "2": [
+          {
+            "id": "b4903690-cadd-4728-9233-fcb931639a80",
+            "diaSemana": 2,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+              "nombre": "Cálculo",
+              "codigo": "MAT-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          },
+          {
+            "id": "de51d48b-dba3-4c74-8b55-0629a295b71e",
+            "diaSemana": 2,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+              "nombre": "Español",
+              "codigo": "ESP-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          }
+        ],
+        "3": [
+          {
+            "id": "266faafa-575d-4db2-ba20-b1ba26c6f1b6",
+            "diaSemana": 3,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+              "nombre": "Cálculo",
+              "codigo": "MAT-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          },
+          {
+            "id": "5445df16-52cf-40d8-9799-9db3c4be8a0d",
+            "diaSemana": 3,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+              "nombre": "Español",
+              "codigo": "ESP-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          }
+        ],
+        "4": [
+          {
+            "id": "88aeec95-16fc-4d95-a2dc-49896143dd2d",
+            "diaSemana": 4,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+              "nombre": "Cálculo",
+              "codigo": "MAT-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          },
+          {
+            "id": "d8fc7913-3d34-4c5c-b1e5-5413d5151aca",
+            "diaSemana": 4,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+              "nombre": "Español",
+              "codigo": "ESP-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          }
+        ],
+        "5": [
+          {
+            "id": "15857ce9-c8c4-4ae2-a6c9-a69591a8d5e2",
+            "diaSemana": 5,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+              "nombre": "Cálculo",
+              "codigo": "MAT-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          },
+          {
+            "id": "3343d485-a978-4632-a4ad-7c93de4dd59b",
+            "diaSemana": 5,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "materia": {
+              "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+              "nombre": "Español",
+              "codigo": "ESP-101"
+            },
+            "periodoAcademico": {
+              "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+              "nombre": "Año Lectivo 2025",
+              "activo": true
+            },
+            "institucion": {
+              "id": "c0c8187a-85da-4551-aeee-73c5b9235994",
+              "nombre": "Colegio San José",
+              "configuraciones": {
+                "id": "67370dfe-8251-4f93-8fd5-ed8f46bea187",
+                "notificacionesActivas": true,
+                "canalNotificacion": "WHATSAPP",
+                "modoNotificacionAsistencia": "INSTANT",
+                "horaDisparoNotificacion": "18:00:00"
+              }
+            }
+          }
+        ],
+        "6": [],
+        "7": []
+      },
+      "message": "Horario semanal obtenido exitosamente"
+    }
+  },
+  "Profesor_Stats_Asistencia": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "message": "Estadísticas de asistencia obtenidas exitosamente",
+      "data": {
+        "totalEstudiantes": 3,
+        "presentes": 0,
+        "ausentes": 0,
+        "tardanzas": 0,
+        "justificados": 0,
+        "sinRegistrar": 3
+      }
+    }
+  },
+  "Estudiante_Me": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "message": "Información del estudiante obtenida exitosamente",
+      "data": {
+        "id": "1d521237-9073-4329-b826-c7b3ba574045",
+        "usuarioId": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+        "identificacion": "TI-1001234567",
+        "codigoQr": "QR-SANTIAGO-001",
+        "nombreResponsable": "María Mendoza",
+        "telefonoResponsable": "+573103816321",
+        "usuario": {
+          "id": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+          "nombres": "Santiago",
+          "apellidos": "Mendoza",
+          "email": "santiago.mendoza@sanjose.edu",
+          "rol": "estudiante"
+        },
+        "createdAt": "2025-12-16T16:48:47.824Z",
+        "updatedAt": "2025-12-16T16:48:47.824Z"
+      }
+    }
+  },
+  "Estudiante_Perfil": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {}
+    }
+  },
+  "Estudiante_Dashboard_Hoy": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "266faafa-575d-4db2-ba20-b1ba26c6f1b6",
+          "diaSemana": 3,
+          "horaInicio": "07:00",
+          "horaFin": "08:00",
+          "materia": {
+            "id": "8896014e-cc9a-4d0f-8d2a-0953305b7e28",
+            "nombre": "Cálculo",
+            "codigo": "MAT-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          }
+        },
+        {
+          "id": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+          "diaSemana": 3,
+          "horaInicio": "08:00",
+          "horaFin": "09:00",
+          "materia": {
+            "id": "d4c75bab-5666-410e-a38d-03de62621940",
+            "nombre": "Física",
+            "codigo": "FIS-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          }
+        },
+        {
+          "id": "5445df16-52cf-40d8-9799-9db3c4be8a0d",
+          "diaSemana": 3,
+          "horaInicio": "10:00",
+          "horaFin": "11:00",
+          "materia": {
+            "id": "6f8e7a0a-7506-4636-8dfd-a4c4ecaac645",
+            "nombre": "Español",
+            "codigo": "ESP-101"
+          },
+          "profesor": {
+            "id": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+            "nombres": "Juan",
+            "apellidos": "Pérez"
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          }
+        },
+        {
+          "id": "ab1d752d-cd90-4f20-9aac-bd08097ef3a9",
+          "diaSemana": 3,
+          "horaInicio": "14:00",
+          "horaFin": "15:00",
+          "materia": {
+            "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+            "nombre": "Inglés",
+            "codigo": "ING-101"
+          },
+          "profesor": {
+            "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+            "nombres": "Laura",
+            "apellidos": "Gómez"
+          },
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          }
+        }
+      ]
+    }
+  },
+  "Estudiante_Horario_Semanal": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "1": [
+          {
+            "id": "2ac66df0-6b1d-4ddc-a0fc-6042c4c812f4",
+            "diaSemana": 1,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "33e67f7c-e058-4d93-9cad-9e03ce7fed2b",
+            "diaSemana": 1,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "43e72ed6-fc88-40f8-887e-8ba17e583984",
+            "diaSemana": 1,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "1101e49a-8c9c-4d48-934f-c7e1ad68dbcf",
+            "diaSemana": 1,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          }
+        ],
+        "2": [
+          {
+            "id": "b4903690-cadd-4728-9233-fcb931639a80",
+            "diaSemana": 2,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "610d4982-91c5-4c2d-8c52-f9fdf6e16946",
+            "diaSemana": 2,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "de51d48b-dba3-4c74-8b55-0629a295b71e",
+            "diaSemana": 2,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "aa41cd24-3455-41a5-9aac-712a49ae7e1c",
+            "diaSemana": 2,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          }
+        ],
+        "3": [
+          {
+            "id": "266faafa-575d-4db2-ba20-b1ba26c6f1b6",
+            "diaSemana": 3,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+            "diaSemana": 3,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "5445df16-52cf-40d8-9799-9db3c4be8a0d",
+            "diaSemana": 3,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "ab1d752d-cd90-4f20-9aac-bd08097ef3a9",
+            "diaSemana": 3,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          }
+        ],
+        "4": [
+          {
+            "id": "88aeec95-16fc-4d95-a2dc-49896143dd2d",
+            "diaSemana": 4,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "eed5f2ac-a489-445c-81e6-2bbcaf4f301c",
+            "diaSemana": 4,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "d8fc7913-3d34-4c5c-b1e5-5413d5151aca",
+            "diaSemana": 4,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "4ababa7a-df77-4e7c-a342-3dcf3dbead18",
+            "diaSemana": 4,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          }
+        ],
+        "5": [
+          {
+            "id": "15857ce9-c8c4-4ae2-a6c9-a69591a8d5e2",
+            "diaSemana": 5,
+            "horaInicio": "07:00",
+            "horaFin": "08:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "3123c73f-257a-43e2-8ad6-60d8a2fadf4a",
+            "diaSemana": 5,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "3343d485-a978-4632-a4ad-7c93de4dd59b",
+            "diaSemana": 5,
+            "horaInicio": "10:00",
+            "horaFin": "11:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          },
+          {
+            "id": "6f1bc6c6-3d1a-45d2-9121-3df58213a776",
+            "diaSemana": 5,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {},
+            "profesor": {},
+            "grupo": {}
+          }
+        ],
+        "6": [],
+        "7": []
+      }
+    }
+  },
+  "Estudiante_Grupos": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "periodoId": "be261e08-b488-439b-b822-c0e55cb4caf6",
+          "nombre": "Décimo A",
+          "grado": "10",
+          "seccion": "A",
+          "createdAt": "2025-12-16T16:48:47.804Z",
+          "periodoAcademico": {
+            "id": "be261e08-b488-439b-b822-c0e55cb4caf6",
+            "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+            "nombre": "Año Lectivo 2025",
+            "fechaInicio": "2025-01-15T00:00:00.000Z",
+            "fechaFin": "2025-12-15T00:00:00.000Z",
+            "activo": true,
+            "createdAt": "2025-12-16T16:48:47.688Z"
+          },
+          "_count": {
+            "estudiantesGrupos": 3,
+            "horarios": 20
+          }
+        }
+      ]
+    }
+  },
+  "Estudiante_Mis_Asistencias": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "f8564b34-25a8-4f7a-925e-f65fa0866660",
+          "fecha": "2025-12-15",
+          "estado": "PRESENTE",
+          "horarioId": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+          "estudianteId": "1d521237-9073-4329-b826-c7b3ba574045",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "horario": {
+            "id": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+            "diaSemana": 3,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {
+              "id": "d4c75bab-5666-410e-a38d-03de62621940",
+              "nombre": "Física",
+              "codigo": "FIS-101"
+            },
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "profesor": {
+              "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+              "nombres": "Laura",
+              "apellidos": "Gómez"
+            }
+          }
+        },
+        {
+          "id": "74a50b1e-1ed8-4a92-bbb8-fb81fe2dcf0a",
+          "fecha": "2025-12-13",
+          "estado": "PRESENTE",
+          "horarioId": "1101e49a-8c9c-4d48-934f-c7e1ad68dbcf",
+          "estudianteId": "1d521237-9073-4329-b826-c7b3ba574045",
+          "profesorId": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "horario": {
+            "id": "1101e49a-8c9c-4d48-934f-c7e1ad68dbcf",
+            "diaSemana": 1,
+            "horaInicio": "14:00",
+            "horaFin": "15:00",
+            "materia": {
+              "id": "e31953f5-b6c7-4214-bb29-bb74615ea720",
+              "nombre": "Inglés",
+              "codigo": "ING-101"
+            },
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "profesor": {
+              "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+              "nombres": "Laura",
+              "apellidos": "Gómez"
+            }
+          }
+        },
+        {
+          "id": "238662c1-2735-4c90-a415-c9f998a95b0a",
+          "fecha": "2025-12-09",
+          "estado": "JUSTIFICADO",
+          "horarioId": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+          "estudianteId": "1d521237-9073-4329-b826-c7b3ba574045",
+          "profesorId": "cd03243e-5c6c-4242-9021-4e3e5fa04f87",
+          "institucionId": "c0c8187a-85da-4551-aeee-73c5b9235994",
+          "horario": {
+            "id": "05b457a8-bc6a-4f08-8b3d-54a8fa3d03e1",
+            "diaSemana": 3,
+            "horaInicio": "08:00",
+            "horaFin": "09:00",
+            "materia": {
+              "id": "d4c75bab-5666-410e-a38d-03de62621940",
+              "nombre": "Física",
+              "codigo": "FIS-101"
+            },
+            "grupo": {
+              "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+              "nombre": "Décimo A",
+              "grado": "10",
+              "seccion": "A"
+            },
+            "profesor": {
+              "id": "29710c1e-8477-4acf-b2f8-3c6e9a0993a6",
+              "nombres": "Laura",
+              "apellidos": "Gómez"
+            }
+          }
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 3,
+        "totalPages": 1,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  },
+  "Acudiente_Listar_Hijos": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "1d521237-9073-4329-b826-c7b3ba574045",
+          "usuarioId": "141979dc-f2b0-4b47-a863-510ada94cbfc",
+          "nombres": "Santiago",
+          "apellidos": "Mendoza",
+          "identificacion": "TI-1001234567",
+          "parentesco": "madre",
+          "esPrincipal": true,
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          },
+          "estadisticasResumen": {
+            "totalClases": 3,
+            "presentes": 2,
+            "ausentes": 0,
+            "tardanzas": 0,
+            "justificados": 1,
+            "porcentajeAsistencia": 100
+          }
+        },
+        {
+          "id": "81787e72-247b-4daf-b9b7-793f726e333d",
+          "usuarioId": "55f38d51-daa4-43a7-804d-a9f41f4b98cd",
+          "nombres": "Valentina",
+          "apellidos": "Rojas",
+          "identificacion": "TI-1001234569",
+          "parentesco": "madre",
+          "esPrincipal": true,
+          "grupo": {
+            "id": "19d15588-2f25-4eb8-9ce1-10f8a8ee15ce",
+            "nombre": "Décimo A",
+            "grado": "10",
+            "seccion": "A"
+          },
+          "estadisticasResumen": {
+            "totalClases": 2,
+            "presentes": 1,
+            "ausentes": 1,
+            "tardanzas": 0,
+            "justificados": 0,
+            "porcentajeAsistencia": 50
+          }
+        }
+      ]
+    }
+  },
+  "Acudiente_Notificaciones": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [
+        {
+          "id": "5540e333-6de8-4f61-bf03-021bb81f4898",
+          "titulo": "🚨 Ausencia reportada",
+          "mensaje": "Santiago Mendoza no asistió a la clase de Cálculo hoy.",
+          "tipo": "AUSENCIA",
+          "leida": false,
+          "estudianteId": "1d521237-9073-4329-b826-c7b3ba574045",
+          "createdAt": "2025-12-16T16:48:47.874Z",
+          "datos": null
+        },
+        {
+          "id": "e4affddc-5c45-4f39-bb77-67c35b720472",
+          "titulo": "⏰ Tardanza registrada",
+          "mensaje": "Valentina Rojas llegó tarde a la clase de Física.",
+          "tipo": "TARDANZA",
+          "leida": true,
+          "estudianteId": "81787e72-247b-4daf-b9b7-793f726e333d",
+          "createdAt": "2025-12-16T16:48:47.874Z",
+          "datos": null
+        },
+        {
+          "id": "2bec2e6d-ee98-4170-8974-fcf1453d3f3d",
+          "titulo": "🚨 Ausencia reportada",
+          "mensaje": "Valentina Rojas faltó a la clase de Español.",
+          "tipo": "AUSENCIA",
+          "leida": false,
+          "estudianteId": "81787e72-247b-4daf-b9b7-793f726e333d",
+          "createdAt": "2025-12-16T16:48:47.874Z",
+          "datos": null
+        }
+      ],
+      "noLeidas": 2,
+      "pagination": {
+        "total": 3,
+        "page": 1,
+        "limit": 20,
+        "totalPages": 1
+      }
+    }
+  },
+  "Acudiente_Count_NoLeidas": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": {
+        "count": 2
+      }
+    }
+  },
+  "Sistema_Logs_Notificaciones": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": [],
+      "pagination": {
+        "total": 0,
+        "limit": 50,
+        "offset": 0
+      }
+    }
+  },
+  "Sistema_Queue_Stats": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "stats": {
+        "pending": 0,
+        "processing": 0,
+        "sent": 0,
+        "failed": 0,
+        "deadLetter": 0
+      }
+    }
+  },
+  "Sistema_Config_Institucion": {
+    "status": 404,
+    "data": {
+      "success": false,
+      "error": "Ruta no encontrada",
+      "code": "NOT_FOUND_ERROR"
+    }
+  }
+}

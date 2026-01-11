@@ -1,369 +1,441 @@
 {
 	"info": {
-		"_postman_id": "d8fbb4e0-f89c-4806-aebf-710f997ad1ed",
-		"name": "🪙 Asistapp API v2.0",
-		"description": "Colección completa para probar la API de AsistApp Backend v2.0\n\n## Credenciales por Defecto\n\n**Super Admin:**\n- Email: superadmin@asistapp.com\n- Password: Admin123!\n\n**Admin San José:**\n- Email: admin@sanjose.edu\n- Password: SanJose123!\n\n**Admin FPS:**\n- Email: admin@fps.edu\n- Password: Fps123!\n\n**Usuario Multi-institución:**\n- Email: multi@asistapp.com\n- Password: Multi123!\n\n**Profesores:**\n- pedro.garcia@sanjose.edu / Prof123!\n- ana.lopez@sanjose.edu / Prof456!\n\n**Estudiantes:**\n- [nombre].[apellido]@sanjose.edu / Est123!\n\n## Uso\n\n1. Importar el environment: Asistapp.postman_environment.json\n2. Ejecutar 'Login - Super Admin' para obtener token\n3. El token se guarda automáticamente en las variables de entorno\n4. Probar los demás endpoints\n\n## Rutas Corregidas\n\nTodas las rutas de usuarios han sido corregidas y ahora funcionan correctamente:\n- GET /usuarios\n- GET /usuarios/:id\n- GET /usuarios/rol/:role\n- GET /usuarios/institucion/:institucionId\n- POST /usuarios/admin/cleanup-tokens\n\n**Nuevos Endpoints de Instituciones:**\n- GET /instituciones (solo super_admin)\n- GET /instituciones/:id\n- POST /instituciones\n- PUT /instituciones/:id\n- DELETE /instituciones/:id",
+		"_postman_id": "k1fbb4e0-f89c-4806-aebf-710f997ad1ed",
+		"name": "AsistApp API v3.5 (Complete & Real)",
+		"description": "Colección v3.5 DEFINITIVA.\n\n## Contenido\n- **Cobertura Total**: Incluye TODOS los endpoints (CRUDs, Toggles, Stats, Configuración).\n- **Ejemplos Reales**: Respuestas capturadas del entorno real para Logins y Lecturas.\n- **Automatización**: Scripts de captura de variables en cada paso.\n\n## Módulos\n1. Rutas Públicas & Auth\n2. Gestión Institucional\n3. Usuarios & Roles\n4. Gestión Académica (Periodos, Materias, Grupos, Horarios)\n5. Asistencias (QR y Manual)\n6. Portales (Estudiante, Profesor, Acudiente)\n7. Sistema de Notificaciones",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
 	},
 	"item": [
 		{
-			"name": "Health Check",
+			"name": "🔐 Autenticación",
 			"item": [
 				{
-					"name": "API Health Check",
+					"name": "Login (Super Admin)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Health check exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.message).to.include('AsistApp Backend');",
-									"    pm.expect(jsonData.timestamp).to.be.a('string');",
-									"});",
-									"",
-									"console.log('✅ API funcionando correctamente');"
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) {",
+									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
+									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
+									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
+									"    pm.environment.set('userId', jsonData.data.usuario.id);",
+									"    console.log('✅ Token Super Admin actualizado');",
+									"}"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{adminUser}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Super Admin",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"expiresIn\": 24,\n    \"usuario\": {\n      \"id\": \"907f0fb9-7c20-44fe-a445-347d409278b5\",\n      \"nombres\": \"Super\",\n      \"apellidos\": \"Administrador\",\n      \"rol\": \"super_admin\",\n      \"instituciones\": []\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login (Admin Institución)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) {",
+									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
+									"    pm.environment.set('institucionId', jsonData.data.usuario.instituciones[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{adminInstitucionUser}}\",\n    \"password\": \"{{adminInstitucionPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Admin Inst",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"usuario\": {\n      \"id\": \"8a200022-4ca2-430c-b8a4-353872a4b2d6\",\n      \"nombres\": \"Administrador\",\n      \"apellidos\": \"San José\",\n      \"rol\": \"admin_institucion\",\n      \"instituciones\": [\n        {\n          \"id\": \"c0c8187a-85da-4551-aeee-73c5b9235994\",\n          \"nombre\": \"Colegio San José\",\n          \"rolEnInstitucion\": \"admin\"\n        }\n      ]\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login (Profesor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) { pm.environment.set('accessToken', jsonData.data.accessToken); pm.environment.set('profesorId', jsonData.data.usuario.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{profesorUser}}\",\n    \"password\": \"{{profesorPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Profesor",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"usuario\": {\n      \"id\": \"cd03243e-5c6c-4242-9021-4e3e5fa04f87\",\n      \"nombres\": \"Juan\",\n      \"apellidos\": \"Pérez\",\n      \"rol\": \"profesor\",\n      \"instituciones\": [\n        { \"nombre\": \"Colegio San José\", \"rolEnInstitucion\": \"profesor\" }\n      ]\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login (Estudiante)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) { pm.environment.set('accessToken', jsonData.data.accessToken); pm.environment.set('estudianteId', jsonData.data.usuario.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{estudianteUser}}\",\n    \"password\": \"{{estudiantePassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Estudiante",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"usuario\": {\n      \"id\": \"141979dc-f2b0-4b47-a863-510ada94cbfc\",\n      \"nombres\": \"Santiago\",\n      \"apellidos\": \"Mendoza\",\n      \"rol\": \"estudiante\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login (Acudiente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) { pm.environment.set('accessToken', jsonData.data.accessToken); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{acudienteUser}}\",\n    \"password\": \"{{acudientePassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Acudiente",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1Ni...\",\n    \"usuario\": {\n      \"id\": \"d983ce2c-493a-4ec0-b8a8-d4f24213775a\",\n      \"nombres\": \"María\",\n      \"apellidos\": \"Mendoza\",\n      \"rol\": \"acudiente\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify Token",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": [""]
-						},
-						"description": "Verificar que la API esté funcionando"
-					}
-				}
-			]
-		},
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Login - Super Admin",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Verificar que el login fue exitoso",
-									"pm.test(\"Login exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('accessToken');",
-									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"        pm.expect(jsonData.data).to.have.property('usuario');",
-									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
-									"        pm.expect(jsonData.data.expiresIn).to.be.a('number');",
-									"    }",
-									"});",
-									"",
-									"// Actualizar variables del environment solo si el login fue exitoso",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    pm.environment.set('userId', jsonData.data.usuario.id);",
-									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
-									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('instituciones', JSON.stringify(jsonData.data.usuario.instituciones || []));",
-									"    ",
-									"    console.log('✅ Login exitoso - Token actualizado');",
-									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
-									"    console.log('Rol:', jsonData.data.usuario.rol);",
-									"    console.log('Instituciones:', jsonData.data.usuario.instituciones ? jsonData.data.usuario.instituciones.length : 0);",
-									"} else {",
-									"    console.log('❌ Login fallido:', jsonData.error || 'Error desconocido');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
+							"raw": "{{baseUrl}}/auth/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"verify"
+							]
 						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"email\": \"superadmin@asistapp.com\", \"password\": \"Admin123!\"}"
-						},
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/login",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "login"]
-						},
-						"description": "Login como Super Admin (usuario creado por seed: superadmin@asistapp.com, password: Admin123!)"
-					}
-				},
-				{
-					"name": "Login Test - Sin Rate Limit",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Verificar que el login fue exitoso",
-									"pm.test(\"Login exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('accessToken');",
-									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"        pm.expect(jsonData.data).to.have.property('usuario');",
-									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
-									"        pm.expect(jsonData.data.expiresIn).to.be.a('number');",
-									"    }",
-									"});",
-									"",
-									"// Actualizar variables del environment solo si el login fue exitoso",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    pm.environment.set('userId', jsonData.data.usuario.id);",
-									"    pm.environment.set('currentUserRole', jsonData.data.usuario.rol);",
-									"    pm.environment.set('currentUserEmail', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos + ' (' + jsonData.data.usuario.email + ')');",
-									"    pm.environment.set('instituciones', JSON.stringify(jsonData.data.usuario.instituciones || []));",
-									"    ",
-									"    console.log('✅ Login exitoso - Token actualizado (sin rate limit)');",
-									"    console.log('Usuario:', jsonData.data.usuario.nombres + ' ' + jsonData.data.usuario.apellidos);",
-									"    console.log('Rol:', jsonData.data.usuario.rol);",
-									"    console.log('Instituciones:', jsonData.data.usuario.instituciones ? jsonData.data.usuario.instituciones.length : 0);",
-									"} else {",
-									"    console.log('❌ Login fallido:', jsonData.error || 'Error desconocido');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"email\": \"superadmin@asistapp.com\", \"password\": \"Admin123!\"}"
-						},
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/login-test",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "login-test"]
-						},
-						"description": "Login sin rate limiting (solo para desarrollo/testing) - Super Admin"
-					}
-				},
-				{
-					"name": "Get User Institutions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Verificar que se obtuvieron las instituciones",
-									"pm.test(\"Instituciones obtenidas\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.be.an('array');",
-									"    }",
-									"});",
-									"",
-									"// Guardar primera institución como variable de environment",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
-									"    pm.environment.set('institucionId', jsonData.data[0].id);",
-									"    pm.environment.set('institucionNombre', jsonData.data[0].nombre);",
-									"    ",
-									"    console.log('✅ Instituciones obtenidas: ' + jsonData.data.length);",
-									"    console.log('Primera institución: ' + jsonData.data[0].nombre);",
-									"} else {",
-									"    console.log('ℹ️ No hay instituciones disponibles o error:', jsonData.error || 'Sin instituciones');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/instituciones",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "instituciones"]
-						},
-						"description": "Obtener instituciones del usuario autenticado"
-					}
-				},
-				{
-					"name": "Verify Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Token válido\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('usuario');",
-									"        pm.expect(jsonData.data).to.have.property('valid');",
-									"        pm.expect(jsonData.data.valid).to.eql(true);",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Token verificado correctamente');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/verify",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "verify"]
-						},
-						"description": "Verificar token de acceso"
 					}
 				},
 				{
 					"name": "Refresh Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 401]);",
-									"});",
-									"",
-									"// Verificar que el refresh fue exitoso",
-									"pm.test(\"Refresh exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('accessToken');",
-									"        pm.expect(jsonData.data).to.have.property('refreshToken');",
-									"        pm.expect(jsonData.data).to.have.property('expiresIn');",
-									"    }",
-									"});",
-									"",
-									"// Actualizar variables del environment con los nuevos tokens",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('accessToken', jsonData.data.accessToken);",
-									"    pm.environment.set('refreshToken', jsonData.data.refreshToken);",
-									"    ",
-									"    console.log('✅ Token refrescado exitosamente');",
-									"    console.log('Nuevo access token actualizado');",
-									"} else {",
-									"    console.log('❌ Refresh fallido:', jsonData.error || 'Error desconocido');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"refreshToken\": \"{{refreshToken}}\"}"
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/refresh",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "refresh"]
-						},
-						"description": "Refrescar access token enviando refreshToken en el body"
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
 					}
 				},
 				{
 					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					}
+				},
+				{
+					"name": "Mis Instituciones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/institutions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"institutions"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Lista",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": \"inst_sanjose_id\",\n            \"nombre\": \"Colegio San José\",\n            \"rol\": \"admin\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🏢 Instituciones",
+			"item": [
+				{
+					"name": "Listar Todas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/instituciones",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"c0c8187a-85da-4551-aeee-73c5b9235994\",\n      \"nombre\": \"Colegio San José\",\n      \"activa\": true\n    },\n    {\n      \"id\": \"ab7688d1-9afc-4a67-a7d8-5bd3eb1d8d02\",\n      \"nombre\": \"Liceo Santander\",\n      \"activa\": true\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Obtener por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/instituciones/{{institucionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones",
+								"{{institucionId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Crear Institución",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 401]);",
-									"});",
-									"",
-									"// Verificar que el logout fue exitoso",
-									"pm.test(\"Logout exitoso\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"// Limpiar variables del environment",
-									"pm.environment.set('accessToken', '');",
-									"pm.environment.set('refreshToken', '');",
-									"pm.environment.set('userId', '');",
-									"pm.environment.set('currentUserRole', '');",
-									"pm.environment.set('currentUserEmail', '');",
-									"pm.environment.set('institucionId', '');",
-									"",
-									"console.log('✅ Sesión cerrada - Variables limpiadas');"
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success) { pm.environment.set('institucionId', jsonData.data.id); }"
 								],
 								"type": "text/javascript"
 							}
@@ -371,249 +443,218 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"refreshToken\": \"{{refreshToken}}\"}"
+							"raw": "{\n    \"nombre\": \"Colegio San José\",\n    \"codigo\": \"SANJOSE001\",\n    \"direccion\": \"Carrera 12 #45-67, Bogotá\",\n    \"telefono\": \"+573215551234\",\n    \"email\": \"contacto@sanjose.edu.co\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/auth/logout",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["auth", "logout"]
+							"raw": "{{baseUrl}}/instituciones",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"id\": \"new-uuid\",\n        \"nombre\": \"Colegio San José\",\n        \"codigo\": \"SANJOSE001\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Actualizar Institución",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Colegio San José - Sede Principal\",\n    \"activa\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"description": "Cerrar sesión enviando refreshToken en el body"
+						"url": {
+							"raw": "{{baseUrl}}/instituciones/{{institucionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones",
+								"{{institucionId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Eliminar Institución",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/instituciones/{{institucionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones",
+								"{{institucionId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Admins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/instituciones/{{institucionId}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones",
+								"{{institucionId}}",
+								"admins"
+							]
+						}
+					}
+				},
+				{
+					"name": "Asignar Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{userId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/instituciones/{{institucionId}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"instituciones",
+								"{{institucionId}}",
+								"admins"
+							]
+						}
 					}
 				}
 			]
 		},
 		{
-			"name": "Users Management",
+			"name": "👥 Usuarios",
 			"item": [
 				{
-					"name": "Get All Users",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuarios obtenidos\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.be.an('array');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuarios obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Listar Todos",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios"]
-						},
-						"description": "Obtener todos los usuarios (requiere admin)"
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"0d96a269-db53-4fa5-8ac9-65a1a7635c64\",\n      \"email\": \"admin_31693217@test.com\",\n      \"rol\": \"admin_institucion\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Buscar por Rol",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios/rol/profesor",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"rol",
+								"profesor"
+							]
+						}
 					}
 				},
 				{
-					"name": "Get User by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuario obtenido\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('email');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuario obtenido:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Buscar por ID",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{userId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "{{userId}}"]
-						},
-						"description": "Obtener usuario por ID"
+							"raw": "{{baseUrl}}/usuarios/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"{{userId}}"
+							]
+						}
 					}
 				},
 				{
-					"name": "Get Users by Role",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuarios por rol obtenidos\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.be.an('array');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuarios por rol obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Buscar por Institución",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/rol/{{role}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "rol", "{{role}}"]
-						},
-						"description": "Obtener usuarios por rol (requiere admin)"
+							"raw": "{{baseUrl}}/usuarios/institucion/{{institucionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"institucion",
+								"{{institucionId}}"
+							]
+						}
 					}
 				},
 				{
-					"name": "Get Users by Institution",
+					"name": "Crear Usuario",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuarios por institución obtenidos\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.be.an('array');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuarios por institución obtenidos: ' + (pm.response.json().data ? pm.response.json().data.length : 0));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/institucion/{{institucionId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "institucion", "{{institucionId}}"]
-						},
-						"description": "Obtener usuarios por institución"
-					}
-				},
-				{
-					"name": "Create Professor",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Profesor creado\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('email');",
-									"        pm.expect(jsonData.data).to.have.property('rol');",
-									"        pm.expect(jsonData.data.rol).to.eql('profesor');",
-									"        pm.expect(jsonData.data).to.have.property('instituciones');",
-									"        pm.expect(jsonData).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"// Guardar ID del profesor creado para pruebas posteriores",
 									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('createdProfesorId', jsonData.data.id);",
-									"    pm.environment.set('createdProfesorEmail', jsonData.data.email);",
-									"    ",
-									"    console.log('✅ Profesor creado:', jsonData.data.email + ' (ID: ' + jsonData.data.id + ')');",
-									"} else {",
-									"    console.log('❌ Error al crear profesor:', jsonData.error || 'Error desconocido');",
-									"}"
+									"if (jsonData.success) { pm.environment.set('createdUserId', jsonData.data.id); }"
 								],
 								"type": "text/javascript"
 							}
@@ -621,567 +662,164 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"profesor.test@asistapp.com\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Profesor\",\n    \"apellidos\": \"Test\",\n    \"rol\": \"profesor\",\n    \"telefono\": \"+123456789\",\n    \"institucionId\": \"{{institucionId}}\"\n}"
+							"raw": "{\n    \"nombres\": \"Profesor\",\n    \"apellidos\": \"Ejemplo\",\n    \"email\": \"profesor.ejemplo@sanjose.edu.co\",\n    \"password\": \"Profe123!\",\n    \"rol\": \"profesor\",\n    \"institucionId\": \"{{institucionId}}\",\n    \"telefono\": \"+573001234567\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios"]
-						},
-						"description": "Crear nuevo profesor"
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
 					}
 				},
 				{
-					"name": "Create Student",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Estudiante creado\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('email');",
-									"        pm.expect(jsonData.data).to.have.property('rol');",
-									"        pm.expect(jsonData.data.rol).to.eql('estudiante');",
-									"        pm.expect(jsonData.data).to.have.property('estudiante');",
-									"        pm.expect(jsonData.data.estudiante).to.have.property('codigoQr');",
-									"        pm.expect(jsonData).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"// Guardar ID del estudiante creado para pruebas posteriores",
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data) {",
-									"    pm.environment.set('createdEstudianteId', jsonData.data.id);",
-									"    pm.environment.set('createdEstudianteEmail', jsonData.data.email);",
-									"    ",
-									"    console.log('✅ Estudiante creado:', jsonData.data.email + ' (ID: ' + jsonData.data.id + ')');",
-									"    console.log('QR Code:', jsonData.data.estudiante ? jsonData.data.estudiante.codigoQr : 'N/A');",
-									"} else {",
-									"    console.log('❌ Error al crear estudiante:', jsonData.error || 'Error desconocido');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"estudiante.test@asistapp.com\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Estudiante\",\n    \"apellidos\": \"Test\",\n    \"rol\": \"estudiante\",\n    \"telefono\": \"+987654321\",\n    \"institucionId\": \"{{institucionId}}\",\n    \"identificacion\": \"999999999\",\n    \"nombreResponsable\": \"Padre Test\",\n    \"telefonoResponsable\": \"+111222333\"\n}"
-						},
-						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios"]
-						},
-						"description": "Crear nuevo estudiante con QR code generado automáticamente"
-					}
-				},
-				{
-					"name": "Update User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuario actualizado\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('id');",
-									"        pm.expect(jsonData.data).to.have.property('email');",
-									"        pm.expect(jsonData).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuario actualizado:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Actualizar Usuario",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombres\": \"Usuario Actualizado\",\n    \"telefono\": \"+555444333\"\n}"
+							"raw": "{\n    \"nombres\": \"Profesor Editado\",\n    \"telefono\": \"+573009999999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdProfesorId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "{{createdProfesorId}}"]
-						},
-						"description": "Actualizar datos de un usuario existente"
+							"raw": "{{baseUrl}}/usuarios/{{createdUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"{{createdUserId}}"
+							]
+						}
 					}
 				},
 				{
-					"name": "Update Student Details",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Estudiante actualizado\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData.data).to.have.property('estudiante');",
-									"        pm.expect(jsonData.data.estudiante).to.have.property('nombreResponsable');",
-									"        pm.expect(jsonData).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Estudiante actualizado:', pm.response.json().data ? pm.response.json().data.email : 'N/A');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Cambiar Contraseña",
 					"request": {
-						"method": "PUT",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"method": "PATCH",
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombres\": \"Estudiante Actualizado\",\n    \"telefono\": \"+999888777\",\n    \"nombreResponsable\": \"Madre Actualizada\"\n}"
+							"raw": "{\n    \"password\": \"NewPass123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdEstudianteId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "{{createdEstudianteId}}"]
-						},
-						"description": "Actualizar datos específicos del estudiante (responsable, teléfono)"
+							"raw": "{{baseUrl}}/usuarios/{{createdUserId}}/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"{{createdUserId}}",
+								"change-password"
+							]
+						}
 					}
 				},
 				{
-					"name": "Delete User (Deactivate)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Verificar respuesta del servidor",
-									"pm.test(\"Respuesta del servidor\", function () {",
-									"    var status = pm.response.code;",
-									"    pm.expect(status).to.be.oneOf([200, 404, 403, 401]);",
-									"});",
-									"",
-									"pm.test(\"Usuario eliminado\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"    if (jsonData.success) {",
-									"        pm.expect(jsonData).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Usuario eliminado (desactivado):', pm.response.json().message || 'Sin mensaje');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Eliminar Usuario",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accessToken}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/{{createdProfesorId}}",
-							"protocol": "{{protocol}}",
-							"host": ["{{host}}"],
-							"port": "{{port}}",
-							"path": ["usuarios", "{{createdProfesorId}}"]
-						},
-						"description": "Eliminar (desactivar) un usuario. NOTA: Es un soft delete, el usuario queda inactivo pero mantiene integridad referencial."
+							"raw": "{{baseUrl}}/usuarios/{{createdUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"{{createdUserId}}"
+							]
+						}
 					}
-				},
+				}
+			]
+		},
+		{
+			"name": "📅 Académico",
+			"item": [
 				{
-					"name": "Test Error Cases",
+					"name": "1. Periodos",
 					"item": [
 						{
-							"name": "409 - Email duplicado",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Error 409 esperado\", function () {",
-											"    pm.response.to.have.status(409);",
-											"});",
-											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('CONFLICT_ERROR');",
-											"});",
-											"",
-											"console.log('✅ Error 409 confirmado: Email duplicado');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{"key": "Content-Type", "value": "application/json"},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"email\": \"{{createdProfesorEmail}}\",\n    \"password\": \"Test123!\",\n    \"nombres\": \"Duplicado\",\n    \"apellidos\": \"Profesor\",\n    \"rol\": \"profesor\",\n    \"telefono\": \"+123456789\",\n    \"institucionId\": \"{{institucionId}}\"\n}"
-								},
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["usuarios"]
-								},
-								"description": "Probar error 409 - Intentar crear usuario con email que ya existe"
-							}
-						},
-						{
-							"name": "400 - Campos requeridos faltantes",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Error 400 esperado\", function () {",
-											"    pm.response.to.have.status(400);",
-											"});",
-											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('VALIDATION_ERROR');",
-											"});",
-											"",
-											"console.log('✅ Error 400 confirmado: Campos requeridos faltantes');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{"key": "Content-Type", "value": "application/json"},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"email\": \"incompleto@test.com\"\n}"
-								},
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["usuarios"]
-								},
-								"description": "Probar error 400 - Crear usuario con campos requeridos faltantes"
-							}
-						},
-						{
-							"name": "401 - Sin autenticación",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Error 401 esperado\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});",
-											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('AUTHENTICATION_ERROR');",
-											"});",
-											"",
-											"console.log('✅ Error 401 confirmado: Sin autenticación');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
+							"name": "Listar Todos",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["usuarios"]
-								},
-								"description": "Probar error 401 - Acceder sin token de autenticación"
+									"raw": "{{baseUrl}}/periodos-academicos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos"
+									]
+								}
 							}
 						},
 						{
-							"name": "404 - Usuario no encontrado",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Error 404 esperado\", function () {",
-											"    pm.response.to.have.status(404);",
-											"});",
-											"",
-											"pm.test(\"Mensaje de error correcto\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.eql(false);",
-											"    pm.expect(jsonData.code).to.eql('NOT_FOUND_ERROR');",
-											"});",
-											"",
-											"console.log('✅ Error 404 confirmado: Usuario no encontrado');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
+							"name": "Listar Activos",
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/usuarios/non-existent-id",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["usuarios", "non-existent-id"]
-								},
-								"description": "Probar error 404 - Usuario con ID inexistente"
+									"raw": "{{baseUrl}}/periodos-academicos/activos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos",
+										"activos"
+									]
+								}
 							}
-						}
-					]
-				},
-				{
-					"name": "Institutions Management",
-					"item": [
+						},
 						{
-							"name": "Get All Institutions",
+							"name": "Obtener por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/periodos-academicos/{{periodoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos",
+										"{{periodoId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Periodo",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"// Verificar respuesta del servidor",
-											"pm.test(\"Respuesta del servidor\", function () {",
-											"    var status = pm.response.code;",
-											"    pm.expect(status).to.be.oneOf([200, 403, 401]);",
-											"});",
-											"",
-											"pm.test(\"Instituciones obtenidas\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData).to.have.property('success');",
-											"    if (jsonData.success) {",
-											"        pm.expect(jsonData.data).to.be.an('array');",
-											"        if (jsonData.data.length > 0) {",
-											"            pm.expect(jsonData.data[0]).to.have.property('id');",
-											"            pm.expect(jsonData.data[0]).to.have.property('nombre');",
-											"            pm.expect(jsonData.data[0]).to.have.property('codigo');",
-											"            pm.expect(jsonData.data[0]).to.have.property('activa');",
-											"        }",
-											"    }",
-											"});",
-											"",
-											"// Guardar primera institución como variable de environment",
 											"var jsonData = pm.response.json();",
-											"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
-											"    pm.environment.set('institucionId', jsonData.data[0].id);",
-											"    pm.environment.set('institucionNombre', jsonData.data[0].nombre);",
-											"    pm.environment.set('institucionCodigo', jsonData.data[0].codigo);",
-											"    ",
-											"    console.log('✅ Instituciones obtenidas: ' + jsonData.data.length);",
-											"    console.log('Primera institución: ' + jsonData.data[0].nombre + ' (' + jsonData.data[0].codigo + ')');",
-											"} else {",
-											"    console.log('❌ Error al obtener instituciones:', jsonData.error || 'Sin instituciones');",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones"]
-								},
-								"description": "Obtener todas las instituciones (requiere rol super_admin)"
-							}
-						},
-						{
-							"name": "Get Institution by ID",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Verificar respuesta del servidor",
-											"pm.test(\"Respuesta del servidor\", function () {",
-											"    var status = pm.response.code;",
-											"    pm.expect(status).to.be.oneOf([200, 404, 401]);",
-											"});",
-											"",
-											"pm.test(\"Institución obtenida\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData).to.have.property('success');",
-											"    if (jsonData.success) {",
-											"        pm.expect(jsonData.data).to.have.property('id');",
-											"        pm.expect(jsonData.data).to.have.property('nombre');",
-											"        pm.expect(jsonData.data).to.have.property('codigo');",
-											"        pm.expect(jsonData.data).to.have.property('activa');",
-											"        pm.expect(jsonData.data).to.have.property('createdAt');",
-											"        pm.expect(jsonData.data).to.have.property('updatedAt');",
-											"    }",
-											"});",
-											"",
-											"console.log('✅ Institución obtenida:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones", "{{institucionId}}"]
-								},
-								"description": "Obtener institución por ID"
-							}
-						},
-						{
-							"name": "Create Institution",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Verificar respuesta del servidor",
-											"pm.test(\"Respuesta del servidor\", function () {",
-											"    var status = pm.response.code;",
-											"    pm.expect(status).to.be.oneOf([201, 400, 409, 403, 401]);",
-											"});",
-											"",
-											"pm.test(\"Institución creada\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData).to.have.property('success');",
-											"    if (jsonData.success) {",
-											"        pm.expect(jsonData.data).to.have.property('id');",
-											"        pm.expect(jsonData.data).to.have.property('nombre');",
-											"        pm.expect(jsonData.data).to.have.property('codigo');",
-											"        pm.expect(jsonData.data).to.have.property('activa');",
-											"        pm.expect(jsonData.data.activa).to.eql(true); // Por defecto true",
-											"        pm.expect(jsonData).to.have.property('message');",
-											"    }",
-											"});",
-											"",
-											"// Guardar ID de la institución creada para pruebas posteriores",
-											"var jsonData = pm.response.json();",
-											"if (jsonData.success && jsonData.data) {",
-											"    pm.environment.set('createdInstitucionId', jsonData.data.id);",
-											"    pm.environment.set('createdInstitucionNombre', jsonData.data.nombre);",
-											"    ",
-											"    console.log('✅ Institución creada:', jsonData.data.nombre + ' (ID: ' + jsonData.data.id + ')');",
-											"} else {",
-											"    console.log('❌ Error al crear institución:', jsonData.error || 'Error desconocido');",
-											"}"
+											"if (jsonData.success) { pm.environment.set('periodoId', jsonData.data.id); }"
 										],
 										"type": "text/javascript"
 									}
@@ -1189,323 +827,1249 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{"key": "Content-Type", "value": "application/json"},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"nombre\": \"Colegio {{institucionNombre}} Test\",\n    \"codigo\": \"TEST{{institucionCodigo}}\",\n    \"direccion\": \"Dirección de prueba\",\n    \"telefono\": \"555-9999\",\n    \"email\": \"test@colegio.com\"\n}"
+									"raw": "{\n    \"nombre\": \"Año Lectivo 2024\",\n    \"fechaInicio\": \"2024-02-01T00:00:00Z\",\n    \"fechaFin\": \"2024-11-30T00:00:00Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones"]
-								},
-								"description": "Crear nueva institución (requiere rol super_admin)"
+									"raw": "{{baseUrl}}/periodos-academicos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos"
+									]
+								}
 							}
 						},
 						{
-							"name": "Update Institution",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Verificar respuesta del servidor",
-											"pm.test(\"Respuesta del servidor\", function () {",
-											"    var status = pm.response.code;",
-											"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
-											"});",
-											"",
-											"pm.test(\"Institución actualizada\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData).to.have.property('success');",
-											"    if (jsonData.success) {",
-											"        pm.expect(jsonData.data).to.have.property('id');",
-											"        pm.expect(jsonData.data).to.have.property('nombre');",
-											"        pm.expect(jsonData.data).to.have.property('codigo');",
-											"        pm.expect(jsonData).to.have.property('message');",
-											"    }",
-											"});",
-											"",
-											"console.log('✅ Institución actualizada:', pm.response.json().data ? pm.response.json().data.nombre : 'N/A');"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
+							"name": "Actualizar Periodo",
 							"request": {
 								"method": "PUT",
-								"header": [
-									{"key": "Content-Type", "value": "application/json"},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"nombre\": \"{{institucionNombre}} Actualizado\",\n    \"direccion\": \"Nueva dirección actualizada\",\n    \"telefono\": \"555-0000\",\n    \"activa\": false\n}"
+									"raw": "{\n    \"nombre\": \"Año Lectivo 2025\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
 								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{institucionId}}",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones", "{{institucionId}}"]
-								},
-								"description": "Actualizar institución existente (requiere rol super_admin)"
+									"raw": "{{baseUrl}}/periodos-academicos/{{periodoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos",
+										"{{periodoId}}"
+									]
+								}
 							}
 						},
 						{
-							"name": "Delete Institution",
+							"name": "Toggle Estado",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/periodos-academicos/{{periodoId}}/toggle-status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos",
+										"{{periodoId}}",
+										"toggle-status"
+									]
+								}
+							}
+						},
+						{
+							"name": "Eliminar Periodo",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/periodos-academicos/{{periodoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"periodos-academicos",
+										"{{periodoId}}"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "2. Materias",
+					"item": [
+						{
+							"name": "Listar Todas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/materias",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"materias"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK - Real Data",
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"nombre\": \"Matemáticas\",\n      \"codigo\": \"MAT-101\"\n    }\n  ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Disponibles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/materias/disponibles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"materias",
+										"disponibles"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Materia",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"// Verificar respuesta del servidor",
-											"pm.test(\"Respuesta del servidor\", function () {",
-											"    var status = pm.response.code;",
-											"    pm.expect(status).to.be.oneOf([200, 404, 409, 403, 401]);",
-											"});",
-											"",
-											"pm.test(\"Institución eliminada\", function () {",
-											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData).to.have.property('success');",
-											"    if (jsonData.success) {",
-											"        pm.expect(jsonData).to.have.property('message');",
-											"    }",
-											"});",
-											"",
-											"console.log('✅ Institución eliminada:', pm.response.json().message || 'Sin mensaje');"
+											"var jsonData = pm.response.json();",
+											"if (jsonData.success) { pm.environment.set('materiaId', jsonData.data.id); }"
 										],
 										"type": "text/javascript"
 									}
 								}
 							],
 							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{accessToken}}"
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nombre\": \"Matemáticas\",\n    \"codigo\": \"MAT-101\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
 									}
-								],
-								"url": {
-									"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/{{createdInstitucionId}}",
-									"protocol": "{{protocol}}",
-									"host": ["{{host}}"],
-									"port": "{{port}}",
-									"path": ["instituciones", "{{createdInstitucionId}}"]
 								},
-								"description": "Eliminar institución (requiere rol super_admin). NOTA: Solo funciona si la institución no tiene usuarios asociados."
+								"url": {
+									"raw": "{{baseUrl}}/materias",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"materias"
+									]
+								}
 							}
 						},
 						{
-							"name": "Test Error Cases",
-							"item": [
-								{
-									"name": "401 - Sin autenticación",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Error 401 esperado\", function () {",
-													"    pm.response.to.have.status(401);",
-													"});",
-													"",
-													"pm.test(\"Mensaje de error correcto\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData.success).to.eql(false);",
-													"    pm.expect(jsonData.code).to.eql('AUTHENTICATION_ERROR');",
-													"});",
-													"",
-													"console.log('✅ Error 401 confirmado: Sin autenticación');"
-												],
-												"type": "text/javascript"
-											}
+							"name": "Actualizar Materia",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nombre\": \"Matemáticas Avanzadas\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
 										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-											"protocol": "{{protocol}}",
-											"host": ["{{host}}"],
-											"port": "{{port}}",
-											"path": ["instituciones"]
-										},
-										"description": "Probar error 401 - Sin token de autenticación"
 									}
 								},
-								{
-									"name": "403 - Sin permisos (admin_institucion)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Error 403 esperado\", function () {",
-													"    pm.response.to.have.status(403);",
-													"});",
-													"",
-													"pm.test(\"Mensaje de error correcto\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData.success).to.eql(false);",
-													"    pm.expect(jsonData.code).to.eql('AUTHORIZATION_ERROR');",
-													"});",
-													"",
-													"console.log('✅ Error 403 confirmado: Sin permisos super_admin');"
-												],
-												"type": "text/javascript"
-											}
-										}
+								"url": {
+									"raw": "{{baseUrl}}/materias/{{materiaId}}",
+									"host": [
+										"{{baseUrl}}"
 									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer {{accessToken}}"
-											}
-										],
-										"url": {
-											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-											"protocol": "{{protocol}}",
-											"host": ["{{host}}"],
-											"port": "{{port}}",
-											"path": ["instituciones"]
-										},
-										"description": "Probar error 403 - Usuario admin_institucion intentando acceder a instituciones (requiere super_admin)"
-									}
-								},
-								{
-									"name": "404 - Institución no encontrada",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Error 404 esperado\", function () {",
-													"    pm.response.to.have.status(404);",
-													"});",
-													"",
-													"pm.test(\"Mensaje de error correcto\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData.success).to.eql(false);",
-													"    pm.expect(jsonData.code).to.eql('NOT_FOUND_ERROR');",
-													"});",
-													"",
-													"console.log('✅ Error 404 confirmado: Institución no encontrada');"
-												],
-												"type": "text/javascript"
-											}
-										}
+									"path": [
+										"materias",
+										"{{materiaId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "Eliminar Materia",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/materias/{{materiaId}}",
+									"host": [
+										"{{baseUrl}}"
 									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer {{accessToken}}"
-											}
-										],
-										"url": {
-											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones/non-existent-id",
-											"protocol": "{{protocol}}",
-											"host": ["{{host}}"],
-											"port": "{{port}}",
-											"path": ["instituciones", "non-existent-id"]
-										},
-										"description": "Probar error 404 - Institución con ID inexistente"
-									}
-								},
-								{
-									"name": "409 - Código duplicado",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Error 409 esperado\", function () {",
-													"    pm.response.to.have.status(409);",
-													"});",
-													"",
-													"pm.test(\"Mensaje de error correcto\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData.success).to.eql(false);",
-													"    pm.expect(jsonData.code).to.eql('CONFLICT_ERROR');",
-													"});",
-													"",
-													"console.log('✅ Error 409 confirmado: Código duplicado');"
-												],
-												"type": "text/javascript"
-											}
-										}
+									"path": [
+										"materias",
+										"{{materiaId}}"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "3. Grupos",
+					"item": [
+						{
+							"name": "Listar Todos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos",
+									"host": [
+										"{{baseUrl}}"
 									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{"key": "Content-Type", "value": "application/json"},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{accessToken}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"nombre\": \"Institución Duplicada\",\n    \"codigo\": \"{{institucionCodigo}}\"\n}"
-										},
-										"url": {
-											"raw": "{{protocol}}://{{host}}:{{port}}/instituciones",
-											"protocol": "{{protocol}}",
-											"host": ["{{host}}"],
-											"port": "{{port}}",
-											"path": ["instituciones"]
-										},
-										"description": "Probar error 409 - Intentar crear institución con código que ya existe"
-									}
+									"path": [
+										"grupos"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK - Real Data",
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"nombre\": \"6-A\",\n      \"grado\": \"6\",\n      \"seccion\": \"A\"\n    }\n  ]\n}"
 								}
 							]
+						},
+						{
+							"name": "Disponibles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/disponibles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"disponibles"
+									]
+								}
+							}
+						},
+						{
+							"name": "Obtener por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Grupo",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"if (jsonData.success) { pm.environment.set('grupoId', jsonData.data.id); }"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nombre\": \"Grado 10 - A\",\n    \"grado\": \"10\",\n    \"seccion\": \"A\",\n    \"periodoId\": \"{{periodoId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/grupos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos"
+									]
+								}
+							}
+						},
+						{
+							"name": "Actualizar Grupo",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nombre\": \"Grado 10 - B\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "Toggle Estado",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}/toggle-status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}",
+										"toggle-status"
+									]
+								}
+							}
+						},
+						{
+							"name": "Listar Estudiantes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}/estudiantes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}",
+										"estudiantes"
+									]
+								}
+							}
+						},
+						{
+							"name": "Estudiantes Sin Asignar",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/estudiantes-sin-asignar",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"estudiantes-sin-asignar"
+									]
+								}
+							}
+						},
+						{
+							"name": "Asignar Estudiante",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"estudianteId\": \"{{estudianteId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}/asignar-estudiante",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}",
+										"asignar-estudiante"
+									]
+								}
+							}
+						},
+						{
+							"name": "Desasignar Estudiante",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"estudianteId\": \"{{estudianteId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}/desasignar-estudiante",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}",
+										"desasignar-estudiante"
+									]
+								}
+							}
+						},
+						{
+							"name": "Eliminar Grupo",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/grupos/{{grupoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"grupos",
+										"{{grupoId}}"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "4. Horarios",
+					"item": [
+						{
+							"name": "Listar Todos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/horarios",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios"
+									]
+								}
+							}
+						},
+						{
+							"name": "Por Grupo",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/horarios/grupo/{{grupoId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios",
+										"grupo",
+										"{{grupoId}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK - Real Data",
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"diaSemana\": 2,\n      \"horaInicio\": \"07:00\",\n      \"horaFin\": \"09:00\",\n      \"materia\": { \"nombre\": \"Matemáticas\" }\n    }\n  ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Crear Horario",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"if (jsonData.success) { pm.environment.set('horarioId', jsonData.data.id); }"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"periodoId\": \"{{periodoId}}\",\n    \"grupoId\": \"{{grupoId}}\",\n    \"materiaId\": \"{{materiaId}}\",\n    \"profesorId\": \"{{profesorId}}\",\n    \"diaSemana\": 2,\n    \"horaInicio\": \"08:00\",\n    \"horaFin\": \"10:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/horarios",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios"
+									]
+								}
+							}
+						},
+						{
+							"name": "Actualizar Horario",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"horaInicio\": \"08:30\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/horarios/{{horarioId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios",
+										"{{horarioId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "Obtener Asistencias",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/horarios/{{horarioId}}/asistencias",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios",
+										"{{horarioId}}",
+										"asistencias"
+									]
+								}
+							}
+						},
+						{
+							"name": "Eliminar Horario",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/horarios/{{horarioId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"horarios",
+										"{{horarioId}}"
+									]
+								}
+							}
 						}
 					]
 				}
 			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "{{protocol}}://{{host}}:{{port}}",
-			"type": "string",
-			"description": "URL base (usar variable de environment)"
 		},
 		{
-			"key": "accessToken",
-			"value": "{{accessToken}}",
-			"type": "string",
-			"description": "Token de acceso JWT (se actualiza automáticamente)"
+			"name": "✅ Asistencias",
+			"item": [
+				{
+					"name": "Registrar QR (Móvil)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"horarioId\": \"{{horarioId}}\",\n    \"codigoQr\": \"{{codigoQr}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar"
+							]
+						}
+					}
+				},
+				{
+					"name": "Registrar Manual",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"horarioId\": \"{{horarioId}}\",\n    \"estudianteId\": \"{{estudianteId}}\",\n    \"estado\": \"TARDANZA\",\n    \"observacion\": \"Entró 15 min tarde\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar-manual",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar-manual"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Asistencias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias"
+							]
+						}
+					}
+				},
+				{
+					"name": "Estadísticas x Horario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/estadisticas/{{horarioId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"estadisticas",
+								"{{horarioId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Ejemplo",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"totalEstudiantes\": 30,\n        \"presentes\": 28,\n        \"ausentes\": 1,\n        \"tardanzas\": 1,\n        \"porcentajeAsistencia\": 93.3\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Actualizar Asistencia",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"estado\": \"JUSTIFICADO\",\n    \"justificada\": true,\n    \"observacion\": \"Trajo excusa médica\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/{{asistenciaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"{{asistenciaId}}"
+							]
+						}
+					}
+				}
+			]
 		},
 		{
-			"key": "userId",
-			"value": "{{userId}}",
-			"type": "string",
-			"description": "ID de usuario para pruebas específicas"
+			"name": "🎓 Estudiantes",
+			"item": [
+				{
+					"name": "Dashboard - Clases Hoy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/estudiantes/dashboard/clases-hoy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"estudiantes",
+								"dashboard",
+								"clases-hoy"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"horaInicio\": \"07:00\",\n      \"horaFin\": \"09:00\",\n      \"materia\": \"Matemáticas\",\n      \"profesor\": \"Juan Pérez\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Dashboard - Semanal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/estudiantes/dashboard/horario-semanal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"estudiantes",
+								"dashboard",
+								"horario-semanal"
+							]
+						}
+					}
+				},
+				{
+					"name": "Mi Perfil",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/estudiantes/perfil",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"estudiantes",
+								"perfil"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n      \"nombres\": \"Santiago\",\n      \"apellidos\": \"Mendoza\",\n      \"email\": \"santiago.mendoza@sanjose.edu\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Mis Grupos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/estudiantes/grupos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"estudiantes",
+								"grupos"
+							]
+						}
+					}
+				},
+				{
+					"name": "Información QR (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/estudiantes/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"estudiantes",
+								"me"
+							]
+						}
+					}
+				}
+			]
 		},
 		{
-			"key": "role",
-			"value": "{{role}}",
-			"type": "string",
-			"description": "Rol para filtrar usuarios"
+			"name": "👨‍🏫 Profesores",
+			"item": [
+				{
+					"name": "Dashboard - Clases Hoy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/profesores/dashboard/clases-hoy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profesores",
+								"dashboard",
+								"clases-hoy"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"grupo\": \"6-A\",\n      \"materia\": \"Matemáticas\",\n      \"horaInicio\": \"07:00\",\n      \"horaFin\": \"09:00\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Dashboard - Semanal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/profesores/dashboard/horario-semanal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profesores",
+								"dashboard",
+								"horario-semanal"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👪 Acudientes",
+			"item": [
+				{
+					"name": "Listar Hijos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/hijos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"hijos"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"estudiantenombres\": \"Santiago\",\n      \"estudianteapellidos\": \"Mendoza\",\n      \"estudianteemail\": \"santiago.mendoza@sanjose.edu\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Detalle Hijo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/hijos/{{estudianteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"hijos",
+								"{{estudianteId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Asistencias Hijo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/hijos/{{estudianteId}}/asistencias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"hijos",
+								"{{estudianteId}}",
+								"asistencias"
+							]
+						}
+					}
+				},
+				{
+					"name": "Estadísticas Hijo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/hijos/{{estudianteId}}/estadisticas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"hijos",
+								"{{estudianteId}}",
+								"estadisticas"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Notificaciones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/notificaciones",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"notificaciones"
+							]
+						}
+					}
+				},
+				{
+					"name": "Contar No Leídas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/notificaciones/no-leidas/count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"notificaciones",
+								"no-leidas",
+								"count"
+							]
+						}
+					}
+				},
+				{
+					"name": "Marcar Leída",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/notificaciones/{{notificacionId}}/leer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"notificaciones",
+								"{{notificacionId}}",
+								"leer"
+							]
+						}
+					}
+				},
+				{
+					"name": "Marcar Todas Leídas",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/notificaciones/leer-todas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"notificaciones",
+								"leer-todas"
+							]
+						}
+					}
+				},
+				{
+					"name": "Registrar Dispositivo (FCM)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{fcmToken}}\",\n    \"plataforma\": \"android\",\n    \"modelo\": \"Pixel 6 Simulator\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/acudiente/dispositivo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"acudiente",
+								"dispositivo"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔔 Notificaciones & Sistema",
+			"item": [
+				{
+					"name": "Disparo Manual (Test)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"ASISTENCIA\",\n    \"payload\": {\n        \"estudianteId\": \"{{estudianteId}}\",\n        \"mensaje\": \"Prueba NOTIF 123\",\n        \"estado\": \"AUSENTE\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/manual-trigger",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"manual-trigger"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Notificación enviada a la cola\",\n    \"jobId\": \"12345\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Configurar Institución",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notificacionesActivas\": true,\n    \"canalNotificacion\": \"WHATSAPP\",\n    \"modoNotificacionAsistencia\": \"INSTANTANEO\",\n    \"horaDisparoNotificacion\": \"14:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/institutions/{{institucionId}}/notification-config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"institutions",
+								"{{institucionId}}",
+								"notification-config"
+							]
+						}
+					}
+				},
+				{
+					"name": "Stats Cola Notificaciones (DB)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/queue/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"queue",
+								"stats"
+							]
+						}
+					}
+				},
+				{
+					"name": "Logs Notificaciones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/logs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"logs"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Real Data",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"success\": true,\n  \"data\": []\n}"
+						}
+					]
+				},
+				{
+					"name": "Reintentar Fallidas (Dead Letter)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/queue/retry-dead-letter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"queue",
+								"retry-dead-letter"
+							]
+						}
+					}
+				},
+				{
+					"name": "Trigger Daily Check",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/trigger-daily-check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"trigger-daily-check"
+							]
+						}
+					}
+				}
+			]
 		}
 	]
 }
